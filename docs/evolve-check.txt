@@ -1,0 +1,9 @@
+Evolution step in the arena port (measured in this port, not in the repository).
+Shield on, scheme none, w = 0.5, 30 seeds. Mean game score (0 to 100) with evolution off and on.
+
+start (th, c, g)            note                  off     on
+(0.50, 0.05, 1.00)          repository defaults    95.7    87.5
+(0.80, 0.05, 1.00)          threshold too high     16.8    37.1
+(0.30, 0.05, 1.00)          threshold low          74.3    77.3
+(0.50, 0.05, 1.80)          gain too high          46.7    55.3
+(0.50, 0.05, 0.60)          gain too low            1.7    28.2

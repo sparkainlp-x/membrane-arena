@@ -1,0 +1,13 @@
+Reward-scheme term in the arena port (not measured in the repository). w = 0.5, 40 seeds, evolution on.
+
+shield  scheme       T       F       precision  score
+on      individual    42.9     3.5      0.925    87.7
+on      team          43.3     3.3      0.930    88.6
+on      difference    42.7     3.7      0.920    87.2
+on      consensus     43.0     3.4      0.928    87.9
+on      random        43.0     3.4      0.928    88.1
+off     individual   119.5    12.3      0.908    69.0
+off     team         120.2    11.6      0.914    69.7
+off     difference   119.8    12.0      0.910    69.5
+off     consensus    119.7    11.7      0.913    68.9
+off     random       120.1    11.7      0.913    69.8
