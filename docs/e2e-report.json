@@ -1,0 +1,278 @@
+{
+ "chrome": "headless Chrome via playwright-core",
+ "cases": [
+  {
+   "name": "en-desktop",
+   "errors": [],
+   "external": [],
+   "runMs": 16865,
+   "frames": 1010,
+   "avgFrameMs": 16.67,
+   "p95FrameMs": 16.7,
+   "maxFrameMs": 16.8,
+   "fps": 60,
+   "drawMsAvg": 0.53,
+   "drawMsWorst": 2.6,
+   "result": {
+    "score": "Score 87 of 100",
+    "share": "ARENA seed e2een\nScore 87/100 (repo ref 82)\nTrue 42  False 2  Prec 95%\nSetup SAZ team w100\nSteadiness █████████░\nSYNTHETIC classical simulation\nhttp://127.0.0.1:8765/#s=e2een&b=87&c=t-100-SAZ&l=en",
+    "live": "Contest finished. Score 87.",
+    "cmp": 6,
+    "lesson": "The amplifier did nothing",
+    "synthetic": "SYNTHETIC / classical simulation"
+   },
+   "overflowX": 0,
+   "viewport": [
+    1366,
+    900
+   ],
+   "cmpRepoCells": [
+    "40.65 (sd 4.475)",
+    "6.35 (sd 4.44)",
+    "0.865 (sd 0.094)",
+    "0.001",
+    "82"
+   ],
+   "copyStatus": "Copied."
+  },
+  {
+   "name": "en-phone",
+   "errors": [],
+   "external": [],
+   "runMs": 16902,
+   "frames": 1009,
+   "avgFrameMs": 16.75,
+   "p95FrameMs": 16.8,
+   "maxFrameMs": 100,
+   "fps": 59.7,
+   "drawMsAvg": 0.42,
+   "drawMsWorst": 1.4,
+   "result": {
+    "score": "Score 73 of 100",
+    "share": "ARENA seed e2een\nScore 73/100 (repo ref 86)\nTrue 36  False 1  Prec 97%\nSetup S-- team w100\nSteadiness █████░░░░░\nSYNTHETIC classical simulation\nhttp://127.0.0.1:8765/#s=e2een&b=73&c=t-100-S--&l=en",
+    "live": "Contest finished. Score 73.",
+    "cmp": 6,
+    "lesson": "The shield is the part that works",
+    "synthetic": "SYNTHETIC / classical simulation"
+   },
+   "overflowX": 0,
+   "viewport": [
+    390,
+    844
+   ],
+   "cmpRepoCells": [
+    "42.35 (sd 3.675)",
+    "3.75 (sd 4.025)",
+    "0.92 (sd 0.086)",
+    "0.004",
+    "86"
+   ],
+   "copyStatus": "Copied."
+  },
+  {
+   "name": "fr-desktop",
+   "errors": [],
+   "external": [],
+   "runMs": 16846,
+   "frames": 1010,
+   "avgFrameMs": 16.68,
+   "p95FrameMs": 16.8,
+   "maxFrameMs": 33.3,
+   "fps": 59.9,
+   "drawMsAvg": 0.64,
+   "drawMsWorst": 1.6,
+   "result": {
+    "score": "Score 88 sur 100",
+    "share": "ARENA graine e2efr\nScore 88/100 (réf. dépôt 86)\nVrais 41  Faux 2  Préc 95%\nRéglage S-- équipe w100\nRégularité █████████░\nSimulation classique SYNTHÉTIQUE\nhttp://127.0.0.1:8765/#s=e2efr&b=88&c=t-100-S--&l=fr",
+    "live": "Concours terminé. Score 88.",
+    "cmp": 6,
+    "lesson": "L'amplificateur n'a rien fait",
+    "synthetic": "SYNTHÉTIQUE / simulation classique"
+   },
+   "overflowX": 0,
+   "viewport": [
+    1366,
+    900
+   ],
+   "cmpRepoCells": [
+    "42.35 (sd 3.675)",
+    "3.75 (sd 4.025)",
+    "0.92 (sd 0.086)",
+    "0.004",
+    "86"
+   ],
+   "copyStatus": "Copié."
+  },
+  {
+   "name": "fr-phone",
+   "errors": [],
+   "external": [],
+   "runMs": 16887,
+   "frames": 1005,
+   "avgFrameMs": 16.8,
+   "p95FrameMs": 16.7,
+   "maxFrameMs": 99.9,
+   "fps": 59.5,
+   "drawMsAvg": 0.63,
+   "drawMsWorst": 4.7,
+   "result": {
+    "score": "Score 88 sur 100",
+    "share": "ARENA graine e2efr\nScore 88/100 (réf. dépôt 86)\nVrais 41  Faux 2  Préc 95%\nRéglage S-- équipe w100\nRégularité █████████░\nSimulation classique SYNTHÉTIQUE\nhttp://127.0.0.1:8765/#s=e2efr&b=88&c=t-100-S--&l=fr",
+    "live": "Concours terminé. Score 88.",
+    "cmp": 6,
+    "lesson": "L'amplificateur n'a rien fait",
+    "synthetic": "SYNTHÉTIQUE / simulation classique"
+   },
+   "overflowX": 0,
+   "viewport": [
+    390,
+    844
+   ],
+   "cmpRepoCells": [
+    "42.35 (sd 3.675)",
+    "3.75 (sd 4.025)",
+    "0.92 (sd 0.086)",
+    "0.004",
+    "86"
+   ],
+   "copyStatus": "Copié."
+  },
+  {
+   "name": "en-desktop-reduced",
+   "errors": [],
+   "external": [],
+   "runMs": 16833,
+   "frames": 1010,
+   "avgFrameMs": 16.67,
+   "p95FrameMs": 16.7,
+   "maxFrameMs": 16.8,
+   "fps": 60,
+   "drawMsAvg": 0.41,
+   "drawMsWorst": 1.2,
+   "result": {
+    "score": "Score 73 of 100",
+    "share": "ARENA seed e2een\nScore 73/100 (repo ref 86)\nTrue 36  False 1  Prec 97%\nSetup S-- team w100\nSteadiness █████░░░░░\nSYNTHETIC classical simulation\nhttp://127.0.0.1:8765/#s=e2een&b=73&c=t-100-S--&l=en",
+    "live": "Contest finished. Score 73.",
+    "cmp": 6,
+    "lesson": "The shield is the part that works",
+    "synthetic": "SYNTHETIC / classical simulation"
+   },
+   "overflowX": 0,
+   "viewport": [
+    1366,
+    900
+   ],
+   "cmpRepoCells": [
+    "42.35 (sd 3.675)",
+    "3.75 (sd 4.025)",
+    "0.92 (sd 0.086)",
+    "0.004",
+    "86"
+   ],
+   "copyStatus": "Copied."
+  },
+  {
+   "name": "robustness",
+   "errors": [],
+   "external": [],
+   "checks": [
+    {
+     "name": "daily mode label",
+     "ok": true,
+     "detail": "Daily contest #1, 2026-10-24"
+    },
+    {
+     "name": "daily result saved",
+     "ok": true,
+     "detail": "{\"daily\":{\"2026-10-24\":{\"score\":74.5150211352657,\"T\":38,\"F\":8,\"precision\":0.8260"
+    },
+    {
+     "name": "daily-done message after reload",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "streak shown after reload",
+     "ok": true,
+     "detail": "Daily streak: 1 (best 1)Best daily score: 75"
+    },
+    {
+     "name": "no errors (daily)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "language switch re-renders the result",
+     "ok": true,
+     "detail": "Score 75 sur 100"
+    },
+    {
+     "name": "corrupted storage ignored",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "hostile stored record ignored",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "blocked storage: plays and warns",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "hostile hash falls back to the daily contest",
+     "ok": true,
+     "detail": "Daily contest #1, 2026-10-24"
+    },
+    {
+     "name": "valid challenge link applies seed, target, preset and language",
+     "ok": true,
+     "detail": "Défi : battez 70 sur la graine abc123"
+    },
+    {
+     "name": "space runs",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "space pauses",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "g finishes the current generation, then pauses",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "g at a generation boundary runs exactly the next generation",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "space at a boundary resumes into the next generation",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "f finishes with 12 generations",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "result is announced to the live region",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "no errors (keys)",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  }
+ ],
+ "otherRequestsServed": []
+}
