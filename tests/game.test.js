@@ -436,3 +436,36 @@ test('performance: a full contest of 12 generations runs in well under a second'
   const ms = Number(process.hrtime.bigint() - t0) / 1e6;
   assert.ok(ms < 1500, `took ${ms} ms`);
 });
+
+test('startFor: deterministic per seed, inside the documented ranges, two decimals, varies across seeds', () => {
+  assert.deepEqual(G.startFor('d2026-10-24'), G.startFor('d2026-10-24'));
+  const seen = new Set();
+  for (let i = 0; i < 200; i++) {
+    const s = G.startFor('seed' + i);
+    assert.ok(s.th >= 0.3 && s.th <= 0.8, `th ${s.th}`);
+    assert.ok(s.c >= 0 && s.c <= 0.3, `c ${s.c}`);
+    assert.ok(s.g >= 0.7 && s.g <= 1.5, `g ${s.g}`);
+    [s.th, s.c, s.g].forEach((v) => assert.equal(Math.round(v * 100) / 100, v));
+    seen.add(s.th + '/' + s.g);
+  }
+  assert.ok(seen.size > 100);
+});
+
+test('a start from startFor is accepted by createContest and kept as the first generation\'s parameters', () => {
+  const st = G.startFor('daily-start');
+  const s = Object.assign({}, G.DEFAULTS, st);
+  const c = G.createContest('daily-start', s);
+  const h = G.stepGeneration(c, s);
+  h.params.forEach((p) => { assert.equal(p.th, st.th); assert.equal(p.c, st.c); assert.equal(p.g, st.g); });
+});
+
+test('evolution lesson exists and the repository start is the documented default', () => {
+  assert.ok(G.LESSON_IDS.includes('evolve'));
+  assert.deepEqual([G.DEFAULTS.th, G.DEFAULTS.c, G.DEFAULTS.g], [0.5, 0.05, 1.0]);
+});
+
+test('from a poor start, evolution beats a frozen start; from the repository start the frozen start does at least as well (12 seeds)', () => {
+  const mean = (o) => { let t = 0; for (let k = 0; k < 12; k++) { const s = Object.assign({}, G.DEFAULTS, { scheme: 'random', shield: true }, o); const c = G.createContest('evo' + k, s); while (!G.done(c)) G.stepGeneration(c, s); t += G.summarize(c.hist).score; } return t / 12; };
+  assert.ok(mean({ th: 0.8, evolve: true }) > mean({ th: 0.8, evolve: false }));
+  assert.ok(mean({ evolve: false }) >= mean({ evolve: true }));
+});

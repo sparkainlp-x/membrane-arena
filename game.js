@@ -211,6 +211,13 @@
   }
   function done(c) { return c.gen >= GENS; }
 
+  // Starting parameters of a contest are set by its seed, so every player of a daily contest begins in the same place.
+  // The repository baselines all began at DEFAULTS (th 0.5, c 0.05, g 1.0).
+  function startFor(seed) {
+    var r = makeRng(GEN + seed + '/start'), r2 = function (x) { return Math.round(x * 100) / 100; };
+    return { th: r2(0.3 + 0.5 * r()), c: r2(0.3 * r()), g: r2(0.7 + 0.8 * r()) };
+  }
+
   // Run generation c.gen with `settings`; returns the generation record (also appended to c.hist).
   function stepGeneration(c, settings) {
     if (done(c)) throw new Error('contest finished');
@@ -351,7 +358,7 @@
 
   /* ---------- lessons (numbers come from baselines.js, which comes from the CSV copies) ---------- */
 
-  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'handpicked', 'synthetic'];
+  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'evolve', 'handpicked', 'synthetic'];
   function lessonVars() {
     var L = BASE.LESSON;
     return {
@@ -397,7 +404,7 @@
     return { current: cur, best: best };
   }
 
-  /* ---------- hash links, validated field by field ---------- */
+  /* ---------- hash links, checked field by field ---------- */
 
   var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
   var CFG_RE = /^([itdcr])-(0|25|50|75|100)-([S-])([A-])([Z-])$/;
@@ -484,7 +491,7 @@
     hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
     sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
     stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
-    sanitizeSettings: sanitizeSettings, createContest: createContest, stepGeneration: stepGeneration, done: done,
+    sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
     summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
     pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
     dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
