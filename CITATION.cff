@@ -1,0 +1,57 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "Membrane Arena: a browser game about three coupled membranes, reward schemes, a shield, an amplifier and a stabilizer (SYNTHETIC classical simulation)"
+type: software
+authors:
+  - family-names: "Brisson"
+    given-names: "Jean-François"
+    orcid: "https://orcid.org/0009-0000-9778-5374"
+    affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
+version: 0.1.0
+license: AGPL-3.0-only
+repository-code: "https://github.com/sparkainlp-x/membrane-arena"
+abstract: >-
+  SYNTHETIC educational game, zero dependencies, offline, English and French.
+  The player steers three coupled Oja-rule membranes that learn a planted
+  pattern in noise, chooses a reward scheme, a cooperation setting, a 2-of-3
+  shield, a capped amplifier and a gain-clamped stabilizer, and watches a
+  (1+1) evolution step. Scores are compared with the measured width-32 results
+  of the crystallization-contest repository. Includes a daily seeded contest,
+  a plain-text share card and challenge links. Classical simulation only.
+keywords:
+  - "scientific-reasoning"
+  - "oja-rule"
+  - "reward-schemes"
+  - "evolution-strategies"
+  - "education"
+  - "synthetic"
+  - "javascript"
+references:
+  - type: article
+    title: "Simplified neuron model as a principal component analyzer"
+    authors:
+      - family-names: "Oja"
+        given-names: "Erkki"
+    year: 1982
+    journal: "Journal of Mathematical Biology"
+    volume: 15
+    issue: "3"
+    start: 267
+    end: 273
+    doi: "10.1007/BF00275687"
+  - type: software
+    title: "crystallization-contest"
+    authors:
+      - family-names: "Brisson"
+        given-names: "Jean-François"
+    version: 0.1.0
+    doi: "10.5281/zenodo.23619515"
+    repository-code: "https://github.com/sparkainlp-x/crystallization-contest"
+    notes: "Source of the contest mechanics and of every baseline number shown in the game (concept DOI 10.5281/zenodo.23619514)."
+  - type: software
+    title: "membrane-crystallization"
+    authors:
+      - family-names: "Brisson"
+        given-names: "Jean-François"
+    version: 0.1.0
+    doi: "10.5281/zenodo.23583050"

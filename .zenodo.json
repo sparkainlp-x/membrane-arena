@@ -1,0 +1,55 @@
+{
+  "title": "Membrane Arena: a browser game about three coupled membranes, reward schemes, a shield, an amplifier and a stabilizer (SYNTHETIC classical simulation)",
+  "version": "0.1.0",
+  "upload_type": "software",
+  "description": "<p>SYNTHETIC educational game, zero dependencies, offline, English and French. The player steers three coupled Oja-rule membranes that learn a planted pattern in noise, chooses a reward scheme, a cooperation setting, a 2-of-3 shield, a capped amplifier and a gain-clamped stabilizer, and watches a (1+1) evolution step. Scores are compared with the measured width-32 results of the crystallization-contest repository, with the source file cited next to each number. Includes a daily seeded contest, a plain-text share card and challenge links in the URL hash. Classical simulation only: the JavaScript port is statistically comparable to the Python original, not bit-identical. No accounts, no network calls.</p>",
+  "creators": [
+    {
+      "name": "Brisson, Jean-François",
+      "orcid": "0009-0000-9778-5374",
+      "affiliation": "Spark AI NLP, Fredericton, New Brunswick, Canada"
+    }
+  ],
+  "license": "AGPL-3.0-only",
+  "access_right": "open",
+  "language": "eng",
+  "keywords": [
+    "scientific reasoning",
+    "Oja rule",
+    "reward schemes",
+    "evolution strategies",
+    "education",
+    "synthetic",
+    "JavaScript"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.23619514",
+      "relation": "isDerivedFrom",
+      "scheme": "doi",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "10.5281/zenodo.23583050",
+      "relation": "isDerivedFrom",
+      "scheme": "doi",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "10.1007/BF00275687",
+      "relation": "references",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://github.com/sparkainlp-x/membrane-arena",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ],
+  "references": [
+    "Oja, E. (1982). Simplified neuron model as a principal component analyzer. Journal of Mathematical Biology, 15(3), 267-273. https://doi.org/10.1007/BF00275687",
+    "Brisson, J.-F. crystallization-contest v0.1.0. https://doi.org/10.5281/zenodo.23619515",
+    "Brisson, J.-F. membrane-crystallization v0.1.0. https://doi.org/10.5281/zenodo.23583050"
+  ]
+}
