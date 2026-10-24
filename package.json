@@ -1,0 +1,16 @@
+{
+  "name": "membrane-arena",
+  "version": "0.1.0",
+  "description": "Membrane Arena: a zero-dependency browser game about three coupled membranes, reward schemes, a shield, an amplifier and a stabilizer (SYNTHETIC classical simulation).",
+  "license": "AGPL-3.0-only",
+  "author": "Jean-François Brisson",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/",
+    "build": "node build.js",
+    "baselines": "node scripts/make-baselines.js",
+    "port-check": "node scripts/port-check.js",
+    "serve": "node scripts/serve.js"
+  },
+  "engines": { "node": ">=20" }
+}
