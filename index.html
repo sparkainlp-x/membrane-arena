@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Membrane Arena: an offline, synthetic, classical-simulation game about three coupled membranes, reward schemes, a 2-of-3 shield, an amplifier and a stabilizer.">
+<title>Membrane Arena</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='16' cy='9' r='5' fill='none' stroke='%2340d0e0' stroke-width='2'/%3E%3Ccircle cx='9' cy='21' r='5' fill='none' stroke='%237aa8ff' stroke-width='2'/%3E%3Ccircle cx='23' cy='21' r='5' fill='none' stroke='%23c9a84c' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to the game</a>
+<header class="top">
+  <div class="brand">
+    <h1 id="app-title" data-i18n="app.title">MEMBRANE ARENA</h1>
+    <p class="tagline" data-i18n="app.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="tag.synthetic"></span>
+    <button id="btn-lang" class="btn small" type="button"></button>
+    <button id="btn-help" class="btn small" type="button" aria-haspopup="dialog" data-i18n="btn.help"></button>
+  </div>
+</header>
+<noscript><p class="card" data-i18n="err.noscript">This game needs JavaScript. It makes no network requests.</p></noscript>
+
+<main id="main" tabindex="-1">
+  <section class="card intro" aria-labelledby="intro-title">
+    <h2 id="intro-title" data-i18n="intro.title"></h2>
+    <p data-i18n="intro.body"></p>
+    <p class="muted small-text" data-i18n="intro.source"></p>
+    <p id="mode-line" class="beat"></p>
+    <p id="daily-done" class="muted" hidden></p>
+    <div class="row">
+      <button id="btn-daily" class="btn small" type="button" data-i18n="btn.daily"></button>
+      <button id="btn-practice" class="btn small" type="button" data-i18n="btn.practice"></button>
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="col-main">
+    <section class="card stage" aria-labelledby="stage-title">
+      <h2 id="stage-title" class="sr-only" data-i18n="app.title"></h2>
+      <div class="hud">
+        <span id="hud-gen" class="hud-item"></span>
+        <span id="hud-ep" class="hud-item"></span>
+        <span class="hud-item"><span data-i18n="hud.true"></span> <b id="hud-true" class="c-true">0</b></span>
+        <span class="hud-item"><span data-i18n="hud.false"></span> <b id="hud-false" class="c-false">0</b></span>
+        <span class="hud-item"><span data-i18n="hud.precision"></span> <b id="hud-prec">-</b></span>
+        <span class="hud-item"><span data-i18n="hud.score"></span> <b id="hud-score" class="c-gold">-</b></span>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="arena" role="img" aria-label=""></canvas>
+        <p id="canvas-msg" class="canvas-msg" hidden></p>
+      </div>
+      <ol id="ribbon" class="ribbon" aria-label=""></ol>
+      <p id="ticker" class="ticker" aria-hidden="true"></p>
+      <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <div class="controls">
+        <button id="btn-run" class="btn primary" type="button"></button>
+        <button id="btn-step" class="btn" type="button" data-i18n="btn.step"></button>
+        <button id="btn-finish" class="btn" type="button" data-i18n="btn.finish"></button>
+        <label class="inline" for="speed"><span data-i18n="speed.label"></span>
+          <select id="speed"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option></select>
+        </label>
+        <button id="btn-science" class="btn" type="button" aria-pressed="false"></button>
+      </div>
+      <p id="hud-pending" class="muted small-text" hidden data-i18n="hud.pending"></p>
+    </section>
+
+    <section id="panel-meters" class="card" aria-labelledby="meters-title">
+      <h2 id="meters-title" data-i18n="meters.title"></h2>
+      <div class="meters-grid">
+        <div>
+          <div class="meter-row"><span class="m-name">A</span><div id="m-gain-0" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-0" class="m-fill"></span><span id="m-eff-0" class="m-eff"></span></div><span id="m-val-0" class="m-val"></span></div>
+          <div class="meter-row"><span class="m-name">B</span><div id="m-gain-1" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-1" class="m-fill"></span><span id="m-eff-1" class="m-eff"></span></div><span id="m-val-1" class="m-val"></span></div>
+          <div class="meter-row"><span class="m-name">C</span><div id="m-gain-2" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-2" class="m-fill"></span><span id="m-eff-2" class="m-eff"></span></div><span id="m-val-2" class="m-val"></span></div>
+          <div class="meter-row"><span class="m-name">R</span><div id="m-rate" class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5"><span class="m-tick"></span><span id="m-rate-fill" class="m-fill rate"></span></div><span id="m-rate-val" class="m-val"></span></div>
+          <p id="m-state" class="muted small-text"></p>
+          <p class="hint" data-i18n="meters.help"></p>
+        </div>
+        <div>
+          <h3 data-i18n="fit.title"></h3>
+          <canvas id="fit" class="chart" role="img" aria-label=""></canvas>
+          <p class="hint" data-i18n="fit.help"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-science" class="card" aria-labelledby="sci-title" hidden>
+      <h2 id="sci-title" data-i18n="sci.title"></h2>
+      <p class="small-text"><span class="key key-prec"></span><span data-i18n="sci.prec"></span> <span class="key key-base"></span><span data-i18n="sci.base"></span></p>
+      <canvas id="sci" class="chart tall" role="img" aria-label=""></canvas>
+      <p class="small-text" data-i18n="sci.events"></p>
+      <p id="sci-base" class="hint"></p>
+      <p class="hint" data-i18n="sci.help"></p>
+    </section>
+
+    </div>
+
+    <section class="card setup" aria-labelledby="setup-title">
+      <h2 id="setup-title" data-i18n="setup.title"></h2>
+      <p class="muted small-text" data-i18n="setup.note"></p>
+
+      <div class="field">
+        <label for="scheme" data-i18n="scheme.label"></label>
+        <select id="scheme"></select>
+        <p id="scheme-desc" class="hint" data-i18n="scheme.desc"></p>
+      </div>
+
+      <div class="field">
+        <label for="w" data-i18n="w.label"></label>
+        <div class="sliderrow"><span class="end" data-i18n="w.comp"></span>
+          <input id="w" type="range" min="0" max="1" step="0.25" value="0.5">
+          <span class="end" data-i18n="w.coop"></span><output id="w-val" for="w">50%</output></div>
+        <p class="hint" data-i18n="w.help"></p>
+      </div>
+
+      <div class="field switches">
+        <label class="switch"><input id="t-shield" type="checkbox" checked><span data-i18n="shield.label"></span></label>
+        <p class="hint" data-i18n="shield.help"></p>
+        <label class="switch"><input id="t-amp" type="checkbox"><span data-i18n="amp.label"></span></label>
+        <p class="hint" data-i18n="amp.help"></p>
+        <label class="switch"><input id="t-stab" type="checkbox"><span data-i18n="stab.label"></span></label>
+        <p class="hint" data-i18n="stab.help"></p>
+        <label class="switch"><input id="t-evolve" type="checkbox" checked><span data-i18n="evolve.label"></span></label>
+        <p class="hint" data-i18n="evolve.help"></p>
+      </div>
+
+      <details id="adv" class="field">
+        <summary data-i18n="adv.title"></summary>
+        <p class="hint" data-i18n="start.note"></p>
+        <div class="sliderrow"><label for="th" data-i18n="th.label"></label><input id="th" type="range" min="0.1" max="1.2" step="0.01" value="0.5"><output id="th-val" for="th"></output></div>
+        <div class="sliderrow"><label for="c" data-i18n="c.label"></label><input id="c" type="range" min="0" max="0.5" step="0.01" value="0.05"><output id="c-val" for="c"></output></div>
+        <div class="sliderrow"><label for="g" data-i18n="g.label"></label><input id="g" type="range" min="0.5" max="2" step="0.01" value="1"><output id="g-val" for="g"></output></div>
+        <p id="adv-locked" class="hint" hidden data-i18n="adv.locked"></p>
+        <button id="btn-defaults" class="btn small" type="button" data-i18n="btn.defaults"></button>
+        <div class="sliderrow"><label for="fcost" data-i18n="fcost.label"></label><input id="fcost" type="range" min="0" max="2" step="0.25" value="0"><output id="fcost-val" for="fcost"></output></div>
+        <p class="hint" data-i18n="fcost.help"></p>
+      </details>
+      <p id="cfg-note" class="hint"></p>
+    </section>
+  </div>
+
+  <section id="s-result" class="card result" aria-labelledby="result-title" tabindex="-1" hidden>
+    <h2 id="result-title" tabindex="-1" data-i18n="result.title"></h2>
+    <p id="result-score" class="big"></p>
+    <div id="parts" class="parts"></div>
+    <p class="hint" data-i18n="result.formula"></p>
+
+    <h3 data-i18n="cmp.title"></h3>
+    <div class="tablewrap"><table id="cmp" class="scores"></table></div>
+    <p id="cmp-note" class="hint"></p>
+    <p id="challenge-result" class="beat" hidden></p>
+    <details class="field"><summary data-i18n="cmp.schemes"></summary>
+      <div class="tablewrap"><table id="schemes-table" class="scores"></table></div>
+      <p id="schemes-source" class="hint"></p>
+    </details>
+
+    <div class="lesson" id="lesson-box">
+      <h3 data-i18n="lesson.title"></h3>
+      <h4 id="lesson-title"></h4>
+      <p id="lesson-body"></p>
+      <button id="btn-lesson-more" class="btn small" type="button" data-i18n="lesson.more"></button>
+    </div>
+
+    <h3 data-i18n="params.title"></h3>
+    <ul id="params" class="stats"></ul>
+
+    <h3 data-i18n="share.title_label"></h3>
+    <pre id="share-text" tabindex="0"></pre>
+    <div class="row">
+      <button id="btn-copy" class="btn primary" type="button" data-i18n="btn.copy"></button>
+      <button id="btn-link" class="btn" type="button" data-i18n="btn.link"></button>
+      <button id="btn-again" class="btn" type="button" data-i18n="btn.again"></button>
+    </div>
+    <p id="copy-status" class="muted" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="stats-title">
+    <h2 id="stats-title" data-i18n="stats.title"></h2>
+    <ul id="stats-list" class="stats"></ul>
+    <p id="store-warn" class="hint" hidden data-i18n="store.warn"></p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p data-i18n="footer.disclaimer"></p>
+  <p data-i18n="footer.privacy"></p>
+  <p data-i18n="footer.credit"></p>
+  <p data-i18n="footer.source"></p>
+  <p id="footer-version"></p>
+</footer>
+
+<div id="help" class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+  <div class="modal-box">
+    <h2 id="help-title" tabindex="-1" data-i18n="help.title"></h2>
+    <p data-i18n="help.p1"></p><p data-i18n="help.p2"></p><p data-i18n="help.p3"></p><p data-i18n="help.p4"></p><p data-i18n="help.p5"></p>
+    <p class="muted" data-i18n="help.keys"></p>
+    <button id="btn-help-close" class="btn primary" type="button" data-i18n="btn.close"></button>
+  </div>
+</div>
+
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="i18n.js"></script>
+<script src="scene.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

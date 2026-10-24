@@ -1,0 +1,2490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Membrane Arena: an offline, synthetic, classical-simulation game about three coupled membranes, reward schemes, a 2-of-3 shield, an amplifier and a stabilizer.">
+<title>Membrane Arena</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='16' cy='9' r='5' fill='none' stroke='%2340d0e0' stroke-width='2'/%3E%3Ccircle cx='9' cy='21' r='5' fill='none' stroke='%237aa8ff' stroke-width='2'/%3E%3Ccircle cx='23' cy='21' r='5' fill='none' stroke='%23c9a84c' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #0a1330;
+  --bg2: #101c40;
+  --panel: #12204a;
+  --line: #2a3b6e;
+  --text: #eef2ff;
+  --muted: #b3bedb;
+  --gold: #c9a84c;
+  --gold-bright: #e0c36a;
+  --cyan: #40d0e0;
+  --blue: #7aa8ff;
+  --aqua: #5ee6b8;
+  --danger: #ff9a9a;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: radial-gradient(1400px 700px at 50% -10%, #16275a 0%, var(--bg) 60%) fixed;
+  color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 12px 28px;
+}
+.skip { position: absolute; left: -999px; top: 0; background: var(--gold); color: #0a1330; padding: 8px 12px; z-index: 30; }
+.skip:focus { left: 8px; top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.top, main, .foot { width: 100%; max-width: 1180px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 0 6px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 1.7rem; letter-spacing: 0.22em; color: var(--gold); font-weight: 700; }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { border: 1px solid var(--cyan); color: var(--cyan); border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; letter-spacing: 0.08em; }
+main { outline: none; }
+.card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 12px; min-width: 0; }
+[hidden] { display: none !important; }
+h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--gold-bright); }
+h3 { margin: 16px 0 6px; font-size: 1rem; color: var(--gold-bright); }
+h4 { margin: 0 0 4px; font-size: 1rem; color: var(--cyan); }
+h2:focus, h2[tabindex="-1"]:focus { outline: none; }
+p { margin: 8px 0; }
+.muted { color: var(--muted); }
+.small-text { font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.84rem; margin: 2px 0 10px; }
+.beat { color: var(--cyan); font-weight: 600; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: #1a2a5c; color: var(--text); padding: 12px 16px;
+  min-height: 44px; border-radius: 10px; font: inherit; cursor: pointer; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: var(--gold); color: #0a1330; border-color: var(--gold); font-weight: 700; }
+.btn.primary:hover { background: var(--gold-bright); }
+.btn.small { padding: 6px 12px; min-height: 40px; font-size: 0.9rem; }
+.btn[aria-pressed="true"] { border-color: var(--cyan); background: #12426a; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+.col-main { min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 14px; }
+@media (min-width: 980px) { .layout { grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); align-items: start; } }
+
+.hud { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.92rem; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.hud-item { color: var(--muted); } .hud-item b { color: var(--text); }
+.c-true { color: var(--cyan) !important; } .c-false { color: var(--danger) !important; } .c-gold { color: var(--gold-bright) !important; }
+.canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #070e26; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .canvas-wrap { aspect-ratio: 1 / 1.05; } }
+#arena { width: 100%; height: 100%; display: block; }
+.canvas-msg { position: absolute; left: 12px; right: 12px; bottom: 8px; margin: 0; font-size: 0.85rem; color: var(--muted); }
+.ribbon { list-style: none; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 10px 0 0; padding: 0; }
+.ribbon li { height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #0d1840; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: var(--muted); }
+.ribbon li.planted { border-style: solid; }
+.ribbon li.noise { border-style: dashed; }
+.ribbon li.t { background: #0f4b5a; border-color: var(--cyan); color: var(--text); }
+.ribbon li.f { background: #4b2a34; border-color: var(--danger); color: var(--text); }
+.ribbon li.h { background: #2a3350; border-color: var(--muted); color: var(--text); }
+.ribbon li.cur { box-shadow: 0 0 0 2px var(--gold); }
+.ticker { min-height: 1.5em; margin: 8px 0 0; color: var(--gold-bright); font-size: 0.92rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.inline { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
+select {
+  background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 44px; font: inherit; max-width: 100%;
+}
+.field { margin: 14px 0; }
+.field > label { display: block; margin: 0 0 4px; font-weight: 600; }
+.field select { width: 100%; }
+.sliderrow { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+.sliderrow label { flex: 0 0 9.5em; margin: 0; }
+.sliderrow .end { font-size: 0.8rem; color: var(--muted); }
+input[type=range] { flex: 1; min-width: 110px; min-height: 44px; accent-color: var(--gold); }
+output { min-width: 4ch; text-align: right; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.switch { display: flex; gap: 10px; align-items: center; min-height: 44px; margin: 6px 0 0; font-weight: 600; cursor: pointer; }
+.switch input { width: 22px; height: 22px; accent-color: var(--gold); flex: none; }
+.switches .hint { margin-left: 32px; }
+details summary { cursor: pointer; padding: 8px 0; color: var(--cyan); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+details[disabled] input { opacity: .5; }
+
+.meters-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .meters-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.meter-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.m-name { width: 1.4em; font-weight: 700; color: var(--gold-bright); }
+.meter { position: relative; flex: 1; height: 18px; background: #070e26; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.m-band { position: absolute; top: 0; bottom: 0; left: calc(0.33 / 3.2 * 100%); width: calc((3 - 0.33) / 3.2 * 100%); background: rgba(64, 208, 224, 0.12); border-left: 1px dashed var(--cyan); border-right: 1px dashed var(--cyan); }
+.meter.off .m-band { display: none; }
+.m-fill { position: absolute; left: 0; top: 3px; bottom: 3px; width: 0; background: var(--cyan); border-radius: 6px; }
+.m-fill.rate { background: var(--gold); }
+.m-eff { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--text); left: 0; }
+.m-tick { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--muted); }
+.meter.clamped { border-color: var(--danger); }
+.m-val { width: 9.5em; white-space: nowrap; text-align: right; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: 190px; background: #070e26; border: 1px solid var(--line); border-radius: 10px; display: block; }
+.chart.tall { height: 340px; }
+.key { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--cyan); vertical-align: middle; margin-right: 6px; }
+.key-base { border-top: 3px dashed var(--gold); margin-left: 14px; }
+
+.big { font-size: 1.6rem; font-weight: 700; color: var(--gold-bright); margin: 4px 0 8px; }
+.parts { display: grid; gap: 8px; }
+.part { display: grid; grid-template-columns: 9.5em 1fr 6.8em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.part .bar { height: 10px; background: #070e26; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.part .bar span { display: block; height: 100%; background: var(--cyan); }
+.part .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+.scores { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.scores th, .scores td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.scores th:first-child, .scores td:first-child { text-align: left; white-space: normal; }
+.scores th { color: var(--cyan); font-weight: 600; }
+.lesson { margin-top: 14px; padding: 12px; border: 1px solid var(--gold); border-radius: 10px; background: #0e1a3d; }
+.lesson h3 { margin-top: 0; }
+pre {
+  white-space: pre-wrap; word-break: break-word; background: #070e26; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
+}
+.stats { list-style: none; margin: 0; padding: 0; color: var(--muted); }
+.stats li { padding: 2px 0; }
+.modal { position: fixed; inset: 0; background: rgba(4, 8, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.modal-box { max-width: 560px; max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: var(--radius); padding: 18px; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 0.8rem; }
+.foot p { margin: 4px 0; }
+@media (max-width: 480px) { .sliderrow label { flex-basis: 100%; } .part { grid-template-columns: 7em 1fr 6.8em; } h1 { font-size: 1.35rem; } }
+@media (prefers-reduced-motion: no-preference) {
+  .m-fill { transition: width 0.25s ease; }
+  .m-eff { transition: left 0.25s ease; }
+  .card { animation: rise 0.25s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media (forced-colors: active) { .btn.primary { border: 2px solid ButtonText; } .m-fill, .m-eff { background: Highlight; forced-color-adjust: none; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to the game</a>
+<header class="top">
+  <div class="brand">
+    <h1 id="app-title" data-i18n="app.title">MEMBRANE ARENA</h1>
+    <p class="tagline" data-i18n="app.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="tag.synthetic"></span>
+    <button id="btn-lang" class="btn small" type="button"></button>
+    <button id="btn-help" class="btn small" type="button" aria-haspopup="dialog" data-i18n="btn.help"></button>
+  </div>
+</header>
+<noscript><p class="card" data-i18n="err.noscript">This game needs JavaScript. It makes no network requests.</p></noscript>
+
+<main id="main" tabindex="-1">
+  <section class="card intro" aria-labelledby="intro-title">
+    <h2 id="intro-title" data-i18n="intro.title"></h2>
+    <p data-i18n="intro.body"></p>
+    <p class="muted small-text" data-i18n="intro.source"></p>
+    <p id="mode-line" class="beat"></p>
+    <p id="daily-done" class="muted" hidden></p>
+    <div class="row">
+      <button id="btn-daily" class="btn small" type="button" data-i18n="btn.daily"></button>
+      <button id="btn-practice" class="btn small" type="button" data-i18n="btn.practice"></button>
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="col-main">
+    <section class="card stage" aria-labelledby="stage-title">
+      <h2 id="stage-title" class="sr-only" data-i18n="app.title"></h2>
+      <div class="hud">
+        <span id="hud-gen" class="hud-item"></span>
+        <span id="hud-ep" class="hud-item"></span>
+        <span class="hud-item"><span data-i18n="hud.true"></span> <b id="hud-true" class="c-true">0</b></span>
+        <span class="hud-item"><span data-i18n="hud.false"></span> <b id="hud-false" class="c-false">0</b></span>
+        <span class="hud-item"><span data-i18n="hud.precision"></span> <b id="hud-prec">-</b></span>
+        <span class="hud-item"><span data-i18n="hud.score"></span> <b id="hud-score" class="c-gold">-</b></span>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="arena" role="img" aria-label=""></canvas>
+        <p id="canvas-msg" class="canvas-msg" hidden></p>
+      </div>
+      <ol id="ribbon" class="ribbon" aria-label=""></ol>
+      <p id="ticker" class="ticker" aria-hidden="true"></p>
+      <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <div class="controls">
+        <button id="btn-run" class="btn primary" type="button"></button>
+        <button id="btn-step" class="btn" type="button" data-i18n="btn.step"></button>
+        <button id="btn-finish" class="btn" type="button" data-i18n="btn.finish"></button>
+        <label class="inline" for="speed"><span data-i18n="speed.label"></span>
+          <select id="speed"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option></select>
+        </label>
+        <button id="btn-science" class="btn" type="button" aria-pressed="false"></button>
+      </div>
+      <p id="hud-pending" class="muted small-text" hidden data-i18n="hud.pending"></p>
+    </section>
+
+    <section id="panel-meters" class="card" aria-labelledby="meters-title">
+      <h2 id="meters-title" data-i18n="meters.title"></h2>
+      <div class="meters-grid">
+        <div>
+          <div class="meter-row"><span class="m-name">A</span><div id="m-gain-0" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-0" class="m-fill"></span><span id="m-eff-0" class="m-eff"></span></div><span id="m-val-0" class="m-val"></span></div>
+          <div class="meter-row"><span class="m-name">B</span><div id="m-gain-1" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-1" class="m-fill"></span><span id="m-eff-1" class="m-eff"></span></div><span id="m-val-1" class="m-val"></span></div>
+          <div class="meter-row"><span class="m-name">C</span><div id="m-gain-2" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-2" class="m-fill"></span><span id="m-eff-2" class="m-eff"></span></div><span id="m-val-2" class="m-val"></span></div>
+          <div class="meter-row"><span class="m-name">R</span><div id="m-rate" class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5"><span class="m-tick"></span><span id="m-rate-fill" class="m-fill rate"></span></div><span id="m-rate-val" class="m-val"></span></div>
+          <p id="m-state" class="muted small-text"></p>
+          <p class="hint" data-i18n="meters.help"></p>
+        </div>
+        <div>
+          <h3 data-i18n="fit.title"></h3>
+          <canvas id="fit" class="chart" role="img" aria-label=""></canvas>
+          <p class="hint" data-i18n="fit.help"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-science" class="card" aria-labelledby="sci-title" hidden>
+      <h2 id="sci-title" data-i18n="sci.title"></h2>
+      <p class="small-text"><span class="key key-prec"></span><span data-i18n="sci.prec"></span> <span class="key key-base"></span><span data-i18n="sci.base"></span></p>
+      <canvas id="sci" class="chart tall" role="img" aria-label=""></canvas>
+      <p class="small-text" data-i18n="sci.events"></p>
+      <p id="sci-base" class="hint"></p>
+      <p class="hint" data-i18n="sci.help"></p>
+    </section>
+
+    </div>
+
+    <section class="card setup" aria-labelledby="setup-title">
+      <h2 id="setup-title" data-i18n="setup.title"></h2>
+      <p class="muted small-text" data-i18n="setup.note"></p>
+
+      <div class="field">
+        <label for="scheme" data-i18n="scheme.label"></label>
+        <select id="scheme"></select>
+        <p id="scheme-desc" class="hint" data-i18n="scheme.desc"></p>
+      </div>
+
+      <div class="field">
+        <label for="w" data-i18n="w.label"></label>
+        <div class="sliderrow"><span class="end" data-i18n="w.comp"></span>
+          <input id="w" type="range" min="0" max="1" step="0.25" value="0.5">
+          <span class="end" data-i18n="w.coop"></span><output id="w-val" for="w">50%</output></div>
+        <p class="hint" data-i18n="w.help"></p>
+      </div>
+
+      <div class="field switches">
+        <label class="switch"><input id="t-shield" type="checkbox" checked><span data-i18n="shield.label"></span></label>
+        <p class="hint" data-i18n="shield.help"></p>
+        <label class="switch"><input id="t-amp" type="checkbox"><span data-i18n="amp.label"></span></label>
+        <p class="hint" data-i18n="amp.help"></p>
+        <label class="switch"><input id="t-stab" type="checkbox"><span data-i18n="stab.label"></span></label>
+        <p class="hint" data-i18n="stab.help"></p>
+        <label class="switch"><input id="t-evolve" type="checkbox" checked><span data-i18n="evolve.label"></span></label>
+        <p class="hint" data-i18n="evolve.help"></p>
+      </div>
+
+      <details id="adv" class="field">
+        <summary data-i18n="adv.title"></summary>
+        <p class="hint" data-i18n="start.note"></p>
+        <div class="sliderrow"><label for="th" data-i18n="th.label"></label><input id="th" type="range" min="0.1" max="1.2" step="0.01" value="0.5"><output id="th-val" for="th"></output></div>
+        <div class="sliderrow"><label for="c" data-i18n="c.label"></label><input id="c" type="range" min="0" max="0.5" step="0.01" value="0.05"><output id="c-val" for="c"></output></div>
+        <div class="sliderrow"><label for="g" data-i18n="g.label"></label><input id="g" type="range" min="0.5" max="2" step="0.01" value="1"><output id="g-val" for="g"></output></div>
+        <p id="adv-locked" class="hint" hidden data-i18n="adv.locked"></p>
+        <button id="btn-defaults" class="btn small" type="button" data-i18n="btn.defaults"></button>
+        <div class="sliderrow"><label for="fcost" data-i18n="fcost.label"></label><input id="fcost" type="range" min="0" max="2" step="0.25" value="0"><output id="fcost-val" for="fcost"></output></div>
+        <p class="hint" data-i18n="fcost.help"></p>
+      </details>
+      <p id="cfg-note" class="hint"></p>
+    </section>
+  </div>
+
+  <section id="s-result" class="card result" aria-labelledby="result-title" tabindex="-1" hidden>
+    <h2 id="result-title" tabindex="-1" data-i18n="result.title"></h2>
+    <p id="result-score" class="big"></p>
+    <div id="parts" class="parts"></div>
+    <p class="hint" data-i18n="result.formula"></p>
+
+    <h3 data-i18n="cmp.title"></h3>
+    <div class="tablewrap"><table id="cmp" class="scores"></table></div>
+    <p id="cmp-note" class="hint"></p>
+    <p id="challenge-result" class="beat" hidden></p>
+    <details class="field"><summary data-i18n="cmp.schemes"></summary>
+      <div class="tablewrap"><table id="schemes-table" class="scores"></table></div>
+      <p id="schemes-source" class="hint"></p>
+    </details>
+
+    <div class="lesson" id="lesson-box">
+      <h3 data-i18n="lesson.title"></h3>
+      <h4 id="lesson-title"></h4>
+      <p id="lesson-body"></p>
+      <button id="btn-lesson-more" class="btn small" type="button" data-i18n="lesson.more"></button>
+    </div>
+
+    <h3 data-i18n="params.title"></h3>
+    <ul id="params" class="stats"></ul>
+
+    <h3 data-i18n="share.title_label"></h3>
+    <pre id="share-text" tabindex="0"></pre>
+    <div class="row">
+      <button id="btn-copy" class="btn primary" type="button" data-i18n="btn.copy"></button>
+      <button id="btn-link" class="btn" type="button" data-i18n="btn.link"></button>
+      <button id="btn-again" class="btn" type="button" data-i18n="btn.again"></button>
+    </div>
+    <p id="copy-status" class="muted" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="stats-title">
+    <h2 id="stats-title" data-i18n="stats.title"></h2>
+    <ul id="stats-list" class="stats"></ul>
+    <p id="store-warn" class="hint" hidden data-i18n="store.warn"></p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p data-i18n="footer.disclaimer"></p>
+  <p data-i18n="footer.privacy"></p>
+  <p data-i18n="footer.credit"></p>
+  <p data-i18n="footer.source"></p>
+  <p id="footer-version"></p>
+</footer>
+
+<div id="help" class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+  <div class="modal-box">
+    <h2 id="help-title" tabindex="-1" data-i18n="help.title"></h2>
+    <p data-i18n="help.p1"></p><p data-i18n="help.p2"></p><p data-i18n="help.p3"></p><p data-i18n="help.p4"></p><p data-i18n="help.p5"></p>
+    <p class="muted" data-i18n="help.keys"></p>
+    <button id="btn-help-close" class="btn primary" type="button" data-i18n="btn.close"></button>
+  </div>
+</div>
+
+<script>
+/* GENERATED by scripts/make-baselines.js from data/*.csv. Do not edit by hand. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaBaselines = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {
+   "SOURCE": {
+    "commit": "c74c60beeb9706ea6d30fd6973b2a821a5b23926",
+    "repo": "sparkainlp-x/crystallization-contest",
+    "contest": "results/contest_w32-128_summary.csv",
+    "contest256": "results/contest_256_summary.csv",
+    "sweep": "results/sweep_summary.csv",
+    "stress": "results/stress_summary.csv"
+   },
+   "CONTEST32": [
+    {
+     "w": 0,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 113.8,
+     "Tsd": 10.4,
+     "F": 13,
+     "Fsd": 8.111,
+     "P": 0.901,
+     "Psd": 0.059,
+     "rv": 0.04,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 41.5,
+     "Tsd": 2.819,
+     "F": 3.75,
+     "Fsd": 2.845,
+     "P": 0.919,
+     "Psd": 0.061,
+     "rv": 0.005,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 41.25,
+     "Tsd": 4.908,
+     "F": 3.9,
+     "Fsd": 4.756,
+     "P": 0.915,
+     "Psd": 0.104,
+     "rv": 0.006,
+     "mg": 1.398,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.8,
+     "Tsd": 6.856,
+     "F": 5.65,
+     "Fsd": 6.368,
+     "P": 0.877,
+     "Psd": 0.141,
+     "rv": 0.002,
+     "mg": 1.397,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.9,
+     "Tsd": 5.92,
+     "F": 10.2,
+     "Fsd": 6.005,
+     "P": 0.922,
+     "Psd": 0.044,
+     "rv": 0.041,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.528,
+     "F": 3.95,
+     "Fsd": 3.913,
+     "P": 0.915,
+     "Psd": 0.083,
+     "rv": 0.004,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.117,
+     "F": 4.05,
+     "Fsd": 3.3,
+     "P": 0.913,
+     "Psd": 0.071,
+     "rv": 0.004,
+     "mg": 1.362,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.2,
+     "Tsd": 6.204,
+     "F": 10,
+     "Fsd": 6.481,
+     "P": 0.923,
+     "Psd": 0.048,
+     "rv": 0.043,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.675,
+     "F": 3.75,
+     "Fsd": 4.025,
+     "P": 0.92,
+     "Psd": 0.086,
+     "rv": 0.004,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.297,
+     "F": 3.75,
+     "Fsd": 3.552,
+     "P": 0.919,
+     "Psd": 0.076,
+     "rv": 0.004,
+     "mg": 1.319,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    }
+   ],
+   "SCHEMES32": [
+    {
+     "scheme": "individual",
+     "seeds": 20,
+     "T": 6.75,
+     "F": 0.5,
+     "P": 0.937
+    },
+    {
+     "scheme": "team",
+     "seeds": 20,
+     "T": 12.35,
+     "F": 0.5,
+     "P": 0.959
+    },
+    {
+     "scheme": "difference",
+     "seeds": 20,
+     "T": 12.75,
+     "F": 0.45,
+     "P": 0.965
+    },
+    {
+     "scheme": "consensus",
+     "seeds": 20,
+     "T": 13.15,
+     "F": 0.2,
+     "P": 0.985
+    },
+    {
+     "scheme": "random",
+     "seeds": 20,
+     "T": 11.5,
+     "F": 0.4,
+     "P": 0.966
+    }
+   ],
+   "LESSON": {
+    "shieldFpMin": 2.3,
+    "shieldFpMax": 3.2,
+    "shieldVarMin": 8,
+    "shieldVarMax": 17,
+    "ampMaxDeltaP": 0.004,
+    "stabCostMin": 0.3,
+    "stabCostMax": 4.8,
+    "indLowest": 10,
+    "indCells": 15,
+    "runawayNoZMin": 20,
+    "runawayNoZMax": 35,
+    "runawayZMax": 0,
+    "seeds": 20
+   }
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: pure game logic (SYNTHETIC classical simulation).
+ *
+ * A JavaScript port of the three-membrane crystallization contest of
+ * sparkainlp-x/crystallization-contest at width n = 32, with seeded
+ * determinism, lazy per-generation stepping (so the player can steer between
+ * generations), reward schemes, scoring, baseline comparison, lessons, daily
+ * seeds, hash links, a store sanitizer and the plain-text share card.
+ * No DOM, no network, no storage.
+ *
+ * The port is statistically comparable to the Python original, not
+ * bit-identical: the random number generators differ. See DESIGN.md.
+ * Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./baselines.js'));
+  else root.ArenaGame = factory(root.ArenaBaselines);
+})(typeof self !== 'undefined' ? self : this, function (BASE) {
+  'use strict';
+
+  var VERSION = '0.1.0';
+  var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
+  var EPOCH = '2026-10-24';              // day number 1
+  var N = 32;                            // width of the measured baselines used here
+  var EP = 8, GENS = 12, STEPS = 60;     // as in the repository contest
+  var CHECK = 10, WINDOW = 5, ETA = 0.5;
+  var AGREE = 0.4, TRUTH = 0.5, SIGMA_SCALE = 1.5;
+  var AMP_CAP = 0.5, TARGET = 0.5, LEAK = 0.3, KSTAB = 1.5;
+  var GAIN_MIN = 0.33, GAIN_MAX = 3.0, FACTOR_MIN = 0.2;
+  var TH_MIN = 0.02, TH_MAX = 1.5, C_MAX = 0.5;
+  var SCHEMES = ['individual', 'team', 'difference', 'consensus', 'random'];
+  var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
+  var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
+  var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
+
+  /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
+
+  function hashStr(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seedStr) { return mulberry32(hashStr(String(seedStr))); }
+  function gauss(rng) {
+    var u = 0;
+    while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+
+  /* ---------- complex vectors in C^n: {r, i} Float64Array pairs ---------- */
+
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function normalize(v) {
+    var s = 0, k, n = v.r.length;
+    for (k = 0; k < n; k++) s += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    s = Math.sqrt(s);
+    if (!(s > 0) || !isFinite(s)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= s; v.i[k] /= s; }
+    return v;
+  }
+  function rvec(n, rng) {
+    var v = zeros(n);
+    for (var k = 0; k < n; k++) { v.r[k] = gauss(rng); v.i[k] = gauss(rng); }
+    return normalize(v);
+  }
+  function noisy(state, sigma, rng) {
+    var n = state.r.length, v = zeros(n);
+    for (var k = 0; k < n; k++) {
+      v.r[k] = state.r[k] + sigma * gauss(rng);
+      v.i[k] = state.i[k] + sigma * gauss(rng);
+    }
+    return normalize(v);
+  }
+  // <a|b> = sum conj(a) b
+  function inner(a, b) {
+    var re = 0, im = 0, n = a.r.length;
+    for (var k = 0; k < n; k++) {
+      re += a.r[k] * b.r[k] + a.i[k] * b.i[k];
+      im += a.r[k] * b.i[k] - a.i[k] * b.r[k];
+    }
+    return { re: re, im: im };
+  }
+  function fidelity(a, b) { var z = inner(a, b); return z.re * z.re + z.im * z.im; }
+  function copyVec(v) { return { r: Float64Array.from(v.r), i: Float64Array.from(v.i) }; }
+
+  /* ---------- the contest, as in crystallization_contest/{events,rewards,contest}.py ---------- */
+
+  function sigmaFor(n) { return SIGMA_SCALE / Math.sqrt(n); }
+  function scaledThreshold(q, n, sigma) { return 1 + q * n / (1 + 2 * sigma * sigma * n); }
+  function energyRatio(win, n) {
+    var s = 0;
+    for (var k = 0; k < win.length; k++) s += win[k];
+    return n * s / win.length;
+  }
+  function agreeing(vec, decls, thresh) {
+    var c = 0;
+    for (var k = 0; k < decls.length; k++) if (decls[k] && fidelity(vec, decls[k]) >= thresh) c++;
+    return c;
+  }
+  function systemEvent(decls, thresh) {            // need ceil(3/2) = 2 of 3
+    for (var k = 0; k < decls.length; k++) if (decls[k] && agreeing(decls[k], decls, thresh) >= 2) return k;
+    return null;
+  }
+  function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
+
+  function reward(scheme, i, decls) {              // rewards.py, for 3 agents
+    var without, team;
+    if (scheme === 'individual') return decls[i] ? 1 : 0;
+    if (scheme === 'team' || scheme === 'difference') team = systemEvent(decls, AGREE) !== null ? 1 : 0;
+    if (scheme === 'team') return team;
+    if (scheme === 'difference') {
+      without = decls.slice(); without[i] = null;
+      return team - (systemEvent(without, AGREE) !== null ? 1 : 0);
+    }
+    if (scheme === 'consensus') return decls[i] && agreeing(decls[i], decls, AGREE) >= 2 ? 1 : 0;
+    return 0;                                      // random
+  }
+
+  function warmStart(v, warm, amp) {
+    amp = Math.min(Math.max(amp, 0), AMP_CAP);
+    if (!warm || amp === 0) return v;
+    var o = zeros(v.r.length);
+    for (var k = 0; k < o.r.length; k++) { o.r[k] = (1 - amp) * v.r[k] + amp * warm.r[k]; o.i[k] = (1 - amp) * v.i[k] + amp * warm.i[k]; }
+    return normalize(o);
+  }
+  function stabilizerFactor(rateEma) { return Math.max(FACTOR_MIN, 1 - KSTAB * (rateEma - TARGET)); }
+  function leakyUpdate(rateEma, evRate) { return (1 - LEAK) * rateEma + LEAK * evRate; }
+  function clampGain(g) { return Math.min(GAIN_MAX, Math.max(GAIN_MIN, g)); }
+
+  // One episode of 3 coupled Oja membranes. `trace` (Float32Array STEPS*3) records geff * energy ratio.
+  function episode(n, pat, sigma, P, warm, amp, rng, trace) {
+    var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
+    for (i = 0; i < 3; i++) vs.push(warmStart(rvec(n, rng), warm, amp));
+    var thr = [];
+    for (i = 0; i < 3; i++) thr.push(scaledThreshold(Math.min(TH_MAX, P[i].th * (2 - P[i].sp)), n, sigma));
+    var last = [0, 0, 0];
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; continue; }
+        var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+        var y = inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im);
+        if (win[i].length > WINDOW) win[i].shift();
+        var v = zeros(n), c = P[i].c;
+        for (k = 0; k < n; k++) {
+          v.r[k] = vs[i].r[k] + ETA * (x.r[k] * y.re - x.i[k] * y.im);
+          v.i[k] = vs[i].i[k] + ETA * (x.r[k] * y.im + x.i[k] * y.re);
+        }
+        if (c > 0) {
+          for (j = 0; j < 3; j++) {
+            if (j === i) continue;
+            var ph = inner(vs[j], v), m = Math.sqrt(ph.re * ph.re + ph.im * ph.im), pr = 1, pi = 0;
+            if (m > 0) { pr = ph.re / m; pi = ph.im / m; }
+            for (k = 0; k < n; k++) {
+              v.r[k] += c * (pr * vs[j].r[k] - pi * vs[j].i[k]);
+              v.i[k] += c * (pr * vs[j].i[k] + pi * vs[j].r[k]);
+            }
+          }
+        }
+        vs[i] = normalize(v);
+        last[i] = P[i].geff * energyRatio(win[i], n);
+        trace[(t - 1) * 3 + i] = last[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (!decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, thr: thr };
+  }
+
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      scheme: SCHEMES.indexOf(s.scheme) >= 0 ? s.scheme : d.scheme,
+      w: num(s.w, 0, 1, d.w),
+      shield: s.shield === undefined ? d.shield : !!s.shield,
+      amp: s.amp === undefined ? d.amp : !!s.amp,
+      stab: s.stab === undefined ? d.stab : !!s.stab,
+      evolve: s.evolve === undefined ? d.evolve : !!s.evolve,
+      fcost: num(s.fcost, 0, 2, d.fcost),
+      th: num(s.th, 0.1, 1.2, d.th), c: num(s.c, 0, C_MAX, d.c), g: num(s.g, 0.5, 2, d.g)
+    };
+  }
+
+  function createContest(seed, init) {
+    var o = sanitizeSettings(init), sigma = sigmaFor(N), par = [];
+    for (var i = 0; i < 3; i++) par.push({ th: o.th, c: o.c, g: o.g, sp: 0.5, geff: 1 });
+    return {
+      seed: String(seed), n: N, sigma: sigma, par: par, best: [-1, -1, -1], rateEma: TARGET, warm: null, hist: [], gen: 0,
+      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut')
+    };
+  }
+  function done(c) { return c.gen >= GENS; }
+
+  // Starting parameters of a contest are set by its seed, so every player of a daily contest begins in the same place.
+  // The repository baselines all began at DEFAULTS (th 0.5, c 0.05, g 1.0).
+  function startFor(seed) {
+    var r = makeRng(GEN + seed + '/start'), r2 = function (x) { return Math.round(x * 100) / 100; };
+    return { th: r2(0.3 + 0.5 * r()), c: r2(0.3 * r()), g: r2(0.7 + 0.8 * r()) };
+  }
+
+  // Run generation c.gen with `settings`; returns the generation record (also appended to c.hist).
+  function stepGeneration(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), n = c.n, i, e, cand = [];
+    for (i = 0; i < 3; i++) cand.push({ th: c.par[i].th, c: c.par[i].c, g: c.par[i].g, sp: c.par[i].sp, geff: 1 });
+    var clamped = [false, false, false], mutated = false;
+    if (c.gen > 0 && o.evolve) {
+      mutated = true;
+      cand.forEach(function (p, k) {
+        p.th = Math.min(TH_MAX, Math.max(TH_MIN, p.th * Math.exp(0.2 * gauss(c.mrng))));
+        p.c = Math.min(C_MAX, Math.max(0, p.c + 0.05 * gauss(c.mrng)));
+        p.g = p.g * Math.exp(0.2 * gauss(c.mrng));
+      });
+    }
+    if (o.stab) cand.forEach(function (p, k) { var g = clampGain(p.g); clamped[k] = g !== p.g; p.g = g; });
+    var fp = [0, 0, 0], tp = [0, 0, 0], bonus = [0, 0, 0], joint = 0, outT = 0, outF = 0, episodes = [];
+    var paramsStart = cand.map(function (p) { return { th: p.th, c: p.c, g: p.g }; });
+    for (e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? rvec(n, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      cand.forEach(function (p) { p.geff = p.g * (o.stab ? stabilizerFactor(c.rateEma) : 1); });
+      var geffs = cand.map(function (p) { return p.geff; });
+      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace);
+      var d = ep.decl, truth = d.map(function (di) { return isTrueEvent(di, pat); }), agree = [];
+      for (i = 0; i < 3; i++) {
+        if (truth[i]) tp[i]++;
+        if (d[i] && !truth[i]) fp[i]++;
+        bonus[i] += reward(o.scheme, i, d);
+        if (d[i]) {
+          var conf = false;
+          for (var j = 0; j < 3; j++) if (j !== i && d[j] && fidelity(d[i], d[j]) >= AGREE) { conf = true; if (j > i) agree.push([i, j]); }
+          cand[i].sp = 0.8 * cand[i].sp + 0.2 * (conf ? 1 : 0);
+        }
+      }
+      if (truth[0] && truth[1] && truth[2]) joint++;
+      var outs, passed = null;
+      if (o.shield) {
+        passed = null;
+        for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        outs = passed === null ? [] : [passed];
+      } else {
+        outs = [];
+        for (i = 0; i < 3; i++) if (d[i]) outs.push(i);
+      }
+      var evT = 0, evF = 0;
+      outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+      outT += evT; outF += evF;
+      c.warm = outs.length ? d[outs[0]] : null;
+      c.rateEma = leakyUpdate(c.rateEma, outs.length / (o.shield ? 1 : 3));
+      episodes.push({
+        planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
+        dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
+        agree: agree, evT: evT, evF: evF, trace: trace, rateEma: c.rateEma
+      });
+    }
+    var m = Math.max(tp[0], tp[1], tp[2]), top = [];
+    for (i = 0; i < 3; i++) if (tp[i] === m) top.push(i);
+    var scores = [], accepted = [], contest = [];
+    for (i = 0; i < 3; i++) {
+      var rank = top.indexOf(i) >= 0 && m > 0 ? 1 / top.length : 0;
+      var base = o.w * joint + (1 - o.w) * rank;
+      var s = base + SCHEME_SCALE * bonus[i] - o.fcost * fp[i] / EP;
+      scores.push(s); contest.push(base);
+      if (s >= c.best[i]) { c.best[i] = s; c.par[i] = cand[i]; accepted.push(true); } else accepted.push(false);
+    }
+    var rec = {
+      gen: c.gen, settings: o, episodes: episodes, outT: outT, outF: outF, shield: o.shield, mutated: mutated,
+      params: paramsStart, geff: episodes[EP - 1].geff, clamped: clamped,
+      maxG: Math.max(c.par[0].g, c.par[1].g, c.par[2].g), gains: c.par.map(function (p) { return p.g; }),
+      scores: scores, contest: contest, bonus: bonus.map(function (b) { return SCHEME_SCALE * b; }), accepted: accepted,
+      best: c.best.slice(), joint: joint, tp: tp, fp: fp, rateEma: c.rateEma,
+      parAfter: c.par.map(function (p) { return { th: p.th, c: p.c, g: p.g, sp: p.sp }; })
+    };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+
+  /* ---------- scoring (the game's own weights; the repository has no game score) ---------- */
+
+  function pvariance(xs) {
+    if (!xs.length) return 0;
+    var m = 0, v = 0, k;
+    for (k = 0; k < xs.length; k++) m += xs[k];
+    m /= xs.length;
+    for (k = 0; k < xs.length; k++) v += (xs[k] - m) * (xs[k] - m);
+    return v / xs.length;
+  }
+  function clamp01(x) { return Math.min(1, Math.max(0, x)); }
+
+  function summarize(hist) {
+    var T = 0, F = 0, teq = 0, feq = 0, rates = [], maxG = 0, k;
+    hist.forEach(function (h) {
+      var w = h.shield ? 1 : 1 / 3;
+      T += h.outT; F += h.outF; teq += h.outT * w; feq += h.outF * w;
+      rates.push((h.outT + h.outF) / EP);
+      if (h.maxG > maxG) maxG = h.maxG;
+    });
+    var gens = hist.length, planted = gens * EP / 2;
+    var precision = T + F > 0 ? T / (T + F) : 0;
+    var rateVar = pvariance(rates);
+    var net = planted > 0 ? (teq - feq) / planted : 0;
+    var steadiness = T + F > 0 ? 1 - clamp01(rateVar / STEADY_REF) : 0;
+    var score = 100 * (0.5 * clamp01(net) + 0.25 * precision + 0.25 * steadiness);
+    return {
+      gens: gens, T: T, F: F, precision: precision, rateVar: rateVar, maxG: maxG, finalG: gens ? hist[gens - 1].maxG : 0,
+      net: net, steadiness: steadiness, score: score,
+      parts: { net: 50 * clamp01(net), precision: 25 * precision, steadiness: 25 * steadiness }
+    };
+  }
+
+  /* ---------- baselines from the repository's results ---------- */
+
+  function cfgTag(s) { return (s.shield ? 'S' : '-') + (s.amp ? 'A' : '-') + (s.stab ? 'Z' : '-'); }
+  function nearestW(w) {
+    var best = W_STEPS[0];
+    W_STEPS.forEach(function (x) { if (Math.abs(x - w) < Math.abs(best - w)) best = x; });
+    return best;
+  }
+  // measured width-32 row for the player's configuration, or null when the repository did not measure it
+  function baselineFor(settings) {
+    var s = sanitizeSettings(settings), tag = cfgTag(s), wm = [0, 0.5, 1], w = wm[0];
+    wm.forEach(function (x) { if (Math.abs(x - s.w) < Math.abs(w - s.w) - 1e-9) w = x; });
+    for (var k = 0; k < BASE.CONTEST32.length; k++) {
+      var r = BASE.CONTEST32[k];
+      if (r.cfg === tag && r.w === w) return { row: r, w: w, exactW: Math.abs(w - s.w) < 1e-9, tag: tag, file: BASE.SOURCE.contest };
+    }
+    return null;
+  }
+  // The same game score applied to the repository's mean counts (an approximation, labelled as such).
+  function baselineScore(b) {
+    if (!b) return null;
+    var shielded = b.tag.charAt(0) === 'S', r = b.row, planted = GENS * EP / 2;
+    var wgt = shielded ? 1 : 1 / 3;
+    var net = (r.T - r.F) * wgt / planted;
+    var steady = 1 - clamp01(r.rv / STEADY_REF);
+    return 100 * (0.5 * clamp01(net) + 0.25 * r.P + 0.25 * steady);
+  }
+
+  /* ---------- lessons (numbers come from baselines.js, which comes from the CSV copies) ---------- */
+
+  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'evolve', 'handpicked', 'synthetic'];
+  function lessonVars() {
+    var L = BASE.LESSON;
+    return {
+      fpmin: L.shieldFpMin, fpmax: L.shieldFpMax, vmin: L.shieldVarMin, vmax: L.shieldVarMax, ampd: L.ampMaxDeltaP.toFixed(3),
+      cmin: L.stabCostMin, cmax: L.stabCostMax, low: L.indLowest, cells: L.indCells,
+      rmin: L.runawayNoZMin, rmax: L.runawayNoZMax, seeds: L.seeds
+    };
+  }
+  // Which lesson fits this run: the one about the thing the player just did, otherwise a rotation by seed.
+  function pickLesson(settings, seed) {
+    var s = sanitizeSettings(settings);
+    if (!s.shield) return 'shield';
+    if (s.amp) return 'amp';
+    if (s.stab) return 'stab';
+    if (s.scheme === 'individual') return 'individual';
+    return LESSON_IDS[hashStr(String(seed || '')) % LESSON_IDS.length];
+  }
+
+  /* ---------- dates, daily seeds, streaks ---------- */
+
+  function dateIndex(str) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str));
+    if (!m) return NaN;
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var ms = Date.UTC(y, mo - 1, d), dt = new Date(ms);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return NaN;
+    return Math.round(ms / 86400000);
+  }
+  function dayNumber(dateStr) { return dateIndex(dateStr) - dateIndex(EPOCH) + 1; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function localDateString(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function dailySeed(dateStr) { return 'd' + dateStr; }
+  function seedDate(seed) { return seed.charAt(0) === 'd' && !isNaN(dateIndex(seed.slice(1))) ? seed.slice(1) : null; }
+  function computeStreak(dates, today) {
+    var idx = {};
+    dates.forEach(function (d) { var i = dateIndex(d); if (!isNaN(i)) idx[i] = true; });
+    var days = Object.keys(idx).map(Number).sort(function (a, b) { return a - b; });
+    var best = 0, run = 0, prev = null;
+    days.forEach(function (d) { run = prev !== null && d === prev + 1 ? run + 1 : 1; prev = d; if (run > best) best = run; });
+    var t = dateIndex(today), cur = 0;
+    var d0 = idx[t] ? t : (idx[t - 1] ? t - 1 : null);
+    if (d0 !== null) { for (var d = d0; idx[d]; d--) cur++; }
+    return { current: cur, best: best };
+  }
+
+  /* ---------- hash links, checked field by field ---------- */
+
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  var CFG_RE = /^([itdcr])-(0|25|50|75|100)-([S-])([A-])([Z-])$/;
+  var SCHEME_CODE = { i: 'individual', t: 'team', d: 'difference', c: 'consensus', r: 'random' };
+  function parseHash(hash) {
+    var out = { mode: 'daily', seed: null, date: null, best: null, lang: null, preset: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1), m;
+      if (k === 'd' && dateIndex(v) >= dateIndex(EPOCH)) { out.date = v; out.seed = dailySeed(v); out.mode = 'challenge'; }
+      else if (k === 's' && SEED_RE.test(v)) { out.seed = v; out.mode = 'challenge'; }
+      else if (k === 'b' && /^\d{1,3}$/.test(v) && +v <= 100) out.best = parseInt(v, 10);
+      else if (k === 'l' && /^[a-z]{2}$/.test(v)) out.lang = v;
+      else if (k === 'c' && (m = CFG_RE.exec(v))) {
+        out.preset = { scheme: SCHEME_CODE[m[1]], w: +m[2] / 100, shield: m[3] === 'S', amp: m[4] === 'A', stab: m[5] === 'Z' };
+      }
+    });
+    if (out.seed === null) { out.best = null; out.preset = null; }
+    return out;
+  }
+  function presetCode(s) {
+    var o = sanitizeSettings(s), code = 'itdcr'.charAt(SCHEMES.indexOf(o.scheme));
+    return code + '-' + Math.round(nearestW(o.w) * 100) + '-' + cfgTag(o);
+  }
+  function buildChallengeHash(o) {
+    var parts = [];
+    if (o.date) parts.push('d=' + o.date); else parts.push('s=' + o.seed);
+    if (typeof o.best === 'number' && isFinite(o.best)) parts.push('b=' + Math.max(0, Math.min(100, Math.round(o.best))));
+    if (o.settings) parts.push('c=' + presetCode(o.settings));
+    if (o.lang) parts.push('l=' + o.lang);
+    return '#' + parts.join('&');
+  }
+
+  /* ---------- share card (plain text, no emoji) ---------- */
+
+  function fmt(str, vars) {
+    return String(str).replace(/\{(\w+)\}/g, function (m, k) { return vars && k in vars ? vars[k] : m; });
+  }
+  function bar(value, max, width) {
+    width = width || 10;
+    var f = Math.round(Math.min(1, Math.max(0, value / max)) * width);
+    return new Array(f + 1).join('\u2588') + new Array(width - f + 1).join('\u2591');
+  }
+  function buildShare(o) {
+    var L = o.labels, r = o.result, lines = [];
+    lines.push(o.seed ? fmt(L['share.title_seed'], { seed: o.seed }) : fmt(L['share.title'], { day: o.day, date: o.date }));
+    lines.push(fmt(L['share.score'], { score: Math.round(r.score) }) + (o.ref === null || o.ref === undefined ? '' : ' ' + fmt(L['share.ref'], { ref: Math.round(o.ref) })));
+    lines.push(fmt(L['share.events'], { t: r.T, f: r.F, p: Math.round(r.precision * 100) }));
+    lines.push(fmt(L['share.setup'], { tag: cfgTag(o.settings), scheme: L['scheme.' + o.settings.scheme + '.short'], w: Math.round(o.settings.w * 100) }));
+    lines.push(L['share.steady'] + ' ' + bar(r.steadiness, 1, 10));
+    lines.push(L['share.synthetic']);
+    if (o.url) lines.push(o.url);
+    return lines.join('\n');
+  }
+
+  /* ---------- defensive store ---------- */
+
+  function sanitizeStore(raw) {
+    var out = { daily: {}, bestDaily: null, bestPractice: null }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
+    if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
+    if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
+    var d = raw.daily;
+    if (d && typeof d === 'object' && !Array.isArray(d)) {
+      Object.keys(d).forEach(function (k) {
+        var e = d[k];
+        if (isNaN(dateIndex(k)) || dateIndex(k) < dateIndex(EPOCH) || !e || typeof e !== 'object') return;
+        if (!num(e.score) || !num(e.T) || !num(e.F) || !num(e.precision)) return;
+        if (e.score < 0 || e.score > 100 || e.precision < 0 || e.precision > 1) return;
+        if (e.T < 0 || e.F < 0 || e.T > 1000 || e.F > 1000 || Math.floor(e.T) !== e.T || Math.floor(e.F) !== e.F) return;
+        var st = typeof e.tag === 'string' && /^[S-][A-][Z-]$/.test(e.tag) ? e.tag : '---';
+        out.daily[k] = { score: e.score, T: e.T, F: e.F, precision: e.precision, tag: st };
+      });
+    }
+    return out;
+  }
+
+  return {
+    VERSION: VERSION, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
+    AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
+    SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
+    sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
+    sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
+    summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
+    pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
+    dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
+    computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
+    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: English and French strings (UTF-8).
+ * Every string is a plain value; {name} placeholders are filled by ArenaGame.fmt.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaI18n = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var en = {
+    'app.title': 'MEMBRANE ARENA',
+    'app.tagline': 'Steer three coupled membranes toward true crystallization events.',
+    'app.pagetitle': 'Membrane Arena',
+    'tag.synthetic': 'SYNTHETIC / classical simulation',
+    'btn.lang': 'Français',
+    'btn.help': 'How it works',
+    'btn.close': 'Close',
+    'skip': 'Skip to the game',
+
+    'mode.daily': 'Daily contest #{day}, {date}',
+    'mode.practice': 'Practice seed {seed}',
+    'mode.challenge': 'Challenge seed {seed}',
+    'mode.challenge_best': 'Challenge: beat {best} on seed {seed}',
+    'btn.daily': 'Daily contest',
+    'btn.practice': 'New practice seed',
+    'daily.done': 'You played today\'s contest and scored {score}. Replays are practice and do not count.',
+
+    'intro.title': 'The contest',
+    'intro.body': 'Three membranes stream noisy observations and each learns the strongest direction with Oja\'s rule. When a membrane\'s energy crosses its threshold it declares a crystallization event. Planted patterns make true events; noise makes false ones. You choose how they are rewarded and what filters the output. Settings are applied from the next generation, so you can steer while the contest runs.',
+    'intro.source': 'Mechanics follow the published crystallization-contest repository; this is a synthetic classical simulation, not a physical experiment.',
+
+    'stage.aria': 'Three membranes drawn on a canvas. Their rings ripple faster as energy rises. A gold lattice marks a true event and grey cracks mark a false event. The text below the canvas announces every outcome.',
+    'hud.idle': 'Choose a setup, then run the contest.',
+    'hud.gen': 'Generation {g} of {max}',
+    'hud.ep': 'Episode {e} of {max}',
+    'hud.true': 'True',
+    'hud.false': 'False',
+    'hud.precision': 'Precision',
+    'hud.score': 'Score',
+    'hud.pending': 'New settings apply from the next generation.',
+    'hud.ribbon': 'Episodes of this generation',
+    'ribbon.planted': 'planted',
+    'ribbon.noise': 'noise',
+    'ribbon.true': 'true event',
+    'ribbon.false': 'false event',
+    'ribbon.held': 'held by the shield',
+    'ribbon.none': 'no output',
+    'ribbon.pending': 'not yet run',
+
+    'btn.run': 'Run contest',
+    'btn.pause': 'Pause',
+    'btn.resume': 'Resume',
+    'btn.step': 'Next generation',
+    'btn.finish': 'Finish now',
+    'btn.again': 'Play again',
+    'btn.science_on': 'Science mode: on',
+    'btn.science_off': 'Science mode: off',
+    'speed.label': 'Speed',
+    'speed.1': '1x',
+    'speed.2': '2x',
+    'speed.4': '4x',
+    'speed.8': '8x',
+
+    'setup.title': 'Setup',
+    'setup.note': 'Change anything at any time. A change applies from the next generation.',
+    'scheme.label': 'Reward scheme',
+    'scheme.individual': 'Individual: each membrane is paid for declaring',
+    'scheme.team': 'Team: all are paid when the group agrees',
+    'scheme.difference': 'Difference: paid for making the difference',
+    'scheme.consensus': 'Consensus: paid when 2 of 3 agree with you',
+    'scheme.random': 'None: contest score only',
+    'scheme.individual.short': 'indiv',
+    'scheme.team.short': 'team',
+    'scheme.difference.short': 'diff',
+    'scheme.consensus.short': 'consensus',
+    'scheme.random.short': 'none',
+    'scheme.desc': 'The scheme adds a bonus of one quarter of the summed per-episode reward to each membrane\'s selection score. This combination with the evolution step was not measured in the repository; the repository measured schemes on their own (sweep table below). In this port the choice moved the mean score by little (docs/scheme-check.txt).',
+    'w.label': 'Competition versus cooperation',
+    'w.comp': 'Competition',
+    'w.coop': 'Cooperation',
+    'w.help': 'At 0 the most successful membrane takes the whole bonus. At 100 percent the score counts only episodes where all three are right.',
+    'shield.label': 'Shield: 2 of 3 must agree',
+    'shield.help': 'Fail closed: an event leaves only if two membranes agree, otherwise it is dropped.',
+    'amp.label': 'Amplifier (capped at 0.5)',
+    'amp.help': 'Starts each episode partly from the last output. Measured effect in the repository: about zero.',
+    'stab.label': 'Stabilizer (gain clamp and leaky integrator)',
+    'stab.help': 'Damps the gain when the output rate runs high and clamps it to 0.33 to 3. It prevents runaway and costs some precision.',
+    'evolve.label': '(1+1) evolution of the parameters',
+    'evolve.help': 'Each generation every membrane mutates its threshold, coupling and gain and keeps the mutation only if its score does not fall.',
+    'adv.title': 'Starting parameters and extras',
+    'th.label': 'Threshold fraction',
+    'c.label': 'Coupling to the others',
+    'g.label': 'Gain',
+    'fcost.label': 'Cost per false event',
+    'fcost.help': 'Extra penalty in the selection score. The repository found this knob changed little.',
+    'cfg.measured': 'The repository measured this combination at width 32 (setup {tag}, w = {w}).',
+    'cfg.unmeasured': 'The repository did not measure this combination, so the final comparison has no baseline.',
+
+    'meters.title': 'Stabilizer meters',
+    'meters.gain': 'Gain of membrane {m}',
+    'meters.eff': 'effective',
+    'meters.eff_short': 'eff.',
+    'meters.clamp': 'clamped',
+    'meters.rate': 'Output rate (leaky average)',
+    'meters.help': 'Bars show each membrane\'s gain on a 0 to 3.2 scale; the band marks the clamp range 0.33 to 3. With the stabilizer off the gain moves freely.',
+    'meters.stab_on': 'Stabilizer on',
+    'meters.stab_off': 'Stabilizer off',
+    'fit.title': 'Evolution: selection score per generation',
+    'fit.help': 'Lines show each membrane\'s best score so far. A filled dot is an accepted mutation, a hollow dot a rejected one.',
+    'fit.aria': 'Chart of the best selection score of each membrane over the generations.',
+
+    'sci.title': 'Science view',
+    'sci.prec': 'Cumulative precision',
+    'sci.base': 'Repository mean for this setup',
+    'sci.events': 'True (cyan) and false (red) outputs per generation',
+    'sci.help': 'The dashed gold line is the repository\'s mean precision for the same setup at width 32. One run is one sample: it will scatter around the mean.',
+    'sci.aria': 'Charts of cumulative precision and of true and false outputs per generation.',
+    'sci.nobase': 'No repository baseline for this setup.',
+
+    'say.start': 'Contest started.',
+    'say.gen': 'Generation {g}: {t} true and {f} false outputs, {d} dropped by the shield.',
+    'say.true': 'Generation {g}, episode {e}: true event.',
+    'say.false': 'Generation {g}, episode {e}: false event.',
+    'say.held': 'Generation {g}, episode {e}: shield held a declaration.',
+    'say.final': 'Contest finished. Score {score}.',
+    'say.paused': 'Paused.',
+
+    'result.title': 'Result',
+    'result.score': 'Score {score} of 100',
+    'result.formula': 'Score = 50 x net true events + 25 x precision + 25 x steadiness. These weights are this game\'s own, not the repository\'s. Part of the shield\'s steadiness is mechanical: it allows at most one output per episode.',
+    'part.net': 'Net true events',
+    'part.precision': 'Precision',
+    'part.steady': 'Steadiness',
+    'part.value': '{v} of {max}',
+    'cmp.title': 'Compare with the repository',
+    'cmp.metric': 'Measure',
+    'cmp.you': 'Your run',
+    'cmp.repo': 'Repository mean',
+    'cmp.true': 'True outputs',
+    'cmp.false': 'False outputs',
+    'cmp.precision': 'Precision',
+    'cmp.ratevar': 'Output rate variance',
+    'cmp.score': 'Score on the same formula',
+    'cmp.source': 'Source: {file}, width 32, {seeds} seeds per row, means. Repository {repo} at commit {commit}. The repository score row applies this game\'s formula to those mean counts and is approximate.',
+    'cmp.none': 'The repository did not measure this combination, so there is no baseline to show. Try S--, SA- or SAZ, or none of the three.',
+    'cmp.nearw': 'The repository measured w = 0, 0.5 and 1 only; the row shown is for w = {w}.',
+    'cmp.schemes': 'Reward schemes as measured alone (width 32, 3 agents)',
+    'cmp.schemes_cols': 'Scheme, true events, false events, precision',
+    'cmp.schemes_source': 'Source: {file}, 20 seeds. Different task and units from the table above.',
+    'cmp.schemes_file': 'results/sweep_summary.csv',
+
+    'lesson.title': 'What the repository measured',
+    'lesson.shield.title': 'The shield is the part that works',
+    'lesson.shield.body': 'Requiring 2 of 3 membranes to agree cut false events by a factor of {fpmin} to {fpmax} in the repository measurements (widths 32 to 256, w = 0.5, {seeds} seeds per row) and made the output rate about {vmin} to {vmax} times steadier. Part of that steadiness is mechanical: at most one output per episode. Synthetic data.',
+    'lesson.amp.title': 'The amplifier did nothing',
+    'lesson.amp.body': 'Warm-starting from the last output, weight capped at 0.5, changed precision by at most {ampd} in any measured row, which is within noise. The toggle is here so you can see this yourself. Do not expect it to help.',
+    'lesson.stab.title': 'The stabilizer is insurance, and it costs precision',
+    'lesson.stab.body': 'A leaky integrator on the output rate plus a gain clamp removed runaway gain: {rmin} to {rmax} percent of stress runs blew up without it and none with it. In the normal contest it cost {cmin} to {cmax} precision points. Keep it for risky settings.',
+    'lesson.individual.title': 'Individual reward was the weakest',
+    'lesson.individual.body': 'Paying each membrane only for declaring gave the fewest true events in {low} of {cells} measured cells (reward schemes, widths and team sizes). Paying for agreement did better. Synthetic data, one task.',
+    'lesson.handpicked.title': 'The parameters were hand-picked',
+    'lesson.handpicked.body': 'Thresholds, coupling, the noise level, episode counts and the stabilizer constants were chosen by hand, not searched or tuned. Different choices could change every number you see here.',
+    'lesson.synthetic.title': 'Everything here is synthetic',
+    'lesson.synthetic.body': 'The planted pattern, the noise and the three membranes are a classical simulation. Nothing here measures a physical system, so none of it is evidence about one. The repository numbers describe this simulation only.',
+    'lesson.more': 'Show another lesson',
+
+    'share.title': 'MEMBRANE ARENA #{day}  {date}',
+    'share.title_seed': 'ARENA seed {seed}',
+    'share.score': 'Score {score}/100',
+    'share.ref': '(repo ref {ref})',
+    'share.events': 'True {t}  False {f}  Prec {p}%',
+    'share.setup': 'Setup {tag} {scheme} w{w}',
+    'share.steady': 'Steadiness',
+    'share.synthetic': 'SYNTHETIC classical simulation',
+    'share.title_label': 'Share card (plain text)',
+    'btn.copy': 'Copy result',
+    'btn.link': 'Copy challenge link',
+    'copied': 'Copied.',
+    'copy.fail': 'Copy is not available here. Select the text and copy it by hand.',
+
+    'stats.title': 'Your record',
+    'stats.streak': 'Daily streak: {cur} (best {best})',
+    'stats.best': 'Best daily score: {best}',
+    'stats.none': 'No daily result yet.',
+    'store.warn': 'This browser does not allow saving, so your record lasts only for this visit.',
+
+    'footer.privacy': 'No accounts, no network calls, nothing leaves this page. The record is kept in this browser only.',
+    'footer.disclaimer': 'SYNTHETIC / classical simulation. Not a physical experiment.',
+    'footer.credit': 'Learning rule: Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687. Author: Jean-François Brisson, Spark AI NLP.',
+    'footer.source': 'Baselines: sparkainlp-x/crystallization-contest, results/*_summary.csv. Licence: AGPL-3.0-only.',
+    'footer.version': 'Version {v}',
+
+    'help.title': 'How it works',
+    'help.p1': 'Each membrane is an agent in a 32-dimensional complex space. It sees noisy copies of one planted pattern in half of the episodes and pure noise in the other half, and it tracks the strongest direction with Oja\'s rule. It cannot tell which half it is in.',
+    'help.p2': 'A membrane declares an event when its gain-scaled energy ratio crosses a threshold. A declaration is true when the episode is planted and the vector matches the pattern. The lattice and crack bursts appear at the declaration and show the truth only afterwards.',
+    'help.p3': 'The reward scheme, the cooperation slider and the evolution step decide which parameters survive. The final stage filters the output: the shield, the amplifier and the stabilizer are separate switches.',
+    'help.p4': 'The game score and the arena\'s scheme bonus are this game\'s own design choices. The baselines, lesson numbers and the shield, amplifier and stabilizer behaviour come from the repository\'s CSV results, cited next to each number.',
+    'help.p5': 'The JavaScript port is statistically comparable to the Python original (see docs/port-check.txt), not bit-identical.',
+    'help.keys': 'Keys: Space runs or pauses, G runs the next generation, F finishes, S toggles the science view.',
+
+    'start.note': 'The seed sets the starting threshold, coupling and gain. The repository baselines all started from threshold 0.5, coupling 0.05 and gain 1.0.',
+    'btn.defaults': 'Use the repository start',
+    'adv.locked': 'Starting values are locked once the contest starts. Evolution moves them from there; switch evolution off to freeze them.',
+    'lesson.evolve.title': 'Evolution is not a free win',
+    'lesson.evolve.body': 'In this port the (1+1) step helps from a poor start but can lose to simply keeping good hand-picked parameters, because each generation scores only eight noisy episodes (docs/evolve-check.txt). This was measured in the port, not in the repository.',
+    'params.title': 'Parameters, start to end',
+    'params.line': 'Membrane {m}: threshold {th0} to {th1}, coupling {c0} to {c1}, gain {g0} to {g1}',
+
+    'cmp.mixed': 'You changed the shield, amplifier or stabilizer during the run, so the comparison uses the last setup.',
+    'result.beat': 'You beat the challenge score of {best}.',
+    'result.notbeat': 'The challenge score is {best}; you scored {score}.',
+    'err.noscript': 'This game needs JavaScript. It makes no network requests.',
+    'err.canvas': 'Your browser could not start the canvas. The numbers and the result still work.'
+  };
+
+  var fr = {
+    'app.title': 'MEMBRANE ARENA',
+    'app.tagline': 'Pilotez trois membranes couplées vers de vrais événements de cristallisation.',
+    'app.pagetitle': 'Membrane Arena',
+    'tag.synthetic': 'SYNTHÉTIQUE / simulation classique',
+    'btn.lang': 'English',
+    'btn.help': 'Comment ça marche',
+    'btn.close': 'Fermer',
+    'skip': 'Aller au jeu',
+
+    'mode.daily': 'Concours du jour n° {day}, {date}',
+    'mode.practice': 'Entraînement, graine {seed}',
+    'mode.challenge': 'Défi, graine {seed}',
+    'mode.challenge_best': 'Défi : battez {best} sur la graine {seed}',
+    'btn.daily': 'Concours du jour',
+    'btn.practice': 'Nouvelle graine d\'entraînement',
+    'daily.done': 'Vous avez joué le concours du jour : {score}. Les reprises sont de l\'entraînement et ne comptent pas.',
+
+    'intro.title': 'Le concours',
+    'intro.body': 'Trois membranes reçoivent un flux d\'observations bruitées et chacune apprend la direction dominante par la règle d\'Oja. Quand l\'énergie d\'une membrane dépasse son seuil, elle déclare un événement de cristallisation. Un motif planté donne des événements vrais ; le bruit en donne de faux. Vous choisissez la récompense et le filtre de sortie. Les réglages s\'appliquent à la génération suivante : vous pouvez piloter pendant le concours.',
+    'intro.source': 'La mécanique suit le dépôt publié crystallization-contest ; il s\'agit d\'une simulation classique synthétique, pas d\'une expérience physique.',
+
+    'stage.aria': 'Trois membranes dessinées sur un canevas. Leurs anneaux ondulent plus vite quand l\'énergie monte. Un réseau doré marque un événement vrai, des fissures grises un événement faux. Le texte sous le canevas annonce chaque résultat.',
+    'hud.idle': 'Choisissez un réglage, puis lancez le concours.',
+    'hud.gen': 'Génération {g} sur {max}',
+    'hud.ep': 'Épisode {e} sur {max}',
+    'hud.true': 'Vrais',
+    'hud.false': 'Faux',
+    'hud.precision': 'Précision',
+    'hud.score': 'Score',
+    'hud.pending': 'Les nouveaux réglages s\'appliquent à la génération suivante.',
+    'hud.ribbon': 'Épisodes de cette génération',
+    'ribbon.planted': 'planté',
+    'ribbon.noise': 'bruit',
+    'ribbon.true': 'événement vrai',
+    'ribbon.false': 'événement faux',
+    'ribbon.held': 'retenu par le bouclier',
+    'ribbon.none': 'aucune sortie',
+    'ribbon.pending': 'pas encore joué',
+
+    'btn.run': 'Lancer le concours',
+    'btn.pause': 'Pause',
+    'btn.resume': 'Reprendre',
+    'btn.step': 'Génération suivante',
+    'btn.finish': 'Terminer maintenant',
+    'btn.again': 'Rejouer',
+    'btn.science_on': 'Mode science : activé',
+    'btn.science_off': 'Mode science : désactivé',
+    'speed.label': 'Vitesse',
+    'speed.1': '1x',
+    'speed.2': '2x',
+    'speed.4': '4x',
+    'speed.8': '8x',
+
+    'setup.title': 'Réglages',
+    'setup.note': 'Changez ce que vous voulez quand vous voulez. Un changement s\'applique à la génération suivante.',
+    'scheme.label': 'Schéma de récompense',
+    'scheme.individual': 'Individuel : chaque membrane est payée pour déclarer',
+    'scheme.team': 'Équipe : tous sont payés quand le groupe s\'accorde',
+    'scheme.difference': 'Différence : payé pour faire la différence',
+    'scheme.consensus': 'Consensus : payé quand 2 sur 3 sont d\'accord avec vous',
+    'scheme.random': 'Aucun : score du concours seulement',
+    'scheme.individual.short': 'indiv',
+    'scheme.team.short': 'équipe',
+    'scheme.difference.short': 'diff',
+    'scheme.consensus.short': 'consensus',
+    'scheme.random.short': 'aucun',
+    'scheme.desc': 'Le schéma ajoute au score de sélection de chaque membrane un bonus égal au quart de la somme des récompenses par épisode. Cette combinaison avec l\'étape d\'évolution n\'a pas été mesurée dans le dépôt ; le dépôt a mesuré les schémas seuls (tableau plus bas). Dans ce portage, le choix a peu déplacé le score moyen (docs/scheme-check.txt).',
+    'w.label': 'Compétition ou coopération',
+    'w.comp': 'Compétition',
+    'w.coop': 'Coopération',
+    'w.help': 'À 0, la membrane la plus performante prend tout le bonus. À 100 pour cent, le score ne compte que les épisodes où les trois ont raison.',
+    'shield.label': 'Bouclier : 2 sur 3 doivent s\'accorder',
+    'shield.help': 'Fermé par défaut : un événement ne sort que si deux membranes s\'accordent, sinon il est écarté.',
+    'amp.label': 'Amplificateur (plafonné à 0,5)',
+    'amp.help': 'Démarre chaque épisode en partie depuis la dernière sortie. Effet mesuré dans le dépôt : à peu près nul.',
+    'stab.label': 'Stabilisateur (bornage du gain et intégrateur à fuite)',
+    'stab.help': 'Réduit le gain quand le taux de sortie est élevé et le borne entre 0,33 et 3. Il évite l\'emballement et coûte un peu de précision.',
+    'evolve.label': 'Évolution (1+1) des paramètres',
+    'evolve.help': 'À chaque génération, chaque membrane mute son seuil, son couplage et son gain, et garde la mutation seulement si son score ne baisse pas.',
+    'adv.title': 'Paramètres de départ et options',
+    'th.label': 'Fraction de seuil',
+    'c.label': 'Couplage avec les autres',
+    'g.label': 'Gain',
+    'fcost.label': 'Coût par faux événement',
+    'fcost.help': 'Pénalité supplémentaire dans le score de sélection. Le dépôt a trouvé que ce réglage change peu.',
+    'cfg.measured': 'Le dépôt a mesuré cette combinaison à la largeur 32 (réglage {tag}, w = {w}).',
+    'cfg.unmeasured': 'Le dépôt n\'a pas mesuré cette combinaison : la comparaison finale n\'aura pas de référence.',
+
+    'meters.title': 'Jauges du stabilisateur',
+    'meters.gain': 'Gain de la membrane {m}',
+    'meters.eff': 'effectif',
+    'meters.eff_short': 'eff.',
+    'meters.clamp': 'borné',
+    'meters.rate': 'Taux de sortie (moyenne à fuite)',
+    'meters.help': 'Les barres montrent le gain de chaque membrane sur une échelle de 0 à 3,2 ; la bande marque la plage bornée de 0,33 à 3. Stabilisateur éteint, le gain varie librement.',
+    'meters.stab_on': 'Stabilisateur actif',
+    'meters.stab_off': 'Stabilisateur éteint',
+    'fit.title': 'Évolution : score de sélection par génération',
+    'fit.help': 'Les lignes montrent le meilleur score de chaque membrane jusqu\'ici. Un point plein est une mutation acceptée, un point creux une mutation rejetée.',
+    'fit.aria': 'Graphique du meilleur score de sélection de chaque membrane au fil des générations.',
+
+    'sci.title': 'Vue scientifique',
+    'sci.prec': 'Précision cumulée',
+    'sci.base': 'Moyenne du dépôt pour ce réglage',
+    'sci.events': 'Sorties vraies (cyan) et fausses (rouge) par génération',
+    'sci.help': 'La ligne dorée en tirets est la précision moyenne du dépôt pour le même réglage à la largeur 32. Une partie est un seul échantillon : elle s\'écartera de la moyenne.',
+    'sci.aria': 'Graphiques de la précision cumulée et des sorties vraies et fausses par génération.',
+    'sci.nobase': 'Pas de référence du dépôt pour ce réglage.',
+
+    'say.start': 'Concours lancé.',
+    'say.gen': 'Génération {g} : {t} sorties vraies et {f} fausses, {d} écartées par le bouclier.',
+    'say.true': 'Génération {g}, épisode {e} : événement vrai.',
+    'say.false': 'Génération {g}, épisode {e} : événement faux.',
+    'say.held': 'Génération {g}, épisode {e} : le bouclier a retenu une déclaration.',
+    'say.final': 'Concours terminé. Score {score}.',
+    'say.paused': 'En pause.',
+
+    'result.title': 'Résultat',
+    'result.score': 'Score {score} sur 100',
+    'result.formula': 'Score = 50 x événements vrais nets + 25 x précision + 25 x régularité. Ces poids sont ceux de ce jeu, pas du dépôt. Une partie de la régularité due au bouclier est mécanique : il autorise au plus une sortie par épisode.',
+    'part.net': 'Événements vrais nets',
+    'part.precision': 'Précision',
+    'part.steady': 'Régularité',
+    'part.value': '{v} sur {max}',
+    'cmp.title': 'Comparaison avec le dépôt',
+    'cmp.metric': 'Mesure',
+    'cmp.you': 'Votre partie',
+    'cmp.repo': 'Moyenne du dépôt',
+    'cmp.true': 'Sorties vraies',
+    'cmp.false': 'Sorties fausses',
+    'cmp.precision': 'Précision',
+    'cmp.ratevar': 'Variance du taux de sortie',
+    'cmp.score': 'Score avec la même formule',
+    'cmp.source': 'Source : {file}, largeur 32, {seeds} graines par ligne, moyennes. Dépôt {repo} au commit {commit}. La ligne de score du dépôt applique la formule de ce jeu à ces comptes moyens ; elle est approximative.',
+    'cmp.none': 'Le dépôt n\'a pas mesuré cette combinaison : il n\'y a pas de référence à afficher. Essayez S--, SA- ou SAZ, ou aucun des trois.',
+    'cmp.nearw': 'Le dépôt n\'a mesuré que w = 0, 0,5 et 1 ; la ligne affichée correspond à w = {w}.',
+    'cmp.schemes': 'Schémas de récompense mesurés seuls (largeur 32, 3 agents)',
+    'cmp.schemes_cols': 'Schéma, événements vrais, événements faux, précision',
+    'cmp.schemes_source': 'Source : {file}, 20 graines. Tâche et unités différentes du tableau ci-dessus.',
+    'cmp.schemes_file': 'results/sweep_summary.csv',
+
+    'lesson.title': 'Ce que le dépôt a mesuré',
+    'lesson.shield.title': 'Le bouclier est ce qui fonctionne',
+    'lesson.shield.body': 'Exiger l\'accord de 2 membranes sur 3 a réduit les faux événements d\'un facteur {fpmin} à {fpmax} dans les mesures du dépôt (largeurs 32 à 256, w = 0,5, {seeds} graines par ligne) et rendu le taux de sortie environ {vmin} à {vmax} fois plus régulier. Une partie de cette régularité est mécanique : au plus une sortie par épisode. Données synthétiques.',
+    'lesson.amp.title': 'L\'amplificateur n\'a rien fait',
+    'lesson.amp.body': 'Un démarrage à chaud depuis la dernière sortie, poids plafonné à 0,5, a changé la précision d\'au plus {ampd} dans toutes les lignes mesurées, ce qui est dans le bruit. L\'interrupteur est là pour que vous le constatiez vous-même. N\'attendez pas d\'aide de sa part.',
+    'lesson.stab.title': 'Le stabilisateur est une assurance, et il coûte de la précision',
+    'lesson.stab.body': 'Un intégrateur à fuite sur le taux de sortie et un bornage du gain ont supprimé l\'emballement : {rmin} à {rmax} pour cent des essais de contrainte divergeaient sans lui, aucun avec. Dans le concours normal, il a coûté {cmin} à {cmax} points de précision. Gardez-le pour les réglages risqués.',
+    'lesson.individual.title': 'La récompense individuelle était la plus faible',
+    'lesson.individual.body': 'Payer chaque membrane seulement pour déclarer a donné le moins d\'événements vrais dans {low} cellules sur {cells} mesurées (schémas, largeurs et tailles d\'équipe). Payer l\'accord a fait mieux. Données synthétiques, une seule tâche.',
+    'lesson.handpicked.title': 'Les paramètres ont été choisis à la main',
+    'lesson.handpicked.body': 'Les seuils, le couplage, le niveau de bruit, le nombre d\'épisodes et les constantes du stabilisateur ont été choisis à la main, sans recherche ni réglage. D\'autres choix pourraient changer tous les chiffres affichés ici.',
+    'lesson.synthetic.title': 'Tout ici est synthétique',
+    'lesson.synthetic.body': 'Le motif planté, le bruit et les trois membranes forment une simulation classique. Rien ici ne mesure un système physique, donc rien n\'en est une preuve. Les chiffres du dépôt décrivent cette simulation seulement.',
+    'lesson.more': 'Afficher une autre leçon',
+
+    'share.title': 'MEMBRANE ARENA n°{day}  {date}',
+    'share.title_seed': 'ARENA graine {seed}',
+    'share.score': 'Score {score}/100',
+    'share.ref': '(réf. dépôt {ref})',
+    'share.events': 'Vrais {t}  Faux {f}  Préc {p}%',
+    'share.setup': 'Réglage {tag} {scheme} w{w}',
+    'share.steady': 'Régularité',
+    'share.synthetic': 'Simulation classique SYNTHÉTIQUE',
+    'share.title_label': 'Carte à partager (texte brut)',
+    'btn.copy': 'Copier le résultat',
+    'btn.link': 'Copier le lien du défi',
+    'copied': 'Copié.',
+    'copy.fail': 'La copie n\'est pas disponible ici. Sélectionnez le texte et copiez-le à la main.',
+
+    'stats.title': 'Votre historique',
+    'stats.streak': 'Série quotidienne : {cur} (meilleure {best})',
+    'stats.best': 'Meilleur score du jour : {best}',
+    'stats.none': 'Pas encore de résultat quotidien.',
+    'store.warn': 'Ce navigateur interdit l\'enregistrement : votre historique ne dure que le temps de cette visite.',
+
+    'footer.privacy': 'Pas de compte, aucun appel réseau, rien ne quitte cette page. L\'historique reste dans ce navigateur seulement.',
+    'footer.disclaimer': 'Simulation classique SYNTHÉTIQUE. Pas une expérience physique.',
+    'footer.credit': 'Règle d\'apprentissage : Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687. Auteur : Jean-François Brisson, Spark AI NLP.',
+    'footer.source': 'Références : sparkainlp-x/crystallization-contest, results/*_summary.csv. Licence : AGPL-3.0-only.',
+    'footer.version': 'Version {v}',
+
+    'help.title': 'Comment ça marche',
+    'help.p1': 'Chaque membrane est un agent dans un espace complexe de dimension 32. Elle voit des copies bruitées d\'un motif planté dans la moitié des épisodes et du bruit pur dans l\'autre moitié, et suit la direction dominante par la règle d\'Oja. Elle ne sait pas dans quelle moitié elle se trouve.',
+    'help.p2': 'Une membrane déclare un événement quand son rapport d\'énergie, multiplié par le gain, dépasse un seuil. Une déclaration est vraie si l\'épisode est planté et que le vecteur correspond au motif. Le réseau et les fissures apparaissent à la déclaration et ne révèlent la vérité qu\'après coup.',
+    'help.p3': 'Le schéma de récompense, le curseur de coopération et l\'évolution décident quels paramètres survivent. L\'étape finale filtre la sortie : le bouclier, l\'amplificateur et le stabilisateur sont des interrupteurs séparés.',
+    'help.p4': 'Le score du jeu et le bonus de schéma de l\'arène sont des choix de conception de ce jeu. Les références, les chiffres des leçons et le comportement du bouclier, de l\'amplificateur et du stabilisateur viennent des résultats CSV du dépôt, cités près de chaque chiffre.',
+    'help.p5': 'Le portage JavaScript est statistiquement comparable à l\'original Python (voir docs/port-check.txt), pas identique bit à bit.',
+    'help.keys': 'Touches : Espace lance ou met en pause, G lance la génération suivante, F termine, S bascule la vue scientifique.',
+
+    'start.note': 'La graine fixe le seuil, le couplage et le gain de départ. Toutes les références du dépôt partaient d\'un seuil de 0,5, d\'un couplage de 0,05 et d\'un gain de 1,0.',
+    'btn.defaults': 'Prendre le départ du dépôt',
+    'adv.locked': 'Les valeurs de départ sont verrouillées dès que le concours commence. L\'évolution les déplace ensuite ; coupez l\'évolution pour les figer.',
+    'lesson.evolve.title': 'L\'évolution n\'est pas une victoire gratuite',
+    'lesson.evolve.body': 'Dans ce portage, l\'étape (1+1) aide quand le départ est mauvais mais peut perdre contre de bons paramètres choisis à la main, car chaque génération ne note que huit épisodes bruités (docs/evolve-check.txt). Cela a été mesuré dans le portage, pas dans le dépôt.',
+    'params.title': 'Paramètres, du départ à la fin',
+    'params.line': 'Membrane {m} : seuil {th0} puis {th1}, couplage {c0} puis {c1}, gain {g0} puis {g1}',
+
+    'cmp.mixed': 'Vous avez changé le bouclier, l\'amplificateur ou le stabilisateur pendant la partie : la comparaison utilise le dernier réglage.',
+    'result.beat': 'Vous avez battu le score du défi, {best}.',
+    'result.notbeat': 'Le score du défi est {best} ; vous avez fait {score}.',
+    'err.noscript': 'Ce jeu nécessite JavaScript. Il ne fait aucune requête réseau.',
+    'err.canvas': 'Votre navigateur n\'a pas pu démarrer le canevas. Les chiffres et le résultat fonctionnent quand même.'
+  };
+
+  var LANGS = { en: en, fr: fr };
+  function make(lang) {
+    var table = Object.prototype.hasOwnProperty.call(LANGS, lang) ? LANGS[lang] : en;
+    return function t(key, vars) {
+      var s = Object.prototype.hasOwnProperty.call(table, key) ? table[key] : (Object.prototype.hasOwnProperty.call(en, key) ? en[key] : key);
+      return vars ? s.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? vars[k] : m; }) : s;
+    };
+  }
+  return { LANGS: LANGS, make: make, supported: Object.keys(LANGS) };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: canvas scene (SYNTHETIC classical simulation).
+ *
+ * Pure helpers (layout, timeline, colours, lattice, cracks) are exported for
+ * tests and need no DOM. createArena() draws three rippling membranes, pooled
+ * flow particles, pooled lattice / crack bursts and the shield flash on a
+ * canvas. drawFitness() and drawScience() draw the two chart canvases.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaScene = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var RATE = 60;            // simulation steps per second at 1x
+  var STEPS = 60, EP = 8;
+  var EP_GAP = 0.3;         // seconds between episodes at 1x
+  var INTERMISSION = 0.7;   // seconds after the last episode of a generation at 1x
+  var MAX_PARTICLES = 320, MAX_BURSTS = 6;
+  var HUES = [[64, 208, 224], [122, 168, 255], [94, 230, 184]];   // cyan, blue, aqua
+  var DIM = [28, 47, 102], GOLD = [201, 168, 76], GREY = [138, 147, 168], WARN = [190, 112, 112];
+  var TAU = Math.PI * 2;
+
+  function clamp(x, lo, hi) { return x < lo ? lo : (x > hi ? hi : x); }
+  function mix(a, b, t) { t = clamp(t, 0, 1); return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function rgba(c, a) { return 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + (a === undefined ? 1 : clamp(a, 0, 1).toFixed(3)) + ')'; }
+
+  // colour of a membrane ring for energy e = (gain * energy ratio) / threshold: dim navy at 0, its hue at 1, toward white above
+  function energyColor(i, e) {
+    var h = HUES[i];
+    if (e <= 1) return mix(DIM, h, e);
+    return mix(h, [255, 255, 255], clamp((e - 1) * 0.5, 0, 0.45));
+  }
+
+  function layout(w, h) {
+    var cx = w / 2, cy = h * 0.54, rt = Math.min(h * 0.3, w * 0.29), rm = Math.min(rt * 0.5, w * 0.16);
+    var angles = [-Math.PI / 2, Math.PI / 6, 5 * Math.PI / 6];
+    return {
+      w: w, h: h, cx: cx, cy: cy, rt: rt, rm: rm,
+      m: angles.map(function (a) { return { x: cx + rt * Math.cos(a), y: cy + rt * Math.sin(a) }; })
+    };
+  }
+
+  /* ---------- timeline of one generation (time in seconds at 1x) ---------- */
+
+  function buildTimeline(rec) {
+    var epDur = STEPS / RATE, slot = epDur + EP_GAP, ev = [], e, i;
+    for (e = 0; e < rec.episodes.length; e++) {
+      var ep = rec.episodes[e], s0 = e * slot;
+      for (i = 0; i < 3; i++) {
+        if (ep.declStep[i] !== null) ev.push({ t: s0 + ep.declStep[i] / RATE, type: 'decl', ep: e, i: i, truth: ep.truth[i], planted: ep.planted });
+      }
+      ev.push({ t: s0 + epDur + 0.02, type: 'out', ep: e, outs: ep.outs, passed: ep.passed, dropped: ep.dropped, evT: ep.evT, evF: ep.evF, planted: ep.planted, shield: rec.shield });
+    }
+    var duration = rec.episodes.length * slot + INTERMISSION;
+    ev.push({ t: duration, type: 'gen' });
+    ev.sort(function (a, b) { return a.t - b.t; });
+    return { events: ev, duration: duration, epDur: epDur, slot: slot };
+  }
+  // events with t0 < t <= t1
+  function eventsBetween(tl, t0, t1) {
+    var out = [];
+    for (var k = 0; k < tl.events.length; k++) { var t = tl.events[k].t; if (t > t0 && t <= t1) out.push(tl.events[k]); }
+    return out;
+  }
+  function locate(tl, t) {
+    var nEp = EP, e = Math.min(nEp - 1, Math.max(0, Math.floor(t / tl.slot)));
+    var local = t - e * tl.slot;
+    return { ep: e, step: clamp(local * RATE, 0, STEPS), gap: local > tl.epDur, inter: t >= nEp * tl.slot };
+  }
+
+  /* ---------- lattice and cracks ---------- */
+
+  // hexagonal lattice points within radius R, nearest first
+  function hexPoints(R, spacing) {
+    var pts = [], row, col, rows = Math.ceil(R / (spacing * 0.866)) + 1;
+    for (row = -rows; row <= rows; row++) {
+      for (col = -rows; col <= rows; col++) {
+        var x = (col + (row & 1 ? 0.5 : 0)) * spacing, y = row * spacing * 0.866, d = Math.sqrt(x * x + y * y);
+        if (d <= R) pts.push({ x: x, y: y, d: d });
+      }
+    }
+    pts.sort(function (a, b) { return a.d - b.d; });
+    return pts;
+  }
+  function hexEdges(pts, spacing) {
+    var edges = [], a, b, lim = spacing * 1.05;
+    for (a = 0; a < pts.length; a++) for (b = a + 1; b < pts.length; b++) {
+      var dx = pts[a].x - pts[b].x, dy = pts[a].y - pts[b].y;
+      if (dx * dx + dy * dy <= lim * lim) edges.push([a, b]);
+    }
+    return edges;
+  }
+  function lcg(seed) { var s = (seed >>> 0) || 1; return function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+  // jagged polylines radiating from the origin; deterministic in the seed
+  function crackPaths(seed, R, count) {
+    var rnd = lcg(seed), paths = [], k, j;
+    for (k = 0; k < count; k++) {
+      var a = (k / count) * TAU + rnd() * 0.6, x = 0, y = 0, pts = [{ x: 0, y: 0 }], segs = 4 + Math.floor(rnd() * 3);
+      for (j = 0; j < segs; j++) {
+        a += (rnd() - 0.5) * 1.1;
+        var len = R * (0.18 + rnd() * 0.16);
+        x += Math.cos(a) * len; y += Math.sin(a) * len;
+        pts.push({ x: x, y: y });
+      }
+      paths.push(pts);
+    }
+    return paths;
+  }
+
+  /* ---------- the arena ---------- */
+
+  function createArena(canvas, opts) {
+    opts = opts || {};
+    var ctx = canvas.getContext('2d');
+    var st = {
+      w: 300, h: 300, dpr: 1, lay: layout(300, 300), reduced: !!opts.reduced,
+      rec: null, tl: null, t: 0, speed: 4, playing: false,
+      pulse: [0, 0, 0], shown: [0, 0, 0], settings: null, c: 0.05,
+      px: new Float32Array(MAX_PARTICLES * 6), pn: 0,         // u, speed, membrane/pair id, kind, jitter, seed
+      bursts: [], flashes: [], clock: 0, lattice: null,
+      frames: 0, frameMs: 0, worstMs: 0, lastDraw: 0, evCount: 0, rnd: lcg(12345)
+    };
+
+    function resize() {
+      var r = canvas.getBoundingClientRect(), w = Math.max(160, Math.round(r.width)), h = Math.max(160, Math.round(r.height));
+      var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
+      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+      st.w = w; st.h = h; st.dpr = dpr; st.lay = layout(w, h);
+      var spacing = Math.max(10, st.lay.rm * 0.34), R = st.lay.rm * 1.5, pts = hexPoints(R, spacing);
+      st.lattice = { pts: pts, edges: hexEdges(pts, spacing), R: R, spacing: spacing };
+      st.bg = null;
+    }
+
+    function spawn(kind, id, u0) {
+      if (st.pn >= MAX_PARTICLES) return;
+      var k = st.pn * 6;
+      st.px[k] = u0 || 0; st.px[k + 1] = 0.5 + st.rnd() * 0.6; st.px[k + 2] = id; st.px[k + 3] = kind; st.px[k + 4] = (st.rnd() - 0.5) * 2; st.px[k + 5] = st.rnd() * TAU;
+      st.pn++;
+    }
+    function removeP(n) {
+      var last = (st.pn - 1) * 6, k = n * 6;
+      for (var q = 0; q < 6; q++) st.px[k + q] = st.px[last + q];
+      st.pn--;
+    }
+
+    function setGeneration(rec, settings) {
+      st.rec = rec; st.tl = buildTimeline(rec); st.t = 0; st.settings = settings || null;
+      st.c = rec.params.reduce(function (a, p) { return a + p.c; }, 0) / 3;
+      st.bursts.length = 0; st.flashes.length = 0;
+    }
+    function clearGeneration() { st.rec = null; st.tl = null; st.t = 0; st.bursts.length = 0; st.flashes.length = 0; }
+    function setPlaying(p) { st.playing = !!p; }
+    function setSpeed(s) { st.speed = clamp(Number(s) || 1, 0.25, 16); }
+    function setReduced(r) { st.reduced = !!r; if (r) st.pn = 0; }
+    function genDone() { return !!st.tl && st.t >= st.tl.duration; }
+
+    function addBurst(i, truth) {
+      for (var k = st.bursts.length - 1; k >= 0; k--) if (st.bursts[k].i === i) st.bursts.splice(k, 1);
+      if (st.bursts.length >= MAX_BURSTS) st.bursts.shift();
+      var life = 2.0 / Math.sqrt(Math.max(1, st.speed));
+      st.bursts.push({ i: i, truth: truth, t0: st.clock, life: life, seed: (st.evCount * 2654435761) >>> 0 });
+      st.evCount++;
+    }
+    function addFlash(pass) { st.flashes.push({ pass: pass, t0: st.clock, life: 1.1 / Math.sqrt(Math.max(1, st.speed)) + 0.25 }); if (st.flashes.length > 4) st.flashes.shift(); }
+
+    // advance by dt real seconds; returns the timeline events fired
+    function update(dt) {
+      dt = clamp(dt, 0, 0.05);
+      st.clock += dt;
+      var fired = [], i, n;
+      if (st.playing && st.tl && st.t < st.tl.duration) {
+        var t0 = st.t, t1 = Math.min(st.tl.duration, t0 + dt * st.speed);
+        st.t = t1;
+        fired = eventsBetween(st.tl, t0, t1);
+        fired.forEach(function (e) {
+          if (e.type === 'decl') { addBurst(e.i, e.truth); st.pulse[e.i] = 1; }
+          else if (e.type === 'out' && e.shield) { if (e.passed !== null) addFlash(true); else if (e.dropped) addFlash(false); }
+        });
+      }
+      var now = st.rec && st.tl ? locate(st.tl, st.t) : null;
+      for (i = 0; i < 3; i++) {
+        st.pulse[i] = Math.max(0, st.pulse[i] - dt * 1.6);
+        var e = 0.2;
+        if (now) e = energyOf(now, i);
+        st.shown[i] += (e - st.shown[i]) * Math.min(1, dt * 10);
+      }
+      if (!st.reduced) {
+        var lay = st.lay, rate = 12 * Math.sqrt(Math.min(st.speed, 4)), active = !st.rec || (st.playing && now && !now.gap);
+        if (active) {
+          for (i = 0; i < 3; i++) {
+            var dec = st.rec && now && st.rec.episodes[now.ep].declStep[i] !== null && st.rec.episodes[now.ep].declStep[i] <= now.step;
+            if (dec) continue;
+            n = rate * dt; while (n > 0) { if (st.rnd() < n) spawn(0, i); n -= 1; }
+          }
+          var lr = st.c * 70 * Math.sqrt(Math.min(st.speed, 4)) * dt, pair;
+          for (pair = 0; pair < 6; pair++) { n = lr; while (n > 0) { if (st.rnd() < n) spawn(1, pair); n -= 1; } }
+        }
+        for (i = st.pn - 1; i >= 0; i--) {
+          var k = i * 6;
+          st.px[k] += dt * st.px[k + 1] * (st.px[k + 3] === 0 ? 0.9 : 1.1);
+          if (st.px[k] >= 1) { if (st.px[k + 3] === 0) st.pulse[st.px[k + 2]] = Math.min(1, st.pulse[st.px[k + 2]] + 0.08); removeP(i); }
+        }
+      }
+      return fired;
+    }
+
+    function energyOf(now, i) {
+      var ep = st.rec.episodes[now.ep], step = Math.max(1, Math.min(STEPS, Math.floor(now.step)));
+      if (now.step < 1) return 0.2;
+      return clamp(ep.trace[(step - 1) * 3 + i] / ep.thr[i], 0, 1.7);
+    }
+
+    function pairIndex(id) { return [[0, 1], [1, 0], [0, 2], [2, 0], [1, 2], [2, 1]][id]; }
+
+    function background() {
+      if (!st.bg) {
+        var g = ctx.createRadialGradient(st.w / 2, st.h * 0.45, 10, st.w / 2, st.h * 0.5, Math.max(st.w, st.h) * 0.75);
+        g.addColorStop(0, '#13234f'); g.addColorStop(1, '#0a1330');
+        st.bg = g;
+      }
+      ctx.fillStyle = st.bg; ctx.fillRect(0, 0, st.w, st.h);
+      ctx.fillStyle = 'rgba(122,168,255,0.07)';
+      var step = 28, x, y;
+      for (x = step / 2; x < st.w; x += step) for (y = step / 2; y < st.h; y += step) ctx.fillRect(x, y, 1.2, 1.2);
+    }
+
+    function drawEdges(lay) {
+      ctx.lineWidth = 1;
+      for (var a = 0; a < 3; a++) for (var b = a + 1; b < 3; b++) {
+        ctx.strokeStyle = rgba(mix(DIM, [122, 168, 255], 0.35 + st.c), 0.28 + st.c * 1.2);
+        ctx.beginPath(); ctx.moveTo(lay.m[a].x, lay.m[a].y); ctx.lineTo(lay.m[b].x, lay.m[b].y); ctx.stroke();
+      }
+    }
+
+    function drawParticles(lay) {
+      if (st.reduced) return;
+      ctx.globalCompositeOperation = 'lighter';
+      for (var i = 0; i < st.pn; i++) {
+        var k = i * 6, u = st.px[k], kind = st.px[k + 3], id = st.px[k + 2], x, y, col, a;
+        if (kind === 0) {
+          var m = lay.m[id], sx = lay.cx, sy = lay.cy + lay.rt * 0.0;
+          var px = -(m.y - sy), py = m.x - sx, pl = Math.sqrt(px * px + py * py) || 1, wob = Math.sin(st.px[k + 5] + u * 9) * 5 * st.px[k + 4];
+          x = sx + (m.x - sx) * u + px / pl * wob; y = sy + (m.y - sy) * u + py / pl * wob;
+          col = HUES[id]; a = Math.sin(u * Math.PI) * 0.9;
+        } else {
+          var pr = pairIndex(id), A = lay.m[pr[0]], B = lay.m[pr[1]];
+          var ox = -(B.y - A.y), oy = B.x - A.x, ol = Math.sqrt(ox * ox + oy * oy) || 1, off = Math.sin(u * Math.PI) * 7 * (st.px[k + 4] > 0 ? 1 : -1);
+          x = A.x + (B.x - A.x) * u + ox / ol * off; y = A.y + (B.y - A.y) * u + oy / ol * off;
+          col = mix(HUES[pr[0]], HUES[pr[1]], u); a = Math.sin(u * Math.PI) * 0.75;
+        }
+        ctx.fillStyle = rgba(col, a);
+        ctx.beginPath(); ctx.arc(x, y, kind === 0 ? 1.8 : 1.5, 0, TAU); ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function drawMembrane(i, lay, now) {
+      var m = lay.m[i], rm = lay.rm, e = st.shown[i], pulse = st.pulse[i], t = st.clock;
+      var declared = !!(st.rec && now && st.rec.episodes[now.ep].declStep[i] !== null && st.rec.episodes[now.ep].declStep[i] <= now.step);
+      var truth = declared && st.rec.episodes[now.ep].truth[i];
+      var col = declared ? (truth ? GOLD : GREY) : energyColor(i, e);
+      var glow = ctx.createRadialGradient(m.x, m.y, rm * 0.2, m.x, m.y, rm * 1.75);
+      glow.addColorStop(0, rgba(col, 0.22 + 0.25 * clamp(e, 0, 1.3) + pulse * 0.2));
+      glow.addColorStop(1, rgba(col, 0));
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(m.x, m.y, rm * 1.75, 0, TAU); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+      var rings = 6, seg = 72, k, j;
+      var amp = st.reduced ? 0 : rm * 0.028 * (1 + 2.2 * clamp(e, 0, 1.4) + pulse * 1.5);
+      for (k = 0; k < rings; k++) {
+        var rr = rm * (0.38 + 0.125 * k), harm = 3 + k, dir = k % 2 ? 1 : -1, ph = t * (0.8 + 0.22 * k) * dir + i * 2.1 + k;
+        ctx.beginPath();
+        for (j = 0; j <= seg; j++) {
+          var a = (j / seg) * TAU, r = rr + amp * Math.sin(harm * a + ph) + amp * 0.5 * Math.sin((harm + 2) * a - ph * 1.3);
+          var x = m.x + Math.cos(a) * r, y = m.y + Math.sin(a) * r;
+          if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.lineWidth = k === rings - 1 ? 2.2 : 1.2;
+        ctx.strokeStyle = rgba(k === rings - 1 ? col : mix(col, DIM, k * 0.1), (0.35 + 0.5 * (k / rings)) * (declared ? 1 : 0.55 + 0.45 * clamp(e, 0, 1)));
+        ctx.stroke();
+      }
+      // threshold progress arc and tick
+      var prog = clamp(e, 0, 1);
+      ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+      ctx.strokeStyle = rgba(DIM, 0.8);
+      ctx.beginPath(); ctx.arc(m.x, m.y, rm * 1.22, -Math.PI / 2, -Math.PI / 2 + TAU); ctx.stroke();
+      if (prog > 0.005) {
+        ctx.strokeStyle = rgba(declared ? col : mix(HUES[i], GOLD, e >= 1 ? 0.8 : 0), 0.95);
+        ctx.beginPath(); ctx.arc(m.x, m.y, rm * 1.22, -Math.PI / 2, -Math.PI / 2 + TAU * prog); ctx.stroke();
+      }
+      ctx.lineCap = 'butt';
+      ctx.fillStyle = rgba([238, 242, 255], 0.9);
+      ctx.font = '600 ' + Math.round(Math.max(12, rm * 0.3)) + 'px system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('ABC'.charAt(i), m.x, m.y);
+    }
+
+    function drawBursts(lay) {
+      var L = st.lattice;
+      for (var b = st.bursts.length - 1; b >= 0; b--) {
+        var br = st.bursts[b], age = st.clock - br.t0;
+        if (age > br.life) { st.bursts.splice(b, 1); continue; }
+        var m = lay.m[br.i], p = st.reduced ? 1 : clamp(age / (br.life * 0.45), 0, 1), fade = clamp(1 - (age / br.life - 0.55) / 0.45, 0, 1);
+        if (st.reduced) fade = clamp(1 - age / br.life, 0, 1);
+        if (br.truth) {
+          var reach = L.R * p, i, e;
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = rgba(GOLD, 0.55 * fade);
+          ctx.beginPath();
+          for (e = 0; e < L.edges.length; e++) {
+            var A = L.pts[L.edges[e][0]], B = L.pts[L.edges[e][1]];
+            if (B.d > reach || A.d > reach) continue;
+            ctx.moveTo(m.x + A.x, m.y + A.y); ctx.lineTo(m.x + B.x, m.y + B.y);
+          }
+          ctx.stroke();
+          ctx.fillStyle = rgba([255, 236, 170], 0.95 * fade);
+          for (i = 0; i < L.pts.length; i++) {
+            if (L.pts[i].d > reach) break;
+            ctx.beginPath(); ctx.arc(m.x + L.pts[i].x, m.y + L.pts[i].y, 2.1, 0, TAU); ctx.fill();
+          }
+          ctx.globalCompositeOperation = 'source-over';
+        } else {
+          var paths = crackPaths(br.seed, L.R * 0.9, 7), q, s, rnd = lcg(br.seed ^ 77);
+          ctx.lineWidth = 1.4; ctx.strokeStyle = rgba(WARN, 0.75 * fade); ctx.lineJoin = 'round';
+          for (q = 0; q < paths.length; q++) {
+            var path = paths[q], upto = Math.max(1, Math.round(p * (path.length - 1)));
+            ctx.beginPath(); ctx.moveTo(m.x, m.y);
+            for (s = 1; s <= upto; s++) ctx.lineTo(m.x + path[s].x, m.y + path[s].y);
+            ctx.stroke();
+          }
+          ctx.fillStyle = rgba(GREY, 0.55 * fade);
+          for (q = 0; q < 34; q++) {
+            var ang = rnd() * TAU, rad = L.R * (0.2 + rnd() * 0.7) * (0.4 + 0.6 * p);
+            ctx.fillRect(m.x + Math.cos(ang) * rad + (rnd() - 0.5) * 6, m.y + Math.sin(ang) * rad + (rnd() - 0.5) * 6, 1.8, 1.8);
+          }
+        }
+      }
+    }
+
+    function drawFlashes(lay) {
+      for (var f = st.flashes.length - 1; f >= 0; f--) {
+        var fl = st.flashes[f], age = st.clock - fl.t0;
+        if (age > fl.life) { st.flashes.splice(f, 1); continue; }
+        var a = 1 - age / fl.life, m = lay.m;
+        ctx.beginPath(); ctx.moveTo(m[0].x, m[0].y); ctx.lineTo(m[1].x, m[1].y); ctx.lineTo(m[2].x, m[2].y); ctx.closePath();
+        if (fl.pass) {
+          ctx.fillStyle = rgba(GOLD, 0.10 * a); ctx.fill();
+          ctx.lineWidth = 2.5; ctx.strokeStyle = rgba(GOLD, 0.9 * a); ctx.stroke();
+        } else {
+          ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(GREY, 0.7 * a); ctx.stroke(); ctx.setLineDash([]);
+        }
+      }
+    }
+
+    function draw() {
+      var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
+      var lay = st.lay, now = st.rec && st.tl ? locate(st.tl, st.t) : null;
+      background();
+      drawEdges(lay);
+      // source
+      var sg = ctx.createRadialGradient(lay.cx, lay.cy, 0, lay.cx, lay.cy, lay.rm * 0.45);
+      sg.addColorStop(0, 'rgba(238,242,255,0.55)'); sg.addColorStop(1, 'rgba(238,242,255,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(lay.cx, lay.cy, lay.rm * 0.45, 0, TAU); ctx.fill();
+      drawParticles(lay);
+      for (var i = 0; i < 3; i++) drawMembrane(i, lay, now);
+      drawBursts(lay);
+      drawFlashes(lay);
+      var dtm = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0;
+      st.frames++; st.frameMs = st.frameMs * 0.95 + dtm * 0.05; if (dtm > st.worstMs) st.worstMs = dtm;
+    }
+
+    function stats() { return { frames: st.frames, drawMs: st.frameMs, worstDrawMs: st.worstMs, particles: st.pn, bursts: st.bursts.length, t: st.t }; }
+    function resetStats() { st.frames = 0; st.worstMs = 0; }
+    function position() { return st.rec && st.tl ? locate(st.tl, st.t) : null; }
+
+    resize();
+    return { resize: resize, setGeneration: setGeneration, clearGeneration: clearGeneration, setPlaying: setPlaying, setSpeed: setSpeed,
+      setReduced: setReduced, update: update, draw: draw, genDone: genDone, stats: stats, resetStats: resetStats, position: position,
+      state: function () { return st; } };
+  }
+
+  /* ---------- chart canvases ---------- */
+
+  function prep(canvas) {
+    var r = canvas.getBoundingClientRect(), w = Math.max(160, Math.round(r.width)), h = Math.max(100, Math.round(r.height));
+    var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1), ctx = canvas.getContext('2d');
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    return { ctx: ctx, w: w, h: h };
+  }
+  function axes(ctx, x0, y0, x1, y1, gens, ymaxLabel, ytop) {
+    ctx.strokeStyle = 'rgba(122,168,255,0.25)'; ctx.lineWidth = 1; ctx.fillStyle = 'rgba(179,190,219,0.9)';
+    ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (var q = 0; q <= 4; q++) { var y = y1 - (y1 - y0) * q / 4; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); var v = ytop * q / 4; ctx.fillText(Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0$/, ''), x0 - 4, y); }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (var g = 0; g < gens; g += 2) ctx.fillText(String(g + 1), x0 + (x1 - x0) * (g + 0.5) / gens, y1 + 3);
+  }
+
+  // best selection score of each membrane per generation, accepted mutations filled, rejected hollow
+  function drawFitness(canvas, hist, gens) {
+    var p = prep(canvas), ctx = p.ctx, x0 = 34, x1 = p.w - 10, y0 = 8, y1 = p.h - 20, i, g;
+    var ymax = 1;
+    hist.forEach(function (h) { h.best.forEach(function (b) { if (b > ymax) ymax = b; }); h.scores.forEach(function (b) { if (b > ymax) ymax = b; }); });
+    ymax = Math.ceil(ymax * 2) / 2;
+    axes(ctx, x0, y0, x1, y1, gens, '', ymax);
+    for (i = 0; i < 3; i++) {
+      ctx.strokeStyle = rgba(HUES[i], 0.95); ctx.lineWidth = 2; ctx.beginPath();
+      hist.forEach(function (h, k) { var x = x0 + (x1 - x0) * (k + 0.5) / gens, y = y1 - (y1 - y0) * clamp(h.best[i], 0, ymax) / ymax; if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+      ctx.stroke();
+      hist.forEach(function (h, k) {
+        var x = x0 + (x1 - x0) * (k + 0.5) / gens, ys = y1 - (y1 - y0) * clamp(h.scores[i], 0, ymax) / ymax;
+        ctx.beginPath(); ctx.arc(x, ys, 3.2, 0, TAU);
+        if (h.accepted[i]) { ctx.fillStyle = rgba(HUES[i], 1); ctx.fill(); } else { ctx.strokeStyle = rgba(HUES[i], 0.8); ctx.lineWidth = 1.2; ctx.stroke(); }
+      });
+    }
+  }
+
+  // cumulative precision per generation with the repository mean as a dashed line, and stacked true / false outputs
+  function drawScience(canvas, hist, gens, base) {
+    var p = prep(canvas), ctx = p.ctx, mid = Math.round(p.h * 0.5), g, T = 0, F = 0;
+    var x0 = 34, x1 = p.w - 10;
+    axes(ctx, x0, 8, x1, mid - 18, gens, '', 1);
+    if (base) {
+      var yb = (mid - 18) - (mid - 26) * base.P;
+      ctx.setLineDash([5, 4]); ctx.strokeStyle = rgba(GOLD, 0.95); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x0, yb); ctx.lineTo(x1, yb); ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.strokeStyle = rgba(HUES[0], 1); ctx.lineWidth = 2.2; ctx.beginPath();
+    var pts = [];
+    hist.forEach(function (h, k) {
+      T += h.outT; F += h.outF;
+      var pr = T + F > 0 ? T / (T + F) : 0, x = x0 + (x1 - x0) * (k + 0.5) / gens, y = (mid - 18) - (mid - 26) * pr;
+      pts.push([x, y]); if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    pts.forEach(function (q) { ctx.fillStyle = rgba(HUES[0], 1); ctx.beginPath(); ctx.arc(q[0], q[1], 2.6, 0, TAU); ctx.fill(); });
+    var ymax = 1;
+    hist.forEach(function (h) { if (h.outT + h.outF > ymax) ymax = h.outT + h.outF; });
+    ymax = Math.max(4, Math.ceil(ymax / 4) * 4);
+    var by0 = mid + 8, by1 = p.h - 20;
+    axes(ctx, x0, by0, x1, by1, gens, '', ymax);
+    var bw = Math.max(3, (x1 - x0) / gens * 0.6);
+    hist.forEach(function (h, k) {
+      var x = x0 + (x1 - x0) * (k + 0.5) / gens - bw / 2, ht = (by1 - by0) * h.outT / ymax, hf = (by1 - by0) * h.outF / ymax;
+      ctx.fillStyle = rgba(HUES[0], 0.85); ctx.fillRect(x, by1 - ht, bw, ht);
+      ctx.fillStyle = rgba(WARN, 0.95); ctx.fillRect(x, by1 - ht - hf, bw, hf);
+    });
+  }
+
+  return {
+    RATE: RATE, STEPS: STEPS, EP: EP, EP_GAP: EP_GAP, INTERMISSION: INTERMISSION, HUES: HUES, GOLD: GOLD,
+    clamp: clamp, mix: mix, rgba: rgba, energyColor: energyColor, layout: layout, buildTimeline: buildTimeline,
+    eventsBetween: eventsBetween, locate: locate, hexPoints: hexPoints, hexEdges: hexEdges, crackPaths: crackPaths, lcg: lcg,
+    createArena: createArena, drawFitness: drawFitness, drawScience: drawScience
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: UI controller (SYNTHETIC classical simulation).
+ * Wires the DOM to ArenaGame (logic) and ArenaScene (canvas). No network.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function () {
+  'use strict';
+  var G = ArenaGame, S = ArenaScene, I = ArenaI18n, B = ArenaBaselines;
+  var $ = function (id) { return document.getElementById(id); };
+  var STORE_KEY = 'membrane-arena/v1';
+
+  var lang = 'en', t = I.make('en');
+  var store = G.sanitizeStore(null), storeOk = true;
+  var seedInfo = null;                 // { seed, date, mode: 'daily' | 'practice' | 'challenge', best, preset }
+  var contest = null, mode = 'idle';   // idle | running | paused | done
+  var stepOnce = false, atBoundary = false, lessonIdx = 0, lastResult = null, counted = false;
+  var doneT = 0, doneF = 0, curT = 0, curF = 0, curRec = null, shownEp = -1, pendingNote = false, tickerMsg = '';
+  var arena = null, lastTs = 0, reduced = false, science = false;
+
+  /* ---------- storage, defensive ---------- */
+
+  function loadStore() {
+    try { return G.sanitizeStore(JSON.parse(window.localStorage.getItem(STORE_KEY))); }
+    catch (e) { try { window.localStorage.getItem('x'); } catch (e2) { storeOk = false; } return G.sanitizeStore(null); }
+  }
+  function saveStore() {
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { storeOk = false; $('store-warn').hidden = false; }
+  }
+
+  /* ---------- text ---------- */
+
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    document.title = t('app.pagetitle');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    $('btn-lang').textContent = t('btn.lang');
+    $('btn-lang').setAttribute('lang', lang === 'en' ? 'fr' : 'en');
+    $('arena').setAttribute('aria-label', t('stage.aria'));
+    $('fit').setAttribute('aria-label', t('fit.aria'));
+    $('sci').setAttribute('aria-label', t('sci.aria'));
+    $('ribbon').setAttribute('aria-label', t('hud.ribbon'));
+    $('footer-version').textContent = t('footer.version', { v: G.VERSION });
+    buildSchemeOptions();
+    for (var i = 0; i < 3; i++) $('m-gain-' + i).setAttribute('aria-label', t('meters.gain', { m: 'ABC'.charAt(i) }));
+    $('m-rate').setAttribute('aria-label', t('meters.rate'));
+    renderMode(); renderControls(); renderCfgNote(); renderStats(); renderHud(); renderMeters(curRec); renderRibbon();
+    if (!contest || mode === 'idle') setTicker(t('hud.idle'));
+    if (lastResult && mode === 'done') renderResult();
+    drawCharts();
+  }
+
+  // the options are created once (so a preset can select one before the first render) and relabelled on a language change
+  function buildSchemeOptions() {
+    var sel = $('scheme');
+    if (sel.options.length !== G.SCHEMES.length) {
+      sel.innerHTML = '';
+      G.SCHEMES.forEach(function (s) { var o = document.createElement('option'); o.value = s; sel.appendChild(o); });
+      sel.value = G.DEFAULTS.scheme;
+    }
+    G.SCHEMES.forEach(function (s, i) { sel.options[i].textContent = t('scheme.' + s); });
+  }
+
+  function setTicker(msg) { tickerMsg = msg; $('ticker').textContent = msg; }
+  function announce(msg) { $('sr-live').textContent = msg; }
+  function say(msg, always) { setTicker(msg); if (always || (arena && arena.state().speed <= 2)) announce(msg); }
+  function r1(x) { return (Math.round(x * 10) / 10).toFixed(1); }
+  function r2(x) { return (Math.round(x * 100) / 100).toFixed(2); }
+
+  /* ---------- seed and mode ---------- */
+
+  function today() { return G.localDateString(new Date()); }
+  function newSeedInfo(kind, seed, extra) {
+    var d = G.seedDate(seed);
+    seedInfo = { seed: seed, date: d, mode: kind, best: null, preset: null };
+    if (extra) { seedInfo.best = extra.best; seedInfo.preset = extra.preset; }
+    var st = G.startFor(seed);
+    setSlider('th', st.th); setSlider('c', st.c); setSlider('g', st.g);
+    if (seedInfo.preset) applyPreset(seedInfo.preset);
+    resetRun();
+    renderMode(); renderCfgNote();
+  }
+  function startDaily() { var d = today(); newSeedInfo('daily', G.dailySeed(d)); }
+  function startPractice() { newSeedInfo('practice', 'p' + Math.floor(Math.random() * 2176782336).toString(36)); }
+  function applyHash() {
+    var h = G.parseHash(window.location.hash);
+    if (h.lang && I.supported.indexOf(h.lang) >= 0 && h.lang !== lang) { lang = h.lang; t = I.make(lang); }
+    if (h.mode === 'challenge') newSeedInfo('challenge', h.seed, { best: h.best, preset: h.preset });
+    else startDaily();
+    applyI18n();
+  }
+  function renderMode() {
+    if (!seedInfo) return;
+    var txt;
+    if (seedInfo.mode === 'daily') txt = t('mode.daily', { day: G.dayNumber(seedInfo.date), date: seedInfo.date });
+    else if (seedInfo.mode === 'challenge') txt = seedInfo.best !== null ? t('mode.challenge_best', { best: seedInfo.best, seed: seedInfo.seed }) : t('mode.challenge', { seed: seedInfo.seed });
+    else txt = t('mode.practice', { seed: seedInfo.seed });
+    $('mode-line').textContent = txt;
+    var rec = seedInfo.mode === 'daily' ? store.daily[seedInfo.date] : null;
+    $('daily-done').hidden = !rec;
+    if (rec) $('daily-done').textContent = t('daily.done', { score: Math.round(rec.score) });
+  }
+
+  /* ---------- controls ---------- */
+
+  function setSlider(id, v) { var el = $(id); el.value = String(v); renderOutput(id); }
+  function renderOutput(id) {
+    var el = $(id), v = Number(el.value);
+    $(id + '-val').textContent = id === 'w' ? Math.round(v * 100) + '%' : r2(v);
+  }
+  function readSettings() {
+    return G.sanitizeSettings({
+      scheme: $('scheme').value, w: Number($('w').value), shield: $('t-shield').checked, amp: $('t-amp').checked, stab: $('t-stab').checked,
+      evolve: $('t-evolve').checked, fcost: Number($('fcost').value), th: Number($('th').value), c: Number($('c').value), g: Number($('g').value)
+    });
+  }
+  function applyPreset(p) {
+    $('scheme').value = p.scheme; setSlider('w', p.w);
+    $('t-shield').checked = p.shield; $('t-amp').checked = p.amp; $('t-stab').checked = p.stab;
+  }
+  function renderControls() {
+    ['w', 'th', 'c', 'g', 'fcost'].forEach(renderOutput);
+    var locked = mode === 'running' || mode === 'paused';
+    ['th', 'c', 'g', 'btn-defaults'].forEach(function (id) { $(id).disabled = locked; });
+    $('adv-locked').hidden = !locked;
+    var run = $('btn-run');
+    run.textContent = mode === 'running' ? t('btn.pause') : mode === 'paused' ? t('btn.resume') : mode === 'done' ? t('btn.again') : t('btn.run');
+    $('btn-step').disabled = mode === 'done';
+    $('btn-finish').disabled = mode === 'done';
+    $('btn-science').textContent = t(science ? 'btn.science_on' : 'btn.science_off');
+    $('btn-science').setAttribute('aria-pressed', science ? 'true' : 'false');
+    $('hud-pending').hidden = !(pendingNote && locked);
+  }
+  function renderCfgNote() {
+    var s = readSettings(), b = G.baselineFor(s);
+    $('cfg-note').textContent = b ? t('cfg.measured', { tag: b.tag, w: b.w }) : t('cfg.unmeasured');
+  }
+  function onControlChange() {
+    renderControls(); renderCfgNote();
+    if (mode === 'running' || mode === 'paused') { pendingNote = true; $('hud-pending').hidden = false; }
+  }
+
+  /* ---------- HUD, ribbon, meters ---------- */
+
+  function renderHud() {
+    var T = doneT + curT, F = doneF + curF, hist = contest ? contest.hist : [];
+    var gen = contest ? Math.min(G.GENS, curRec ? curRec.gen + 1 : contest.gen) : 0;
+    $('hud-gen').textContent = contest && contest.hist.length ? t('hud.gen', { g: gen, max: G.GENS }) : t('hud.gen', { g: 0, max: G.GENS });
+    $('hud-true').textContent = String(T); $('hud-false').textContent = String(F);
+    $('hud-prec').textContent = T + F > 0 ? Math.round(100 * T / (T + F)) + '%' : '-';
+    var done = hist.slice(0, mode === 'done' ? hist.length : Math.max(0, hist.length - (curRec && mode !== 'done' ? 1 : 0)));
+    $('hud-score').textContent = done.length ? String(Math.round(G.summarize(done).score)) : '-';
+    var pos = arena && arena.position();
+    $('hud-ep').textContent = t('hud.ep', { e: pos ? pos.ep + 1 : 0, max: G.EP });
+  }
+  var ribbonState = [];
+  function renderRibbon() {
+    var ol = $('ribbon');
+    if (ol.children.length !== G.EP) { ol.innerHTML = ''; for (var k = 0; k < G.EP; k++) ol.appendChild(document.createElement('li')); }
+    for (var i = 0; i < G.EP; i++) {
+      var li = ol.children[i], st = ribbonState[i];
+      li.className = st ? st.cls : '';
+      li.textContent = st ? st.sym : '\u00b7';
+      var label = t('stats.none') && (t('hud.ep', { e: i + 1, max: G.EP }) + ': ' + (st ? st.label : t('ribbon.pending')));
+      li.setAttribute('aria-label', label); li.title = label;
+      if (i === shownEp && mode !== 'done') li.classList.add('cur');
+    }
+  }
+  function renderMeters(rec) {
+    var stab = rec ? rec.settings.stab : $('t-stab').checked;
+    for (var i = 0; i < 3; i++) {
+      var g = rec ? rec.params[i].g : Number($('g').value), eff = rec ? rec.geff[i] : g, el = $('m-gain-' + i);
+      $('m-fill-' + i).style.width = Math.min(100, g / 3.2 * 100) + '%';
+      $('m-eff-' + i).style.left = 'calc(' + Math.min(100, eff / 3.2 * 100) + '% - 1.5px)';
+      el.setAttribute('aria-valuenow', r2(g));
+      el.setAttribute('aria-valuetext', r2(g) + ', ' + t('meters.eff') + ' ' + r2(eff) + (rec && rec.clamped[i] ? ', ' + t('meters.clamp') : ''));
+      el.classList.toggle('off', !stab); el.classList.toggle('clamped', !!(rec && rec.clamped[i]));
+      $('m-val-' + i).textContent = r2(g) + ' / ' + t('meters.eff_short') + ' ' + r2(eff) + (rec && rec.clamped[i] ? ' (' + t('meters.clamp') + ')' : '');
+    }
+    var rate = rec ? rec.rateEma : G.TARGET;
+    $('m-rate-fill').style.width = Math.min(100, rate * 100) + '%';
+    $('m-rate').setAttribute('aria-valuenow', r2(rate));
+    $('m-rate-val').textContent = r2(rate);
+    $('m-state').textContent = t(stab ? 'meters.stab_on' : 'meters.stab_off');
+  }
+  function drawCharts() {
+    var hist = contest ? contest.hist : [], doneHist = curRec && mode !== 'done' ? hist.slice(0, -1) : hist;
+    try {
+      S.drawFitness($('fit'), doneHist, G.GENS);
+      if (science) {
+        var b = G.baselineFor(readSettings());
+        S.drawScience($('sci'), doneHist, G.GENS, b ? b.row : null);
+        $('sci-base').textContent = b ? t('cfg.measured', { tag: b.tag, w: b.w }) + ' ' + b.file : t('sci.nobase');
+      }
+    } catch (e) { /* charts are decoration; the numbers still work */ }
+  }
+
+  /* ---------- the contest loop ---------- */
+
+  function resetRun() {
+    contest = null; mode = 'idle'; atBoundary = false; curRec = null; doneT = doneF = curT = curF = 0; ribbonState = []; shownEp = -1; stepOnce = false;
+    pendingNote = false; lastResult = null;
+    if (arena) { arena.clearGeneration(); arena.setPlaying(false); }
+    $('s-result').hidden = true;
+    renderControls(); renderHud(); renderRibbon(); renderMeters(null); setTicker(t('hud.idle')); announce('');
+    drawCharts();
+  }
+  function beginRun() {
+    var d = today();
+    if (seedInfo.mode === 'daily' && seedInfo.date !== d) { startDaily(); }
+    resetRun();
+    counted = seedInfo.mode === 'daily' && !store.daily[seedInfo.date];
+    contest = G.createContest(seedInfo.seed, readSettings());
+    mode = 'running';
+    say(t('say.start'), true);
+    nextGeneration();
+  }
+  function nextGeneration() {
+    var s = readSettings();
+    curRec = G.stepGeneration(contest, s);
+    curT = curF = 0; ribbonState = []; shownEp = -1; pendingNote = false;
+    if (arena) { arena.setGeneration(curRec, s); arena.setPlaying(mode === 'running'); }
+    renderMeters(curRec); renderRibbon(); renderHud(); renderControls();
+  }
+  function onOut(e) {
+    var rec = curRec, ep = rec.episodes[e.ep], st;
+    if (e.shield && e.passed === null && e.dropped) st = { cls: 'h', sym: 'H', label: t('ribbon.held') };
+    else if (e.evF > 0) st = { cls: 'f', sym: 'F', label: t('ribbon.false') };
+    else if (e.evT > 0) st = { cls: 't', sym: 'T', label: t('ribbon.true') };
+    else st = { cls: '', sym: '-', label: t('ribbon.none') };
+    st.cls += (st.cls ? ' ' : '') + (ep.planted ? 'planted' : 'noise');
+    st.label = t(ep.planted ? 'ribbon.planted' : 'ribbon.noise') + ', ' + st.label;
+    ribbonState[e.ep] = st;
+    curT += e.evT; curF += e.evF;
+    var g = rec.gen + 1, n = e.ep + 1;
+    if (e.shield && e.dropped && e.passed === null) say(t('say.held', { g: g, e: n }));
+    else { if (e.evT > 0) say(t('say.true', { g: g, e: n })); if (e.evF > 0) say(t('say.false', { g: g, e: n })); }
+    renderRibbon(); renderHud();
+  }
+  function onGenEnd() {
+    var rec = curRec, dropped = 0;
+    rec.episodes.forEach(function (ep) { if (ep.dropped) dropped++; });
+    doneT += rec.outT; doneF += rec.outF; curT = curF = 0;
+    say(t('say.gen', { g: rec.gen + 1, t: rec.outT, f: rec.outF, d: dropped }), true);
+    var h = contest.hist; curRec = null;
+    renderHud(); drawCharts();
+    curRec = rec;
+    if (G.done(contest)) { finish(); return; }
+    if (stepOnce) { stepOnce = false; atBoundary = true; mode = 'paused'; if (arena) arena.setPlaying(false); curRec = rec; renderControls(); announce(t('say.paused')); return; }
+    nextGeneration();
+  }
+  function frame(ts) {
+    var dt = lastTs ? (ts - lastTs) / 1000 : 0.016;
+    lastTs = ts;
+    if (arena) {
+      try {
+        var fired = arena.update(dt);
+        for (var k = 0; k < fired.length; k++) {
+          if (fired[k].type === 'out') onOut(fired[k]);
+          else if (fired[k].type === 'gen') { onGenEnd(); break; }
+        }
+        var pos = arena.position();
+        if (pos && mode !== 'done' && pos.ep !== shownEp) { shownEp = pos.ep; renderRibbon(); renderHud(); }
+        arena.draw();
+      } catch (e) { arena = null; showCanvasError(); }
+    }
+    window.requestAnimationFrame(frame);
+  }
+  function showCanvasError() { $('canvas-msg').hidden = false; $('canvas-msg').textContent = t('err.canvas'); }
+
+  // leave a pause: at a generation boundary the next generation starts, otherwise the current one carries on
+  function resume() {
+    mode = 'running';
+    if (atBoundary) { atBoundary = false; nextGeneration(); } else if (arena) arena.setPlaying(true);
+    renderControls();
+  }
+  function onRun() {
+    if (mode === 'running') { mode = 'paused'; if (arena) arena.setPlaying(false); announce(t('say.paused')); renderControls(); return; }
+    if (mode === 'paused') { resume(); return; }
+    if (mode === 'done') resetRun();
+    beginRun();
+    if (!arena) onFinish();
+  }
+  function onStep() {
+    if (mode === 'idle' || mode === 'done') { if (mode === 'done') resetRun(); stepOnce = true; beginRun(); if (!arena) onFinish(); return; }
+    stepOnce = true;
+    if (mode === 'paused') resume();
+  }
+  function onFinish() {
+    if (mode === 'done') return;
+    if (mode === 'idle') { if (seedInfo.mode === 'daily' && seedInfo.date !== today()) startDaily(); counted = seedInfo.mode === 'daily' && !store.daily[seedInfo.date]; contest = G.createContest(seedInfo.seed, readSettings()); }
+    var s = readSettings();
+    while (!G.done(contest)) G.stepGeneration(contest, s);
+    curRec = null;
+    var sum = G.summarize(contest.hist);
+    doneT = sum.T; doneF = sum.F; curT = curF = 0;
+    var last = contest.hist[contest.hist.length - 1];
+    ribbonState = [];
+    last.episodes.forEach(function (ep, i) {
+      var held = last.shield && ep.dropped;
+      ribbonState[i] = { cls: (held ? 'h' : ep.evF > 0 ? 'f' : ep.evT > 0 ? 't' : '') + ' ' + (ep.planted ? 'planted' : 'noise'), sym: held ? 'H' : ep.evF > 0 ? 'F' : ep.evT > 0 ? 'T' : '-',
+        label: t(ep.planted ? 'ribbon.planted' : 'ribbon.noise') + ', ' + (held ? t('ribbon.held') : ep.evF > 0 ? t('ribbon.false') : ep.evT > 0 ? t('ribbon.true') : t('ribbon.none')) };
+    });
+    renderMeters(last);
+    if (arena) { arena.clearGeneration(); arena.setPlaying(false); }
+    finish();
+  }
+  function finish() {
+    mode = 'done'; curRec = null;
+    var sum = G.summarize(contest.hist);
+    lastResult = sum;
+    var s = readSettings(), score = Math.round(sum.score);
+    if (counted) {
+      store.daily[seedInfo.date] = { score: sum.score, T: sum.T, F: sum.F, precision: sum.precision, tag: G.cfgTag(contest.hist[contest.hist.length - 1].settings) };
+      if (store.bestDaily === null || sum.score > store.bestDaily) store.bestDaily = sum.score;
+    } else if (seedInfo.mode !== 'daily' && (store.bestPractice === null || sum.score > store.bestPractice)) store.bestPractice = sum.score;
+    if (counted || seedInfo.mode !== 'daily') saveStore();
+    lessonIdx = G.LESSON_IDS.indexOf(G.pickLesson(contest.hist[contest.hist.length - 1].settings, seedInfo.seed));
+    renderControls(); renderHud(); renderMode(); renderStats(); renderRibbon(); drawCharts();
+    renderResult();
+    $('s-result').hidden = false;
+    announce(t('say.final', { score: score }));
+    setTicker(t('say.final', { score: score }));
+    try { $('result-title').focus({ preventScroll: false }); } catch (e) { /* focus is a courtesy */ }
+    var el = $('s-result'); if (el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+  }
+
+  /* ---------- result ---------- */
+
+  function row(cells, head) {
+    var tr = document.createElement('tr');
+    cells.forEach(function (c) { var td = document.createElement(head ? 'th' : 'td'); td.textContent = c; if (head) td.scope = 'col'; tr.appendChild(td); });
+    return tr;
+  }
+  function labelsTable() { return I.LANGS[lang]; }
+  function renderResult() {
+    if (!lastResult || !contest) return;
+    var r = lastResult, hist = contest.hist, lastS = hist[hist.length - 1].settings, i;
+    $('result-score').textContent = t('result.score', { score: Math.round(r.score) });
+    var parts = $('parts'); parts.innerHTML = '';
+    [['part.net', r.parts.net, 50], ['part.precision', r.parts.precision, 25], ['part.steady', r.parts.steadiness, 25]].forEach(function (p) {
+      var d = document.createElement('div'); d.className = 'part';
+      var l = document.createElement('span'); l.textContent = t(p[0]);
+      var bar = document.createElement('span'); bar.className = 'bar'; var f = document.createElement('span'); f.style.width = Math.round(100 * p[1] / p[2]) + '%'; bar.appendChild(f);
+      var v = document.createElement('span'); v.className = 'v'; v.textContent = t('part.value', { v: r1(p[1]), max: p[2] });
+      d.appendChild(l); d.appendChild(bar); d.appendChild(v); parts.appendChild(d);
+    });
+    var b = G.baselineFor(lastS), cmp = $('cmp'); cmp.innerHTML = '';
+    cmp.appendChild(row([t('cmp.metric'), t('cmp.you'), t('cmp.repo')], true));
+    var rr = b ? b.row : null, bs = G.baselineScore(b);
+    cmp.appendChild(row([t('cmp.true'), String(r.T), rr ? rr.T + ' (sd ' + rr.Tsd + ')' : '-']));
+    cmp.appendChild(row([t('cmp.false'), String(r.F), rr ? rr.F + ' (sd ' + rr.Fsd + ')' : '-']));
+    cmp.appendChild(row([t('cmp.precision'), r2(r.precision), rr ? rr.P + ' (sd ' + rr.Psd + ')' : '-']));
+    cmp.appendChild(row([t('cmp.ratevar'), r.rateVar.toFixed(3), rr ? rr.rv.toFixed(3) : '-']));
+    cmp.appendChild(row([t('cmp.score'), String(Math.round(r.score)), bs === null ? '-' : String(Math.round(bs))]));
+    var note = '';
+    if (b) note = t('cmp.source', { file: b.file, seeds: rr.seeds, repo: B.SOURCE.repo, commit: B.SOURCE.commit.slice(0, 7) }) + (b.exactW ? '' : ' ' + t('cmp.nearw', { w: b.w }));
+    else note = t('cmp.none');
+    var mixed = hist.some(function (h) { return G.cfgTag(h.settings) !== G.cfgTag(lastS); });
+    if (mixed) note += ' ' + t('cmp.mixed');
+    $('cmp-note').textContent = note;
+    var ch = $('challenge-result');
+    if (seedInfo.mode === 'challenge' && seedInfo.best !== null) {
+      ch.hidden = false;
+      ch.textContent = Math.round(r.score) > seedInfo.best ? t('result.beat', { best: seedInfo.best }) : t('result.notbeat', { best: seedInfo.best, score: Math.round(r.score) });
+    } else ch.hidden = true;
+    var sc = $('schemes-table'); sc.innerHTML = '';
+    sc.appendChild(row([t('scheme.label'), t('cmp.true'), t('cmp.false'), t('cmp.precision')], true));
+    B.SCHEMES32.forEach(function (s) { sc.appendChild(row([t('scheme.' + s.scheme + '.short'), String(s.T), String(s.F), String(s.P)])); });
+    $('schemes-source').textContent = t('cmp.schemes_source', { file: t('cmp.schemes_file') });
+    renderLesson();
+    var ul = $('params'); ul.innerHTML = '';
+    var p0 = hist[0].params, p1 = contest.par;
+    for (i = 0; i < 3; i++) {
+      var li = document.createElement('li');
+      li.textContent = t('params.line', { m: 'ABC'.charAt(i), th0: r2(p0[i].th), th1: r2(p1[i].th), c0: r2(p0[i].c), c1: r2(p1[i].c), g0: r2(p0[i].g), g1: r2(p1[i].g) });
+      ul.appendChild(li);
+    }
+    $('share-text').textContent = shareText();
+  }
+  function renderLesson() {
+    var id = G.LESSON_IDS[((lessonIdx % G.LESSON_IDS.length) + G.LESSON_IDS.length) % G.LESSON_IDS.length];
+    $('lesson-title').textContent = t('lesson.' + id + '.title');
+    $('lesson-body').textContent = G.fmt(t('lesson.' + id + '.body'), G.lessonVars());
+  }
+  function challengeUrl() {
+    var h = contest ? contest.hist : [], s = h.length ? h[h.length - 1].settings : readSettings();
+    var o = { settings: s, best: lastResult ? lastResult.score : null, lang: lang };
+    if (seedInfo.date) o.date = seedInfo.date; else o.seed = seedInfo.seed;
+    var base = window.location.href.split('#')[0];
+    return base + G.buildChallengeHash(o);
+  }
+  function shareText() {
+    var h = contest.hist, s = h[h.length - 1].settings, b = G.baselineFor(s);
+    return G.buildShare({
+      labels: labelsTable(), seed: seedInfo.date ? null : seedInfo.seed, day: seedInfo.date ? G.dayNumber(seedInfo.date) : 0, date: seedInfo.date,
+      result: lastResult, settings: s, ref: b ? G.baselineScore(b) : null, url: challengeUrl()
+    });
+  }
+  function copyText(text) {
+    var st = $('copy-status');
+    function fail() { st.textContent = t('copy.fail'); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { st.textContent = t('copied'); }, fail);
+      else fail();
+    } catch (e) { fail(); }
+  }
+
+  function renderStats() {
+    var ul = $('stats-list'); ul.innerHTML = '';
+    var dates = Object.keys(store.daily), li;
+    if (!dates.length) { li = document.createElement('li'); li.textContent = t('stats.none'); ul.appendChild(li); }
+    else {
+      var st = G.computeStreak(dates, today());
+      li = document.createElement('li'); li.textContent = t('stats.streak', { cur: st.current, best: st.best }); ul.appendChild(li);
+      li = document.createElement('li'); li.textContent = t('stats.best', { best: Math.round(store.bestDaily === null ? 0 : store.bestDaily) }); ul.appendChild(li);
+    }
+    $('store-warn').hidden = storeOk;
+  }
+
+  /* ---------- help dialog, keys ---------- */
+
+  var lastFocus = null;
+  function openHelp() { lastFocus = document.activeElement; $('help').hidden = false; $('help-title').focus(); }
+  function closeHelp() { $('help').hidden = true; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+  function onKey(e) {
+    if (e.key === 'Escape' && !$('help').hidden) { closeHelp(); return; }
+    if (!$('help').hidden && e.key === 'Tab') {
+      var f = $('help').querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (f.length) { var first = f[0], last = f[f.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey || !$('help').hidden) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'SUMMARY' || tag === 'A') return;
+    if (e.key === ' ') { e.preventDefault(); onRun(); }
+    else if (e.key === 'g' || e.key === 'G') onStep();
+    else if (e.key === 'f' || e.key === 'F') onFinish();
+    else if (e.key === 's' || e.key === 'S') toggleScience();
+  }
+  function toggleScience() { science = !science; $('panel-science').hidden = !science; renderControls(); drawCharts(); }
+
+  /* ---------- boot ---------- */
+
+  function init() {
+    store = loadStore();
+    if (store.lang && I.supported.indexOf(store.lang) >= 0) lang = store.lang;
+    else if (/^fr/i.test(navigator.language || '')) lang = 'fr';
+    t = I.make(lang);
+    reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    try { arena = S.createArena($('arena'), { reduced: reduced }); } catch (e) { arena = null; showCanvasError(); }
+    if (arena) arena.setSpeed($('speed').value);
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var onMq = function () { reduced = mq.matches; if (arena) arena.setReduced(reduced); };
+      if (mq.addEventListener) mq.addEventListener('change', onMq);
+    }
+    $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; t = I.make(lang); store.lang = lang; saveStore(); applyI18n(); });
+    $('btn-help').addEventListener('click', openHelp);
+    $('btn-help-close').addEventListener('click', closeHelp);
+    $('help').addEventListener('click', function (e) { if (e.target === $('help')) closeHelp(); });
+    $('btn-daily').addEventListener('click', function () { if (window.location.hash) { history.replaceState(null, '', window.location.pathname + window.location.search); } startDaily(); applyI18n(); });
+    $('btn-practice').addEventListener('click', function () { startPractice(); applyI18n(); });
+    $('btn-run').addEventListener('click', onRun);
+    $('btn-step').addEventListener('click', onStep);
+    $('btn-finish').addEventListener('click', onFinish);
+    $('btn-again').addEventListener('click', function () { resetRun(); beginRun(); if (!arena) onFinish(); });
+    $('btn-science').addEventListener('click', toggleScience);
+    $('speed').addEventListener('change', function () { if (arena) arena.setSpeed($('speed').value); });
+    ['scheme', 'w', 'th', 'c', 'g', 'fcost', 't-shield', 't-amp', 't-stab', 't-evolve'].forEach(function (id) {
+      $(id).addEventListener('input', onControlChange); $(id).addEventListener('change', onControlChange);
+    });
+    $('btn-defaults').addEventListener('click', function () { setSlider('th', G.DEFAULTS.th); setSlider('c', G.DEFAULTS.c); setSlider('g', G.DEFAULTS.g); onControlChange(); });
+    $('btn-lesson-more').addEventListener('click', function () { lessonIdx++; renderLesson(); });
+    $('btn-copy').addEventListener('click', function () { copyText($('share-text').textContent); });
+    $('btn-link').addEventListener('click', function () { copyText(challengeUrl()); });
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('hashchange', function () { applyHash(); });
+    var rz = function () { if (arena) arena.resize(); drawCharts(); };
+    if (window.ResizeObserver) new ResizeObserver(rz).observe($('arena')); else window.addEventListener('resize', rz);
+    document.addEventListener('visibilitychange', function () { lastTs = 0; });
+    buildSchemeOptions();
+    applyHash();
+    window.__arena = {
+      stats: function () { return arena ? arena.stats() : null; }, resetStats: function () { if (arena) arena.resetStats(); },
+      contest: function () { return contest; }, mode: function () { return mode; }, lang: function () { return lang; },
+      result: function () { return lastResult; }, seed: function () { return seedInfo; }
+    };
+    window.requestAnimationFrame(frame);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>

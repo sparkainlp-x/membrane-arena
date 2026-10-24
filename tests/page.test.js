@@ -1,0 +1,144 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { build } = require('../build.js');
+
+const root = path.join(__dirname, '..');
+const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
+const SOURCES = ['index.html', 'style.css', 'game.js', 'i18n.js', 'scene.js', 'app.js', 'build.js', 'scripts/make-baselines.js', 'scripts/port-check.js', 'scripts/scheme-check.js', 'scripts/evolve-check.js', 'scripts/e2e-check.js', 'scripts/serve.js'];
+// word lists are assembled from fragments so this file does not contain the words it forbids
+const join = (parts) => new RegExp('\\b(' + parts.map((p) => p.join('')).join('|') + ')\\b', 'i');
+const BANNED = join([['pro', 'ven'], ['valid', 'ated'], ['production', '-ready'], ['quantum ', 'advantage'], ['real-world ', 'performance']]);
+const NAMES = join([['l', 'ee'], ['la', 'ha'], ['bel', 'kadi'], ['ti', 'su']]);
+const EMOJI = /\p{Extended_Pictographic}/u;
+
+test('built page is one self-contained file (no external files, no network APIs)', () => {
+  const html = build();
+  assert.ok(!/<script[^>]*\ssrc=/i.test(html), 'no external script');
+  assert.ok(!/<link[^>]*rel=["']stylesheet/i.test(html), 'no external stylesheet');
+  assert.ok(!/(fetch\(|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|import\()/.test(html));
+  assert.ok(!/https?:\/\/(?!www\.w3\.org\/2000\/svg)[^\s"')]+/.test(html.replace(/<title>[^<]*<\/title>/, '')), 'only the SVG namespace URL appears');
+  assert.ok(!/googletagmanager|google-analytics|cdn\.|fonts\.googleapis/i.test(html));
+  assert.ok(html.length < 250000, 'small page');
+});
+
+test('dist/index.html, when present, matches a fresh build', { skip: !fs.existsSync(path.join(root, 'dist', 'index.html')) }, () => {
+  assert.equal(read('dist/index.html'), build());
+});
+
+test('no banned wording, emoji or forbidden names anywhere in the shipped sources and documents', () => {
+  for (const f of SOURCES.concat(['README.md', 'DESIGN.md', 'CHANGELOG.md', 'CITATION.cff', '.zenodo.json', 'docs/port-check.txt', 'docs/scheme-check.txt', 'docs/evolve-check.txt', 'data/SOURCE.txt'])) {
+    if (!fs.existsSync(path.join(root, f))) continue;
+    const s = read(f);
+    assert.ok(!BANNED.test(s), `banned word in ${f}`);
+    assert.ok(!EMOJI.test(s), `emoji in ${f}`);
+    assert.ok(!NAMES.test(s), `forbidden name in ${f}`);
+  }
+});
+
+test('every element id used by app.js exists in index.html', () => {
+  const html = read('index.html'), app = read('app.js');
+  const used = new Set();
+  for (const m of app.matchAll(/\$\('([\w-]+)'\)/g)) used.add(m[1]);
+  assert.ok(used.size > 40);
+  for (const id of used) assert.ok(html.includes(`id="${id}"`), `missing #${id}`);
+  for (const i of [0, 1, 2]) for (const p of ['m-gain-', 'm-fill-', 'm-eff-', 'm-val-']) assert.ok(html.includes(`id="${p}${i}"`));
+  for (const id of ['th', 'c', 'g', 'fcost', 'w']) assert.ok(html.includes(`id="${id}-val"`));
+});
+
+test('script load order in index.html: baselines, game, i18n, scene, app', () => {
+  const html = read('index.html');
+  const order = [...html.matchAll(/<script src="([\w.]+)"><\/script>/g)].map((m) => m[1]);
+  assert.deepEqual(order, ['baselines.js', 'game.js', 'i18n.js', 'scene.js', 'app.js']);
+});
+
+test('every data-i18n key in index.html and every literal key used by app.js exists in English', () => {
+  const en = require('../i18n.js').LANGS.en, html = read('index.html'), app = read('app.js');
+  const used = new Set();
+  for (const m of html.matchAll(/data-i18n="([\w.]+)"/g)) used.add(m[1]);
+  for (const m of app.matchAll(/\bt\('([a-z_]+\.[\w.]+)'/g)) used.add(m[1]);
+  assert.ok(used.size > 60);
+  for (const k of used) assert.ok(k in en, `missing key ${k}`);
+});
+
+test('accessibility basics: language attribute, viewport, labelled controls, live region, dialog, reduced motion', () => {
+  const html = read('index.html'), css = read('style.css');
+  assert.match(html, /<html lang="en">/);
+  assert.match(html, /name="viewport"/);
+  for (const id of ['scheme', 'w', 'th', 'c', 'g', 'fcost', 'speed']) assert.match(html, new RegExp(`<label[^>]*for="${id}"`), `label for ${id}`);
+  for (const id of ['t-shield', 't-amp', 't-stab', 't-evolve']) assert.match(html, new RegExp(`<label class="switch"><input id="${id}"`));
+  assert.match(html, /role="dialog"[^>]*aria-modal="true"/);
+  assert.match(html, /aria-live="polite"/);
+  assert.match(html, /role="meter"/);
+  assert.match(html, /<canvas id="arena" role="img"/);
+  assert.match(html, /aria-pressed="false"/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /:focus-visible/);
+  assert.match(html, /class="skip"/);
+  assert.match(css, /min-height: 44px/);
+});
+
+test('brand colours are present (gold on navy, cyan accent)', () => {
+  const css = read('style.css').toLowerCase();
+  assert.ok(css.includes('#c9a84c'));
+  assert.ok(css.includes('#0a1330'));
+  assert.ok(css.includes('#40d0e0'));
+});
+
+test('the page states privacy and the synthetic label in the markup and in every language', () => {
+  const html = read('index.html'), I = require('../i18n.js');
+  assert.match(html, /data-i18n="tag\.synthetic"/);
+  assert.match(html, /data-i18n="footer\.disclaimer"/);
+  assert.match(html, /data-i18n="footer\.privacy"/);
+  for (const l of Object.keys(I.LANGS)) assert.match(I.LANGS[l]['footer.disclaimer'], /SYNTH/);
+});
+
+test('app.js guards what it reads: hash through parseHash, storage through sanitizeStore, no innerHTML from data', () => {
+  const app = read('app.js');
+  assert.match(app, /G\.parseHash\(window\.location\.hash\)/);
+  assert.match(app, /G\.sanitizeStore\(JSON\.parse/);
+  assert.match(app, /try \{[^}]*localStorage/);
+  assert.ok(!/innerHTML\s*=\s*[^'"\s]/.test(app.replace(/innerHTML = ''/g, '')), 'innerHTML is only used to clear');
+  assert.ok(!/eval\(|new Function|document\.write/.test(app));
+});
+
+test('metadata: licence is the full AGPL-3.0 text, package and citation agree on name and version', () => {
+  const lic = read('LICENSE');
+  assert.match(lic, /GNU AFFERO GENERAL PUBLIC LICENSE\s+Version 3, 19 November 2007/);
+  assert.ok(lic.length > 30000);
+  const pkg = JSON.parse(read('package.json')), G = require('../game.js');
+  assert.equal(pkg.version, G.VERSION);
+  assert.equal(pkg.license, 'AGPL-3.0-only');
+  if (fs.existsSync(path.join(root, 'CITATION.cff'))) {
+    const cff = read('CITATION.cff');
+    assert.match(cff, new RegExp('version: ' + G.VERSION.replace(/\./g, '\\.')));
+    assert.match(cff, /license: AGPL-3\.0-only/);
+    assert.match(cff, /0009-0000-9778-5374/);
+    const z = JSON.parse(read('.zenodo.json'));
+    assert.equal(z.version, G.VERSION);
+    assert.equal(z.license, 'AGPL-3.0-only');
+    assert.equal(z.creators.length, 1);
+  }
+});
+
+test('CI workflows exist, are local files only, and run the tests on supported Node versions', () => {
+  const t = read('.github/workflows/tests.yml');
+  assert.match(t, /node-version: \[20, 22, 24\]/);
+  assert.match(t, /node --test tests\//);
+  assert.match(t, /node build\.js/);
+  assert.match(read('.github/workflows/pages.yml'), /upload-pages-artifact/);
+});
+
+test('app.js builds the scheme options before it applies a hash preset (a preset selects an option)', () => {
+  const app = read('app.js');
+  const boot = app.slice(app.indexOf('function init()'));
+  assert.match(boot, /buildSchemeOptions\(\);\s+applyHash\(\);/);
+});
+
+test('pausing at a generation boundary resumes into the next generation (no stuck run)', () => {
+  const app = read('app.js');
+  assert.match(app, /atBoundary = true/);
+  assert.match(app, /if \(atBoundary\) \{ atBoundary = false; nextGeneration\(\); \}/);
+});
