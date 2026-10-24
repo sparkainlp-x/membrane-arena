@@ -83,7 +83,7 @@ No accounts, no trackers, no network calls (the tests scan the built page for ne
 ```bash
 node build.js                 # writes dist/index.html (one self-contained file)
 node scripts/serve.js 8080    # preview at http://127.0.0.1:8080/
-node --test tests/            # the test suite, no dependencies
+node --test tests/*.test.js            # the test suite, no dependencies
 node scripts/port-check.js    # the port against the repository means (about 2 minutes)
 ```
 
@@ -91,7 +91,7 @@ Open `dist/index.html` directly in a browser, or serve it. Node 20 or later is o
 
 ## Tests
 
-`node --test tests/` runs 88 tests with Node's built-in runner and no dependencies. It covers: seeded determinism of the whole contest and of lazy stepping, the contest mechanics (shield, amplifier cap, stabilizer clamp and leaky update, evolution acceptance and bounds, reward schemes), scoring, baseline lookup, hash links and hostile input, the store sanitizer, dates and streaks, i18n parity and share-card line length in both languages, the timeline and layout helpers, the arena with a stub canvas, and the built page (self-contained, no network APIs, ids and keys exist, accessibility basics, brand colours, no banned wording).
+`node --test tests/*.test.js` runs 88 tests with Node's built-in runner and no dependencies. It covers: seeded determinism of the whole contest and of lazy stepping, the contest mechanics (shield, amplifier cap, stabilizer clamp and leaky update, evolution acceptance and bounds, reward schemes), scoring, baseline lookup, hash links and hostile input, the store sanitizer, dates and streaks, i18n parity and share-card line length in both languages, the timeline and layout helpers, the arena with a stub canvas, and the built page (self-contained, no network APIs, ids and keys exist, accessibility basics, brand colours, no banned wording).
 
 `scripts/e2e-check.js` plays a full round in headless Chrome (English and French, phone and desktop, plus reduced motion) and records console errors, external requests and frame times. It needs playwright-core and Chrome, so it is not part of `node --test`. The last run's report is `docs/e2e-report.json` and screenshots are in `docs/screenshots/`.
 

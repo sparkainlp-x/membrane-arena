@@ -6,7 +6,7 @@
   "author": "Jean-François Brisson",
   "private": true,
   "scripts": {
-    "test": "node --test tests/",
+    "test": "node --test tests/*.test.js",
     "build": "node build.js",
     "baselines": "node scripts/make-baselines.js",
     "port-check": "node scripts/port-check.js",

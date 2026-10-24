@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 22
       - name: Tests
-        run: node --test tests/
+        run: node --test tests/*.test.js
       - name: Build the single file
         run: |
           node build.js
