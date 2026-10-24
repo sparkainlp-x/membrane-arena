@@ -129,7 +129,7 @@
       var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
       if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
       st.w = w; st.h = h; st.dpr = dpr; st.lay = layout(w, h);
-      var spacing = Math.max(10, st.lay.rm * 0.34), R = st.lay.rm * 1.9, pts = hexPoints(R, spacing);
+      var spacing = Math.max(10, st.lay.rm * 0.34), R = st.lay.rm * 1.5, pts = hexPoints(R, spacing);
       st.lattice = { pts: pts, edges: hexEdges(pts, spacing), R: R, spacing: spacing };
       st.bg = null;
     }
@@ -398,7 +398,7 @@
   function axes(ctx, x0, y0, x1, y1, gens, ymaxLabel, ytop) {
     ctx.strokeStyle = 'rgba(122,168,255,0.25)'; ctx.lineWidth = 1; ctx.fillStyle = 'rgba(179,190,219,0.9)';
     ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    for (var q = 0; q <= 4; q++) { var y = y1 - (y1 - y0) * q / 4; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); ctx.fillText((ytop * q / 4).toFixed(ytop <= 2 ? 1 : 0), x0 - 4, y); }
+    for (var q = 0; q <= 4; q++) { var y = y1 - (y1 - y0) * q / 4; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); var v = ytop * q / 4; ctx.fillText(Number.isInteger(v) ? String(v) : v.toFixed(2).replace(/0$/, ''), x0 - 4, y); }
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     for (var g = 0; g < gens; g += 2) ctx.fillText(String(g + 1), x0 + (x1 - x0) * (g + 0.5) / gens, y1 + 3);
   }
