@@ -6,7 +6,7 @@ Résumé FR : jeu éducatif SYNTHÉTIQUE (simulation classique) construit sur le
 
 ![Membrane Arena mid-contest on desktop: gold lattices mark true events, the ribbon shows each episode](docs/screenshots/en-desktop-2-running.png)
 
-Status: version 0.1.0, not yet published. Nothing here is released, tagged or deployed.
+Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: version 0.1.0. The tagged release and its DOI are not issued yet; this line is updated when they are.
 
 ## What you do
 
