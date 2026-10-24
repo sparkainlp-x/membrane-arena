@@ -1,0 +1,4 @@
+Source: https://github.com/sparkainlp-x/crystallization-contest
+Commit: c74c60beeb9706ea6d30fd6973b2a821a5b23926 (tag v0.1.0)
+Files: copies of results/*_summary.csv, unchanged. Licence: AGPL-3.0-only.
+fcost_summary.csv is kept for reference; the game does not read it.
