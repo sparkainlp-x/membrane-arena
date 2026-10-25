@@ -175,3 +175,162 @@ test('chart drawing accepts empty and full histories without throwing', () => {
   S.drawScience(stubCanvas(500, 340), [], 12, null);
   S.drawScience(stubCanvas(500, 340), c.hist, 12, G.baselineFor(s).row);
 });
+
+/* ---------- v0.2 scene features ---------- */
+
+function loggingCanvas(w, h) {
+  const sets = [], calls = [];
+  const ctx = new Proxy({}, {
+    get(t, k) {
+      if (k === 'sets') return sets; if (k === 'calls') return calls;
+      if (k === 'createRadialGradient' || k === 'createLinearGradient') return () => ({ addColorStop() {} });
+      if (k === 'measureText') return (s) => ({ width: String(s).length * 6 });
+      return typeof t[k] === 'undefined' ? (...a) => { calls.push(k); } : t[k];
+    },
+    set(t, k, v) { t[k] = v; sets.push([k, v]); return true; }
+  });
+  return { width: 0, height: 0, getContext: () => ctx, getBoundingClientRect: () => ({ width: w, height: h }), ctx };
+}
+
+test('crystal: six-fold symmetric, deterministic in the seed, inside the radius, ordered by birth', () => {
+  const a = S.crystalSegments(5, 100), b = S.crystalSegments(5, 100), c = S.crystalSegments(6, 100);
+  assert.deepEqual(a, b); assert.notDeepEqual(a, c);
+  assert.equal(a.length % 6, 0);
+  a.forEach((g) => { assert.ok(Math.hypot(g.x1, g.y1) <= 100 + 1e-6); assert.ok(g.b0 >= 0 && g.b1 <= 1 + 1e-9); assert.ok(g.w > 0); });
+  for (let i = 1; i < a.length; i++) assert.ok(a[i].b0 >= a[i - 1].b0 - 1e-12);
+  const reach = (s) => Math.max(...s.map((g) => Math.max(Math.hypot(g.x0, g.y0), Math.hypot(g.x1, g.y1))));
+  assert.ok(Math.abs(reach(a) - 100) < 1e-6, 'the stem reaches the radius');
+  // the set of segment lengths is the same in every 60 degree sector
+  const lens = a.map((g) => Math.round(Math.hypot(g.x1 - g.x0, g.y1 - g.y0) * 1000)).sort((x, y) => x - y);
+  for (let k = 0; k < lens.length; k += 6) assert.ok(lens.slice(k, k + 6).every((v) => Math.abs(v - lens[k]) <= 2));
+});
+
+test('crystal growth: segments appear from the centre outward and never shrink as p rises', () => {
+  const segs = S.crystalSegments(11, 80);
+  let prevCount = 0, prevLen = 0;
+  for (let p = 0; p <= 1.0001; p += 0.1) {
+    let count = 0, len = 0;
+    segs.forEach((g) => { const s = S.segmentAt(g, p); if (s) { count++; len += Math.hypot(s.x1 - s.x0, s.y1 - s.y0); } });
+    assert.ok(count >= prevCount && len >= prevLen - 1e-9);
+    prevCount = count; prevLen = len;
+  }
+  assert.equal(S.segmentAt(segs[0], 0), null);
+  const full = S.segmentAt(segs[segs.length - 1], 1);
+  assert.ok(Math.abs(full.x1 - segs[segs.length - 1].x1) < 1e-9);
+});
+
+test('compass angle: 0 when aligned, pi/2 when orthogonal, null in a noise episode, monotone', () => {
+  assert.equal(S.dialAngle(1), 0);
+  assert.ok(Math.abs(S.dialAngle(0) - Math.PI / 2) < 1e-12);
+  assert.equal(S.dialAngle(-1), null);
+  assert.equal(S.dialAngle(NaN), null);
+  assert.ok(S.dialAngle(0.9) < S.dialAngle(0.5));
+  assert.equal(S.dialAngle(1.0000001), 0);
+});
+
+test('replay position: index and (generation, episode, step) round-trip and cover the whole contest', () => {
+  assert.equal(S.TOTAL_STEPS, 5760);
+  for (const idx of [0, 1, 59, 60, 479, 480, 481, 2500, 5759, 5760]) {
+    const p = S.indexToPos(idx);
+    assert.ok(p.gen >= 0 && p.gen <= 11 && p.ep >= 0 && p.ep <= 7 && p.step >= 0 && p.step <= 60);
+    if (idx < 5760) assert.equal(S.posToIndex(p), idx);
+  }
+  assert.deepEqual(S.indexToPos(5760), { gen: 11, ep: 7, step: 60 });
+  assert.deepEqual(S.indexToPos(-4), { gen: 0, ep: 0, step: 0 });
+  assert.deepEqual(S.indexToPos(61), { gen: 0, ep: 1, step: 1 });
+  assert.deepEqual(S.indexToPos(481), { gen: 1, ep: 0, step: 1 });
+});
+
+test('snapshot: numbers come from the record, truth only after the declaration, no alignment in noise', () => {
+  const r = rec('snap', { shield: true });
+  r.episodes.forEach((ep, e) => {
+    const end = S.snapshotAt(r, e, 60);
+    assert.equal(end.planted, ep.planted);
+    for (let i = 0; i < 3; i++) {
+      assert.equal(end.declared[i], ep.declStep[i] !== null);
+      assert.equal(end.truth[i], ep.declStep[i] !== null ? ep.truth[i] : null);
+      if (!ep.planted) assert.equal(end.align[i], null);
+      if (ep.declStep[i] !== null && ep.declStep[i] > 1) {
+        const before = S.snapshotAt(r, e, ep.declStep[i] - 1);
+        assert.equal(before.declared[i], false); assert.equal(before.truth[i], null);
+      }
+    }
+    const start = S.snapshotAt(r, e, 0);
+    assert.deepEqual(start.energy, [0, 0, 0]); assert.deepEqual(start.align, [null, null, null]);
+  });
+});
+
+test('arena replay: showAt freezes the clock at the exact episode and step, spawns nothing, and every position draws', () => {
+  const r = rec('replay', { shield: true });
+  const a = S.createArena(stubCanvas(900, 562), {});
+  a.showAt(r, 3, 25, {});
+  const pos = a.position();
+  assert.equal(pos.ep, 3); assert.ok(Math.abs(pos.step - 25) < 1e-6);
+  for (let i = 0; i < 100; i++) { a.update(1 / 60); a.draw(); }
+  assert.equal(a.stats().particles, 0);
+  assert.equal(a.position().ep, 3); assert.ok(Math.abs(a.position().step - 25) < 1e-6, 'does not advance');
+  assert.equal(a.snapshot().step, 25); assert.equal(a.snapshot().ep, 4);
+  for (let ep = 0; ep < 8; ep++) for (const step of [0, 1, 10, 33, 60]) { a.showAt(r, ep, step, {}); a.update(0.016); a.draw(); }
+  a.leaveScrub(); assert.equal(a.state().scrub, null);
+});
+
+test('arena replay draws grown crystals and cracks for declared membranes and nothing before the declaration', () => {
+  const r = rec('replay2', { shield: true });
+  let e = r.episodes.findIndex((ep) => ep.declStep.some((d) => d !== null));
+  assert.ok(e >= 0);
+  const ep = r.episodes[e], first = Math.min(...ep.declStep.filter((d) => d !== null));
+  const count = (step) => { const cv = loggingCanvas(900, 562), a = S.createArena(cv, {}); a.showAt(r, e, step, {}); for (let i = 0; i < 20; i++) a.update(0.016); cv.ctx.calls.length = 0; a.draw(); return cv.ctx.calls.length; };
+  assert.ok(count(Math.min(60, first + 20)) > count(Math.max(0, first - 1)), 'a declared membrane adds drawing');
+});
+
+test('arena intro: plays for its duration, can be skipped, calls back once, and is off in reduced motion', () => {
+  const a = S.createArena(stubCanvas(900, 562), {});
+  let done = 0;
+  assert.equal(a.playIntro({ title: 'T', sub: 'S', done: () => { done++; } }), true);
+  assert.equal(a.stats().intro, true);
+  let guard = 0;
+  while (a.stats().intro && guard++ < 1000) { a.update(1 / 30); a.draw(); }
+  assert.equal(done, 1); assert.ok(guard * (1 / 30) >= S.INTRO_DUR - 0.1);
+  a.playIntro({ title: 'T', sub: 'S', done: () => { done++; } }); a.skipIntro(); a.skipIntro();
+  assert.equal(done, 2); assert.equal(a.stats().intro, false);
+  const b = S.createArena(stubCanvas(600, 400), { reduced: true });
+  assert.equal(b.playIntro({ title: 'T', sub: 'S' }), false);
+  assert.equal(b.stats().intro, false);
+});
+
+test('high contrast: no additive glow, black background, still draws a full generation', () => {
+  const r = rec('hc', { shield: true });
+  const cv = loggingCanvas(900, 562), a = S.createArena(cv, { contrast: true });
+  a.setGeneration(r, {}); a.setSpeed(16); a.setPlaying(true);
+  let guard = 0;
+  while (!a.genDone() && guard++ < 3000) { a.update(1 / 30); a.draw(); }
+  assert.ok(a.genDone());
+  assert.ok(!cv.ctx.sets.some(([k, v]) => k === 'globalCompositeOperation' && v === 'lighter'), 'no additive blending');
+  assert.ok(cv.ctx.sets.some(([k, v]) => k === 'fillStyle' && v === '#000'));
+  const cv2 = loggingCanvas(900, 562), b = S.createArena(cv2, {});
+  b.setGeneration(r, {}); b.setSpeed(16); b.setPlaying(true);
+  for (let i = 0; i < 200; i++) { b.update(1 / 30); b.draw(); }
+  assert.ok(cv2.ctx.sets.some(([k, v]) => k === 'globalCompositeOperation' && v === 'lighter'));
+  b.setContrast(true); b.draw();
+});
+
+test('shield gate follows a pass (open) and a hold (shut) and returns to rest', () => {
+  const r = rec('gate', { shield: true });
+  const a = S.createArena(stubCanvas(900, 562), {});
+  a.setGeneration(r, { shield: true }); a.setSpeed(4); a.setPlaying(true);
+  let sawOpen = false, guard = 0;
+  while (!a.genDone() && guard++ < 4000) { a.update(1 / 30); a.draw(); if (a.state().gate > 0.3) sawOpen = true; }
+  assert.ok(sawOpen, 'the gate opened for a released output');
+  a.setPlaying(false);
+  for (let i = 0; i < 300; i++) { a.update(1 / 30); a.draw(); }
+  assert.ok(Math.abs(a.state().gate) < 0.05);
+});
+
+test('draw cost stays small in the stub canvas (no per-frame allocation blow-up): 300 frames of a busy generation', () => {
+  const a = S.createArena(stubCanvas(1180, 738), {});
+  a.setGeneration(rec('busy', { c: 0.4, th: 0.2 }), { shield: true }); a.setSpeed(8); a.setPlaying(true);
+  const t0 = Date.now();
+  for (let i = 0; i < 300; i++) { a.update(1 / 60); a.draw(); }
+  assert.ok(Date.now() - t0 < 4000, `took ${Date.now() - t0} ms`);
+  assert.ok(a.stats().particles <= 360);
+});
