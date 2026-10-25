@@ -25,65 +25,154 @@ const served = [];
 
 const VIEWS = { phone: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }, desktop: { viewport: { width: 1366, height: 900 }, deviceScaleFactor: 1 } };
 const report = [];
+const downloads = path.join(require('node:os').tmpdir(), 'membrane-arena-e2e');
+fs.mkdirSync(downloads, { recursive: true });
+
+// frame timing from requestAnimationFrame, collected in the page
+const FRAMES = () => {
+  window.__frames = []; let last = 0;
+  const tick = (ts) => { if (last) window.__frames.push(ts - last); last = ts; requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+};
+function frameStats(frames) {
+  const f = frames.slice().sort((a, b) => a - b), avg = f.reduce((a, b) => a + b, 0) / Math.max(1, f.length);
+  return { frames: f.length, avgFrameMs: +avg.toFixed(2), p95FrameMs: +(f[Math.floor(f.length * 0.95)] || 0).toFixed(2), maxFrameMs: +(f[f.length - 1] || 0).toFixed(2), fps: +(1000 / avg).toFixed(1) };
+}
+// a canvas is drawn when it holds more than one colour
+const NONBLANK = (id) => {
+  const c = document.getElementById(id); if (!c || !c.width) return false;
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data, r0 = d[0], g0 = d[1], b0 = d[2];
+  let diff = 0; for (let i = 0; i < d.length; i += 4 * 7) if (Math.abs(d[i] - r0) + Math.abs(d[i + 1] - g0) + Math.abs(d[i + 2] - b0) > 24) diff++;
+  return diff > 20;
+};
 
 async function runCase(browser, lang, view, opts) {
   opts = opts || {};
-  const name = `${lang}-${view}${opts.reduced ? '-reduced' : ''}`;
-  const ctx = await browser.newContext(Object.assign({ locale: lang === 'fr' ? 'fr-CA' : 'en-CA', reducedMotion: opts.reduced ? 'reduce' : 'no-preference' }, VIEWS[view]));
+  const name = `${lang}-${view}${opts.reduced ? '-reduced' : ''}${opts.hc ? '-contrast' : ''}`;
+  const ctx = await browser.newContext(Object.assign({ locale: lang === 'fr' ? 'fr-CA' : 'en-CA', reducedMotion: opts.reduced ? 'reduce' : 'no-preference', acceptDownloads: true }, VIEWS[view]));
   const page = await ctx.newPage();
-  const errors = [], external = [], requests = [];
+  const errors = [], external = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(m.type() + ': ' + m.text()); });
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
-  page.on('request', (r) => { requests.push(r.url()); if (!r.url().startsWith(`http://127.0.0.1:${port}/`) && !r.url().startsWith('data:')) external.push(r.url()); });
-  await page.addInitScript(() => {
-    window.__frames = []; let last = 0;
-    const tick = (ts) => { if (last) window.__frames.push(ts - last); last = ts; requestAnimationFrame(tick); };
-    requestAnimationFrame(tick);
-  });
-  await page.goto(`http://127.0.0.1:${port}/#l=${lang}&s=e2e${lang}`);
+  page.on('request', (r) => { if (!r.url().startsWith(`http://127.0.0.1:${port}/`) && !r.url().startsWith('data:')) external.push(r.url()); });
+  await page.addInitScript(FRAMES);
+  // the screenshots kept in docs/screenshots (the other views are still exercised, just not saved)
+  const KEEP = { 'en-desktop': null, 'fr-desktop': ['02', '04', '05', '06'], 'en-phone': ['02', '04', '05', '06', '07', '08'], 'fr-phone': ['02', '04'], 'en-desktop-reduced': ['02', '04'],
+    'en-desktop-contrast': ['02', '04', '05'], 'en-phone-contrast': ['02', '04'] };
+  const shot = async (n, loc) => {
+    const keep = KEEP[name];
+    if (keep && !keep.includes(n.slice(0, 2))) return;
+    await (loc ? page.locator(loc) : page).screenshot({ path: path.join(shots, `${name}-${n}.png`) });
+  };
+  const out = { name, errors, external, checks: {} };
+  const ck = (k, v) => { out.checks[k] = v; };
+  // first visit with no hash: the intro plays (not in reduced motion), the tour card is shown
+  await page.goto(`http://127.0.0.1:${port}/` + (lang === 'fr' ? '#l=fr' : ''));
+  if (lang === 'fr') await page.evaluate(() => { localStorage.clear(); }), await page.reload();
   await page.waitForFunction(() => window.__arena && document.querySelector('#hud-gen').textContent.length > 0);
-  await page.screenshot({ path: path.join(shots, `${name}-1-idle.png`), fullPage: false });
-  const out = { name, errors, external };
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: path.join(shots, `${name}-1-idle.png`), fullPage: false });
-  if (opts.saz) { await page.check('#t-amp'); await page.check('#t-stab'); }
+  await page.waitForTimeout(opts.reduced ? 300 : 2300);
+  ck('introPlayed', await page.evaluate(() => window.__arena.stats().intro));
+  ck('tourVisible', await page.isVisible('#tutorial'));
+  if (opts.hc) { await page.click('#btn-contrast'); await page.waitForTimeout(200); }
+  if (view === 'desktop' && !opts.hc && !opts.reduced) await shot('01-intro', '.stage');
+  await page.evaluate(() => window.__arena.skipIntro());
+  await page.click('#btn-tut-skip');
+  ck('tourClosed', !(await page.isVisible('#tutorial')));
   await page.selectOption('#speed', '8');
-  if (view === 'desktop' && !opts.reduced) { await page.click('#btn-science'); }
+  // measure the animated arena for 5 s with the meters tab, then 5 s with the Lab open
   await page.evaluate(() => { window.__frames.length = 0; window.__arena.resetStats(); });
-  const t0 = Date.now();
   await page.click('#btn-run');
-  await page.waitForTimeout(4500);
+  await page.waitForTimeout(5000);
+  const stA = await page.evaluate(() => ({ f: window.__frames.slice(), s: window.__arena.stats() }));
+  Object.assign(out, frameStats(stA.f), { drawMsAvg: +stA.s.drawMs.toFixed(2), drawMsWorst: +stA.s.worstDrawMs.toFixed(2), particles: stA.s.particles });
   await page.evaluate(() => document.querySelector('.stage').scrollIntoView());
-  await page.waitForTimeout(250);
-  await page.screenshot({ path: path.join(shots, `${name}-2-running.png`), fullPage: false });
-  // steer mid-run: change the reward scheme and the cooperation setting, as a player would
-  await page.selectOption('#scheme', 'team');
-  await page.fill('#w', '1');
-  await page.waitForFunction(() => window.__arena.mode() === 'done', null, { timeout: 180000 });
-  out.runMs = Date.now() - t0;
-  const frames = await page.evaluate(() => window.__frames.slice());
-  const stats = await page.evaluate(() => window.__arena.stats());
-  frames.sort((a, b) => a - b);
-  const avg = frames.reduce((a, b) => a + b, 0) / Math.max(1, frames.length);
-  out.frames = frames.length; out.avgFrameMs = +avg.toFixed(2); out.p95FrameMs = +frames[Math.floor(frames.length * 0.95)].toFixed(2); out.maxFrameMs = +frames[frames.length - 1].toFixed(2);
-  out.fps = +(1000 / avg).toFixed(1); out.drawMsAvg = +stats.drawMs.toFixed(2); out.drawMsWorst = +stats.worstDrawMs.toFixed(2);
-  await page.waitForTimeout(900);
-  out.result = await page.evaluate(() => ({ score: document.querySelector('#result-score').textContent, share: document.querySelector('#share-text').textContent, live: document.querySelector('#sr-live').textContent, cmp: document.querySelectorAll('#cmp tr').length, lesson: document.querySelector('#lesson-title').textContent, synthetic: document.querySelector('.tag').textContent }));
-  out.overflowX = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  await page.evaluate(() => document.querySelector('#s-result').scrollIntoView());
-  await page.waitForTimeout(300);
-  await page.screenshot({ path: path.join(shots, `${name}-3-result.png`), fullPage: false });
-  out.viewport = await page.evaluate(() => [window.innerWidth, window.innerHeight]);
-  await page.screenshot({ path: path.join(shots, `${name}-4-full.png`), fullPage: true });
-  if (view === 'desktop' && !opts.reduced) {
-    await page.locator('#panel-meters').screenshot({ path: path.join(shots, `${name}-5-meters.png`) });
-    await page.locator('#panel-science').screenshot({ path: path.join(shots, `${name}-6-science.png`) });
+  await page.waitForTimeout(200);
+  await shot('02-running', '.stage');
+  if (!opts.reduced || opts.hc) {
+    await page.evaluate(() => { window.__arena.showTab('lab'); window.__frames.length = 0; window.__arena.resetStats(); });
+    await page.waitForTimeout(5000);
+    const stB = await page.evaluate(() => ({ f: window.__frames.slice(), s: window.__arena.stats() }));
+    out.withLab = Object.assign(frameStats(stB.f), { drawMsAvg: +stB.s.drawMs.toFixed(2), drawMsWorst: +stB.s.worstDrawMs.toFixed(2) });
   }
-  out.cmpRepoCells = await page.evaluate(() => [...document.querySelectorAll('#cmp tr')].slice(1).map((r) => r.children[2].textContent));
-  // the daily record survives a reload; copy works or fails politely
-  await page.click('#btn-copy');
-  await page.waitForTimeout(300);
-  out.copyStatus = await page.evaluate(() => document.querySelector('#copy-status').textContent);
+  // steer mid-run, as a player would
+  await page.selectOption('#scheme', 'team');
+  await page.keyboard.press('Escape');
+  await page.click('#btn-finish');
+  await page.waitForFunction(() => window.__arena.mode() === 'done', null, { timeout: 60000 });
+  await page.waitForTimeout(900);
+  out.result = await page.evaluate(() => ({ score: document.querySelector('#result-score').textContent, live: document.querySelector('#sr-live').textContent, cmp: document.querySelectorAll('#cmp tr').length, synthetic: document.querySelector('.tag').textContent }));
+  // replay: scrub, the arena description follows, play advances
+  ck('replayVisible', await page.isVisible('#replay'));
+  const d0 = await page.evaluate(() => { window.__arena.replayTo(0); return window.__arena.desc(); });
+  const d1 = await page.evaluate(() => { window.__arena.replayTo(2 * 480 + 3 * 60 + 40); return window.__arena.desc(); });
+  ck('replayDescriptionChanges', d0 !== d1 && /Generation 3|G[ée]n[ée]ration 3/.test(d1));
+  out.replayDesc = d1;
+  await page.evaluate(() => document.querySelector('.stage').scrollIntoView());
+  await shot('07-replay', '.stage');
+  const before = await page.evaluate(() => window.__arena.replayIdx());
+  await page.click('#btn-replay-play'); await page.waitForTimeout(700);
+  const after = await page.evaluate(() => window.__arena.replayIdx());
+  ck('replayPlays', after > before);
+  await page.click('#btn-replay-play');
+  // Lab: every instrument drawn and described
+  await page.click('#tab-lab');
+  await page.waitForTimeout(900);
+  out.labCanvases = await page.evaluate((src) => { const f = eval(src); return ['lab-rates', 'lab-align', 'lab-hist', 'lab-sweep', 'lab-shield', 'lab-gain', 'lab-land', 'lab-amp', 'sci'].map((id) => [id, f(id)]); }, NONBLANK.toString());
+  out.labAlt = await page.evaluate(() => [...document.querySelectorAll('#panel-lab .alt')].map((e) => e.textContent.length));
+  await page.locator('#panel-lab').scrollIntoViewIfNeeded();
+  await shot('04-lab', '#panel-lab');
+  out.probeMs = await page.evaluate(() => { const t0 = performance.now(); ArenaLab.probe(window.__arena.contest(), window.__arena.contest().hist[11].settings, 60); return +(performance.now() - t0).toFixed(1); });
+  // export
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }).catch(() => null), page.click('#btn-exp-run-csv')]);
+  if (dl) { const f = path.join(downloads, name + '-run.csv'); await dl.saveAs(f); const txt = fs.readFileSync(f, 'utf8'); ck('runCsvRows', txt.trim().split('\n').length); } else ck('runCsvRows', 0);
+  // ensemble: like for like with the repository, 20 seeds, time-sliced
+  await page.click('#tab-ens');
+  await page.click('#btn-ens-match');
+  await page.check('#t-shield'); await page.selectOption('#ens-n', '20');
+  await page.evaluate(() => { window.__frames.length = 0; });
+  const e0 = Date.now();
+  await page.click('#btn-ens-run');
+  await page.waitForFunction(() => window.__arena.labState().ensN >= 20, null, { timeout: 120000 });
+  out.ensembleWallMs = Date.now() - e0;
+  const fe = await page.evaluate(() => window.__frames.slice());
+  out.ensembleMaxFrameGapMs = frameStats(fe).maxFrameMs;
+  out.ensembleComputeMs = await page.evaluate(() => Math.round(window.__arena.labState().ensMs));
+  await page.waitForTimeout(400);
+  out.ensemble = await page.evaluate(() => ({ status: document.querySelector('#ens-status').textContent, rows: document.querySelectorAll('#ens-table tr').length, like: document.querySelector('#ens-like').textContent.slice(0, 60), alt: document.querySelector('#ens-alt').textContent.length, note: document.querySelector('#ens-note').textContent }));
+  await page.locator('#panel-ens').scrollIntoViewIfNeeded();
+  await shot('05-ensemble', '#panel-ens');
+  const [dl2] = await Promise.all([page.waitForEvent('download', { timeout: 10000 }).catch(() => null), page.click('#btn-ens-json')]);
+  if (dl2) { const f = path.join(downloads, name + '-ens.json'); await dl2.saveAs(f); ck('ensJsonOk', typeof JSON.parse(fs.readFileSync(f, 'utf8')) === 'object'); } else ck('ensJsonOk', false);
+  // A/B: shield on against off, the same seeds
+  await page.click('#tab-ab');
+  await page.selectOption('#ab-factor', 'shield');
+  await page.selectOption('#ab-n', '20');
+  const a0 = Date.now();
+  await page.click('#btn-ab-run');
+  await page.waitForFunction(() => window.__arena.labState().abN >= 20, null, { timeout: 120000 });
+  out.abWallMs = Date.now() - a0;
+  await page.waitForTimeout(400);
+  out.ab = await page.evaluate(() => ({ status: document.querySelector('#ab-status').textContent, verdict: document.querySelector('#ab-verdict').textContent, rows: document.querySelectorAll('#ab-table tr').length, alt: document.querySelector('#ab-alt').textContent.length }));
+  await page.locator('#panel-ab').scrollIntoViewIfNeeded();
+  await shot('06-ab', '#panel-ab');
+  // missions recorded from those two runs; stored locally
+  await page.click('#tab-missions');
+  out.missions = await page.evaluate(() => [...document.querySelectorAll('#missions-list .mission')].map((li) => [li.id, li.className, li.querySelector('.status').textContent]));
+  out.storedMissions = await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('membrane-arena/v1')).missions || {}));
+  await shot('08-missions', '#panel-missions');
+  await page.click('#tab-method');
+  await shot('09-method', '#panel-method');
+  // layout
+  for (const tab of ['meters', 'lab', 'ens', 'ab', 'missions', 'method']) {
+    await page.click('#tab-' + tab);
+    const ov = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    out.overflowX = Math.max(out.overflowX || 0, ov);
+  }
+  await page.click('#tab-lab');
+  await page.evaluate(() => document.querySelector('#s-result').scrollIntoView());
+  await shot('03-result', '#s-result');
+  out.contrast = await page.evaluate(() => window.__arena.hc());
+  out.reduced = await page.evaluate(() => window.__arena.reduced());
   await ctx.close();
   report.push(out);
   return out;
@@ -158,6 +247,45 @@ async function robustness(browser) {
   check('result is announced to the live region', /Contest finished/.test(await page.textContent('#sr-live')));
   check('no errors (keys)', errs.length === 0, errs.join('|'));
   await ctx.close();
+  // 7. v0.2: tabs by keyboard, the S key, tour and switches persist, hostile v0.2 store fields, intro skip
+  ({ ctx, page, errs } = await fresh(null, '#s=tabs'));
+  check('tour shown on the first visit', await page.isVisible('#tutorial'));
+  await page.click('#btn-tut-next'); await page.click('#btn-tut-next');
+  check('tour advances', /Step 3 of 5/.test(await page.textContent('#tut-step')), await page.textContent('#tut-step'));
+  await page.click('#btn-tut-skip');
+  await page.focus('#tab-meters'); await page.keyboard.press('ArrowRight');
+  check('arrow key moves to the Lab tab', (await page.getAttribute('#tab-lab', 'aria-selected')) === 'true' && await page.isVisible('#panel-lab') && !(await page.isVisible('#panel-meters')));
+  await page.keyboard.press('End');
+  check('End key moves to the last tab', (await page.getAttribute('#tab-method', 'aria-selected')) === 'true');
+  await page.keyboard.press('Home');
+  check('Home key moves to the first tab', (await page.getAttribute('#tab-meters', 'aria-selected')) === 'true');
+  await page.click('#btn-motion'); await page.click('#btn-contrast');
+  check('motion off and high contrast apply to the page', await page.evaluate(() => document.documentElement.classList.contains('still') && document.documentElement.classList.contains('hc') && window.__arena.reduced()));
+  await page.reload(); await page.waitForFunction(() => window.__arena);
+  check('switches and the finished tour persist after a reload', await page.evaluate(() => document.documentElement.classList.contains('hc') && document.documentElement.classList.contains('still')) && !(await page.isVisible('#tutorial')));
+  await page.click('#btn-intro');
+  check('the Intro button reopens the tour', await page.isVisible('#tutorial'));
+  await page.click('#btn-tut-skip');
+  await page.click('body', { position: { x: 5, y: 5 } });
+  await page.keyboard.press('s');
+  check('the S key opens the Lab', (await page.getAttribute('#tab-lab', 'aria-selected')) === 'true');
+  check('Lab explains itself before any contest', await page.isVisible('#lab-empty'));
+  check('no errors (tabs)', errs.length === 0, errs.join('|'));
+  await ctx.close();
+  ({ ctx, page, errs } = await fresh(() => localStorage.setItem('membrane-arena/v1', JSON.stringify({ missions: { shield: { outcome: '<img src=x onerror=alert(1)>', n: 5 }, play: { outcome: 'beat', n: 0 } }, bestScheme: { team: 'x', consensus: 61.5 }, hc: 'yes' }))));
+  await page.click('#tab-missions');
+  const ms = await page.evaluate(() => [...document.querySelectorAll('#missions-list .mission')].map((li) => li.className));
+  check('hostile mission record ignored, valid one shown', ms[0] === 'mission' && /done/.test(ms[4]) && errs.length === 0, ms.join('|'));
+  check('best-by-scheme record shown', /consensus 62/.test(await page.textContent('#stats-list')), await page.textContent('#stats-list'));
+  check('hostile contrast flag ignored', !(await page.evaluate(() => window.__arena.hc())));
+  await ctx.close();
+  ({ ctx, page, errs } = await fresh(null, ''));
+  await page.waitForTimeout(500);
+  check('intro plays on a first visit without a link', await page.evaluate(() => window.__arena.stats().intro));
+  await page.keyboard.press('Escape');
+  check('Escape skips the intro', !(await page.evaluate(() => window.__arena.stats().intro)));
+  check('skipping marks the intro as seen', await page.evaluate(() => window.__arena.store().introSeen === true));
+  await ctx.close();
   return res;
 }
 
@@ -165,11 +293,13 @@ async function robustness(browser) {
   await new Promise((r) => server.listen(port, '127.0.0.1', r));
   const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--no-sandbox', '--disable-gpu'] });
   const only = process.env.E2E_ONLY === 'robustness';
-  if (!only) for (const lang of ['en', 'fr']) for (const view of ['desktop', 'phone']) {
-    const o = await runCase(browser, lang, view, { saz: lang === 'en' && view === 'desktop' });
-    console.log(JSON.stringify(o));
+  if (!only) {
+    for (const f of fs.readdirSync(shots)) if (f.endsWith('.png')) fs.unlinkSync(path.join(shots, f));
+    for (const [lang, view, o] of [['en', 'desktop'], ['fr', 'desktop'], ['en', 'phone'], ['fr', 'phone'], ['en', 'desktop', { reduced: true }], ['en', 'desktop', { hc: true }], ['en', 'phone', { hc: true }]]) {
+      const r = await runCase(browser, lang, view, o);
+      console.log(JSON.stringify(r));
+    }
   }
-  if (!only) console.log(JSON.stringify(await runCase(browser, 'en', 'desktop', { reduced: true })));
   const checks = await robustness(browser);
   console.log(JSON.stringify(checks));
   report.push({ name: 'robustness', errors: checks.filter((c) => !c.ok).map((c) => c.name + ': ' + c.detail), external: [], checks });

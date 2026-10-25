@@ -5,171 +5,972 @@
    "name": "en-desktop",
    "errors": [],
    "external": [],
-   "runMs": 16865,
-   "frames": 1010,
-   "avgFrameMs": 16.67,
-   "p95FrameMs": 16.7,
-   "maxFrameMs": 16.8,
-   "fps": 60,
-   "drawMsAvg": 0.53,
-   "drawMsWorst": 2.6,
-   "result": {
-    "score": "Score 87 of 100",
-    "share": "ARENA seed e2een\nScore 87/100 (repo ref 82)\nTrue 42  False 2  Prec 95%\nSetup SAZ team w100\nSteadiness █████████░\nSYNTHETIC classical simulation\nhttp://127.0.0.1:8765/#s=e2een&b=87&c=t-100-SAZ&l=en",
-    "live": "Contest finished. Score 87.",
-    "cmp": 6,
-    "lesson": "The amplifier did nothing",
-    "synthetic": "SYNTHETIC / classical simulation"
+   "checks": {
+    "introPlayed": true,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
    },
-   "overflowX": 0,
-   "viewport": [
-    1366,
-    900
-   ],
-   "cmpRepoCells": [
-    "40.65 (sd 4.475)",
-    "6.35 (sd 4.44)",
-    "0.865 (sd 0.094)",
-    "0.001",
-    "82"
-   ],
-   "copyStatus": "Copied."
-  },
-  {
-   "name": "en-phone",
-   "errors": [],
-   "external": [],
-   "runMs": 16902,
-   "frames": 1009,
-   "avgFrameMs": 16.75,
+   "frames": 302,
+   "avgFrameMs": 16.83,
    "p95FrameMs": 16.8,
-   "maxFrameMs": 100,
-   "fps": 59.7,
-   "drawMsAvg": 0.42,
-   "drawMsWorst": 1.4,
+   "maxFrameMs": 49.9,
+   "fps": 59.4,
+   "drawMsAvg": 1.2,
+   "drawMsWorst": 2.5,
+   "particles": 92,
+   "withLab": {
+    "frames": 297,
+    "avgFrameMs": 17,
+    "p95FrameMs": 16.8,
+    "maxFrameMs": 50,
+    "fps": 58.8,
+    "drawMsAvg": 1.3,
+    "drawMsWorst": 2.6
+   },
    "result": {
-    "score": "Score 73 of 100",
-    "share": "ARENA seed e2een\nScore 73/100 (repo ref 86)\nTrue 36  False 1  Prec 97%\nSetup S-- team w100\nSteadiness █████░░░░░\nSYNTHETIC classical simulation\nhttp://127.0.0.1:8765/#s=e2een&b=73&c=t-100-S--&l=en",
-    "live": "Contest finished. Score 73.",
+    "score": "Score 75 of 100",
+    "live": "Contest finished. Score 75.",
     "cmp": 6,
-    "lesson": "The shield is the part that works",
     "synthetic": "SYNTHETIC / classical simulation"
    },
+   "replayDesc": "Generation 3, episode 4 (noise), step 40. A: 18 percent of threshold, no signal in this episode. B: 12 percent of threshold, no signal in this episode. C: 14 percent of threshold, no signal in this episode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
+   ],
+   "labAlt": [
+    156,
+    142,
+    171,
+    238,
+    192,
+    146,
+    136,
+    226
+   ],
+   "probeMs": 71.3,
+   "ensembleWallMs": 2803,
+   "ensembleMaxFrameGapMs": 50,
+   "ensembleComputeMs": 1939,
+   "ensemble": {
+    "status": "Finished 20 seeds in 2.7 s.",
+    "rows": 6,
+    "like": "The setup matches how the repository ran: scheme none, no fa",
+    "alt": 280,
+    "note": "Baseline: results/contest_w32-128_summary.csv in sparkainlp-x/crystallization-contest, commit c74c60b. The repository game score is the same formula applied to its mean counts, so it is approximate and has no interval. Intervals overlap the repository for 3 of 3 measured metrics (true, false, precision)."
+   },
+   "abWallMs": 5225,
+   "ab": {
+    "status": "Finished 20 paired seeds in 5.2 s.",
+    "verdict": "The 95 percent interval of the game score difference excludes 0 at n = 20.",
+    "rows": 6,
+    "alt": 224
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Done: reproduced: fewer false outputs with the shield (interval excludes 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Done: agrees: the repository means fall inside all three intervals"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Done: below the reference"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
    "overflowX": 0,
-   "viewport": [
-    390,
-    844
-   ],
-   "cmpRepoCells": [
-    "42.35 (sd 3.675)",
-    "3.75 (sd 4.025)",
-    "0.92 (sd 0.086)",
-    "0.004",
-    "86"
-   ],
-   "copyStatus": "Copied."
+   "contrast": false,
+   "reduced": false
   },
   {
    "name": "fr-desktop",
    "errors": [],
    "external": [],
-   "runMs": 16846,
-   "frames": 1010,
-   "avgFrameMs": 16.68,
+   "checks": {
+    "introPlayed": false,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
+   },
+   "frames": 303,
+   "avgFrameMs": 16.72,
    "p95FrameMs": 16.8,
    "maxFrameMs": 33.3,
-   "fps": 59.9,
-   "drawMsAvg": 0.64,
-   "drawMsWorst": 1.6,
+   "fps": 59.8,
+   "drawMsAvg": 1.16,
+   "drawMsWorst": 25.5,
+   "particles": 88,
+   "withLab": {
+    "frames": 294,
+    "avgFrameMs": 17.18,
+    "p95FrameMs": 16.8,
+    "maxFrameMs": 50,
+    "fps": 58.2,
+    "drawMsAvg": 1.66,
+    "drawMsWorst": 9
+   },
    "result": {
-    "score": "Score 88 sur 100",
-    "share": "ARENA graine e2efr\nScore 88/100 (réf. dépôt 86)\nVrais 41  Faux 2  Préc 95%\nRéglage S-- équipe w100\nRégularité █████████░\nSimulation classique SYNTHÉTIQUE\nhttp://127.0.0.1:8765/#s=e2efr&b=88&c=t-100-S--&l=fr",
-    "live": "Concours terminé. Score 88.",
+    "score": "Score 75 sur 100",
+    "live": "Concours terminé. Score 75.",
     "cmp": 6,
-    "lesson": "L'amplificateur n'a rien fait",
     "synthetic": "SYNTHÉTIQUE / simulation classique"
    },
+   "replayDesc": "Génération 3, épisode 4 (bruit), étape 40. A : 18 pour cent du seuil, pas de signal dans cet épisode. B : 12 pour cent du seuil, pas de signal dans cet épisode. C : 14 pour cent du seuil, pas de signal dans cet épisode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
+   ],
+   "labAlt": [
+    180,
+    150,
+    184,
+    247,
+    239,
+    155,
+    160,
+    242
+   ],
+   "probeMs": 69.6,
+   "ensembleWallMs": 2700,
+   "ensembleMaxFrameGapMs": 33.4,
+   "ensembleComputeMs": 1861,
+   "ensemble": {
+    "status": "20 graines terminées en 2.7 s.",
+    "rows": 6,
+    "like": "Le réglage correspond à celui du dépôt : schéma aucun, pas d",
+    "alt": 306,
+    "note": "Référence : results/contest_w32-128_summary.csv dans sparkainlp-x/crystallization-contest, commit c74c60b. Le score du jeu pour le dépôt est la même formule appliquée à ses comptes moyens : il est approximatif et sans intervalle. Les intervalles recoupent le dépôt pour 3 des 3 mesures (vraies, fausses, précision)."
+   },
+   "abWallMs": 4502,
+   "ab": {
+    "status": "20 graines appariées terminées en 4.5 s.",
+    "verdict": "L'intervalle à 95 pour cent de la différence de score du jeu exclut 0 pour n = 20.",
+    "rows": 6,
+    "alt": 251
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Faite : reproduit : moins de sorties fausses avec le bouclier (l'intervalle exclut 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Pas encore faite"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Pas encore faite"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Faite : concorde : les moyennes du dépôt tombent dans les trois intervalles"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Faite : sous la référence"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
    "overflowX": 0,
-   "viewport": [
-    1366,
-    900
+   "contrast": false,
+   "reduced": false
+  },
+  {
+   "name": "en-phone",
+   "errors": [],
+   "external": [],
+   "checks": {
+    "introPlayed": true,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
+   },
+   "frames": 304,
+   "avgFrameMs": 16.67,
+   "p95FrameMs": 16.7,
+   "maxFrameMs": 16.8,
+   "fps": 60,
+   "drawMsAvg": 1,
+   "drawMsWorst": 9.2,
+   "particles": 79,
+   "withLab": {
+    "frames": 294,
+    "avgFrameMs": 17.35,
+    "p95FrameMs": 16.8,
+    "maxFrameMs": 83.2,
+    "fps": 57.6,
+    "drawMsAvg": 1.09,
+    "drawMsWorst": 4
+   },
+   "result": {
+    "score": "Score 75 of 100",
+    "live": "Contest finished. Score 75.",
+    "cmp": 6,
+    "synthetic": "SYNTHETIC / classical simulation"
+   },
+   "replayDesc": "Generation 3, episode 4 (noise), step 40. A: 18 percent of threshold, no signal in this episode. B: 12 percent of threshold, no signal in this episode. C: 14 percent of threshold, no signal in this episode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
    ],
-   "cmpRepoCells": [
-    "42.35 (sd 3.675)",
-    "3.75 (sd 4.025)",
-    "0.92 (sd 0.086)",
-    "0.004",
-    "86"
+   "labAlt": [
+    156,
+    142,
+    171,
+    238,
+    192,
+    146,
+    136,
+    226
    ],
-   "copyStatus": "Copié."
+   "probeMs": 65.3,
+   "ensembleWallMs": 3068,
+   "ensembleMaxFrameGapMs": 33.4,
+   "ensembleComputeMs": 1841,
+   "ensemble": {
+    "status": "Finished 20 seeds in 3.0 s.",
+    "rows": 6,
+    "like": "The setup matches how the repository ran: scheme none, no fa",
+    "alt": 280,
+    "note": "Baseline: results/contest_w32-128_summary.csv in sparkainlp-x/crystallization-contest, commit c74c60b. The repository game score is the same formula applied to its mean counts, so it is approximate and has no interval. Intervals overlap the repository for 3 of 3 measured metrics (true, false, precision)."
+   },
+   "abWallMs": 5505,
+   "ab": {
+    "status": "Finished 20 paired seeds in 5.4 s.",
+    "verdict": "The 95 percent interval of the game score difference excludes 0 at n = 20.",
+    "rows": 6,
+    "alt": 224
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Done: reproduced: fewer false outputs with the shield (interval excludes 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Done: agrees: the repository means fall inside all three intervals"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Done: below the reference"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
+   "overflowX": 0,
+   "contrast": false,
+   "reduced": false
   },
   {
    "name": "fr-phone",
    "errors": [],
    "external": [],
-   "runMs": 16887,
-   "frames": 1005,
-   "avgFrameMs": 16.8,
+   "checks": {
+    "introPlayed": false,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
+   },
+   "frames": 306,
+   "avgFrameMs": 16.67,
    "p95FrameMs": 16.7,
-   "maxFrameMs": 99.9,
-   "fps": 59.5,
-   "drawMsAvg": 0.63,
-   "drawMsWorst": 4.7,
+   "maxFrameMs": 16.8,
+   "fps": 60,
+   "drawMsAvg": 0.97,
+   "drawMsWorst": 2.2,
+   "particles": 83,
+   "withLab": {
+    "frames": 293,
+    "avgFrameMs": 17.12,
+    "p95FrameMs": 16.8,
+    "maxFrameMs": 66.6,
+    "fps": 58.4,
+    "drawMsAvg": 1.02,
+    "drawMsWorst": 2.1
+   },
    "result": {
-    "score": "Score 88 sur 100",
-    "share": "ARENA graine e2efr\nScore 88/100 (réf. dépôt 86)\nVrais 41  Faux 2  Préc 95%\nRéglage S-- équipe w100\nRégularité █████████░\nSimulation classique SYNTHÉTIQUE\nhttp://127.0.0.1:8765/#s=e2efr&b=88&c=t-100-S--&l=fr",
-    "live": "Concours terminé. Score 88.",
+    "score": "Score 75 sur 100",
+    "live": "Concours terminé. Score 75.",
     "cmp": 6,
-    "lesson": "L'amplificateur n'a rien fait",
     "synthetic": "SYNTHÉTIQUE / simulation classique"
    },
+   "replayDesc": "Génération 3, épisode 4 (bruit), étape 40. A : 18 pour cent du seuil, pas de signal dans cet épisode. B : 12 pour cent du seuil, pas de signal dans cet épisode. C : 14 pour cent du seuil, pas de signal dans cet épisode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
+   ],
+   "labAlt": [
+    180,
+    150,
+    184,
+    247,
+    239,
+    155,
+    160,
+    242
+   ],
+   "probeMs": 61.6,
+   "ensembleWallMs": 2785,
+   "ensembleMaxFrameGapMs": 33.4,
+   "ensembleComputeMs": 1827,
+   "ensemble": {
+    "status": "20 graines terminées en 2.7 s.",
+    "rows": 6,
+    "like": "Le réglage correspond à celui du dépôt : schéma aucun, pas d",
+    "alt": 306,
+    "note": "Référence : results/contest_w32-128_summary.csv dans sparkainlp-x/crystallization-contest, commit c74c60b. Le score du jeu pour le dépôt est la même formule appliquée à ses comptes moyens : il est approximatif et sans intervalle. Les intervalles recoupent le dépôt pour 3 des 3 mesures (vraies, fausses, précision)."
+   },
+   "abWallMs": 5573,
+   "ab": {
+    "status": "20 graines appariées terminées en 5.5 s.",
+    "verdict": "L'intervalle à 95 pour cent de la différence de score du jeu exclut 0 pour n = 20.",
+    "rows": 6,
+    "alt": 251
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Faite : reproduit : moins de sorties fausses avec le bouclier (l'intervalle exclut 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Pas encore faite"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Pas encore faite"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Faite : concorde : les moyennes du dépôt tombent dans les trois intervalles"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Faite : sous la référence"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
    "overflowX": 0,
-   "viewport": [
-    390,
-    844
-   ],
-   "cmpRepoCells": [
-    "42.35 (sd 3.675)",
-    "3.75 (sd 4.025)",
-    "0.92 (sd 0.086)",
-    "0.004",
-    "86"
-   ],
-   "copyStatus": "Copié."
+   "contrast": false,
+   "reduced": false
   },
   {
    "name": "en-desktop-reduced",
    "errors": [],
    "external": [],
-   "runMs": 16833,
-   "frames": 1010,
+   "checks": {
+    "introPlayed": false,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
+   },
+   "frames": 304,
    "avgFrameMs": 16.67,
    "p95FrameMs": 16.7,
    "maxFrameMs": 16.8,
    "fps": 60,
-   "drawMsAvg": 0.41,
-   "drawMsWorst": 1.2,
+   "drawMsAvg": 0.58,
+   "drawMsWorst": 4.3,
+   "particles": 0,
    "result": {
-    "score": "Score 73 of 100",
-    "share": "ARENA seed e2een\nScore 73/100 (repo ref 86)\nTrue 36  False 1  Prec 97%\nSetup S-- team w100\nSteadiness █████░░░░░\nSYNTHETIC classical simulation\nhttp://127.0.0.1:8765/#s=e2een&b=73&c=t-100-S--&l=en",
-    "live": "Contest finished. Score 73.",
+    "score": "Score 75 of 100",
+    "live": "Contest finished. Score 75.",
     "cmp": 6,
-    "lesson": "The shield is the part that works",
     "synthetic": "SYNTHETIC / classical simulation"
    },
+   "replayDesc": "Generation 3, episode 4 (noise), step 40. A: 18 percent of threshold, no signal in this episode. B: 12 percent of threshold, no signal in this episode. C: 14 percent of threshold, no signal in this episode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
+   ],
+   "labAlt": [
+    156,
+    142,
+    171,
+    238,
+    192,
+    146,
+    136,
+    226
+   ],
+   "probeMs": 64.5,
+   "ensembleWallMs": 2262,
+   "ensembleMaxFrameGapMs": 33.4,
+   "ensembleComputeMs": 1629,
+   "ensemble": {
+    "status": "Finished 20 seeds in 2.2 s.",
+    "rows": 6,
+    "like": "The setup matches how the repository ran: scheme none, no fa",
+    "alt": 280,
+    "note": "Baseline: results/contest_w32-128_summary.csv in sparkainlp-x/crystallization-contest, commit c74c60b. The repository game score is the same formula applied to its mean counts, so it is approximate and has no interval. Intervals overlap the repository for 3 of 3 measured metrics (true, false, precision)."
+   },
+   "abWallMs": 4835,
+   "ab": {
+    "status": "Finished 20 paired seeds in 4.8 s.",
+    "verdict": "The 95 percent interval of the game score difference excludes 0 at n = 20.",
+    "rows": 6,
+    "alt": 224
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Done: reproduced: fewer false outputs with the shield (interval excludes 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Done: agrees: the repository means fall inside all three intervals"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Done: below the reference"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
    "overflowX": 0,
-   "viewport": [
-    1366,
-    900
+   "contrast": false,
+   "reduced": true
+  },
+  {
+   "name": "en-desktop-contrast",
+   "errors": [],
+   "external": [],
+   "checks": {
+    "introPlayed": true,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
+   },
+   "frames": 305,
+   "avgFrameMs": 16.67,
+   "p95FrameMs": 16.8,
+   "maxFrameMs": 16.8,
+   "fps": 60,
+   "drawMsAvg": 0.89,
+   "drawMsWorst": 1.6,
+   "particles": 95,
+   "withLab": {
+    "frames": 298,
+    "avgFrameMs": 16.89,
+    "p95FrameMs": 16.8,
+    "maxFrameMs": 49.9,
+    "fps": 59.2,
+    "drawMsAvg": 0.8,
+    "drawMsWorst": 1.7
+   },
+   "result": {
+    "score": "Score 75 of 100",
+    "live": "Contest finished. Score 75.",
+    "cmp": 6,
+    "synthetic": "SYNTHETIC / classical simulation"
+   },
+   "replayDesc": "Generation 3, episode 4 (noise), step 40. A: 18 percent of threshold, no signal in this episode. B: 12 percent of threshold, no signal in this episode. C: 14 percent of threshold, no signal in this episode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
    ],
-   "cmpRepoCells": [
-    "42.35 (sd 3.675)",
-    "3.75 (sd 4.025)",
-    "0.92 (sd 0.086)",
-    "0.004",
-    "86"
+   "labAlt": [
+    156,
+    142,
+    171,
+    238,
+    192,
+    146,
+    136,
+    226
    ],
-   "copyStatus": "Copied."
+   "probeMs": 64.2,
+   "ensembleWallMs": 2339,
+   "ensembleMaxFrameGapMs": 16.8,
+   "ensembleComputeMs": 1707,
+   "ensemble": {
+    "status": "Finished 20 seeds in 2.3 s.",
+    "rows": 6,
+    "like": "The setup matches how the repository ran: scheme none, no fa",
+    "alt": 280,
+    "note": "Baseline: results/contest_w32-128_summary.csv in sparkainlp-x/crystallization-contest, commit c74c60b. The repository game score is the same formula applied to its mean counts, so it is approximate and has no interval. Intervals overlap the repository for 3 of 3 measured metrics (true, false, precision)."
+   },
+   "abWallMs": 4292,
+   "ab": {
+    "status": "Finished 20 paired seeds in 4.2 s.",
+    "verdict": "The 95 percent interval of the game score difference excludes 0 at n = 20.",
+    "rows": 6,
+    "alt": 224
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Done: reproduced: fewer false outputs with the shield (interval excludes 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Done: agrees: the repository means fall inside all three intervals"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Done: below the reference"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
+   "overflowX": 0,
+   "contrast": true,
+   "reduced": false
+  },
+  {
+   "name": "en-phone-contrast",
+   "errors": [],
+   "external": [],
+   "checks": {
+    "introPlayed": true,
+    "tourVisible": true,
+    "tourClosed": true,
+    "replayVisible": true,
+    "replayDescriptionChanges": true,
+    "replayPlays": true,
+    "runCsvRows": 13,
+    "ensJsonOk": true
+   },
+   "frames": 305,
+   "avgFrameMs": 16.67,
+   "p95FrameMs": 16.7,
+   "maxFrameMs": 16.8,
+   "fps": 60,
+   "drawMsAvg": 0.81,
+   "drawMsWorst": 2.1,
+   "particles": 98,
+   "withLab": {
+    "frames": 298,
+    "avgFrameMs": 16.89,
+    "p95FrameMs": 16.8,
+    "maxFrameMs": 66.7,
+    "fps": 59.2,
+    "drawMsAvg": 0.72,
+    "drawMsWorst": 1.2
+   },
+   "result": {
+    "score": "Score 75 of 100",
+    "live": "Contest finished. Score 75.",
+    "cmp": 6,
+    "synthetic": "SYNTHETIC / classical simulation"
+   },
+   "replayDesc": "Generation 3, episode 4 (noise), step 40. A: 18 percent of threshold, no signal in this episode. B: 12 percent of threshold, no signal in this episode. C: 14 percent of threshold, no signal in this episode.",
+   "labCanvases": [
+    [
+     "lab-rates",
+     true
+    ],
+    [
+     "lab-align",
+     true
+    ],
+    [
+     "lab-hist",
+     true
+    ],
+    [
+     "lab-sweep",
+     true
+    ],
+    [
+     "lab-shield",
+     true
+    ],
+    [
+     "lab-gain",
+     true
+    ],
+    [
+     "lab-land",
+     true
+    ],
+    [
+     "lab-amp",
+     true
+    ],
+    [
+     "sci",
+     true
+    ]
+   ],
+   "labAlt": [
+    156,
+    142,
+    171,
+    238,
+    192,
+    146,
+    136,
+    226
+   ],
+   "probeMs": 64.5,
+   "ensembleWallMs": 2163,
+   "ensembleMaxFrameGapMs": 33.4,
+   "ensembleComputeMs": 1583,
+   "ensemble": {
+    "status": "Finished 20 seeds in 2.1 s.",
+    "rows": 6,
+    "like": "The setup matches how the repository ran: scheme none, no fa",
+    "alt": 280,
+    "note": "Baseline: results/contest_w32-128_summary.csv in sparkainlp-x/crystallization-contest, commit c74c60b. The repository game score is the same formula applied to its mean counts, so it is approximate and has no interval. Intervals overlap the repository for 3 of 3 measured metrics (true, false, precision)."
+   },
+   "abWallMs": 4123,
+   "ab": {
+    "status": "Finished 20 paired seeds in 4.1 s.",
+    "verdict": "The 95 percent interval of the game score difference excludes 0 at n = 20.",
+    "rows": 6,
+    "alt": 224
+   },
+   "missions": [
+    [
+     "mission-shield",
+     "mission done",
+     "Done: reproduced: fewer false outputs with the shield (interval excludes 0)"
+    ],
+    [
+     "mission-individual",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-amp",
+     "mission",
+     "Not done yet"
+    ],
+    [
+     "mission-repo",
+     "mission done",
+     "Done: agrees: the repository means fall inside all three intervals"
+    ],
+    [
+     "mission-play",
+     "mission done",
+     "Done: below the reference"
+    ]
+   ],
+   "storedMissions": [
+    "play",
+    "repo",
+    "shield"
+   ],
+   "overflowX": 0,
+   "contrast": true,
+   "reduced": false
   },
   {
    "name": "robustness",
@@ -194,7 +995,7 @@
     {
      "name": "streak shown after reload",
      "ok": true,
-     "detail": "Daily streak: 1 (best 1)Best daily score: 75"
+     "detail": "Daily streak: 1 (best 1)Best daily score: 75Best score by scheme: consensus 75"
     },
     {
      "name": "no errors (daily)",
@@ -268,6 +1069,91 @@
     },
     {
      "name": "no errors (keys)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "tour shown on the first visit",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "tour advances",
+     "ok": true,
+     "detail": "Step 3 of 5"
+    },
+    {
+     "name": "arrow key moves to the Lab tab",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "End key moves to the last tab",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Home key moves to the first tab",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "motion off and high contrast apply to the page",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "switches and the finished tour persist after a reload",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "the Intro button reopens the tour",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "the S key opens the Lab",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Lab explains itself before any contest",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "no errors (tabs)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "hostile mission record ignored, valid one shown",
+     "ok": true,
+     "detail": "mission|mission|mission|mission|mission done"
+    },
+    {
+     "name": "best-by-scheme record shown",
+     "ok": true,
+     "detail": "No daily result yet.Best score by scheme: consensus 62"
+    },
+    {
+     "name": "hostile contrast flag ignored",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "intro plays on a first visit without a link",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "Escape skips the intro",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "skipping marks the intro as seen",
      "ok": true,
      "detail": ""
     }
