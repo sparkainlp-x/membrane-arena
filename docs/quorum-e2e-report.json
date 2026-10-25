@@ -1,5 +1,5 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.2",
   "chrome": "/usr/bin/google-chrome",
   "allOk": true,
   "servedOther": [],
@@ -7,7 +7,7 @@
     {
       "name": "quorum-en-desktop",
       "ok": true,
-      "wallMs": 15306,
+      "wallMs": 14883,
       "errors": [],
       "external": [],
       "opts": {},
@@ -83,7 +83,7 @@
     {
       "name": "quorum-fr-phone",
       "ok": true,
-      "wallMs": 7403,
+      "wallMs": 7019,
       "errors": [],
       "external": [],
       "opts": {},
@@ -129,7 +129,7 @@
     {
       "name": "quorum-en-phone",
       "ok": true,
-      "wallMs": 8292,
+      "wallMs": 7941,
       "errors": [],
       "external": [],
       "opts": {},
@@ -175,7 +175,7 @@
     {
       "name": "quorum-en-desktop-contrast",
       "ok": true,
-      "wallMs": 5636,
+      "wallMs": 5458,
       "errors": [],
       "external": [],
       "opts": {

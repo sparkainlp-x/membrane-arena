@@ -37,7 +37,7 @@
   else root.ArenaBrain = factory(root.ArenaGame, root.ArenaStats);
 })(typeof self !== 'undefined' ? self : this, function (G, ST) {
   'use strict';
-  var VERSION = '0.3.1';
+  var VERSION = '0.3.2';
   var NS = 'membrane-arena/brain/v1/';      // generator namespace for brain runs
   var KINDS = ['sensory', 'gate', 'integrator', 'output', 'inhibitory', 'memory'];
   var MODES = ['collude', 'stuck', 'silent'];

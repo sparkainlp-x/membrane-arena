@@ -1,0 +1,2438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Reverse Pair: a two-membrane shield. A reverse observer membrane and a predictable calibrator that plays known sine tones take turns on one clock, against fades on or between the tones. A game on a synthetic classical simulation, with a held-out evaluation.">
+<title>Reverse Pair</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='11' cy='16' r='7' fill='none' stroke='%2340d0e0' stroke-width='2.5'/%3E%3Ccircle cx='21' cy='16' r='7' fill='none' stroke='%23c9a84c' stroke-width='2.5'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #0a1330;
+  --bg2: #101c40;
+  --panel: #12204a;
+  --line: #2a3b6e;
+  --text: #eef2ff;
+  --muted: #b3bedb;
+  --gold: #c9a84c;
+  --gold-bright: #e0c36a;
+  --cyan: #40d0e0;
+  --blue: #7aa8ff;
+  --aqua: #5ee6b8;
+  --danger: #ff9a9a;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: radial-gradient(1400px 700px at 50% -10%, #16275a 0%, var(--bg) 60%) fixed;
+  color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 12px 28px;
+}
+.skip { position: absolute; left: -999px; top: 0; background: var(--gold); color: #0a1330; padding: 8px 12px; z-index: 30; }
+.skip:focus { left: 8px; top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.top, main, .foot { width: 100%; max-width: 1180px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 0 6px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 1.7rem; letter-spacing: 0.22em; color: var(--gold); font-weight: 700; }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { border: 1px solid var(--cyan); color: var(--cyan); border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; letter-spacing: 0.08em; }
+main { outline: none; }
+.card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 12px; min-width: 0; }
+[hidden] { display: none !important; }
+h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--gold-bright); }
+h3 { margin: 16px 0 6px; font-size: 1rem; color: var(--gold-bright); }
+h4 { margin: 0 0 4px; font-size: 1rem; color: var(--cyan); }
+h2:focus, h2[tabindex="-1"]:focus { outline: none; }
+p { margin: 8px 0; }
+.muted { color: var(--muted); }
+.small-text { font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.84rem; margin: 2px 0 10px; }
+.beat { color: var(--cyan); font-weight: 600; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: #1a2a5c; color: var(--text); padding: 12px 16px;
+  min-height: 44px; border-radius: 10px; font: inherit; cursor: pointer; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: var(--gold); color: #0a1330; border-color: var(--gold); font-weight: 700; }
+.btn.primary:hover { background: var(--gold-bright); }
+.btn.small { padding: 6px 12px; min-height: 40px; font-size: 0.9rem; }
+.btn[aria-pressed="true"] { border-color: var(--cyan); background: #12426a; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+.col-main { min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 14px; }
+@media (min-width: 980px) { .layout { grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); align-items: start; } }
+
+.hud { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.92rem; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.hud-item { color: var(--muted); } .hud-item b { color: var(--text); }
+.c-true { color: var(--cyan) !important; } .c-false { color: var(--danger) !important; } .c-gold { color: var(--gold-bright) !important; }
+.canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #070e26; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .canvas-wrap { aspect-ratio: 1 / 1.05; } }
+#arena { width: 100%; height: 100%; display: block; }
+.canvas-msg { position: absolute; left: 12px; right: 12px; bottom: 8px; margin: 0; font-size: 0.85rem; color: var(--muted); }
+.ribbon { list-style: none; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 10px 0 0; padding: 0; }
+.ribbon li { height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #0d1840; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: var(--muted); }
+.ribbon li.planted { border-style: solid; }
+.ribbon li.noise { border-style: dashed; }
+.ribbon li.t { background: #0f4b5a; border-color: var(--cyan); color: var(--text); }
+.ribbon li.f { background: #4b2a34; border-color: var(--danger); color: var(--text); }
+.ribbon li.h { background: #2a3350; border-color: var(--muted); color: var(--text); }
+.ribbon li.cur { box-shadow: 0 0 0 2px var(--gold); }
+.ticker { min-height: 1.5em; margin: 8px 0 0; color: var(--gold-bright); font-size: 0.92rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.inline { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
+select {
+  background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 44px; font: inherit; max-width: 100%;
+}
+.field { margin: 14px 0; }
+.field > label { display: block; margin: 0 0 4px; font-weight: 600; }
+.field select { width: 100%; }
+.sliderrow { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+.sliderrow label { flex: 0 0 9.5em; margin: 0; }
+.sliderrow .end { font-size: 0.8rem; color: var(--muted); }
+input[type=range] { flex: 1; min-width: 110px; min-height: 44px; accent-color: var(--gold); }
+output { min-width: 4ch; text-align: right; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.switch { display: flex; gap: 10px; align-items: center; min-height: 44px; margin: 6px 0 0; font-weight: 600; cursor: pointer; }
+.switch input { width: 22px; height: 22px; accent-color: var(--gold); flex: none; }
+.switches .hint { margin-left: 32px; }
+details summary { cursor: pointer; padding: 8px 0; color: var(--cyan); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+details[disabled] input { opacity: .5; }
+
+.meters-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .meters-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.meter-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.m-name { width: 1.4em; font-weight: 700; color: var(--gold-bright); }
+.meter { position: relative; flex: 1; height: 18px; background: #070e26; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.m-band { position: absolute; top: 0; bottom: 0; left: calc(0.33 / 3.2 * 100%); width: calc((3 - 0.33) / 3.2 * 100%); background: rgba(64, 208, 224, 0.12); border-left: 1px dashed var(--cyan); border-right: 1px dashed var(--cyan); }
+.meter.off .m-band { display: none; }
+.m-fill { position: absolute; left: 0; top: 3px; bottom: 3px; width: 0; background: var(--cyan); border-radius: 6px; }
+.m-fill.rate { background: var(--gold); }
+.m-eff { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--text); left: 0; }
+.m-tick { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--muted); }
+.meter.clamped { border-color: var(--danger); }
+.m-val { width: 9.5em; white-space: nowrap; text-align: right; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: 190px; background: #070e26; border: 1px solid var(--line); border-radius: 10px; display: block; }
+.chart.tall { height: 340px; }
+.chart.ens { height: 280px; }
+.rail { width: 100%; height: 44px; display: block; background: #070e26; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
+.key { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--cyan); vertical-align: middle; margin-right: 6px; }
+.key-base { border-top: 3px dashed var(--gold); margin-left: 14px; }
+
+.big { font-size: 1.6rem; font-weight: 700; color: var(--gold-bright); margin: 4px 0 8px; }
+.parts { display: grid; gap: 8px; }
+.part { display: grid; grid-template-columns: 9.5em 1fr 6.8em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.part .bar { height: 10px; background: #070e26; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.part .bar span { display: block; height: 100%; background: var(--cyan); }
+.part .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+.scores { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.scores th, .scores td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.scores th:first-child, .scores td:first-child { text-align: left; white-space: normal; }
+.scores th { color: var(--cyan); font-weight: 600; }
+.lesson { margin-top: 14px; padding: 12px; border: 1px solid var(--gold); border-radius: 10px; background: #0e1a3d; }
+.lesson h3 { margin-top: 0; }
+pre {
+  white-space: pre-wrap; word-break: break-word; background: #070e26; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
+}
+.stats { list-style: none; margin: 0; padding: 0; color: var(--muted); }
+.stats li { padding: 2px 0; }
+.modal { position: fixed; inset: 0; background: rgba(4, 8, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.modal-box { max-width: 560px; max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: var(--radius); padding: 18px; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 0.8rem; }
+.foot p { margin: 4px 0; }
+@media (max-width: 480px) { .sliderrow label { flex-basis: 100%; } .part { grid-template-columns: 7em 1fr 6.8em; } h1 { font-size: 1.35rem; } }
+@media (prefers-reduced-motion: no-preference) {
+  .m-fill { transition: width 0.25s ease; }
+  .m-eff { transition: left 0.25s ease; }
+  .card { animation: rise 0.25s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- v0.2: tabs, Lab, ensemble, A/B, missions, replay, tour ---------- */
+.tabs { padding-top: 8px; }
+.tablist { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 -4px 12px; padding: 0 4px; scrollbar-width: thin; }
+.tab {
+  appearance: none; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 3px solid transparent;
+  padding: 8px 14px; min-height: 44px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 8px 8px 0 0; touch-action: manipulation;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--gold-bright); border-bottom-color: var(--gold); background: rgba(201, 168, 76, 0.08); }
+.tabpanel { outline: none; }
+.tabpanel:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.inst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 6px 16px; }
+.inst { margin: 10px 0 14px; min-width: 0; }
+.inst.wide { grid-column: 1 / -1; }
+.inst h3 { margin-top: 4px; }
+.inst select { min-height: 40px; padding: 4px 8px; }
+.alt { margin: 6px 0 2px; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); font-size: 0.86rem; }
+.alt:empty { display: none; }
+.formrow { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 8px 0; }
+.formrow .switch { margin: 0; }
+progress { width: min(100%, 320px); height: 14px; accent-color: var(--gold); vertical-align: middle; }
+.exp { width: 100%; background: #070e26; color: var(--text); border: 1px solid var(--line); border-radius: 8px; font: 0.8rem/1.3 ui-monospace, Menlo, Consolas, monospace; padding: 8px; }
+.method { margin: 4px 0 8px; padding-left: 1.2em; color: var(--muted); font-size: 0.92rem; }
+.method li { margin: 3px 0; }
+.missions { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
+.mission { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #0e1a3d; }
+.mission h3 { margin: 0 0 2px; }
+.mission.done { border-color: var(--gold); }
+.mission .status { font-weight: 600; color: var(--cyan); margin: 4px 0; font-size: 0.9rem; }
+.mission.done .status { color: var(--gold-bright); }
+.replay { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.replay h3 { margin-top: 0; }
+.replay-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.replay-row input[type=range] { flex: 1; min-width: 140px; }
+.tour { border-color: var(--gold); }
+#help .modal-box h2:focus { outline: none; }
+.row-end { display: flex; justify-content: flex-end; }
+
+/* motion switched off in the page (in addition to the system setting) */
+html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+
+/* high-contrast mode: white on black, heavier outlines, no gradients */
+html.hc { --bg: #000; --bg2: #000; --panel: #000; --line: #fff; --text: #fff; --muted: #f0f0f0; --gold: #ffd400; --gold-bright: #ffd400; --cyan: #00ffff; --blue: #9ec0ff; --aqua: #00ff96; --danger: #ff8a8a; }
+html.hc body { background: #000; }
+html.hc .card { background: #000; border-width: 2px; }
+html.hc .btn { background: #000; border-width: 2px; }
+html.hc .btn.primary { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .btn[aria-pressed="true"] { background: #003a3a; border-color: #00ffff; }
+html.hc select, html.hc .exp, html.hc pre, html.hc .chart, html.hc .rail, html.hc .canvas-wrap, html.hc .meter { background: #000; border: 2px solid #fff; }
+html.hc .tab[aria-selected="true"] { background: #1a1a00; border-bottom-width: 4px; }
+html.hc .mission, html.hc .lesson { background: #000; border-width: 2px; }
+html.hc .ribbon li { background: #000; border-width: 2px; color: #fff; }
+html.hc .ribbon li.t { background: #003a3a; } html.hc .ribbon li.f { background: #3a0000; } html.hc .ribbon li.h { background: #222; }
+html.hc .alt { border-left-color: #fff; }
+html.hc .tag { border-width: 2px; }
+html.hc :focus-visible { outline: 4px solid #ffd400; outline-offset: 2px; }
+html.hc .hint, html.hc .muted { color: #f0f0f0; }
+@media (max-width: 480px) { .tab { padding: 8px 10px; } .formrow { gap: 6px 12px; } }
+@media (forced-colors: active) { .btn.primary { border: 2px solid ButtonText; } .m-fill, .m-eff { background: Highlight; forced-color-adjust: none; } }
+</style>
+<style>
+/* Membrane Arena: extra styles for Reverse Membranes. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+.playgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; }
+@media (min-width: 900px) { .playgrid { grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr); align-items: start; } }
+.forecast { font-weight: 600; color: var(--gold-bright); margin: 4px 0 6px; }
+.tide { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; height: 46px; }
+.tide li { background: #1b2a5a; border: 1px solid var(--line); border-radius: 4px 4px 0 0; min-height: 6px; }
+.tide li.played { background: #23406e; }
+.tide li.cur { background: var(--gold); border-color: var(--gold); }
+.indent { margin-left: 32px; }
+.stepper { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; flex-wrap: wrap; }
+.stepper .slabel { flex: 0 0 9.5em; font-weight: 600; }
+.stepper output { min-width: 2.2em; text-align: center; font-size: 1.25rem; }
+.btn.step { min-width: 48px; min-height: 48px; padding: 0; font-size: 1.4rem; line-height: 1; }
+.bigscore { font-size: 2.6rem; font-weight: 700; margin: 0; color: var(--gold-bright); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tally { margin: 2px 0 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#res-text p { margin: 6px 0; }
+#res-text .good { color: var(--aqua); font-weight: 600; }
+#res-text .warn { color: var(--danger); font-weight: 600; }
+.episodes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 760px) { .episodes { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.episodes .empty { grid-column: 1 / -1; color: var(--muted); margin: 8px 0; }
+.ep { background: #070e26; border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 4px; min-width: 0; }
+.ep.t { border-color: var(--cyan); } .ep.f { border-color: var(--danger); }
+.ep h3 { margin: 0 0 2px; font-size: 0.8rem; color: var(--text); font-weight: 600; }
+.ep .out { margin: 0; font-size: 0.75rem; color: var(--muted); }
+.ep.t .out { color: var(--cyan); } .ep.f .out { color: var(--danger); }
+.ep svg { display: block; width: 100%; height: auto; }
+.ep .chance { stroke: #6f7fae; stroke-width: 1; }
+.ep .thr { stroke: var(--gold); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.ep .m1 { stroke: #40d0e0; } .ep .m2 { stroke: #f0a050; } .ep .m3 { stroke: #b48cff; }
+.ep .tr { fill: none; stroke-width: 1.6; stroke-linejoin: round; }
+.ep .dot { stroke: #fff; stroke-width: 1; }
+.ep .dot.m1 { fill: #40d0e0; } .ep .dot.m2 { fill: #f0a050; } .ep .dot.m3 { fill: #b48cff; }
+.legend { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.88rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.key.k1 { border-top-color: #40d0e0; } .key.k2 { border-top-color: #f0a050; } .key.k3 { border-top-color: #b48cff; }
+.key.kc { border-top: 1px solid #6f7fae; } .key.kt { border-top: 2px dashed var(--gold); }
+.tablewrap { overflow-x: auto; }
+.rtable { border-collapse: collapse; width: 100%; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.rtable th, .rtable td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable th { color: var(--gold-bright); font-weight: 600; }
+.rtable td.n, .rtable th.n { text-align: right; }
+.rtable tr.cur td { background: #12204a; }
+.mirror td { white-space: normal; }
+.mirror td.hit { color: var(--aqua); font-weight: 600; }
+.mirror td.miss { color: var(--muted); }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; color: var(--text); }
+html.hc .tide li { background: #000; border-color: #fff; } html.hc .tide li.played { background: #444; } html.hc .tide li.cur { background: #ffd400; }
+html.hc .ep { background: #000; border: 2px solid #fff; } html.hc .ep.t { border-color: #00ff96; } html.hc .ep.f { border-color: #ff8a8a; border-style: dashed; }
+html.hc .ep .m1, html.hc .key.k1 { stroke: #fff; border-top-color: #fff; } html.hc .ep .m2, html.hc .key.k2 { stroke: #ff6ad5; border-top-color: #ff6ad5; } html.hc .ep .m3, html.hc .key.k3 { stroke: #00ffff; border-top-color: #00ffff; }
+html.hc .ep .dot.m1 { fill: #fff; } html.hc .ep .dot.m2 { fill: #ff6ad5; } html.hc .ep .dot.m3 { fill: #00ffff; }
+html.hc .ep .chance { stroke: #9a9a9a; stroke-dasharray: 1 3; } html.hc .key.kc { border-top: 1px dotted #9a9a9a; }
+html.hc .ep .thr { stroke: #ffd400; } html.hc .rtable tr.cur td { background: #222; }
+html.hc .ep .dot { stroke: #000; }
+</style>
+<style>
+/* Membrane Arena: extra styles for Reverse Pair (loaded after reverse.css). Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+.ticks { list-style: none; margin: 8px 0 2px; padding: 0; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; }
+.ticks li { height: 22px; border-radius: 3px; border: 1px solid var(--line); font-size: 0.68rem; line-height: 20px; text-align: center; color: #fff; font-variant-numeric: tabular-nums; }
+.ticks li.o { background: #135a66; border-color: #40d0e0; }
+.ticks li.c { background: #5a4712; border-color: #c9a84c; }
+.tones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 760px) { .tones { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
+.tone { background: #070e26; border: 1px solid var(--line); border-radius: 8px; padding: 4px; min-width: 0; text-align: center; font-size: 0.75rem; color: var(--muted); }
+.tone svg { display: block; width: 100%; height: auto; }
+.tone .axis { stroke: #6f7fae; stroke-width: 0.8; }
+.tone .stem { stroke: #c9a84c; stroke-width: 1.4; }
+.tone .tip { fill: #c9a84c; }
+.tone .tip.neg { fill: #40d0e0; } .tone .stem.neg { stroke: #40d0e0; }
+.tone .wave { fill: none; stroke: #6f7fae; stroke-width: 0.8; stroke-dasharray: 2 2; }
+.ep .obs { fill: none; stroke: #40d0e0; stroke-width: 1.6; stroke-linejoin: round; }
+.ep .dot.obs { fill: #40d0e0; stroke: #fff; stroke-width: 1; }
+.ep .ctick { stroke: #c9a84c; stroke-width: 1; }
+.ep .bar { fill: #c9a84c; }
+.ep .bar.faded { fill: #f07a50; }
+.ep .truth { stroke: #fff; stroke-width: 1.6; }
+.ep .pred { stroke: #6f7fae; stroke-width: 1; stroke-dasharray: 3 2; }
+.ep .flabel { fill: var(--muted); font-size: 7px; text-anchor: middle; }
+.ep.h { border-color: var(--gold); border-style: dashed; } .ep.h .out { color: var(--gold-bright); }
+.key.ko { border-top: 2px solid #40d0e0; } .key.kcal { border-top: 2px dotted #c9a84c; }
+.key.kbar { border-top: 6px solid #c9a84c; } .key.ktrue { border-top: 2px solid #fff; } .key.kpred { border-top: 1px dashed #6f7fae; }
+html.hc .ticks li.o { background: #000; border-color: #fff; } html.hc .ticks li.c { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .tone { background: #000; border-color: #fff; color: #fff; }
+html.hc .tone .stem, html.hc .tone .tip { stroke: #ffd400; fill: #ffd400; } html.hc .tone .stem.neg, html.hc .tone .tip.neg { stroke: #00ffff; fill: #00ffff; }
+html.hc .ep .obs, html.hc .key.ko { stroke: #fff; border-top-color: #fff; } html.hc .ep .dot.obs { fill: #fff; stroke: #000; }
+html.hc .ep .ctick, html.hc .key.kcal { stroke: #ffd400; border-top-color: #ffd400; }
+html.hc .ep .bar, html.hc .key.kbar { fill: #ffd400; border-top-color: #ffd400; } html.hc .ep .bar.faded { fill: #ff6ad5; }
+html.hc .ep .truth, html.hc .key.ktrue { stroke: #00ffff; border-top-color: #00ffff; }
+html.hc .ep.h { border-color: #ffd400; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Reverse Pair</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+    <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+  <div class="playgrid">
+    <section class="card" aria-labelledby="ctl-h">
+      <h2 id="ctl-h" data-i18n="sec.controls"></h2>
+      <p id="forecast" class="forecast"></p>
+      <ol id="tide" class="tide" aria-hidden="true"></ol>
+      <div class="stepper"><span id="s-label" class="slabel" data-i18n="ctl.share"></span><button id="s-dec" class="btn step" type="button">&minus;</button><output id="s-val" aria-labelledby="s-label">1</output><button id="s-inc" class="btn step" type="button">+</button></div>
+      <p class="hint" data-i18n="ctl.share.hint"></p>
+      <ol id="ticks" class="ticks" aria-hidden="true"></ol>
+      <p id="ticks-text" class="hint"></p>
+      <div class="sliderrow"><label id="th-label" for="th" data-i18n="ctl.th"></label><input id="th" type="range" min="0.2" max="0.95" step="0.05" value="0.6"><output id="th-val" for="th">0.60</output></div>
+      <p class="hint" data-i18n="ctl.th.hint"></p>
+      <label class="switch"><input id="eq" type="checkbox"><span data-i18n="ctl.eq"></span></label>
+      <p class="hint indent" data-i18n="ctl.eq.hint"></p>
+      <label class="switch"><input id="shield" type="checkbox"><span data-i18n="ctl.shield"></span></label>
+      <p class="hint indent" data-i18n="ctl.shield.hint"></p>
+      <label class="switch"><input id="off" type="checkbox"><span data-i18n="ctl.off"></span></label>
+      <p class="hint indent" data-i18n="ctl.off.hint"></p>
+      <div class="controls">
+        <button id="btn-run" class="btn primary" type="button" data-i18n="btn.run"></button>
+        <button id="btn-rest" class="btn" type="button" data-i18n="btn.rest"></button>
+      </div>
+      <div class="controls">
+        <button id="btn-again" class="btn small" type="button" data-i18n="btn.again"></button>
+        <button id="btn-today" class="btn small" type="button" data-i18n="btn.today"></button>
+        <button id="btn-new" class="btn small" type="button" data-i18n="btn.new"></button>
+      </div>
+      <p id="seed" class="hint"></p>
+    </section>
+    <section class="card result" aria-labelledby="res-h">
+      <h2 id="res-h" data-i18n="sec.result"></h2>
+      <p id="score" class="bigscore">0</p>
+      <p id="tally" class="tally"></p>
+      <div id="res-text" aria-live="polite"></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="tones-h">
+    <h2 id="tones-h" data-i18n="sec.tones"></h2>
+    <p data-i18n="tones.p"></p>
+    <div id="tones" class="tones"></div>
+  </section>
+  <section class="card" aria-labelledby="chart-h">
+    <h2 id="chart-h" data-i18n="sec.chart"></h2>
+    <p class="hint" data-i18n="chart.note"></p>
+    <div id="episodes" class="episodes"></div>
+    <ul class="legend">
+      <li><span class="key ko"></span><span data-i18n="legend.obs"></span></li>
+      <li><span class="key kt"></span><span data-i18n="legend.th"></span></li>
+      <li><span class="key kcal"></span><span data-i18n="legend.cal"></span></li>
+      <li><span class="key kbar"></span><span data-i18n="legend.read"></span></li>
+      <li><span class="key ktrue"></span><span data-i18n="legend.true"></span></li>
+      <li><span class="key kpred"></span><span data-i18n="legend.pred"></span></li>
+    </ul>
+  </section>
+  <section class="card" aria-labelledby="rounds-h">
+    <h2 id="rounds-h" data-i18n="sec.rounds"></h2>
+    <div class="tablewrap">
+      <table id="rounds" class="rtable">
+        <thead><tr><th scope="col" class="n" data-i18n="col.round"></th><th scope="col" class="n" data-i18n="col.dark"></th><th scope="col" data-i18n="col.setup"></th><th scope="col" class="n" data-i18n="col.t"></th><th scope="col" class="n" data-i18n="col.f"></th><th scope="col" class="n" data-i18n="col.m"></th><th scope="col" class="n" data-i18n="col.held"></th></tr></thead>
+        <tbody id="rounds-body"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" aria-labelledby="cal-h">
+    <h2 id="cal-h" data-i18n="sec.cal"></h2>
+    <p data-i18n="cal.p"></p>
+    <div class="controls"><button id="btn-cal" class="btn" type="button" data-i18n="btn.cal"></button></div>
+    <div class="tablewrap">
+      <table id="cal" class="rtable">
+        <thead><tr><th scope="col" data-i18n="cal.share"></th><th scope="col" class="n" data-i18n="cal.ticks"></th><th scope="col" class="n" data-i18n="cal.fade"></th><th scope="col" class="n" data-i18n="cal.clean"></th></tr></thead>
+        <tbody id="cal-body"></tbody>
+      </table>
+    </div>
+    <p id="cal-text" class="hint" aria-live="polite"></p>
+  </section>
+  <section class="card" aria-labelledby="eval-h">
+    <h2 id="eval-h" data-i18n="sec.eval"></h2>
+    <p data-i18n="eval.p1"></p>
+    <p data-i18n="eval.p2"></p>
+    <p data-i18n="eval.p3"></p>
+    <p data-i18n="eval.p4"></p>
+    <p class="hint" data-i18n="eval.note"></p>
+  </section>
+  <section class="card">
+    <h2 data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script>
+/* GENERATED by scripts/make-baselines.js from data/*.csv. Do not edit by hand. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaBaselines = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {
+   "SOURCE": {
+    "commit": "c74c60beeb9706ea6d30fd6973b2a821a5b23926",
+    "repo": "sparkainlp-x/crystallization-contest",
+    "contest": "results/contest_w32-128_summary.csv",
+    "contest256": "results/contest_256_summary.csv",
+    "sweep": "results/sweep_summary.csv",
+    "stress": "results/stress_summary.csv"
+   },
+   "CONTEST32": [
+    {
+     "w": 0,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 113.8,
+     "Tsd": 10.4,
+     "F": 13,
+     "Fsd": 8.111,
+     "P": 0.901,
+     "Psd": 0.059,
+     "rv": 0.04,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 41.5,
+     "Tsd": 2.819,
+     "F": 3.75,
+     "Fsd": 2.845,
+     "P": 0.919,
+     "Psd": 0.061,
+     "rv": 0.005,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 41.25,
+     "Tsd": 4.908,
+     "F": 3.9,
+     "Fsd": 4.756,
+     "P": 0.915,
+     "Psd": 0.104,
+     "rv": 0.006,
+     "mg": 1.398,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.8,
+     "Tsd": 6.856,
+     "F": 5.65,
+     "Fsd": 6.368,
+     "P": 0.877,
+     "Psd": 0.141,
+     "rv": 0.002,
+     "mg": 1.397,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.9,
+     "Tsd": 5.92,
+     "F": 10.2,
+     "Fsd": 6.005,
+     "P": 0.922,
+     "Psd": 0.044,
+     "rv": 0.041,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.528,
+     "F": 3.95,
+     "Fsd": 3.913,
+     "P": 0.915,
+     "Psd": 0.083,
+     "rv": 0.004,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.117,
+     "F": 4.05,
+     "Fsd": 3.3,
+     "P": 0.913,
+     "Psd": 0.071,
+     "rv": 0.004,
+     "mg": 1.362,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.2,
+     "Tsd": 6.204,
+     "F": 10,
+     "Fsd": 6.481,
+     "P": 0.923,
+     "Psd": 0.048,
+     "rv": 0.043,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.675,
+     "F": 3.75,
+     "Fsd": 4.025,
+     "P": 0.92,
+     "Psd": 0.086,
+     "rv": 0.004,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.297,
+     "F": 3.75,
+     "Fsd": 3.552,
+     "P": 0.919,
+     "Psd": 0.076,
+     "rv": 0.004,
+     "mg": 1.319,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    }
+   ],
+   "SCHEMES32": [
+    {
+     "scheme": "individual",
+     "seeds": 20,
+     "T": 6.75,
+     "F": 0.5,
+     "P": 0.937
+    },
+    {
+     "scheme": "team",
+     "seeds": 20,
+     "T": 12.35,
+     "F": 0.5,
+     "P": 0.959
+    },
+    {
+     "scheme": "difference",
+     "seeds": 20,
+     "T": 12.75,
+     "F": 0.45,
+     "P": 0.965
+    },
+    {
+     "scheme": "consensus",
+     "seeds": 20,
+     "T": 13.15,
+     "F": 0.2,
+     "P": 0.985
+    },
+    {
+     "scheme": "random",
+     "seeds": 20,
+     "T": 11.5,
+     "F": 0.4,
+     "P": 0.966
+    }
+   ],
+   "LESSON": {
+    "shieldFpMin": 2.3,
+    "shieldFpMax": 3.2,
+    "shieldVarMin": 8,
+    "shieldVarMax": 17,
+    "ampMaxDeltaP": 0.004,
+    "stabCostMin": 0.3,
+    "stabCostMax": 4.8,
+    "indLowest": 10,
+    "indCells": 15,
+    "runawayNoZMin": 20,
+    "runawayNoZMax": 35,
+    "runawayZMax": 0,
+    "seeds": 20
+   }
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: pure game logic (SYNTHETIC classical simulation).
+ *
+ * A JavaScript port of the three-membrane crystallization contest of
+ * sparkainlp-x/crystallization-contest at width n = 32, with seeded
+ * determinism, lazy per-generation stepping (so the player can steer between
+ * generations), reward schemes, scoring, baseline comparison, lessons, daily
+ * seeds, hash links, a store sanitizer and the plain-text share card.
+ * No DOM, no network, no storage.
+ *
+ * The port is statistically comparable to the Python original, not
+ * bit-identical: the random number generators differ. See DESIGN.md.
+ * Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./baselines.js'));
+  else root.ArenaGame = factory(root.ArenaBaselines);
+})(typeof self !== 'undefined' ? self : this, function (BASE) {
+  'use strict';
+
+  var VERSION = '0.3.2';
+  var BUILD = VERSION;   // shown in the page footer
+  var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
+  var EPOCH = '2026-10-24';              // day number 1
+  var N = 32;                            // width of the measured baselines used here
+  var EP = 8, GENS = 12, STEPS = 60;     // as in the repository contest
+  var CHECK = 10, WINDOW = 5, ETA = 0.5;
+  var AGREE = 0.4, TRUTH = 0.5, SIGMA_SCALE = 1.5;
+  var AMP_CAP = 0.5, TARGET = 0.5, LEAK = 0.3, KSTAB = 1.5;
+  var GAIN_MIN = 0.33, GAIN_MAX = 3.0, FACTOR_MIN = 0.2;
+  var TH_MIN = 0.02, TH_MAX = 1.5, C_MAX = 0.5;
+  var SCHEMES = ['individual', 'team', 'difference', 'consensus', 'random'];
+  var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
+  var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
+  var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
+  var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
+
+  /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
+
+  function hashStr(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seedStr) { return mulberry32(hashStr(String(seedStr))); }
+  function gauss(rng) {
+    var u = 0;
+    while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+
+  /* ---------- complex vectors in C^n: {r, i} Float64Array pairs ---------- */
+
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function normalize(v) {
+    var s = 0, k, n = v.r.length;
+    for (k = 0; k < n; k++) s += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    s = Math.sqrt(s);
+    if (!(s > 0) || !isFinite(s)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= s; v.i[k] /= s; }
+    return v;
+  }
+  function rvec(n, rng) {
+    var v = zeros(n);
+    for (var k = 0; k < n; k++) { v.r[k] = gauss(rng); v.i[k] = gauss(rng); }
+    return normalize(v);
+  }
+  function noisy(state, sigma, rng) {
+    var n = state.r.length, v = zeros(n);
+    for (var k = 0; k < n; k++) {
+      v.r[k] = state.r[k] + sigma * gauss(rng);
+      v.i[k] = state.i[k] + sigma * gauss(rng);
+    }
+    return normalize(v);
+  }
+  // <a|b> = sum conj(a) b
+  function inner(a, b) {
+    var re = 0, im = 0, n = a.r.length;
+    for (var k = 0; k < n; k++) {
+      re += a.r[k] * b.r[k] + a.i[k] * b.i[k];
+      im += a.r[k] * b.i[k] - a.i[k] * b.r[k];
+    }
+    return { re: re, im: im };
+  }
+  function fidelity(a, b) { var z = inner(a, b); return z.re * z.re + z.im * z.im; }
+  function copyVec(v) { return { r: Float64Array.from(v.r), i: Float64Array.from(v.i) }; }
+
+  /* ---------- the contest, as in crystallization_contest/{events,rewards,contest}.py ---------- */
+
+  function sigmaFor(n) { return SIGMA_SCALE / Math.sqrt(n); }
+  function scaledThreshold(q, n, sigma) { return 1 + q * n / (1 + 2 * sigma * sigma * n); }
+  function energyRatio(win, n) {
+    var s = 0;
+    for (var k = 0; k < win.length; k++) s += win[k];
+    return n * s / win.length;
+  }
+  function agreeing(vec, decls, thresh) {
+    var c = 0;
+    for (var k = 0; k < decls.length; k++) if (decls[k] && fidelity(vec, decls[k]) >= thresh) c++;
+    return c;
+  }
+  function systemEvent(decls, thresh) {            // need ceil(3/2) = 2 of 3
+    for (var k = 0; k < decls.length; k++) if (decls[k] && agreeing(decls[k], decls, thresh) >= 2) return k;
+    return null;
+  }
+  function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
+
+  function reward(scheme, i, decls) {              // rewards.py, for 3 agents
+    var without, team;
+    if (scheme === 'individual') return decls[i] ? 1 : 0;
+    if (scheme === 'team' || scheme === 'difference') team = systemEvent(decls, AGREE) !== null ? 1 : 0;
+    if (scheme === 'team') return team;
+    if (scheme === 'difference') {
+      without = decls.slice(); without[i] = null;
+      return team - (systemEvent(without, AGREE) !== null ? 1 : 0);
+    }
+    if (scheme === 'consensus') return decls[i] && agreeing(decls[i], decls, AGREE) >= 2 ? 1 : 0;
+    return 0;                                      // random
+  }
+
+  function warmStart(v, warm, amp) {
+    amp = Math.min(Math.max(amp, 0), AMP_CAP);
+    if (!warm || amp === 0) return v;
+    var o = zeros(v.r.length);
+    for (var k = 0; k < o.r.length; k++) { o.r[k] = (1 - amp) * v.r[k] + amp * warm.r[k]; o.i[k] = (1 - amp) * v.i[k] + amp * warm.i[k]; }
+    return normalize(o);
+  }
+  function stabilizerFactor(rateEma) { return Math.max(FACTOR_MIN, 1 - KSTAB * (rateEma - TARGET)); }
+  function leakyUpdate(rateEma, evRate) { return (1 - LEAK) * rateEma + LEAK * evRate; }
+  function clampGain(g) { return Math.min(GAIN_MAX, Math.max(GAIN_MIN, g)); }
+
+  // One episode of 3 coupled Oja membranes. `trace` (Float32Array STEPS*3) records geff * energy ratio.
+  // `ix` is optional instrumentation that draws no random numbers, so it never changes a result:
+  //   ix.fid   Float32Array STEPS*3, |<v|pattern>| of each membrane after each step (-1 in a noise episode)
+  //   ix.noDecl  when true nobody declares or freezes (used by the Lab probe)
+  //   ix.chk   when set to [[],[],[]], each check step pushes [geff * energy ratio, fidelity to the pattern] per membrane
+  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix) {
+    ix = ix || {};
+    var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
+    var lastFid = [-1, -1, -1];
+    if (ix.fid) for (k = 0; k < ix.fid.length; k++) ix.fid[k] = -1;
+    for (i = 0; i < 3; i++) vs.push(warmStart(rvec(n, rng), warm, amp));
+    var thr = [];
+    for (i = 0; i < 3; i++) thr.push(scaledThreshold(Math.min(TH_MAX, P[i].th * (2 - P[i].sp)), n, sigma));
+    var last = [0, 0, 0];
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i]; continue; }
+        var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+        var y = inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im);
+        if (win[i].length > WINDOW) win[i].shift();
+        var v = zeros(n), c = P[i].c;
+        for (k = 0; k < n; k++) {
+          v.r[k] = vs[i].r[k] + ETA * (x.r[k] * y.re - x.i[k] * y.im);
+          v.i[k] = vs[i].i[k] + ETA * (x.r[k] * y.im + x.i[k] * y.re);
+        }
+        if (c > 0) {
+          for (j = 0; j < 3; j++) {
+            if (j === i) continue;
+            var ph = inner(vs[j], v), m = Math.sqrt(ph.re * ph.re + ph.im * ph.im), pr = 1, pi = 0;
+            if (m > 0) { pr = ph.re / m; pi = ph.im / m; }
+            for (k = 0; k < n; k++) {
+              v.r[k] += c * (pr * vs[j].r[k] - pi * vs[j].i[k]);
+              v.i[k] += c * (pr * vs[j].i[k] + pi * vs[j].r[k]);
+            }
+          }
+        }
+        vs[i] = normalize(v);
+        last[i] = P[i].geff * energyRatio(win[i], n);
+        trace[(t - 1) * 3 + i] = last[i];
+        if (pat) lastFid[i] = Math.sqrt(fidelity(vs[i], pat));
+        if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pat ? fidelity(vs[i], pat) : 0]);
+          if (!ix.noDecl && !decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, thr: thr };
+  }
+
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      scheme: SCHEMES.indexOf(s.scheme) >= 0 ? s.scheme : d.scheme,
+      w: num(s.w, 0, 1, d.w),
+      shield: s.shield === undefined ? d.shield : !!s.shield,
+      amp: s.amp === undefined ? d.amp : !!s.amp,
+      stab: s.stab === undefined ? d.stab : !!s.stab,
+      evolve: s.evolve === undefined ? d.evolve : !!s.evolve,
+      fcost: num(s.fcost, 0, 2, d.fcost),
+      th: num(s.th, 0.1, 1.2, d.th), c: num(s.c, 0, C_MAX, d.c), g: num(s.g, 0.5, 2, d.g)
+    };
+  }
+
+  function createContest(seed, init) {
+    var o = sanitizeSettings(init), sigma = sigmaFor(N), par = [];
+    for (var i = 0; i < 3; i++) par.push({ th: o.th, c: o.c, g: o.g, sp: 0.5, geff: 1 });
+    return {
+      seed: String(seed), n: N, sigma: sigma, par: par, best: [-1, -1, -1], rateEma: TARGET, warm: null, hist: [], gen: 0,
+      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut')
+    };
+  }
+  function done(c) { return c.gen >= GENS; }
+
+  // Starting parameters of a contest are set by its seed, so every player of a daily contest begins in the same place.
+  // The repository baselines all began at DEFAULTS (th 0.5, c 0.05, g 1.0).
+  function startFor(seed) {
+    var r = makeRng(GEN + seed + '/start'), r2 = function (x) { return Math.round(x * 100) / 100; };
+    return { th: r2(0.3 + 0.5 * r()), c: r2(0.3 * r()), g: r2(0.7 + 0.8 * r()) };
+  }
+
+  // Run generation c.gen with `settings`; returns the generation record (also appended to c.hist).
+  function stepGeneration(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), n = c.n, i, e, cand = [];
+    for (i = 0; i < 3; i++) cand.push({ th: c.par[i].th, c: c.par[i].c, g: c.par[i].g, sp: c.par[i].sp, geff: 1 });
+    var clamped = [false, false, false], mutated = false;
+    if (c.gen > 0 && o.evolve) {
+      mutated = true;
+      cand.forEach(function (p, k) {
+        p.th = Math.min(TH_MAX, Math.max(TH_MIN, p.th * Math.exp(0.2 * gauss(c.mrng))));
+        p.c = Math.min(C_MAX, Math.max(0, p.c + 0.05 * gauss(c.mrng)));
+        p.g = p.g * Math.exp(0.2 * gauss(c.mrng));
+      });
+    }
+    if (o.stab) cand.forEach(function (p, k) { var g = clampGain(p.g); clamped[k] = g !== p.g; p.g = g; });
+    var fp = [0, 0, 0], tp = [0, 0, 0], bonus = [0, 0, 0], joint = 0, outT = 0, outF = 0, episodes = [];
+    var paramsStart = cand.map(function (p) { return { th: p.th, c: p.c, g: p.g }; });
+    for (e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? rvec(n, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      cand.forEach(function (p) { p.geff = p.g * (o.stab ? stabilizerFactor(c.rateEma) : 1); });
+      var geffs = cand.map(function (p) { return p.geff; });
+      var fidTrace = new Float32Array(STEPS * 3);
+      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace, { fid: fidTrace });
+      var d = ep.decl, truth = d.map(function (di) { return isTrueEvent(di, pat); }), agree = [];
+      for (i = 0; i < 3; i++) {
+        if (truth[i]) tp[i]++;
+        if (d[i] && !truth[i]) fp[i]++;
+        bonus[i] += reward(o.scheme, i, d);
+        if (d[i]) {
+          var conf = false;
+          for (var j = 0; j < 3; j++) if (j !== i && d[j] && fidelity(d[i], d[j]) >= AGREE) { conf = true; if (j > i) agree.push([i, j]); }
+          cand[i].sp = 0.8 * cand[i].sp + 0.2 * (conf ? 1 : 0);
+        }
+      }
+      if (truth[0] && truth[1] && truth[2]) joint++;
+      var outs, passed = null;
+      if (o.shield) {
+        passed = null;
+        for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        outs = passed === null ? [] : [passed];
+      } else {
+        outs = [];
+        for (i = 0; i < 3; i++) if (d[i]) outs.push(i);
+      }
+      var evT = 0, evF = 0;
+      outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+      outT += evT; outF += evF;
+      c.warm = outs.length ? d[outs[0]] : null;
+      c.rateEma = leakyUpdate(c.rateEma, outs.length / (o.shield ? 1 : 3));
+      episodes.push({
+        planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
+        dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
+        agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
+      });
+    }
+    var m = Math.max(tp[0], tp[1], tp[2]), top = [];
+    for (i = 0; i < 3; i++) if (tp[i] === m) top.push(i);
+    var scores = [], accepted = [], contest = [];
+    for (i = 0; i < 3; i++) {
+      var rank = top.indexOf(i) >= 0 && m > 0 ? 1 / top.length : 0;
+      var base = o.w * joint + (1 - o.w) * rank;
+      var s = base + SCHEME_SCALE * bonus[i] - o.fcost * fp[i] / EP;
+      scores.push(s); contest.push(base);
+      if (s >= c.best[i]) { c.best[i] = s; c.par[i] = cand[i]; accepted.push(true); } else accepted.push(false);
+    }
+    var rec = {
+      gen: c.gen, settings: o, episodes: episodes, outT: outT, outF: outF, shield: o.shield, mutated: mutated,
+      params: paramsStart, geff: episodes[EP - 1].geff, clamped: clamped,
+      maxG: Math.max(c.par[0].g, c.par[1].g, c.par[2].g), gains: c.par.map(function (p) { return p.g; }),
+      scores: scores, contest: contest, bonus: bonus.map(function (b) { return SCHEME_SCALE * b; }), accepted: accepted,
+      best: c.best.slice(), joint: joint, tp: tp, fp: fp, rateEma: c.rateEma,
+      parAfter: c.par.map(function (p) { return { th: p.th, c: p.c, g: p.g, sp: p.sp }; })
+    };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+
+  /* ---------- scoring (the game's own weights; the repository has no game score) ---------- */
+
+  function pvariance(xs) {
+    if (!xs.length) return 0;
+    var m = 0, v = 0, k;
+    for (k = 0; k < xs.length; k++) m += xs[k];
+    m /= xs.length;
+    for (k = 0; k < xs.length; k++) v += (xs[k] - m) * (xs[k] - m);
+    return v / xs.length;
+  }
+  function clamp01(x) { return Math.min(1, Math.max(0, x)); }
+
+  function summarize(hist) {
+    var T = 0, F = 0, teq = 0, feq = 0, rates = [], maxG = 0, k;
+    hist.forEach(function (h) {
+      var w = h.shield ? 1 : 1 / 3;
+      T += h.outT; F += h.outF; teq += h.outT * w; feq += h.outF * w;
+      rates.push((h.outT + h.outF) / EP);
+      if (h.maxG > maxG) maxG = h.maxG;
+    });
+    var gens = hist.length, planted = gens * EP / 2;
+    var precision = T + F > 0 ? T / (T + F) : 0;
+    var rateVar = pvariance(rates);
+    var net = planted > 0 ? (teq - feq) / planted : 0;
+    var steadiness = T + F > 0 ? 1 - clamp01(rateVar / STEADY_REF) : 0;
+    var score = 100 * (0.5 * clamp01(net) + 0.25 * precision + 0.25 * steadiness);
+    return {
+      gens: gens, T: T, F: F, precision: precision, rateVar: rateVar, maxG: maxG, finalG: gens ? hist[gens - 1].maxG : 0,
+      net: net, steadiness: steadiness, score: score,
+      parts: { net: 50 * clamp01(net), precision: 25 * precision, steadiness: 25 * steadiness }
+    };
+  }
+
+  /* ---------- baselines from the repository's results ---------- */
+
+  function cfgTag(s) { return (s.shield ? 'S' : '-') + (s.amp ? 'A' : '-') + (s.stab ? 'Z' : '-'); }
+  function nearestW(w) {
+    var best = W_STEPS[0];
+    W_STEPS.forEach(function (x) { if (Math.abs(x - w) < Math.abs(best - w)) best = x; });
+    return best;
+  }
+  // measured width-32 row for the player's configuration, or null when the repository did not measure it
+  function baselineFor(settings) {
+    var s = sanitizeSettings(settings), tag = cfgTag(s), wm = [0, 0.5, 1], w = wm[0];
+    wm.forEach(function (x) { if (Math.abs(x - s.w) < Math.abs(w - s.w) - 1e-9) w = x; });
+    for (var k = 0; k < BASE.CONTEST32.length; k++) {
+      var r = BASE.CONTEST32[k];
+      if (r.cfg === tag && r.w === w) return { row: r, w: w, exactW: Math.abs(w - s.w) < 1e-9, tag: tag, file: BASE.SOURCE.contest };
+    }
+    return null;
+  }
+  // The same game score applied to the repository's mean counts (an approximation, labelled as such).
+  function baselineScore(b) {
+    if (!b) return null;
+    var shielded = b.tag.charAt(0) === 'S', r = b.row, planted = GENS * EP / 2;
+    var wgt = shielded ? 1 : 1 / 3;
+    var net = (r.T - r.F) * wgt / planted;
+    var steady = 1 - clamp01(r.rv / STEADY_REF);
+    return 100 * (0.5 * clamp01(net) + 0.25 * r.P + 0.25 * steady);
+  }
+
+  /* ---------- lessons (numbers come from baselines.js, which comes from the CSV copies) ---------- */
+
+  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'evolve', 'handpicked', 'synthetic'];
+  function lessonVars() {
+    var L = BASE.LESSON;
+    return {
+      fpmin: L.shieldFpMin, fpmax: L.shieldFpMax, vmin: L.shieldVarMin, vmax: L.shieldVarMax, ampd: L.ampMaxDeltaP.toFixed(3),
+      cmin: L.stabCostMin, cmax: L.stabCostMax, low: L.indLowest, cells: L.indCells,
+      rmin: L.runawayNoZMin, rmax: L.runawayNoZMax, seeds: L.seeds
+    };
+  }
+  // Which lesson fits this run: the one about the thing the player just did, otherwise a rotation by seed.
+  function pickLesson(settings, seed) {
+    var s = sanitizeSettings(settings);
+    if (!s.shield) return 'shield';
+    if (s.amp) return 'amp';
+    if (s.stab) return 'stab';
+    if (s.scheme === 'individual') return 'individual';
+    return LESSON_IDS[hashStr(String(seed || '')) % LESSON_IDS.length];
+  }
+
+  /* ---------- dates, daily seeds, streaks ---------- */
+
+  function dateIndex(str) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str));
+    if (!m) return NaN;
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var ms = Date.UTC(y, mo - 1, d), dt = new Date(ms);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return NaN;
+    return Math.round(ms / 86400000);
+  }
+  function dayNumber(dateStr) { return dateIndex(dateStr) - dateIndex(EPOCH) + 1; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function localDateString(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function dailySeed(dateStr) { return 'd' + dateStr; }
+  function seedDate(seed) { return seed.charAt(0) === 'd' && !isNaN(dateIndex(seed.slice(1))) ? seed.slice(1) : null; }
+  function computeStreak(dates, today) {
+    var idx = {};
+    dates.forEach(function (d) { var i = dateIndex(d); if (!isNaN(i)) idx[i] = true; });
+    var days = Object.keys(idx).map(Number).sort(function (a, b) { return a - b; });
+    var best = 0, run = 0, prev = null;
+    days.forEach(function (d) { run = prev !== null && d === prev + 1 ? run + 1 : 1; prev = d; if (run > best) best = run; });
+    var t = dateIndex(today), cur = 0;
+    var d0 = idx[t] ? t : (idx[t - 1] ? t - 1 : null);
+    if (d0 !== null) { for (var d = d0; idx[d]; d--) cur++; }
+    return { current: cur, best: best };
+  }
+
+  /* ---------- hash links, checked field by field ---------- */
+
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  var CFG_RE = /^([itdcr])-(0|25|50|75|100)-([S-])([A-])([Z-])$/;
+  var SCHEME_CODE = { i: 'individual', t: 'team', d: 'difference', c: 'consensus', r: 'random' };
+  function parseHash(hash) {
+    var out = { mode: 'daily', seed: null, date: null, best: null, lang: null, preset: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1), m;
+      if (k === 'd' && dateIndex(v) >= dateIndex(EPOCH)) { out.date = v; out.seed = dailySeed(v); out.mode = 'challenge'; }
+      else if (k === 's' && SEED_RE.test(v)) { out.seed = v; out.mode = 'challenge'; }
+      else if (k === 'b' && /^\d{1,3}$/.test(v) && +v <= 100) out.best = parseInt(v, 10);
+      else if (k === 'l' && /^[a-z]{2}$/.test(v)) out.lang = v;
+      else if (k === 'c' && (m = CFG_RE.exec(v))) {
+        out.preset = { scheme: SCHEME_CODE[m[1]], w: +m[2] / 100, shield: m[3] === 'S', amp: m[4] === 'A', stab: m[5] === 'Z' };
+      }
+    });
+    if (out.seed === null) { out.best = null; out.preset = null; }
+    return out;
+  }
+  function presetCode(s) {
+    var o = sanitizeSettings(s), code = 'itdcr'.charAt(SCHEMES.indexOf(o.scheme));
+    return code + '-' + Math.round(nearestW(o.w) * 100) + '-' + cfgTag(o);
+  }
+  function buildChallengeHash(o) {
+    var parts = [];
+    if (o.date) parts.push('d=' + o.date); else parts.push('s=' + o.seed);
+    if (typeof o.best === 'number' && isFinite(o.best)) parts.push('b=' + Math.max(0, Math.min(100, Math.round(o.best))));
+    if (o.settings) parts.push('c=' + presetCode(o.settings));
+    if (o.lang) parts.push('l=' + o.lang);
+    return '#' + parts.join('&');
+  }
+
+  /* ---------- share card (plain text, no emoji) ---------- */
+
+  function fmt(str, vars) {
+    return String(str).replace(/\{(\w+)\}/g, function (m, k) { return vars && k in vars ? vars[k] : m; });
+  }
+  function bar(value, max, width) {
+    width = width || 10;
+    var f = Math.round(Math.min(1, Math.max(0, value / max)) * width);
+    return new Array(f + 1).join('\u2588') + new Array(width - f + 1).join('\u2591');
+  }
+  function buildShare(o) {
+    var L = o.labels, r = o.result, lines = [];
+    lines.push(o.seed ? fmt(L['share.title_seed'], { seed: o.seed }) : fmt(L['share.title'], { day: o.day, date: o.date }));
+    lines.push(fmt(L['share.score'], { score: Math.round(r.score) }) + (o.ref === null || o.ref === undefined ? '' : ' ' + fmt(L['share.ref'], { ref: Math.round(o.ref) })));
+    lines.push(fmt(L['share.events'], { t: r.T, f: r.F, p: Math.round(r.precision * 100) }));
+    lines.push(fmt(L['share.setup'], { tag: cfgTag(o.settings), scheme: L['scheme.' + o.settings.scheme + '.short'], w: Math.round(o.settings.w * 100) }));
+    lines.push(L['share.steady'] + ' ' + bar(r.steadiness, 1, 10));
+    lines.push(L['share.synthetic']);
+    if (o.url) lines.push(o.url);
+    return lines.join('\n');
+  }
+
+  /* ---------- defensive store ---------- */
+
+  function sanitizeStore(raw) {
+    var out = { daily: {}, bestDaily: null, bestPractice: null, bestScheme: {}, missions: {}, hc: false, still: false, introSeen: false, tutorialSeen: false }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (raw.hc === true) out.hc = true;
+    if (raw.still === true) out.still = true;
+    if (raw.introSeen === true) out.introSeen = true;
+    if (raw.tutorialSeen === true) out.tutorialSeen = true;
+    var bs = raw.bestScheme;
+    if (bs && typeof bs === 'object' && !Array.isArray(bs)) SCHEMES.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(bs, k) && num(bs[k]) && bs[k] >= 0 && bs[k] <= 100) out.bestScheme[k] = bs[k]; });
+    var ms = raw.missions;
+    if (ms && typeof ms === 'object' && !Array.isArray(ms)) {
+      MISSION_IDS.forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(ms, id)) return;
+        var m = ms[id];
+        if (!m || typeof m !== 'object' || OUTCOMES.indexOf(m.outcome) < 0) return;
+        var n = num(m.n) && m.n >= 0 && m.n <= 200 && Math.floor(m.n) === m.n ? m.n : 0;
+        var metrics = Array.isArray(m.metrics) ? m.metrics.filter(function (x) { return METRIC_IDS.indexOf(x) >= 0; }).slice(0, 5) : [];
+        out.missions[id] = { outcome: m.outcome, n: n, metrics: metrics };
+      });
+    }
+    if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
+    if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
+    if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
+    var d = raw.daily;
+    if (d && typeof d === 'object' && !Array.isArray(d)) {
+      Object.keys(d).forEach(function (k) {
+        var e = d[k];
+        if (isNaN(dateIndex(k)) || dateIndex(k) < dateIndex(EPOCH) || !e || typeof e !== 'object') return;
+        if (!num(e.score) || !num(e.T) || !num(e.F) || !num(e.precision)) return;
+        if (e.score < 0 || e.score > 100 || e.precision < 0 || e.precision > 1) return;
+        if (e.T < 0 || e.F < 0 || e.T > 1000 || e.F > 1000 || Math.floor(e.T) !== e.T || Math.floor(e.F) !== e.F) return;
+        var st = typeof e.tag === 'string' && /^[S-][A-][Z-]$/.test(e.tag) ? e.tag : '---';
+        out.daily[k] = { score: e.score, T: e.T, F: e.F, precision: e.precision, tag: st };
+      });
+    }
+    return out;
+  }
+
+  return {
+    VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
+    AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
+    MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
+    sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
+    sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
+    summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
+    pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
+    dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
+    computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
+    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE,
+    episode: episode, copyVec: copyVec, pvariance: pvariance, clamp01: clamp01, SIGMA_SCALE: SIGMA_SCALE, STEADY_REF: STEADY_REF
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Reverse Membranes, the opposite-energy arena (SYNTHETIC classical simulation).
+ * Pure logic: no DOM, no network, no storage.
+ *
+ * The arena's membranes are Hebbian (Oja's rule): each one climbs towards the direction where its
+ * noisy observations carry the most energy, and declares when its windowed energy ratio rises
+ * far enough above 1 (the level a random direction would see). This page runs the mirror image:
+ *
+ *   dark pattern     every observation is random except that a hidden direction, the hole, has
+ *                    had part of its energy removed (`depth` of its amplitude). It is a pattern
+ *                    made of missing energy, the opposite of the arena's bright pattern.
+ *   reverse membrane the same update with the sign flipped (anti-Hebbian): v <- v - eta x <x|v>,
+ *                    then normalize. With eta = 1 each step removes the part of v along the latest
+ *                    observation, so v drifts towards the direction the observations lack.
+ *   echo             the membrane keeps its last WINDOW observations and replays the update over
+ *                    them `echo` more times per step. It is what makes absence learnable in 60
+ *                    steps: without it the descent is too slow (see docs/REVERSE.md).
+ *   opposite energy  E- = 1 - ratio: how far the membrane's windowed energy sits BELOW chance (1 means
+ *                    the observations carry no energy at all along it). A reverse membrane declares
+ *                    when E- reaches its threshold. Forward membranes use the mirrored rule
+ *                    ratio - 1 >= threshold.
+ *
+ * "Opposite energy" is a name for that signed score, nothing more. Nothing here models negative
+ * energy, antimatter, real membranes, neurons or any physical system.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./game.js'));
+  else root.ArenaReverse = factory(root.ArenaGame);
+})(typeof self !== 'undefined' ? self : this, function (G) {
+  'use strict';
+  var VERSION = G.VERSION;
+  var GEN = 'membrane-arena/reverse/v1/';  // generator namespace: changing it changes every contest
+  var N = 16;                              // half the arena width: see docs/REVERSE.md
+  var EP = G.EP, ROUNDS = G.GENS, STEPS = G.STEPS, CHECK = G.CHECK;   // 8 episodes, 12 rounds, 60 steps, check every 10
+  var WINDOW = 10;                         // energy window and echo buffer
+  var ETA = { forward: 0.5, reverse: 1.0 };// forward = the arena's rate; reverse = one exact removal per sample
+  var TRUTH = G.TRUTH, AGREE = G.AGREE;    // 0.5 fidelity to count as the pattern, 0.4 to agree
+  var DEPTH_MIN = 0.6, DEPTH_MAX = 1.0;
+  var POLARITIES = ['reverse', 'forward'];
+  var WORLDS = ['dark', 'bright'];
+  var ECHO_MAX = 2;
+  var LIMITS = { th: [0.2, 0.95] };
+  var DEFAULTS = { polarity: 'reverse', th: 0.6, echo: 1, shield: true };
+  var SIGN = { forward: 1, reverse: -1 };
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function round2(x) { return Math.round(x * 100) / 100; }
+  /* ---------- settings ---------- */
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      polarity: POLARITIES.indexOf(s.polarity) >= 0 ? s.polarity : d.polarity,
+      th: num(s.th, LIMITS.th[0], LIMITS.th[1], d.th),
+      echo: Math.round(num(s.echo, 0, ECHO_MAX, d.echo)),
+      shield: s.shield === undefined ? d.shield : !!s.shield
+    };
+  }
+  /* ---------- observations ---------- */
+  // a random observation with `depth` of the hole's amplitude removed (depth 1 removes it all)
+  function darkSample(hole, depth, rng) {
+    var n = hole.r.length, g = zeros(n), k;
+    for (k = 0; k < n; k++) { g.r[k] = G.gauss(rng); g.i[k] = G.gauss(rng); }
+    var z = G.inner(hole, g);
+    for (k = 0; k < n; k++) {
+      g.r[k] -= depth * (z.re * hole.r[k] - z.im * hole.i[k]);
+      g.i[k] -= depth * (z.re * hole.i[k] + z.im * hole.r[k]);
+    }
+    return G.normalize(g);
+  }
+  function sample(world, pat, depth, sigma, n, rng) {
+    if (!pat) return G.rvec(n, rng);
+    return world === 'dark' ? darkSample(pat, depth, rng) : G.noisy(pat, sigma, rng);
+  }
+  // v <- v + s * eta * x <x|v>, normalized in place (s = +1 Hebbian, -1 anti-Hebbian)
+  function update(v, x, s, eta) {
+    var y = G.inner(x, v), n = v.r.length, a = s * eta, k, xr, xi, q = 0;
+    var yr = a * y.re, yi = a * y.im;
+    for (k = 0; k < n; k++) {
+      xr = x.r[k]; xi = x.i[k];
+      v.r[k] += xr * yr - xi * yi;
+      v.i[k] += xr * yi + xi * yr;
+      q += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    }
+    q = Math.sqrt(q);
+    if (!(q > 0) || !isFinite(q)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= q; v.i[k] /= q; }
+    return v;
+  }
+  // signed energy: forward measures energy above chance (ratio - 1), reverse the opposite energy below it (1 - ratio)
+  function signedEnergy(polarity, ratio) { return SIGN[polarity] * (ratio - 1); }
+  /* ---------- one episode of three membranes ---------- */
+  // o: { world, pat (null for a noise episode), depth, P: settings }. trace (Float32Array STEPS*3)
+  // records each membrane's signed energy; it freezes at the declaration, as in the arena.
+  function episode(o, rng, trace) {
+    var n = N, P = o.P, s = SIGN[P.polarity], eta = ETA[P.polarity], sigma = G.sigmaFor(n);
+    var vs = [], win = [[], [], []], buf = [[], [], []], decl = [null, null, null], declStep = [null, null, null];
+    var last = [0, 0, 0], i, t, r, b;
+    for (i = 0; i < 3; i++) vs.push(G.rvec(n, rng));
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { if (trace) trace[(t - 1) * 3 + i] = last[i]; continue; }
+        var x = sample(o.world, o.pat, o.depth, sigma, n, rng), y = G.inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im); if (win[i].length > WINDOW) win[i].shift();
+        buf[i].push(x); if (buf[i].length > WINDOW) buf[i].shift();
+        vs[i] = update(vs[i], x, s, eta);
+        for (r = 0; r < P.echo; r++) for (b = 0; b < buf[i].length; b++) vs[i] = update(vs[i], buf[i][b], s, eta);
+        last[i] = signedEnergy(P.polarity, G.energyRatio(win[i], n));
+        if (trace) trace[(t - 1) * 3 + i] = last[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (decl[i]) continue;
+          if (last[i] >= P.th) { decl[i] = G.copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, last: last };
+  }
+  // what the three declarations add up to: with the shield only a declaration that 2 of 3 agree on passes
+  function judge(decl, pat, shield) {
+    var truth = decl.map(function (d) { return isTrue(d, pat); });
+    var outs = [], passed = null, i, j;
+    if (shield) {
+      for (i = 0; i < 3; i++) {
+        if (!decl[i]) continue;
+        var c = 0;
+        for (j = 0; j < 3; j++) if (decl[j] && G.fidelity(decl[i], decl[j]) >= AGREE) c++;
+        if (c >= 2) { passed = i; break; }
+      }
+      if (passed !== null) outs.push(passed);
+    } else for (i = 0; i < 3; i++) if (decl[i]) outs.push(i);
+    var evT = 0, evF = 0;
+    outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+    return { truth: truth, outs: outs, passed: passed, evT: evT, evF: evF,
+      dropped: shield && passed === null && (decl[0] || decl[1] || decl[2]) ? true : false };
+  }
+  function isTrue(d, pat) { return !!d && !!pat && G.fidelity(d, pat) >= TRUTH; }
+  /* ---------- the contest: 12 rounds of 8 episodes in the dark world ---------- */
+  // How dark the hidden pattern is in each round: a seeded tide between DEPTH_MIN and DEPTH_MAX.
+  function depthsFor(seed) {
+    var r = G.makeRng(GEN + seed + '/tide'), ph = 2 * Math.PI * r(), f = 0.35 + 0.4 * r(), out = [];
+    for (var k = 0; k < ROUNDS; k++) {
+      var d = 0.8 + 0.17 * Math.sin(ph + f * k) + 0.06 * (r() - 0.5);
+      out.push(round2(Math.min(DEPTH_MAX, Math.max(DEPTH_MIN, d))));
+    }
+    return out;
+  }
+  function createContest(seed) {
+    seed = String(seed);
+    return { seed: seed, depths: depthsFor(seed), hist: [], gen: 0, rng: G.makeRng(GEN + seed + '/main') };
+  }
+  function done(c) { return c.gen >= ROUNDS; }
+  // Where a contest's controls begin: the arena's way round (forward), no echo, a seeded threshold.
+  // Finding the reverse polarity and the echo is the first part of the game.
+  function startFor(seed) {
+    var r = G.makeRng(GEN + seed + '/start');
+    return { polarity: 'forward', th: round2(Math.round(20 * (0.3 + 0.6 * r())) / 20), echo: 0, shield: true };   // on the slider's 0.05 grid
+  }
+  function stepRound(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), depth = c.depths[c.gen], episodes = [], outT = 0, outF = 0, tp = 0, fp = 0, missed = 0;
+    for (var e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? G.rvec(N, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      var ep = episode({ world: 'dark', pat: pat, depth: depth, P: o }, c.rng, trace);
+      var j = judge(ep.decl, pat, o.shield);
+      outT += j.evT; outF += j.evF;
+      j.truth.forEach(function (x, i) { if (x) tp++; else if (ep.decl[i]) fp++; });
+      if (planted && j.evT === 0) missed++;
+      episodes.push({ planted: planted, declStep: ep.declStep, truth: j.truth, outs: j.outs, passed: j.passed, dropped: j.dropped,
+        evT: j.evT, evF: j.evF, trace: trace });
+    }
+    var rec = { gen: c.gen, settings: o, depth: depth, episodes: episodes, outT: outT, outF: outF, shield: o.shield,
+      maxG: 1, tp: tp, fp: fp, missed: missed };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+  // The arena's game score (net true outputs, precision, steadiness), applied to this contest.
+  function summarize(hist) {
+    var s = G.summarize(hist);
+    s.missed = hist.reduce(function (a, h) { return a + h.missed; }, 0);
+    s.planted = hist.length * EP / 2;
+    return s;
+  }
+  /* ---------- the mirror test: both worlds, both polarities, the player's settings ---------- */
+  // Returns 4 cells { world, polarity, T, F, planted, noise } over `episodes` episodes each (half planted).
+  function mirrorTest(settings, seed, episodes) {
+    var o = sanitizeSettings(settings), ep = episodes || 2 * EP, cells = [];
+    WORLDS.forEach(function (world) {
+      POLARITIES.forEach(function (pol) {
+        var P = Object.assign({}, o, { polarity: pol }), rng = G.makeRng(GEN + seed + '/mirror/' + world);
+        var cell = { world: world, polarity: pol, T: 0, F: 0, planted: 0, noise: 0 };
+        for (var e = 0; e < ep; e++) {
+          var planted = e % 2 === 0, pat = planted ? G.rvec(N, rng) : null;
+          var r = episode({ world: world, pat: pat, depth: 0.8, P: P }, rng, null);
+          var j = judge(r.decl, pat, P.shield);
+          if (planted) cell.planted++; else cell.noise++;
+          cell.T += j.evT; cell.F += j.evF;
+        }
+        cells.push(cell);
+      });
+    });
+    return cells;
+  }
+  /* ---------- seeds, hash links, share card ---------- */
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  function dailySeed(dateStr) { return 'r' + dateStr; }
+  function parseHash(hash) {
+    var out = { seed: null, lang: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1);
+      if (k === 's' && SEED_RE.test(v)) out.seed = v;
+      else if (k === 'l' && (v === 'en' || v === 'fr')) out.lang = v;
+    });
+    return out;
+  }
+  function buildHash(o) {
+    var parts = [];
+    if (o.seed && SEED_RE.test(o.seed)) parts.push('s=' + o.seed);
+    if (o.lang === 'fr') parts.push('l=fr');
+    return parts.length ? '#' + parts.join('&') : '';
+  }
+  // one of 8 block heights for a darkness between DEPTH_MIN and DEPTH_MAX
+  function darkGlyph(d) {
+    var k = Math.round(7 * Math.min(1, Math.max(0, (d - DEPTH_MIN) / (DEPTH_MAX - DEPTH_MIN))));
+    return String.fromCharCode(0x2581 + k);
+  }
+  function shareText(o, t) {
+    var r = o.result, lines = [];
+    lines.push(t('share.title', { seed: o.seed }));
+    lines.push(t('share.score', { score: Math.round(r.score) }));
+    lines.push(t('share.events', { t: r.T, f: r.F, m: r.missed, p: Math.round(r.precision * 100) }));
+    lines.push(t('share.setup', { pol: t('pol.' + o.settings.polarity), th: o.settings.th.toFixed(2), e: o.settings.echo, sh: t(o.settings.shield ? 'share.on' : 'share.off') }));
+    lines.push(t('share.depth') + ' ' + o.depths.map(darkGlyph).join(''));
+    lines.push(t('share.tag'));
+    return lines.join('\n');
+  }
+  return {
+    VERSION: VERSION, N: N, EP: EP, ROUNDS: ROUNDS, STEPS: STEPS, CHECK: CHECK, WINDOW: WINDOW, ETA: ETA,
+    TRUTH: TRUTH, AGREE: AGREE, DEPTH_MIN: DEPTH_MIN, DEPTH_MAX: DEPTH_MAX, POLARITIES: POLARITIES, WORLDS: WORLDS,
+    ECHO_MAX: ECHO_MAX, LIMITS: LIMITS, DEFAULTS: DEFAULTS, SIGN: SIGN,
+    sanitizeSettings: sanitizeSettings, darkSample: darkSample, sample: sample, update: update, signedEnergy: signedEnergy,
+    episode: episode, judge: judge, isTrue: isTrue, depthsFor: depthsFor, createContest: createContest, done: done, startFor: startFor,
+    stepRound: stepRound, summarize: summarize, mirrorTest: mirrorTest,
+    darkGlyph: darkGlyph, dailySeed: dailySeed, parseHash: parseHash, buildHash: buildHash, shareText: shareText
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Reverse Pair, a two-membrane shield of an observer and a calibrator
+ * (SYNTHETIC classical simulation). Pure logic: no DOM, no network, no storage.
+ *
+ * Two membranes share one channel and take turns on one clock:
+ *
+ *   observer     a reverse (anti-Hebbian) membrane, as on the Reverse Membranes page. It learns
+ *                away from energy and declares when its opposite energy (1 - windowed energy ratio)
+ *                reaches the threshold at a check. What it will find is not known in advance.
+ *   calibrator   the predictable one. It does not learn. On its ticks it sends one known
+ *                calibration tone through the channel and reads back how much of the tone
+ *                arrives. With a clean channel every reading is 1 (plus a little reading noise),
+ *                so any shortfall is the channel. The tones are signed-amplitude sine codes
+ *                (amplitude |sin|, phase pi/4 when positive and 5 pi/4 when negative, as in the
+ *                Digital-to-Wave testbench) at 9 frequencies, 0 to 8 cycles across the 16
+ *                components. The calibrator sweeps them in order, one per tick.
+ *   the tick     ticks alternate between the two: `share` observer ticks, then one calibrator
+ *                tick, over 120 ticks per episode.
+ *   the channel  in most episodes a fade removes part of the energy in a subspace of slow
+ *                sinusoids, and the removed part rises and falls slowly. On-grid fades cover one
+ *                tone frequency exactly. Off-grid fades cover a band of sinusoids centred between
+ *                two tone frequencies, whose energy leaks across several tones.
+ *   equalizer    if on, the observer divides each observation's frequency components by the
+ *                calibrator's latest readings before learning.
+ *   2-membrane shield  an output needs both membranes. The calibrator votes no when at least
+ *                half of the declared vector's energy sits in frequencies it reads below 0.7.
+ *
+ * For the evaluation (scripts/pair-check.js, docs/PAIR-PROTOCOL.md) every episode draws its world
+ * and its noise from separate streams keyed by seed, round and episode, so every method meets the
+ * same worlds, and one full trajectory serves every threshold and every shield rule.
+ *
+ * These are names for parts of a game, nothing more. Nothing here models negative energy,
+ * antimatter, real membranes, neurons, oscillators, radio hardware or any physical system.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./game.js'), require('./reverse.js'));
+  else root.ArenaPair = factory(root.ArenaGame, root.ArenaReverse);
+})(typeof self !== 'undefined' ? self : this, function (G, R) {
+  'use strict';
+  var VERSION = G.VERSION;
+  var GEN = 'membrane-arena/pair/v2/';     // generator namespace: changing it changes every contest
+  var N = R.N;                             // 16, as on the Reverse Membranes page
+  var EP = R.EP, ROUNDS = R.ROUNDS;        // 8 episodes, 12 rounds
+  var TICKS = 120, CHECK = 20, NCHECK = TICKS / CHECK;
+  var WINDOW = R.WINDOW, ECHO = 1, ETA = R.ETA.reverse;
+  var FREQS = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // calibration tone frequencies, cycles across the 16 components
+  var NF = FREQS.length;
+  var READ_NOISE = 0.05;                   // standard deviation of one calibrator reading
+  var PRED_ERR = READ_NOISE * Math.sqrt(2 / Math.PI);   // predicted mean absolute reading error, clean channel
+  var FADED = 0.7;                         // a reading below this counts as faded for the shield
+  var EQ_FLOOR = 0.15;                     // the equalizer never divides by less than this
+  var ON_FADE = 0.5;                       // "on the fade": at least this share of a vector's energy in the fade subspace
+  var FADE_P = 0.75, FADE_DEPTH = [0.6, 0.95], FADE_FREQS = [0.5, 1, 1.5, 2];
+  var OFF_BW = [0, 1.5], OFF_STEP = 0.5;   // off-grid bandwidth (cycles) and its sampling step
+  var TRUTH = G.TRUTH;
+  var SHARE_MAX = 4;
+  var LIMITS = { th: [0.2, 0.95], share: [1, SHARE_MAX] };
+  // Thresholds chosen on the calibration seeds by scripts/pair-check.js (full pair, share 2), per fade kind.
+  // tests/pairpage.test.js checks them against docs/pair-check.txt.
+  var TUNED = { grid: 0.65, off: 0.7 };
+  function reference(off) { return { share: 2, th: TUNED[off ? 'off' : 'grid'], eq: true, shield: true, off: !!off }; }
+  var DEFAULTS = reference(false);
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function round2(x) { return Math.round(x * 100) / 100; }
+  /* ---------- settings ---------- */
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      share: Math.round(num(s.share, 1, SHARE_MAX, d.share)),
+      th: num(s.th, LIMITS.th[0], LIMITS.th[1], d.th),
+      eq: s.eq === undefined ? d.eq : !!s.eq,
+      shield: s.shield === undefined ? d.shield : !!s.shield,
+      off: s.off === undefined ? d.off : !!s.off
+    };
+  }
+  /* ---------- frequencies ---------- */
+  var COS = new Float64Array(N * N), SIN = new Float64Array(N * N);
+  (function () { for (var k = 0; k < N; k++) for (var j = 0; j < N; j++) { var a = 2 * Math.PI * k * j / N; COS[k * N + j] = Math.cos(a); SIN[k * N + j] = Math.sin(a); } })();
+  var SCALE = 1 / Math.sqrt(N);
+  // unitary discrete Fourier transform (inverse when inv is true)
+  function dft(x, inv) {
+    var X = zeros(N), s = inv ? 1 : -1, k, j, re, im, c, sn;
+    for (k = 0; k < N; k++) {
+      re = 0; im = 0;
+      for (j = 0; j < N; j++) { c = COS[k * N + j]; sn = s * SIN[k * N + j]; re += x.r[j] * c - x.i[j] * sn; im += x.r[j] * sn + x.i[j] * c; }
+      X.r[k] = re * SCALE; X.i[k] = im * SCALE;
+    }
+    return X;
+  }
+  // the calibration frequency a Fourier component belongs to (components k and N - k share one)
+  function freqOf(k) { return k <= N / 2 ? k : N - k; }
+  // signed-amplitude sine code of frequency f: amplitude |s_j|, phase pi/4 if s_j > 0, 5 pi/4 if s_j < 0
+  function signedSine(f) {
+    var s = [], j;
+    for (j = 0; j < N; j++) s.push(f === 0 ? 1 : f === N / 2 ? Math.cos(Math.PI * j) : Math.sin(2 * Math.PI * f * (j + 0.5) / N));
+    return s;
+  }
+  function tone(f) {
+    var s = signedSine(f), v = zeros(N), j, phi, a;
+    for (j = 0; j < N; j++) {
+      a = Math.abs(s[j]);
+      if (s[j] === 0) continue;
+      phi = s[j] > 0 ? Math.PI / 4 : 5 * Math.PI / 4;
+      v.r[j] = a * Math.cos(phi); v.i[j] = a * Math.sin(phi);
+    }
+    return G.normalize(v);
+  }
+  var TONES = FREQS.map(tone);
+  // per-frequency gains (the calibrator's view) applied in the Fourier domain; invert divides instead
+  function shape(x, gains, invert) {
+    var X = dft(x, false), k, c;
+    for (k = 0; k < N; k++) {
+      c = gains[freqOf(k)];
+      if (invert) c = 1 / Math.max(EQ_FLOOR, c);
+      X.r[k] *= c; X.i[k] *= c;
+    }
+    return dft(X, true);
+  }
+  /* ---------- fades ---------- */
+  // complex sinusoid at a (possibly fractional) frequency phi, in cycles across the N components, unit norm
+  function sinusoid(phi) {
+    var v = zeros(N), j, a;
+    for (j = 0; j < N; j++) { a = 2 * Math.PI * phi * j / N; v.r[j] = Math.cos(a) * SCALE; v.i[j] = Math.sin(a) * SCALE; }
+    return v;
+  }
+  // orthonormal basis of the span of vs (modified Gram-Schmidt; nearly dependent vectors are dropped)
+  function orthonormal(vs) {
+    var Q = [];
+    vs.forEach(function (v0) {
+      var v = G.copyVec(v0), k, n = 0;
+      Q.forEach(function (q) {
+        var z = G.inner(q, v);
+        for (k = 0; k < N; k++) { v.r[k] -= z.re * q.r[k] - z.im * q.i[k]; v.i[k] -= z.re * q.i[k] + z.im * q.r[k]; }
+      });
+      for (k = 0; k < N; k++) n += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+      if (n > 0.09) Q.push(G.normalize(v));
+    });
+    return Q;
+  }
+  // share of v's energy inside span(Q)
+  function inSpan(Q, v) {
+    var e = 0, n = 0, k, z;
+    for (k = 0; k < Q.length; k++) { z = G.inner(Q[k], v); e += z.re * z.re + z.im * z.im; }
+    for (k = 0; k < N; k++) n += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    return n > 0 ? e / n : 0;
+  }
+  // x - c Q Q^H x (c = a(t) for the channel; c < 0 boosts the subspace, as the oracle's exact inverse does)
+  function project(x, Q, c) {
+    var y = G.copyVec(x), k, j, z, q;
+    if (!c) return y;
+    for (k = 0; k < Q.length; k++) {
+      q = Q[k]; z = G.inner(q, x);
+      for (j = 0; j < N; j++) { y.r[j] -= c * (z.re * q.r[j] - z.im * q.i[j]); y.i[j] -= c * (z.re * q.i[j] + z.im * q.r[j]); }
+    }
+    return y;
+  }
+  // a fade from its parameters: { kind 'grid', depth, f, ph, band } or { kind 'off', depth, f, ph, center, bw }
+  function buildFade(p) {
+    var vs = [], phis = [], m, i;
+    if (p.kind === 'grid') phis = [p.band];
+    else {
+      m = 1 + Math.floor(p.bw / OFF_STEP + 1e-9);
+      for (i = 0; i < m; i++) phis.push(m === 1 ? p.center : p.center - p.bw / 2 + p.bw * i / (m - 1));
+    }
+    phis.forEach(function (phi) { vs.push(sinusoid(phi)); vs.push(sinusoid(-phi)); });
+    var Q = orthonormal(vs), w = new Float64Array(NF);
+    for (i = 0; i < NF; i++) w[i] = inSpan(Q, TONES[i]);
+    return Object.assign({}, p, { Q: Q, w: w, rank: Q.length });
+  }
+  // the removed share a(t) of the fade subspace at tick t (0 without a fade)
+  function fadeLevel(fade, t) { return fade ? fade.depth * (0.5 + 0.5 * Math.sin(2 * Math.PI * fade.f * t / TICKS + fade.ph)) : 0; }
+  // what the calibrator reads on each tone at tick t, without noise: 1 - a(t) |Q^H tone|^2
+  function gainsAt(fade, t) {
+    var g = new Float64Array(NF), a = fadeLevel(fade, t), k;
+    for (k = 0; k < NF; k++) g[k] = fade ? 1 - a * fade.w[k] : 1;
+    return g;
+  }
+  /* ---------- worlds: every episode's draws, by stream ---------- */
+  function stream(seed, gen, e, name) { return G.makeRng(GEN + seed + '/r' + gen + '/e' + e + '/' + name); }
+  // fade parameters for either kind from one stream: presence, depth, timing and phase are shared by both
+  function fadeParams(rng, kind) {
+    var u = [rng(), rng(), rng(), rng(), rng(), rng(), rng(), rng()];
+    if (u[0] >= FADE_P) return null;
+    var p = { kind: kind, depth: round2(FADE_DEPTH[0] + (FADE_DEPTH[1] - FADE_DEPTH[0]) * u[1]),
+      f: FADE_FREQS[Math.floor(u[2] * FADE_FREQS.length)], ph: 2 * Math.PI * u[3] };
+    if (kind === 'grid') p.band = 1 + Math.floor(u[4] * 7);
+    else {
+      p.center = round2(1 + Math.floor(u[5] * 6) + 0.2 + 0.6 * u[6]);
+      p.bw = Math.round((OFF_BW[0] + (OFF_BW[1] - OFF_BW[0]) * u[7]) / OFF_STEP) * OFF_STEP;
+    }
+    return p;
+  }
+  function makeFade(rng, kind) { var p = fadeParams(rng, kind || 'grid'); return p ? buildFade(p) : null; }
+  // o: { seed, gen, e, depth, kind ('grid' or 'off'), forceFade }
+  function world(o) {
+    var planted = o.e % 2 === 0, k;
+    var p = fadeParams(stream(o.seed, o.gen, o.e, 'fade'), o.kind);
+    for (k = 0; !p && o.forceFade && k < 50; k++) p = fadeParams(stream(o.seed, o.gen, o.e, 'fade/' + k), o.kind);
+    var or = stream(o.seed, o.gen, o.e, 'obs'), noise = new Float64Array(TICKS * 2 * N);
+    for (k = 0; k < noise.length; k++) noise[k] = G.gauss(or);
+    var rr = stream(o.seed, o.gen, o.e, 'read'), rnoise = new Float64Array(TICKS);
+    for (k = 0; k < TICKS; k++) rnoise[k] = G.gauss(rr);
+    return { planted: planted, pat: planted ? G.rvec(N, stream(o.seed, o.gen, o.e, 'pattern')) : null, depth: o.depth,
+      fade: p ? buildFade(p) : null, v0: G.rvec(N, stream(o.seed, o.gen, o.e, 'init')), noise: noise, rnoise: rnoise,
+      rand: stream(o.seed, o.gen, o.e, 'random') };
+  }
+  // the observation at tick t: noise with `depth` of the dark pattern's amplitude removed, through the channel
+  function observeAt(w, t) {
+    var g = zeros(N), k, base = (t - 1) * 2 * N;
+    for (k = 0; k < N; k++) { g.r[k] = w.noise[base + 2 * k]; g.i[k] = w.noise[base + 2 * k + 1]; }
+    if (w.pat) {
+      var z = G.inner(w.pat, g), d = w.depth;
+      for (k = 0; k < N; k++) { g.r[k] -= d * (z.re * w.pat.r[k] - z.im * w.pat.i[k]); g.i[k] -= d * (z.re * w.pat.i[k] + z.im * w.pat.r[k]); }
+    }
+    return w.fade ? project(g, w.fade.Q, fadeLevel(w.fade, t)) : g;
+  }
+  // the calibrator's reading of tone f at tick t: what comes back of the tone, plus reading noise
+  function readAt(w, f, t) {
+    var g = w.fade ? 1 - fadeLevel(w.fade, t) * w.fade.w[f] : 1;
+    return Math.min(1.2, Math.max(0, g + READ_NOISE * w.rnoise[t - 1]));
+  }
+  // share of a vector's energy in frequencies the calibrator reads below FADED
+  function fadedShare(v, est) {
+    var X = dft(v, false), e = 0, n = 0, k, q;
+    for (k = 0; k < N; k++) { q = X.r[k] * X.r[k] + X.i[k] * X.i[k]; n += q; if (est[freqOf(k)] < FADED) e += q; }
+    return n > 0 ? e / n : 0;
+  }
+  // which membrane owns tick t (1-based): `share` observer ticks, then one calibrator tick
+  function owner(t, share) { return (t - 1) % (share + 1) < share ? 'o' : 'c'; }
+  function schedule(share) { var out = []; for (var t = 1; t <= TICKS; t++) out.push(owner(t, share)); return out; }
+  /* ---------- one full trajectory ---------- */
+  // mode: 'solo' (every tick to the observer, no calibrator), 'raw' (calibrator ticks spent, readings not
+  // used by the observer), 'eq' (equalizer from the latest readings) or 'oracle' (every tick, exact inverse
+  // of the true channel). Returns the opposite-energy trace and, at each check, what any threshold or
+  // shield rule needs.
+  function trajectory(w, mode, share) {
+    var solo = mode === 'solo' || mode === 'oracle', v = G.copyVec(w.v0), win = [], buf = [], est = new Float64Array(NF);
+    var trace = new Float32Array(TICKS), checks = [], readings = [], E = 0, sweep = 0, t, r, b, k;
+    for (k = 0; k < NF; k++) est[k] = 1;     // before any reading the calibrator predicts a clean channel
+    for (t = 1; t <= TICKS; t++) {
+      if (solo || owner(t, share) === 'o') {
+        var x = observeAt(w, t);
+        if (mode === 'eq') x = shape(x, est, true);
+        else if (mode === 'oracle' && w.fade) x = project(x, w.fade.Q, 1 - 1 / Math.max(EQ_FLOOR, 1 - fadeLevel(w.fade, t)));
+        x = G.normalize(x);
+        var y = G.inner(x, v);
+        win.push(y.re * y.re + y.im * y.im); if (win.length > WINDOW) win.shift();
+        buf.push(x); if (buf.length > WINDOW) buf.shift();
+        R.update(v, x, -1, ETA);
+        for (r = 0; r < ECHO; r++) for (b = 0; b < buf.length; b++) R.update(v, buf[b], -1, ETA);
+        E = R.signedEnergy('reverse', G.energyRatio(win, N));
+      } else {
+        var f = FREQS[sweep % NF]; sweep++;
+        est[f] = readAt(w, f, t);
+        readings.push({ t: t, f: f, v: est[f] });
+      }
+      trace[t - 1] = E;
+      if (t % CHECK === 0) {
+        var onF = w.fade ? inSpan(w.fade.Q, v) : 0;
+        checks.push({ t: t, E: E, valid: win.length > 0, fid: w.pat ? G.fidelity(v, w.pat) : 0, inFade: onF, onFade: onF >= ON_FADE,
+          cal: solo ? null : fadedShare(v, est) < 0.5, oracle: onF < ON_FADE,
+          est: Float32Array.from(est), gain: Float32Array.from(gainsAt(w.fade, t)) });
+      }
+    }
+    return { trace: trace, checks: checks, readings: readings };
+  }
+  var NO_DECL = { decl: false, out: false, truth: false, held: false, onFade: false, check: null };
+  // the declaration a threshold picks from a trajectory, and the output under a shield rule ('none', 'cal' or 'oracle')
+  function decide(w, tr, th, vote) {
+    var c = null, k;
+    for (k = 0; k < tr.checks.length; k++) if (tr.checks[k].valid && tr.checks[k].E >= th) { c = tr.checks[k]; break; }
+    if (!c) return NO_DECL;
+    var truth = !!w.pat && c.fid >= TRUTH, yes = vote === 'none' ? true : vote === 'cal' ? c.cal : c.oracle;
+    return { decl: true, out: !!yes, truth: truth, held: !yes, onFade: !!w.fade && c.onFade, check: c };
+  }
+  // the random-declare baseline: with probability 0.5, a uniformly random unit vector at a random check
+  function randomDecide(w) {
+    var r = G.makeRng(String(w.rand())), d = r() < 0.5, ci = Math.floor(r() * NCHECK), v = G.rvec(N, r);
+    if (!d) return NO_DECL;
+    return { decl: true, out: true, truth: !!w.pat && G.fidelity(v, w.pat) >= TRUTH, held: false,
+      onFade: !!w.fade && inSpan(w.fade.Q, v) >= ON_FADE, check: { t: CHECK * (ci + 1) } };
+  }
+  /* ---------- the page's episode ---------- */
+  function episode(w, P) {
+    var tr = trajectory(w, P.eq ? 'eq' : 'raw', P.share), d = decide(w, tr, P.th, P.shield ? 'cal' : 'none'), k;
+    var trace = Float32Array.from(tr.trace), declTick = d.check ? d.check.t : null;
+    if (declTick) for (k = declTick; k < TICKS; k++) trace[k] = trace[declTick - 1];   // the observer is frozen once it declares
+    var snapC = d.check || tr.checks[tr.checks.length - 1];
+    return { declTick: declTick, calVote: d.check ? d.check.cal : null, out: d.out, truth: d.truth, held: d.held, onFade: d.onFade,
+      trace: trace, snap: { t: snapC.t, est: snapC.est, gain: snapC.gain }, readings: tr.readings };
+  }
+  /* ---------- the contest ---------- */
+  function depthsFor(seed) {
+    var r = G.makeRng(GEN + seed + '/tide'), ph = 2 * Math.PI * r(), f = 0.35 + 0.4 * r(), out = [];
+    for (var k = 0; k < ROUNDS; k++) out.push(round2(Math.min(1, Math.max(0.6, 0.8 + 0.17 * Math.sin(ph + f * k) + 0.06 * (r() - 0.5)))));
+    return out;
+  }
+  function createContest(seed) {
+    seed = String(seed);
+    return { seed: seed, depths: depthsFor(seed), hist: [], gen: 0 };
+  }
+  function done(c) { return c.gen >= ROUNDS; }
+  // Where a contest's controls begin: an even tick, no equalizer, no shield, on-grid fades, a seeded threshold on the 0.05 grid.
+  function startFor(seed) {
+    var r = G.makeRng(GEN + seed + '/start');
+    return { share: 1, th: round2(Math.round(20 * (0.45 + 0.3 * r())) / 20), eq: false, shield: false, off: false };
+  }
+  function roundWorlds(seed, gen, depth, kind) {
+    var out = [];
+    for (var e = 0; e < EP; e++) out.push(world({ seed: seed, gen: gen, e: e, depth: depth, kind: kind }));
+    return out;
+  }
+  function fadeInfo(f) { return { kind: f.kind, depth: f.depth, f: f.f, band: f.band, center: f.center, bw: f.bw, rank: f.rank }; }
+  function stepRound(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), depth = c.depths[c.gen], episodes = [], outT = 0, outF = 0, tp = 0, fp = 0, missed = 0, held = 0;
+    roundWorlds(c.seed, c.gen, depth, o.off ? 'off' : 'grid').forEach(function (w) {
+      var ep = episode(w, o);
+      if (ep.out) { if (ep.truth) outT++; else outF++; }
+      if (ep.declTick) { if (ep.truth) tp++; else fp++; }
+      if (ep.held) held++;
+      if (w.planted && !(ep.out && ep.truth)) missed++;
+      episodes.push(Object.assign({ planted: w.planted, fade: w.fade ? fadeInfo(w.fade) : null }, ep));
+    });
+    var rec = { gen: c.gen, settings: o, depth: depth, episodes: episodes, outT: outT, outF: outF, shield: o.shield,
+      maxG: 1, tp: tp, fp: fp, missed: missed, held: held };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+  function summarize(hist) {
+    var s = G.summarize(hist);
+    s.missed = hist.reduce(function (a, h) { return a + h.missed; }, 0);
+    s.planted = hist.length * EP / 2;
+    return s;
+  }
+  // a round record for summarize() from per-episode decisions (shielded: whether outputs count in full)
+  function roundRecord(worlds, decs, shielded) {
+    var rec = { outT: 0, outF: 0, shield: !!shielded, maxG: 1, missed: 0, held: 0, decl: 0, onFade: 0 };
+    decs.forEach(function (d, k) {
+      if (d.out) { if (d.truth) rec.outT++; else rec.outF++; }
+      if (d.held) rec.held++;
+      if (d.decl) { rec.decl++; if (d.onFade) rec.onFade++; }
+      if (worlds[k].planted && !(d.out && d.truth)) rec.missed++;
+    });
+    return rec;
+  }
+  /* ---------- the calibration check: predicted against measured ---------- */
+  // The calibrator alone (the observer never changes its readings). At every observer tick after the first
+  // full sweep, cb(f, |error|, w_f, signed error) for each tone f, where the error is the latest reading
+  // minus what the tone would read now, and w_f is the share of tone f inside the fade (0 without a fade).
+  function calibratorErrors(w, share, cb) {
+    var est = new Float64Array(NF), sweep = 0, k, t, a, g;
+    for (k = 0; k < NF; k++) est[k] = 1;
+    for (t = 1; t <= TICKS; t++) {
+      if (owner(t, share) === 'c') { var f = FREQS[sweep % NF]; sweep++; est[f] = readAt(w, f, t); }
+      else if (sweep >= NF) {
+        a = fadeLevel(w.fade, t);
+        for (k = 0; k < NF; k++) { g = w.fade ? 1 - a * w.fade.w[k] : 1; cb(k, Math.abs(est[k] - g), w.fade ? w.fade.w[k] : 0, est[k] - g); }
+      }
+    }
+  }
+  // the tone most inside a fade; wide fades can cover two tones fully, so near-ties (within 1e-9) go to
+  // the lower frequency, which keeps the choice identical across JavaScript engines
+  function fadedTone(fade) {
+    var hi = -Infinity, k;
+    for (k = 0; k < NF; k++) if (fade.w[k] > hi) hi = fade.w[k];
+    for (k = 0; k < NF; k++) if (fade.w[k] >= hi - 1e-9) return k;
+    return 0;
+  }
+  // The page's check: per tick share, over `episodes` episodes that all have a fade of the chosen kind, the
+  // mean error on the faded tone and on clean tones (less than 1% of the tone inside the fade).
+  function calibrationCheck(seed, episodes, off) {
+    var out = [], n = episodes || 24, worlds = [], e;
+    for (e = 0; e < n; e++) worlds.push(world({ seed: seed + '-cal', gen: Math.floor(e / EP), e: e % EP, depth: 0.8, kind: off ? 'off' : 'grid', forceFade: true }));
+    for (var share = 1; share <= SHARE_MAX; share++) {
+      var ef = 0, nf = 0, ec = 0, nc = 0;
+      worlds.forEach(function (w) {
+        var top = fadedTone(w.fade);
+        calibratorErrors(w, share, function (f, err, wt) { if (f === top) { ef += err; nf++; } else if (wt < 0.01) { ec += err; nc++; } });
+      });
+      out.push({ share: share, fadeErr: nf ? ef / nf : 0, cleanErr: nc ? ec / nc : 0, calTicks: TICKS / (share + 1), obsTicks: TICKS * share / (share + 1) });
+    }
+    return out;
+  }
+  /* ---------- seeds, hash links, share card ---------- */
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  function dailySeed(dateStr) { return 'p' + dateStr; }
+  function parseHash(hash) { return R.parseHash(hash); }
+  function buildHash(o) { return R.buildHash(o); }
+  function shareText(o, t) {
+    var r = o.result, s = o.settings, lines = [];
+    lines.push(t('share.title', { seed: o.seed }));
+    lines.push(t('share.score', { score: Math.round(r.score) }));
+    lines.push(t('share.events', { t: r.T, f: r.F, m: r.missed, p: Math.round(r.precision * 100) }));
+    lines.push(t('share.setup', { share: s.share, th: s.th.toFixed(2), eq: t(s.eq ? 'share.on' : 'share.off'), sh: t(s.shield ? 'share.on' : 'share.off') }));
+    lines.push(t(s.off ? 'share.fades.off' : 'share.fades.grid'));
+    lines.push(t('share.tick') + ' ' + schedule(s.share).slice(0, s.share + 1).join('').toUpperCase().replace(/O/g, 'o'));
+    lines.push(t('share.tag'));
+    return lines.join('\n');
+  }
+  return {
+    VERSION: VERSION, GEN: GEN, N: N, EP: EP, ROUNDS: ROUNDS, TICKS: TICKS, CHECK: CHECK, NCHECK: NCHECK, WINDOW: WINDOW, ECHO: ECHO,
+    FREQS: FREQS, READ_NOISE: READ_NOISE, PRED_ERR: PRED_ERR, FADED: FADED, EQ_FLOOR: EQ_FLOOR, ON_FADE: ON_FADE,
+    FADE_P: FADE_P, FADE_DEPTH: FADE_DEPTH, FADE_FREQS: FADE_FREQS, OFF_BW: OFF_BW, OFF_STEP: OFF_STEP,
+    SHARE_MAX: SHARE_MAX, LIMITS: LIMITS, DEFAULTS: DEFAULTS, TUNED: TUNED, reference: reference, SEED_RE: SEED_RE,
+    sanitizeSettings: sanitizeSettings, dft: dft, freqOf: freqOf, signedSine: signedSine, tone: tone, TONES: TONES, shape: shape,
+    sinusoid: sinusoid, orthonormal: orthonormal, inSpan: inSpan, project: project, buildFade: buildFade, fadeLevel: fadeLevel,
+    gainsAt: gainsAt, fadeParams: fadeParams, makeFade: makeFade, world: world, observeAt: observeAt, readAt: readAt,
+    fadedShare: fadedShare, owner: owner, schedule: schedule, trajectory: trajectory, decide: decide, randomDecide: randomDecide,
+    episode: episode, depthsFor: depthsFor, createContest: createContest, done: done, startFor: startFor, roundWorlds: roundWorlds,
+    stepRound: stepRound, summarize: summarize, roundRecord: roundRecord, calibratorErrors: calibratorErrors, fadedTone: fadedTone,
+    calibrationCheck: calibrationCheck, dailySeed: dailySeed, parseHash: parseHash, buildHash: buildHash, shareText: shareText
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: strings for Reverse Pair, English and French (SYNTHETIC classical simulation).
+ * A test checks both languages have the same keys and the same {placeholders}, and that every
+ * measured number quoted in the eval.* and how.* strings appears in docs/pair-check.txt.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PairI18n = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var en = {
+    'page.title': 'Reverse Pair',
+    'page.tagline': 'A two-membrane shield: a reverse observer and a predictable calibrator take turns on one clock.',
+    'page.tag': 'SYNTHETIC',
+    'page.lang': 'Français',
+    'page.hc': 'High contrast',
+    'page.arena': 'The arena',
+    'page.reverse': 'Reverse Membranes',
+    'page.brain': 'Brain architecture',
+    'page.quorum': 'Quorum Keeper',
+    'intro.p1': 'Two membranes share one channel. The observer is a reverse membrane: it learns away from energy and hunts a hidden pattern made of missing energy. The calibrator is the predictable one: it plays known sine tones at nine frequencies and reads back how much of each arrives. On a clean channel every reading is 1. But in most episodes a fade dims part of the channel, either exactly on one of the calibrator\'s frequencies or between two of them, and a fade looks like missing energy too.',
+    'intro.p2': 'SYNTHETIC: a game on a classical simulation. "Opposite energy", "membrane", "tone" and "channel" are names for parts of the game. Nothing here models negative energy, antimatter, real membranes, neurons, oscillators or radio hardware.',
+    'sec.controls': 'Your pair',
+    'sec.result': 'Score',
+    'sec.tones': 'The calibrator\'s tones',
+    'sec.chart': 'Last round, episode by episode',
+    'sec.rounds': 'Rounds',
+    'sec.cal': 'Calibration check: predicted against measured',
+    'sec.how': 'How it works',
+    'sec.card': 'Score card (plain text)',
+    'forecast.round': 'Round {r} of {n}: darkness {d} ({word}).',
+    'forecast.done': 'All {n} rounds played.',
+    'dark.faint': 'faint',
+    'dark.clear': 'clear',
+    'dark.deep': 'deep',
+    'ctl.share': 'Observer ticks per calibrator tick',
+    'ctl.share.hint': 'The two membranes take turns. More observer ticks mean more learning; fewer calibrator ticks mean older readings.',
+    'ctl.share.dec': 'Fewer observer ticks',
+    'ctl.share.inc': 'More observer ticks',
+    'tick.o': 'O',
+    'ticks.text': 'The first 20 of 120 ticks: O is the observer, a number is the calibrator playing that tone. Per episode: {o} observer ticks, {c} calibrator ticks, {sw} sweeps of the nine tones.',
+    'ctl.th': 'Opposite-energy threshold',
+    'ctl.th.hint': 'The observer declares at a check (every 20 ticks) once its opposite energy reaches this.',
+    'ctl.eq': 'Equalizer: correct observations with the calibrator\'s readings',
+    'ctl.eq.hint': 'Each frequency is divided by its latest reading, which undoes a fade as far as the reading is fresh.',
+    'ctl.shield': '2-membrane shield: an output needs both membranes',
+    'ctl.shield.hint': 'The calibrator votes no when at least half of what the observer found sits in frequencies it reads as faded (below 0.7).',
+    'btn.run': 'Play the round',
+    'btn.rest': 'Play the rest',
+    'btn.again': 'Restart this seed',
+    'btn.today': 'Today\'s contest',
+    'btn.new': 'New seed',
+    'btn.cal': 'Run the calibration check',
+    'seed.daily': 'Seed {seed} (today\'s contest). The same seed gives the same contest.',
+    'seed.other': 'Seed {seed}. The same seed gives the same contest.',
+    'tally': 'True {t}, false {f}, missed {m} of {p}',
+    'res.start': 'Each contest starts with an even tick, both helpers off and on-grid fades. Play a round, look at where the observer settled, then turn the calibrator\'s help on.',
+    'res.running': 'Playing round {r}...',
+    'res.round': 'Round {r}: {t} true, {f} false, {m} missed, {h} held by the shield.',
+    'res.false': 'A false output means the observer settled on a fade or on noise and nothing stopped it.',
+    'res.noeq': 'The equalizer is off, so a faded band looks like missing energy to the observer.',
+    'res.noshield': 'The shield is off: outputs need only the observer, and they count a third, as in the arena.',
+    'res.held': 'The calibrator held {h} declaration(s) that sat on a band it reads as faded.',
+    'res.final': 'Final score {score}/100.',
+    'res.parts': 'Net finds {net}/50, precision {prec}/25, steadiness {st}/25.',
+    'res.ref': 'The reference pair (2 : 1, threshold {th}, equalizer and shield on; the threshold was chosen on the calibration seeds for these fades) scores {ref} on this seed.',
+    'res.beat': 'You beat the reference.',
+    'res.below': 'The reference is still ahead. Try changing the tick share or the threshold.',
+    'tones.p': 'The calibrator knows these tones in advance, which is what makes it predictable. Each is a signed-amplitude sine code, as in the Digital-to-Wave testbench: amplitude |sin|, phase π/4 where the sine is positive (gold) and 5π/4 where it is negative (aqua). Frequencies run from 0 to 8 cycles across the 16 components; the calibrator plays them in order, one per tick.',
+    'tone.label': 'frequency {f}',
+    'chart.note': 'Top: the observer\'s opposite energy over 120 ticks, the threshold, and gold marks where the calibrator ticked. Bottom: the calibrator\'s reading of each tone (bars, orange when faded) against the true gain (white lines) and its prediction for a clean channel (dashed, 1), at the declaration or at the end.',
+    'chart.empty': 'Play a round to see it here.',
+    'legend.obs': 'observer',
+    'legend.th': 'threshold',
+    'legend.cal': 'calibrator tick',
+    'legend.read': 'reading',
+    'legend.true': 'true gain',
+    'legend.pred': 'prediction (1)',
+    'ep.dark': 'Episode {e}: dark pattern',
+    'ep.noise': 'Episode {e}: noise only',
+    'ep.decl': 'declared at tick {t}',
+    'ep.vote.yes': ', calibrator agreed',
+    'ep.vote.no': ', calibrator said faded',
+    'ep.nodecl': 'no declaration',
+    'ep.fade': 'on-grid fade at frequency {f}, {c} fade cycles per episode',
+    'ep.clean': 'clean channel',
+    'out.true': 'true output',
+    'out.false': 'false output',
+    'out.held': 'held by the shield',
+    'out.none': 'no output',
+    'col.round': 'Round',
+    'col.dark': 'Darkness',
+    'col.setup': 'Setup',
+    'col.t': 'True',
+    'col.f': 'False',
+    'col.m': 'Missed',
+    'col.held': 'Held',
+    'setup.row': '{s} : 1, threshold {th}',
+    'setup.eq': ', equalizer',
+    'setup.shield': ', shield',
+    'cal.p': 'Because the calibrator is predictable, its readings can be checked. On clean frequencies it should read 1 with an average error equal to its reading noise times √(2/π). On the tone most inside the fade its error grows as it ticks less, because its readings are older when the fade moves.',
+    'cal.share': 'Tick share',
+    'cal.ticks': 'Observer / calibrator ticks',
+    'cal.fade': 'Error, faded tone',
+    'cal.clean': 'Error, clean frequencies',
+    'cal.row': '{s} : 1',
+    'cal.ticks.cell': '{o} / {c}',
+    'cal.running': 'Checking...',
+    'cal.done': 'Predicted error on clean frequencies: {pred}. 48 faded episodes per row ({kind}), fade depth 0.8, this seed.',
+    'how.p1': 'The observer is the Reverse Membranes rule with the sign flipped, width 16, echo 1: it slides away from energy and settles where energy is missing. On its own it cannot tell the hidden pattern from a fade, because both are missing energy. The calibrator never learns anything; it only measures the channel, which is what makes it predictable and checkable.',
+    'how.p2': 'The tick is the trade. More observer ticks mean more learning; fewer calibrator ticks mean staler readings. In the held-out evaluation the full pair scored 73.7 at 1 : 1, 83.1 at 2 : 1, 83.2 at 3 : 1 and 80.5 at 4 : 1 with on-grid fades.',
+    'how.p3': 'On-grid fades cover exactly one of the calibrator\'s tone frequencies, which gives the calibrator a home advantage. Off-grid fades sit between two tones with a random width, so their energy leaks across several tones: the calibrator sees several partial dips instead of one deep one, and dividing by its readings cannot undo the fade exactly. Turn on "Fades between the tones" to play against them.',
+    'how.p4': 'The 2-membrane shield is the arena\'s 2-of-3 shield cut down to two: both must agree, and the second vote comes from a membrane that sees the channel instead of the pattern. Once the equalizer is on, its vote changes little; most of its score comes from the arena rule that unshielded outputs count a third.',
+    'ctl.off': 'Fades between the tones (off-grid)',
+    'ctl.off.hint': 'Off-grid fades sit between two of the calibrator\'s frequencies, with a random width, so no single tone sees them whole. The setting applies from the next round.',
+    'ep.fade.off': 'off-grid fade around frequency {f}, width {w}, {c} fade cycles per episode',
+    'setup.off': ', off-grid',
+    'cal.kind.grid': 'on-grid fades',
+    'cal.kind.off': 'off-grid fades',
+    'sec.eval': 'What 120 held-out contests show',
+    'eval.p1': 'With thresholds chosen on 40 separate calibration seeds, the full pair at 2 : 1 scored 41.11 points more than the observer alone with on-grid fades (95% interval 39.80 to 42.42) and 27.78 more with off-grid fades (26.31 to 29.25). Off-grid, the benefit shrinks by 13.33 points (11.63 to 14.98) but does not disappear. False outputs per contest fall by 15.15 on-grid and by 14.33 off-grid.',
+    'eval.p2': 'Most of the real work is done by the equalizer. Against the ticks-only control (same ticks, readings unused) it adds 11.68 points on-grid and 9.40 off-grid. The share of declarations sitting mostly on the fade falls from 28.6% to 1.2% on-grid, and from 58.5% to 31.9% off-grid, where chance is 9.1%.',
+    'eval.p3': 'The shield\'s score gain is almost all scoring rule. At the pair\'s threshold it adds 26.88 points on-grid and 19.42 off-grid only because unshielded outputs count a third. Its filtering part is -0.07 (-0.17 to 0.03) on-grid and -0.16 (-0.55 to 0.22) off-grid: no detectable difference. Off-grid it stops 1.02 false outputs per contest, but also 1.89 true ones.',
+    'eval.p4': 'An oracle that knows the true fade still scores 9.68 points more on-grid and 21.47 more off-grid: nine tones cannot fully describe a fade that falls between them. On clean tones the calibrator\'s reading error matched the predicted 0.0399 in 32 of 36 frequency and share cells for each fade kind. On the faded tone it grows from 0.1486 at 1 : 1 to 0.2843 at 4 : 1 (on-grid), because readings go stale.',
+    'eval.note': 'Full report: docs/pair-check.txt. Frozen protocol: docs/PAIR-PROTOCOL.md. Every number regenerates with node scripts/pair-check.js --write. These results are about this simulation only.',
+    'share.fades.grid': 'Fades: on-grid',
+    'share.fades.off': 'Fades: off-grid (between tones)',
+    'share.title': 'Reverse Pair, seed {seed}',
+    'share.score': 'Score {score}/100',
+    'share.events': 'True {t}, false {f}, missed {m}, precision {p}%',
+    'share.setup': 'Last setup: {share} : 1, threshold {th}, equalizer {eq}, shield {sh}',
+    'share.on': 'on',
+    'share.off': 'off',
+    'share.tick': 'Tick pattern',
+    'share.tag': 'SYNTHETIC classical simulation',
+    'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.'
+  };
+  var fr = {
+    'page.title': 'Paire inversée',
+    'page.tagline': 'Un bouclier à deux membranes : une observatrice inversée et une calibreuse prévisible se relaient sur une même horloge.',
+    'page.tag': 'SYNTHÉTIQUE',
+    'page.lang': 'English',
+    'page.hc': 'Contraste élevé',
+    'page.arena': 'L\'arène',
+    'page.reverse': 'Membranes inversées',
+    'page.brain': 'Architecture cérébrale',
+    'page.quorum': 'Gardien du quorum',
+    'intro.p1': 'Deux membranes partagent un même canal. L\'observatrice est une membrane inversée : elle apprend à fuir l\'énergie et traque un motif caché fait d\'énergie manquante. La calibreuse est la prévisible : elle joue des tons sinusoïdaux connus sur neuf fréquences et mesure ce qui en revient. Sur un canal propre, chaque lecture vaut 1. Mais dans la plupart des épisodes, un évanouissement atténue une partie du canal, soit exactement sur une des fréquences de la calibreuse, soit entre deux d\'entre elles, et un évanouissement ressemble lui aussi à de l\'énergie manquante.',
+    'intro.p2': 'SYNTHÉTIQUE : un jeu sur une simulation classique. « Énergie opposée », « membrane », « ton » et « canal » sont des noms de pièces du jeu. Rien ici ne modélise l\'énergie négative, l\'antimatière, de vraies membranes, des neurones, des oscillateurs ou du matériel radio.',
+    'sec.controls': 'Votre paire',
+    'sec.result': 'Score',
+    'sec.tones': 'Les tons de la calibreuse',
+    'sec.chart': 'Dernière manche, épisode par épisode',
+    'sec.rounds': 'Manches',
+    'sec.cal': 'Contrôle de calibration : prévu contre mesuré',
+    'sec.how': 'Comment ça marche',
+    'sec.card': 'Carte de score (texte brut)',
+    'forecast.round': 'Manche {r} sur {n} : obscurité {d} ({word}).',
+    'forecast.done': 'Les {n} manches sont jouées.',
+    'dark.faint': 'légère',
+    'dark.clear': 'nette',
+    'dark.deep': 'profonde',
+    'ctl.share': 'Tics de l\'observatrice par tic de la calibreuse',
+    'ctl.share.hint': 'Les deux membranes se relaient. Plus de tics pour l\'observatrice, c\'est plus d\'apprentissage ; moins de tics pour la calibreuse, ce sont des lectures plus anciennes.',
+    'ctl.share.dec': 'Moins de tics pour l\'observatrice',
+    'ctl.share.inc': 'Plus de tics pour l\'observatrice',
+    'tick.o': 'O',
+    'ticks.text': 'Les 20 premiers des 120 tics : O est l\'observatrice, un nombre est la calibreuse jouant ce ton. Par épisode : {o} tics d\'observatrice, {c} tics de calibreuse, {sw} balayages des neuf tons.',
+    'ctl.th': 'Seuil d\'énergie opposée',
+    'ctl.th.hint': 'L\'observatrice déclare à un contrôle (tous les 20 tics) dès que son énergie opposée atteint ce seuil.',
+    'ctl.eq': 'Égaliseur : corriger les observations avec les lectures de la calibreuse',
+    'ctl.eq.hint': 'Chaque fréquence est divisée par sa dernière lecture, ce qui annule un évanouissement tant que la lecture est récente.',
+    'ctl.shield': 'Bouclier à 2 membranes : une sortie exige les deux membranes',
+    'ctl.shield.hint': 'La calibreuse vote non quand au moins la moitié de ce que l\'observatrice a trouvé se trouve dans des fréquences qu\'elle lit comme évanouies (sous 0,7).',
+    'btn.run': 'Jouer la manche',
+    'btn.rest': 'Jouer la suite',
+    'btn.again': 'Recommencer cette graine',
+    'btn.today': 'Partie du jour',
+    'btn.new': 'Nouvelle graine',
+    'btn.cal': 'Lancer le contrôle de calibration',
+    'seed.daily': 'Graine {seed} (partie du jour). La même graine donne la même partie.',
+    'seed.other': 'Graine {seed}. La même graine donne la même partie.',
+    'tally': 'Vrais {t}, faux {f}, manqués {m} sur {p}',
+    'res.start': 'Chaque partie commence avec un tic égal, les deux aides éteintes et des évanouissements sur la grille. Jouez une manche, regardez où l\'observatrice s\'est posée, puis activez l\'aide de la calibreuse.',
+    'res.running': 'Manche {r} en cours...',
+    'res.round': 'Manche {r} : {t} vrais, {f} faux, {m} manqués, {h} retenus par le bouclier.',
+    'res.false': 'Une sortie fausse signifie que l\'observatrice s\'est posée sur un évanouissement ou sur du bruit et que rien ne l\'a arrêtée.',
+    'res.noeq': 'L\'égaliseur est éteint : une bande évanouie ressemble à de l\'énergie manquante pour l\'observatrice.',
+    'res.noshield': 'Le bouclier est éteint : les sorties n\'exigent que l\'observatrice et comptent pour un tiers, comme dans l\'arène.',
+    'res.held': 'La calibreuse a retenu {h} déclaration(s) posée(s) sur une bande qu\'elle lit comme évanouie.',
+    'res.final': 'Score final {score}/100.',
+    'res.parts': 'Trouvailles nettes {net}/50, précision {prec}/25, régularité {st}/25.',
+    'res.ref': 'La paire de référence (2 : 1, seuil {th}, égaliseur et bouclier activés ; le seuil a été choisi sur les graines de calibration pour ces évanouissements) obtient {ref} sur cette graine.',
+    'res.beat': 'Vous battez la référence.',
+    'res.below': 'La référence reste devant. Essayez de changer le partage des tics ou le seuil.',
+    'tones.p': 'La calibreuse connaît ces tons à l\'avance : c\'est ce qui la rend prévisible. Chacun est un code sinusoïdal à amplitude signée, comme dans le banc d\'essai Digital-to-Wave : amplitude |sin|, phase π/4 là où le sinus est positif (or) et 5π/4 là où il est négatif (aqua). Les fréquences vont de 0 à 8 cycles sur les 16 composantes ; la calibreuse les joue dans l\'ordre, une par tic.',
+    'tone.label': 'fréquence {f}',
+    'chart.note': 'En haut : l\'énergie opposée de l\'observatrice sur 120 tics, le seuil, et des marques or là où la calibreuse a joué. En bas : la lecture de chaque ton par la calibreuse (barres, orange si évanouie) contre le vrai gain (traits blancs) et sa prévision pour un canal propre (tirets, 1), à la déclaration ou à la fin.',
+    'chart.empty': 'Jouez une manche pour la voir ici.',
+    'legend.obs': 'observatrice',
+    'legend.th': 'seuil',
+    'legend.cal': 'tic de la calibreuse',
+    'legend.read': 'lecture',
+    'legend.true': 'vrai gain',
+    'legend.pred': 'prévision (1)',
+    'ep.dark': 'Épisode {e} : motif sombre',
+    'ep.noise': 'Épisode {e} : bruit seul',
+    'ep.decl': 'déclaration au tic {t}',
+    'ep.vote.yes': ', la calibreuse a approuvé',
+    'ep.vote.no': ', la calibreuse a dit évanoui',
+    'ep.nodecl': 'aucune déclaration',
+    'ep.fade': 'évanouissement sur la grille à la fréquence {f}, {c} cycles d\'évanouissement par épisode',
+    'ep.clean': 'canal propre',
+    'out.true': 'sortie vraie',
+    'out.false': 'sortie fausse',
+    'out.held': 'retenue par le bouclier',
+    'out.none': 'aucune sortie',
+    'col.round': 'Manche',
+    'col.dark': 'Obscurité',
+    'col.setup': 'Réglage',
+    'col.t': 'Vrais',
+    'col.f': 'Faux',
+    'col.m': 'Manqués',
+    'col.held': 'Retenus',
+    'setup.row': '{s} : 1, seuil {th}',
+    'setup.eq': ', égaliseur',
+    'setup.shield': ', bouclier',
+    'cal.p': 'Parce que la calibreuse est prévisible, ses lectures peuvent être vérifiées. Sur les fréquences propres, elle devrait lire 1 avec une erreur moyenne égale à son bruit de lecture fois √(2/π). Sur le ton le plus touché par l\'évanouissement, son erreur grandit quand elle joue moins souvent, parce que ses lectures sont plus anciennes quand l\'évanouissement bouge.',
+    'cal.share': 'Partage des tics',
+    'cal.ticks': 'Tics observatrice / calibreuse',
+    'cal.fade': 'Erreur, ton évanoui',
+    'cal.clean': 'Erreur, fréquences propres',
+    'cal.row': '{s} : 1',
+    'cal.ticks.cell': '{o} / {c}',
+    'cal.running': 'Contrôle en cours...',
+    'cal.done': 'Erreur prévue sur les fréquences propres : {pred}. 48 épisodes évanouis par ligne ({kind}), profondeur 0,8, cette graine.',
+    'how.p1': 'L\'observatrice suit la règle des Membranes inversées, signe retourné, largeur 16, écho 1 : elle fuit l\'énergie et se pose là où l\'énergie manque. Seule, elle ne distingue pas le motif caché d\'un évanouissement, car les deux sont de l\'énergie manquante. La calibreuse n\'apprend rien ; elle ne fait que mesurer le canal, ce qui la rend prévisible et vérifiable.',
+    'how.p2': 'Le tic est le compromis. Plus de tics pour l\'observatrice, c\'est plus d\'apprentissage ; moins de tics pour la calibreuse, ce sont des lectures plus anciennes. Dans l\'évaluation réservée, la paire complète a obtenu 73,7 à 1 : 1, 83,1 à 2 : 1, 83,2 à 3 : 1 et 80,5 à 4 : 1 avec des évanouissements sur la grille.',
+    'how.p3': 'Les évanouissements sur la grille couvrent exactement une des fréquences de la calibreuse, ce qui lui donne un avantage à domicile. Les évanouissements hors grille tombent entre deux tons, avec une largeur aléatoire : leur énergie déborde sur plusieurs tons, la calibreuse voit plusieurs creux partiels au lieu d\'un seul creux profond, et diviser par ses lectures ne peut pas annuler exactement l\'évanouissement. Activez « Évanouissements entre les tons » pour jouer contre eux.',
+    'how.p4': 'Le bouclier à 2 membranes est le bouclier 2 sur 3 de l\'arène réduit à deux : les deux doivent être d\'accord, et le second vote vient d\'une membrane qui voit le canal plutôt que le motif. Une fois l\'égaliseur activé, son vote change peu de chose ; l\'essentiel de son score vient de la règle de l\'arène selon laquelle les sorties sans bouclier comptent pour un tiers.',
+    'ctl.off': 'Évanouissements entre les tons (hors grille)',
+    'ctl.off.hint': 'Les évanouissements hors grille tombent entre deux fréquences de la calibreuse, avec une largeur aléatoire : aucun ton ne les voit en entier. Le réglage s\'applique à partir de la manche suivante.',
+    'ep.fade.off': 'évanouissement hors grille autour de la fréquence {f}, largeur {w}, {c} cycles d\'évanouissement par épisode',
+    'setup.off': ', hors grille',
+    'cal.kind.grid': 'évanouissements sur la grille',
+    'cal.kind.off': 'évanouissements hors grille',
+    'sec.eval': 'Ce que montrent 120 parties réservées',
+    'eval.p1': 'Avec des seuils choisis sur 40 graines de calibration distinctes, la paire complète à 2 : 1 a obtenu 41,11 points de plus que l\'observatrice seule avec des évanouissements sur la grille (intervalle à 95 % : 39,80 à 42,42) et 27,78 de plus hors grille (26,31 à 29,25). Hors grille, le gain diminue de 13,33 points (11,63 à 14,98) mais ne disparaît pas. Les sorties fausses par partie baissent de 15,15 sur la grille et de 14,33 hors grille.',
+    'eval.p2': 'L\'essentiel du vrai travail vient de l\'égaliseur. Face au contrôle « tics seuls » (mêmes tics, lectures inutilisées), il ajoute 11,68 points sur la grille et 9,40 hors grille. La part des déclarations posées surtout sur l\'évanouissement passe de 28,6 % à 1,2 % sur la grille, et de 58,5 % à 31,9 % hors grille, où le hasard donne 9,1 %.',
+    'eval.p3': 'Le gain de score du bouclier vient presque entièrement de la règle de score. Au seuil de la paire, il ajoute 26,88 points sur la grille et 19,42 hors grille uniquement parce que les sorties sans bouclier comptent pour un tiers. Sa part de filtrage vaut -0,07 (-0,17 à 0,03) sur la grille et -0,16 (-0,55 à 0,22) hors grille : aucune différence détectable. Hors grille, il arrête 1,02 sortie fausse par partie, mais aussi 1,89 sortie vraie.',
+    'eval.p4': 'Un oracle qui connaît le vrai évanouissement obtient encore 9,68 points de plus sur la grille et 21,47 de plus hors grille : neuf tons ne décrivent pas entièrement un évanouissement qui tombe entre eux. Sur les tons propres, l\'erreur de lecture de la calibreuse correspond à la valeur prévue 0,0399 dans 32 cases fréquence et partage sur 36, pour chaque type d\'évanouissement. Sur le ton évanoui, elle passe de 0,1486 à 1 : 1 à 0,2843 à 4 : 1 (sur la grille), parce que les lectures vieillissent.',
+    'eval.note': 'Rapport complet : docs/pair-check.txt. Protocole figé : docs/PAIR-PROTOCOL.md. Chaque nombre se régénère avec node scripts/pair-check.js --write. Ces résultats ne portent que sur cette simulation.',
+    'share.fades.grid': 'Évanouissements : sur la grille',
+    'share.fades.off': 'Évanouissements : hors grille (entre les tons)',
+    'share.title': 'Paire inversée, graine {seed}',
+    'share.score': 'Score {score}/100',
+    'share.events': 'Vrais {t}, faux {f}, manqués {m}, précision {p} %',
+    'share.setup': 'Dernier réglage : {share} : 1, seuil {th}, égaliseur {eq}, bouclier {sh}',
+    'share.on': 'oui',
+    'share.off': 'non',
+    'share.tick': 'Motif des tics',
+    'share.tag': 'simulation classique SYNTHÉTIQUE',
+    'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Hors ligne, aucune requête réseau, rien n\'est stocké.'
+  };
+  return { LANGS: { en: en, fr: fr } };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Reverse Pair page (SYNTHETIC classical simulation).
+ *
+ * Controls (tick share, threshold, equalizer, 2-membrane shield, on-grid or off-grid fades), the tick strip, the calibrator's
+ * nine tones, the round-by-round contest, the eight episode charts of the last round (the observer's
+ * opposite energy, the calibrator's ticks, and the calibrator's readings against the true gains and
+ * its prediction), the rounds table, the calibration check and the plain-text score card.
+ * No network, no storage: everything lives in this page.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function () {
+  'use strict';
+  var P = window.ArenaPair, G = window.ArenaGame, LANGS = window.PairI18n.LANGS;
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var $ = function (id) { return document.getElementById(id); };
+  var hash = P.parseHash(location.hash);
+  var lang = hash.lang === 'fr' ? 'fr' : 'en', hc = false, busy = false;
+  var today = P.dailySeed(G.localDateString(new Date()));
+  var seed = hash.seed || today, contest = null, settings = null, last = null, refs = {}, cal = null, calOff = false;
+  function t(k, vars) { var s = (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; return G.fmt(s, vars); }
+  function text(el, s) { el.textContent = s; }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function para(parent, s, cls) { var p = document.createElement('p'); if (cls) p.className = cls; p.textContent = s; parent.appendChild(p); return p; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function num(x, d) { var s = x.toFixed(d === undefined ? 2 : d); return lang === 'fr' ? s.replace('.', ',') : s; }
+  function svg(tag, attrs, parent) {
+    var el = document.createElementNS(SVGNS, tag);
+    Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function setHash() {
+    var h = P.buildHash({ seed: seed, lang: lang });
+    if (history.replaceState) history.replaceState(null, '', h || location.pathname);
+  }
+  function darkWord(d) { return t(d < 0.73 ? 'dark.faint' : d < 0.87 ? 'dark.clear' : 'dark.deep'); }
+  /* ---------- controls ---------- */
+  function readControls() {
+    settings = P.sanitizeSettings({ share: +$('s-val').textContent, th: +$('th').value, eq: $('eq').checked, shield: $('shield').checked, off: $('off').checked });
+    return settings;
+  }
+  function writeControls(s) {
+    text($('s-val'), String(s.share));
+    $('th').value = String(s.th);
+    $('eq').checked = s.eq;
+    $('shield').checked = s.shield;
+    $('off').checked = !!s.off;
+    settings = P.sanitizeSettings(s);
+    renderControls();
+  }
+  function renderTicks(s) {
+    var box = $('ticks'), sweep = 0;
+    clear(box);
+    for (var tk = 1; tk <= 20; tk++) {
+      var li = document.createElement('li'), who = P.owner(tk, s.share);
+      li.className = who;
+      li.textContent = who === 'o' ? t('tick.o') : String(P.FREQS[sweep++ % P.FREQS.length]);
+      box.appendChild(li);
+    }
+    var c = P.TICKS / (s.share + 1);
+    text($('ticks-text'), t('ticks.text', { o: P.TICKS - c, c: c, sw: num(c / P.FREQS.length, 1) }));
+  }
+  function renderControls() {
+    var s = readControls();
+    text($('th-val'), num(s.th));
+    $('s-dec').disabled = busy || s.share <= 1;
+    $('s-inc').disabled = busy || s.share >= P.SHARE_MAX;
+    renderTicks(s);
+  }
+  function setBusy(b) {
+    busy = b;
+    var over = P.done(contest);
+    $('btn-run').disabled = b || over;
+    $('btn-rest').disabled = b || over;
+    ['btn-again', 'btn-today', 'btn-new', 'btn-cal'].forEach(function (id) { $(id).disabled = b; });
+    ['eq', 'shield', 'off', 'th'].forEach(function (id) { $(id).disabled = b; });
+    renderControls();
+  }
+  /* ---------- contest ---------- */
+  function start(newSeed) {
+    seed = newSeed; contest = P.createContest(seed); last = null; cal = null;
+    writeControls(P.startFor(seed));
+    text($('cal-text'), '');
+    setHash(); renderAll(); setBusy(false);
+  }
+  // the reference: the full pair at 2 : 1 with the calibration-seed threshold for the fades of the last round
+  function refFor() { var h = contest.hist[contest.hist.length - 1]; return P.reference(!!(h && h.settings.off)); }
+  function refScore() {
+    var R0 = refFor(), key = seed + '|' + (R0.off ? 'off' : 'grid');
+    if (refs[key] === undefined) {
+      var c = P.createContest(seed);
+      while (!P.done(c)) P.stepRound(c, R0);
+      refs[key] = P.summarize(c.hist).score;
+    }
+    return refs[key];
+  }
+  function runRounds(all) {
+    if (busy || P.done(contest)) return;
+    setBusy(true);
+    var box = $('res-text');
+    clear(box); para(box, t('res.running', { r: contest.gen + 1 }));
+    var step = function () {
+      last = P.stepRound(contest, readControls());
+      if (all && !P.done(contest)) { renderAll(); clear(box); para(box, t('res.running', { r: contest.gen + 1 })); setTimeout(step, 30); return; }
+      if (P.done(contest)) refScore();
+      setBusy(false); renderAll();
+    };
+    setTimeout(step, 30);
+  }
+  /* ---------- rendering ---------- */
+  function renderForecast() {
+    var n = P.ROUNDS, tide = $('tide');
+    text($('forecast'), P.done(contest) ? t('forecast.done', { n: n }) :
+      t('forecast.round', { r: contest.gen + 1, n: n, d: num(contest.depths[contest.gen]), word: darkWord(contest.depths[contest.gen]) }));
+    clear(tide);
+    contest.depths.forEach(function (d, k) {
+      var li = document.createElement('li');
+      li.style.height = Math.round(20 + 80 * (d - 0.6) / 0.4) + '%';
+      if (k < contest.gen) li.className = 'played';
+      if (k === contest.gen) li.className = 'cur';
+      tide.appendChild(li);
+    });
+    text($('seed'), t(seed === today ? 'seed.daily' : 'seed.other', { seed: seed }));
+  }
+  function renderScore() {
+    var s = P.summarize(contest.hist), box = $('res-text');
+    text($('score'), contest.hist.length ? String(Math.round(s.score)) : '0');
+    text($('tally'), t('tally', { t: s.T, f: s.F, m: s.missed, p: s.planted }));
+    if (busy) return;
+    clear(box);
+    if (!last) { para(box, t('res.start')); return; }
+    para(box, t('res.round', { r: last.gen + 1, t: last.outT, f: last.outF, m: last.missed, h: last.held }));
+    if (last.outF > 0) para(box, t('res.false'), 'warn');
+    if (!last.settings.eq) para(box, t('res.noeq'));
+    if (!last.settings.shield) para(box, t('res.noshield'));
+    else if (last.held > 0) para(box, t('res.held', { h: last.held }));
+    if (P.done(contest)) {
+      var ref = refScore();
+      para(box, t('res.final', { score: Math.round(s.score) }), 'good');
+      para(box, t('res.parts', { net: num(s.parts.net, 1), prec: num(s.parts.precision, 1), st: num(s.parts.steadiness, 1) }));
+      para(box, t('res.ref', { ref: Math.round(ref), th: num(refFor().th) }));
+      para(box, t(s.score > ref ? 'res.beat' : 'res.below'), s.score > ref ? 'good' : null);
+    }
+  }
+  function renderTones() {
+    var box = $('tones');
+    clear(box);
+    P.FREQS.forEach(function (f) {
+      var div = document.createElement('div'), W = 96, H = 44, mid = H / 2, amp = 17, s = P.signedSine(f);
+      div.className = 'tone';
+      var root = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, 'aria-hidden': 'true', focusable: 'false' }, div);
+      svg('line', { x1: 2, x2: W - 2, y1: mid, y2: mid, 'class': 'axis' }, root);
+      var xs = function (j) { return 5 + (W - 10) * j / (P.N - 1); }, pts = [];
+      for (var q = 0; q <= 90; q++) {
+        var jj = (P.N - 1) * q / 90, v = f === 0 ? 1 : f === P.N / 2 ? Math.cos(Math.PI * jj) : Math.sin(2 * Math.PI * f * (jj + 0.5) / P.N);
+        pts.push(xs(jj).toFixed(1) + ',' + (mid - amp * v).toFixed(1));
+      }
+      if (f > 0 && f < P.N / 2) svg('polyline', { points: pts.join(' '), 'class': 'wave' }, root);
+      s.forEach(function (v, j) {
+        var neg = v < 0 ? ' neg' : '';
+        svg('line', { x1: xs(j), x2: xs(j), y1: mid, y2: mid - amp * v, 'class': 'stem' + neg }, root);
+        svg('circle', { cx: xs(j), cy: mid - amp * v, r: 1.6, 'class': 'tip' + neg }, root);
+      });
+      para(div, t('tone.label', { f: f }));
+      box.appendChild(div);
+    });
+  }
+  function epChart(ep, k, s) {
+    var div = document.createElement('div'), h = document.createElement('h3');
+    var W = 200, H = 92, L = 4, Rm = 4, T0 = 6, B = 10, lo = -0.6, hi = 1;
+    var x = function (tk) { return L + (W - L - Rm) * (tk - 1) / (P.TICKS - 1); };
+    var y = function (v) { v = Math.min(hi, Math.max(lo, v)); return T0 + (H - T0 - B) * (hi - v) / (hi - lo); };
+    var cls = ep.out ? (ep.truth ? 't' : 'f') : ep.held ? 'h' : 'n';
+    div.className = 'ep ' + cls;
+    h.textContent = t(ep.planted ? 'ep.dark' : 'ep.noise', { e: k + 1 });
+    div.appendChild(h);
+    var root = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, 'aria-hidden': 'true', focusable: 'false', 'class': 'trace' }, div);
+    svg('line', { x1: L, x2: W - Rm, y1: y(0), y2: y(0), 'class': 'chance' }, root);
+    svg('line', { x1: L, x2: W - Rm, y1: y(s.th), y2: y(s.th), 'class': 'thr' }, root);
+    ep.readings.forEach(function (r) { svg('line', { x1: x(r.t), x2: x(r.t), y1: H - 7, y2: H - 1, 'class': 'ctick' }, root); });
+    var end = ep.declTick || P.TICKS, pts = [];
+    for (var tk = 1; tk <= end; tk++) pts.push(x(tk).toFixed(1) + ',' + y(ep.trace[tk - 1]).toFixed(1));
+    svg('polyline', { points: pts.join(' '), 'class': 'obs' }, root);
+    if (ep.declTick) svg('circle', { cx: x(ep.declTick), cy: y(ep.trace[ep.declTick - 1]), r: 3.6, 'class': 'dot obs' }, root);
+    // the calibrator's readings at the declaration (or the end), against the true gains and the prediction (1)
+    var BW = 200, BH = 50, top = 4, base = 38, scale = (base - top) / 1.2, slot = (BW - 8) / P.FREQS.length;
+    var bars = svg('svg', { viewBox: '0 0 ' + BW + ' ' + BH, 'aria-hidden': 'true', focusable: 'false', 'class': 'bars' }, div);
+    svg('line', { x1: 4, x2: BW - 4, y1: base - scale, y2: base - scale, 'class': 'pred' }, bars);
+    P.FREQS.forEach(function (f, j) {
+      var e = ep.snap.est[f], g = ep.snap.gain[f], bx = 4 + j * slot + slot * 0.2, bw = slot * 0.6;
+      svg('rect', { x: bx.toFixed(1), y: (base - scale * e).toFixed(1), width: bw.toFixed(1), height: (scale * e).toFixed(1), 'class': 'bar' + (e < P.FADED ? ' faded' : '') }, bars);
+      svg('line', { x1: (bx - 2).toFixed(1), x2: (bx + bw + 2).toFixed(1), y1: (base - scale * g).toFixed(1), y2: (base - scale * g).toFixed(1), 'class': 'truth' }, bars);
+      var lab = svg('text', { x: (bx + bw / 2).toFixed(1), y: BH - 3, 'class': 'flabel' }, bars); lab.textContent = String(f);
+    });
+    var out = cls === 't' ? 'out.true' : cls === 'f' ? 'out.false' : cls === 'h' ? 'out.held' : 'out.none';
+    var parts = [cap(t(out))];
+    parts.push(cap(ep.declTick ? t('ep.decl', { t: ep.declTick }) + (ep.calVote ? t('ep.vote.yes') : t('ep.vote.no')) : t('ep.nodecl')));
+    parts.push(cap(!ep.fade ? t('ep.clean') : ep.fade.kind === 'off' ? t('ep.fade.off', { f: num(ep.fade.center), w: num(ep.fade.bw, 1), c: num(ep.fade.f, 1) }) : t('ep.fade', { f: ep.fade.band, c: num(ep.fade.f, 1) })));
+    para(div, parts.join('. ') + '.', 'out');
+    return div;
+  }
+  function renderEpisodes() {
+    var box = $('episodes');
+    clear(box);
+    if (!last) { para(box, t('chart.empty'), 'empty'); return; }
+    last.episodes.forEach(function (ep, k) { box.appendChild(epChart(ep, k, last.settings)); });
+  }
+  function setupText(s) { return t('setup.row', { s: s.share, th: num(s.th) }) + (s.eq ? t('setup.eq') : '') + (s.shield ? t('setup.shield') : '') + (s.off ? t('setup.off') : ''); }
+  function renderRounds() {
+    var body = $('rounds-body');
+    clear(body);
+    contest.hist.forEach(function (h) {
+      var tr = document.createElement('tr');
+      if (last && h.gen === last.gen) tr.className = 'cur';
+      [String(h.gen + 1), num(h.depth), setupText(h.settings), String(h.outT), String(h.outF), String(h.missed), String(h.held)].forEach(function (v, j) {
+        var td = document.createElement('td'); td.textContent = v; if (j !== 2) td.className = 'n'; tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+  function renderCal() {
+    var body = $('cal-body');
+    clear(body);
+    if (!cal) return;
+    cal.forEach(function (r) {
+      var tr = document.createElement('tr'), th = document.createElement('th');
+      th.scope = 'row'; th.textContent = t('cal.row', { s: r.share }); tr.appendChild(th);
+      if (settings && r.share === settings.share) tr.className = 'cur';
+      [t('cal.ticks.cell', { o: r.obsTicks, c: r.calTicks }), num(r.fadeErr, 3), num(r.cleanErr, 3)].forEach(function (v) {
+        var td = document.createElement('td'); td.className = 'n'; td.textContent = v; tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+  function calDone() { text($('cal-text'), t('cal.done', { pred: num(P.PRED_ERR, 3), kind: t(calOff ? 'cal.kind.off' : 'cal.kind.grid') })); }
+  function runCal() {
+    if (busy) return;
+    setBusy(true);
+    text($('cal-text'), t('cal.running'));
+    setTimeout(function () {
+      calOff = readControls().off;
+      cal = P.calibrationCheck(seed, 48, calOff);
+      setBusy(false);
+      renderCal();
+      calDone();
+    }, 30);
+  }
+  function renderShare() {
+    if (!contest.hist.length) { text($('share'), t('chart.empty')); return; }
+    text($('share'), P.shareText({ seed: seed, result: P.summarize(contest.hist), settings: contest.hist[contest.hist.length - 1].settings }, t));
+  }
+  function renderAll() { renderForecast(); renderScore(); renderEpisodes(); renderRounds(); renderCal(); renderShare(); }
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.title = t('page.title');
+    $('s-dec').setAttribute('aria-label', t('ctl.share.dec'));
+    $('s-inc').setAttribute('aria-label', t('ctl.share.inc'));
+    text($('footer-version'), 'pair ' + P.VERSION + ' / arena ' + G.BUILD);
+    if (cal) calDone();
+    renderTones(); renderControls(); setHash(); renderAll();
+  }
+  /* ---------- wiring ---------- */
+  $('eq').addEventListener('change', renderControls);
+  $('shield').addEventListener('change', renderControls);
+  $('off').addEventListener('change', renderControls);
+  $('th').addEventListener('input', renderControls);
+  $('s-dec').addEventListener('click', function () { text($('s-val'), String(Math.max(1, +$('s-val').textContent - 1))); renderControls(); renderCal(); });
+  $('s-inc').addEventListener('click', function () { text($('s-val'), String(Math.min(P.SHARE_MAX, +$('s-val').textContent + 1))); renderControls(); renderCal(); });
+  $('btn-run').addEventListener('click', function () { runRounds(false); });
+  $('btn-rest').addEventListener('click', function () { runRounds(true); });
+  $('btn-again').addEventListener('click', function () { start(seed); });
+  $('btn-today').addEventListener('click', function () { start(today); });
+  $('btn-new').addEventListener('click', function () { start('p' + Math.floor(Math.random() * 1e9).toString(36)); });
+  $('btn-cal').addEventListener('click', runCal);
+  $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; applyLang(); });
+  $('btn-contrast').addEventListener('click', function () {
+    hc = !hc;
+    document.documentElement.classList.toggle('hc', hc);
+    this.setAttribute('aria-pressed', hc ? 'true' : 'false');
+  });
+  contest = P.createContest(seed);
+  writeControls(P.startFor(seed));
+  applyLang();
+  setBusy(false);
+})();
+</script>
+</body>
+</html>

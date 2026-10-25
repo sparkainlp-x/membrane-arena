@@ -20,7 +20,7 @@
 })(typeof self !== 'undefined' ? self : this, function (BASE) {
   'use strict';
 
-  var VERSION = '0.3.1';
+  var VERSION = '0.3.2';
   var BUILD = VERSION;   // shown in the page footer
   var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
   var EPOCH = '2026-10-24';              // day number 1

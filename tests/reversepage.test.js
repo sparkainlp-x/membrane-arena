@@ -30,7 +30,7 @@ test('dist/reverse.html, when present, matches a fresh build, and the other page
   assert.equal(read('dist/index.html'), build());
   assert.equal(read('dist/brain.html'), buildBrain());
   assert.equal(read('dist/quorum.html'), buildQuorum());
-  assert.ok(!/reverse/i.test(read('index.html')), 'the arena page does not load the reverse page');
+  assert.ok(!/<script[^>]*(reverse|pair)/i.test(read('index.html')), 'the arena page does not load the reverse pages (it only links to them)');
 });
 
 test('scripts load in dependency order, and Quorum Keeper links to the page', () => {

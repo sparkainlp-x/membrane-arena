@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Reverse Pair: a two-membrane shield. A reverse observer membrane and a predictable calibrator that plays known sine tones take turns on one clock, against fades on or between the tones. A game on a synthetic classical simulation, with a held-out evaluation.">
+<title>Reverse Pair</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='11' cy='16' r='7' fill='none' stroke='%2340d0e0' stroke-width='2.5'/%3E%3Ccircle cx='21' cy='16' r='7' fill='none' stroke='%23c9a84c' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="reverse.css">
+<link rel="stylesheet" href="pair.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Reverse Pair</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+    <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+  <div class="playgrid">
+    <section class="card" aria-labelledby="ctl-h">
+      <h2 id="ctl-h" data-i18n="sec.controls"></h2>
+      <p id="forecast" class="forecast"></p>
+      <ol id="tide" class="tide" aria-hidden="true"></ol>
+      <div class="stepper"><span id="s-label" class="slabel" data-i18n="ctl.share"></span><button id="s-dec" class="btn step" type="button">&minus;</button><output id="s-val" aria-labelledby="s-label">1</output><button id="s-inc" class="btn step" type="button">+</button></div>
+      <p class="hint" data-i18n="ctl.share.hint"></p>
+      <ol id="ticks" class="ticks" aria-hidden="true"></ol>
+      <p id="ticks-text" class="hint"></p>
+      <div class="sliderrow"><label id="th-label" for="th" data-i18n="ctl.th"></label><input id="th" type="range" min="0.2" max="0.95" step="0.05" value="0.6"><output id="th-val" for="th">0.60</output></div>
+      <p class="hint" data-i18n="ctl.th.hint"></p>
+      <label class="switch"><input id="eq" type="checkbox"><span data-i18n="ctl.eq"></span></label>
+      <p class="hint indent" data-i18n="ctl.eq.hint"></p>
+      <label class="switch"><input id="shield" type="checkbox"><span data-i18n="ctl.shield"></span></label>
+      <p class="hint indent" data-i18n="ctl.shield.hint"></p>
+      <label class="switch"><input id="off" type="checkbox"><span data-i18n="ctl.off"></span></label>
+      <p class="hint indent" data-i18n="ctl.off.hint"></p>
+      <div class="controls">
+        <button id="btn-run" class="btn primary" type="button" data-i18n="btn.run"></button>
+        <button id="btn-rest" class="btn" type="button" data-i18n="btn.rest"></button>
+      </div>
+      <div class="controls">
+        <button id="btn-again" class="btn small" type="button" data-i18n="btn.again"></button>
+        <button id="btn-today" class="btn small" type="button" data-i18n="btn.today"></button>
+        <button id="btn-new" class="btn small" type="button" data-i18n="btn.new"></button>
+      </div>
+      <p id="seed" class="hint"></p>
+    </section>
+    <section class="card result" aria-labelledby="res-h">
+      <h2 id="res-h" data-i18n="sec.result"></h2>
+      <p id="score" class="bigscore">0</p>
+      <p id="tally" class="tally"></p>
+      <div id="res-text" aria-live="polite"></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="tones-h">
+    <h2 id="tones-h" data-i18n="sec.tones"></h2>
+    <p data-i18n="tones.p"></p>
+    <div id="tones" class="tones"></div>
+  </section>
+  <section class="card" aria-labelledby="chart-h">
+    <h2 id="chart-h" data-i18n="sec.chart"></h2>
+    <p class="hint" data-i18n="chart.note"></p>
+    <div id="episodes" class="episodes"></div>
+    <ul class="legend">
+      <li><span class="key ko"></span><span data-i18n="legend.obs"></span></li>
+      <li><span class="key kt"></span><span data-i18n="legend.th"></span></li>
+      <li><span class="key kcal"></span><span data-i18n="legend.cal"></span></li>
+      <li><span class="key kbar"></span><span data-i18n="legend.read"></span></li>
+      <li><span class="key ktrue"></span><span data-i18n="legend.true"></span></li>
+      <li><span class="key kpred"></span><span data-i18n="legend.pred"></span></li>
+    </ul>
+  </section>
+  <section class="card" aria-labelledby="rounds-h">
+    <h2 id="rounds-h" data-i18n="sec.rounds"></h2>
+    <div class="tablewrap">
+      <table id="rounds" class="rtable">
+        <thead><tr><th scope="col" class="n" data-i18n="col.round"></th><th scope="col" class="n" data-i18n="col.dark"></th><th scope="col" data-i18n="col.setup"></th><th scope="col" class="n" data-i18n="col.t"></th><th scope="col" class="n" data-i18n="col.f"></th><th scope="col" class="n" data-i18n="col.m"></th><th scope="col" class="n" data-i18n="col.held"></th></tr></thead>
+        <tbody id="rounds-body"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" aria-labelledby="cal-h">
+    <h2 id="cal-h" data-i18n="sec.cal"></h2>
+    <p data-i18n="cal.p"></p>
+    <div class="controls"><button id="btn-cal" class="btn" type="button" data-i18n="btn.cal"></button></div>
+    <div class="tablewrap">
+      <table id="cal" class="rtable">
+        <thead><tr><th scope="col" data-i18n="cal.share"></th><th scope="col" class="n" data-i18n="cal.ticks"></th><th scope="col" class="n" data-i18n="cal.fade"></th><th scope="col" class="n" data-i18n="cal.clean"></th></tr></thead>
+        <tbody id="cal-body"></tbody>
+      </table>
+    </div>
+    <p id="cal-text" class="hint" aria-live="polite"></p>
+  </section>
+  <section class="card" aria-labelledby="eval-h">
+    <h2 id="eval-h" data-i18n="sec.eval"></h2>
+    <p data-i18n="eval.p1"></p>
+    <p data-i18n="eval.p2"></p>
+    <p data-i18n="eval.p3"></p>
+    <p data-i18n="eval.p4"></p>
+    <p class="hint" data-i18n="eval.note"></p>
+  </section>
+  <section class="card">
+    <h2 data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="reverse.js"></script>
+<script src="pair.js"></script>
+<script src="pair-i18n.js"></script>
+<script src="pairui.js"></script>
+</body>
+</html>

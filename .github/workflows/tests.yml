@@ -24,7 +24,9 @@ jobs:
         run: node --test tests/*.test.js
       - name: baselines.js matches the CSV copies
         run: node scripts/make-baselines.js --check
-      - name: dist/index.html, dist/brain.html, dist/quorum.html and dist/reverse.html are up to date
+      - name: Reverse Pair evaluation reproduces (every number, SHA-256 checked)
+        run: node scripts/pair-check.js --verify > /dev/null
+      - name: dist/index.html, dist/brain.html, dist/quorum.html, dist/reverse.html and dist/pair.html are up to date
         run: |
           node build.js
-          git diff --exit-code dist/index.html dist/brain.html dist/quorum.html dist/reverse.html
+          git diff --exit-code dist/index.html dist/brain.html dist/quorum.html dist/reverse.html dist/pair.html

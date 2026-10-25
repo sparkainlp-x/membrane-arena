@@ -28,7 +28,7 @@ test('dist/quorum.html, when present, matches a fresh build; the arena and brain
   assert.equal(read('dist/quorum.html'), buildQuorum());
   assert.equal(read('dist/index.html'), build());
   assert.equal(read('dist/brain.html'), buildBrain());
-  assert.ok(!/quorum/i.test(read('index.html')), 'the arena page does not load the game');
+  assert.ok(!/<script[^>]*quorum/i.test(read('index.html')), 'the arena page does not load the game (it only links to it)');
 });
 
 test('every element id used by quorumui.js exists in quorum.html', () => {

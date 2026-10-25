@@ -1,11 +1,12 @@
 'use strict';
 /*
  * Build dist/index.html (the arena), dist/brain.html (the brain architecture page),
- * dist/quorum.html (the Quorum Keeper game) and dist/reverse.html (Reverse Membranes): each one
- * self-contained file with its stylesheets and every script inlined.
- *   node build.js            write all four files
- * build() returns the arena HTML string, buildBrain() the brain page, buildQuorum() the game and
- * buildReverse() the reverse page (used by the tests).
+ * dist/quorum.html (the Quorum Keeper game), dist/reverse.html (Reverse Membranes) and
+ * dist/pair.html (Reverse Pair): each one self-contained file with its stylesheets and every
+ * script inlined.
+ *   node build.js            write all five files
+ * build() returns the arena HTML string, buildBrain() the brain page, buildQuorum() the game,
+ * buildReverse() the reverse page and buildPair() the pair page (used by the tests).
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -22,13 +23,14 @@ function build() { return inline('index.html'); }
 function buildBrain() { return inline('brain.html'); }
 function buildQuorum() { return inline('quorum.html'); }
 function buildReverse() { return inline('reverse.html'); }
+function buildPair() { return inline('pair.html'); }
 
 if (require.main === module) {
   fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
-  for (const [name, fn] of [['index.html', build], ['brain.html', buildBrain], ['quorum.html', buildQuorum], ['reverse.html', buildReverse]]) {
+  for (const [name, fn] of [['index.html', build], ['brain.html', buildBrain], ['quorum.html', buildQuorum], ['reverse.html', buildReverse], ['pair.html', buildPair]]) {
     const html = fn();
     fs.writeFileSync(path.join(root, 'dist', name), html);
     console.log(`wrote dist/${name} (${html.length} bytes)`);
   }
 }
-module.exports = { build, buildBrain, buildQuorum, buildReverse };
+module.exports = { build, buildBrain, buildQuorum, buildReverse, buildPair };

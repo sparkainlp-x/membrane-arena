@@ -189,6 +189,10 @@
     'footer.disclaimer': 'SYNTHETIC / classical simulation. Not a physical experiment.',
     'footer.credit': 'Learning rule: Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687. Author: Jean-François Brisson, Spark AI NLP.',
     'footer.source': 'Baselines: sparkainlp-x/crystallization-contest, results/*_summary.csv. Licence: AGPL-3.0-only.',
+    'nav.brain': 'Brain architecture',
+    'nav.quorum': 'Quorum Keeper',
+    'nav.reverse': 'Reverse Membranes',
+    'nav.pair': 'Reverse Pair',
     'footer.version': 'Version {v}',
 
     'help.title': 'How it works',
@@ -617,6 +621,10 @@
     'footer.disclaimer': 'Simulation classique SYNTHÉTIQUE. Pas une expérience physique.',
     'footer.credit': 'Règle d\'apprentissage : Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687. Auteur : Jean-François Brisson, Spark AI NLP.',
     'footer.source': 'Références : sparkainlp-x/crystallization-contest, results/*_summary.csv. Licence : AGPL-3.0-only.',
+    'nav.brain': 'Architecture cérébrale',
+    'nav.quorum': 'Gardien du quorum',
+    'nav.reverse': 'Membranes inversées',
+    'nav.pair': 'Paire inversée',
     'footer.version': 'Version {v}',
 
     'help.title': 'Comment ça marche',

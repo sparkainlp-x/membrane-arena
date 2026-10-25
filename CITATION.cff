@@ -7,7 +7,7 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.3.1
+version: 0.3.2
 date-released: 2026-10-25
 license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
@@ -34,7 +34,13 @@ abstract: >-
   at width 16: membranes with the learning sign flipped find a dark direction
   whose energy was removed ("opposite energy" is only the name of a score;
   nothing models negative energy, antimatter, physics or biology).
-  Classical simulation only.
+  Reverse Pair joins a reverse observer and a predictable calibrator that
+  plays signed-amplitude sine tones on one clock, with an equalizer and a
+  2-membrane shield, and ships a frozen evaluation protocol: thresholds
+  tuned on calibration seeds, results on 120 held-out seeds with bootstrap
+  intervals, on-grid and off-grid fades, baselines, an oracle and a
+  regenerating script with SHA-256 hashes (nothing models oscillators or
+  radio hardware). Classical simulation only.
 keywords:
   - "scientific-reasoning"
   - "oja-rule"
@@ -46,6 +52,8 @@ keywords:
   - "fault-tolerance"
   - "logic-game"
   - "anti-hebbian-learning"
+  - "reproducibility"
+  - "calibration"
 references:
   - type: article
     title: "Simplified neuron model as a principal component analyzer"

@@ -1,0 +1,123 @@
+Reverse Pair evaluation report, v0.3.2. SYNTHETIC classical simulation; no physical claims.
+Protocol: docs/PAIR-PROTOCOL.md, SHA-256 a5981e75ed6363027f159eb47668e2535cd085d52167e0239a3a804222d0e6ca.
+Generator membrane-arena/pair/v2/. Calibration seeds cal-000 to cal-039 (40 contests), used only to choose thresholds.
+Held-out seeds test-000 to test-119 (120 contests), never used for tuning; the two sets are disjoint.
+One contest: 12 rounds of 8 episodes (48 planted dark patterns, 48 noise-only). Every method meets the same worlds and noise per seed.
+Intervals: 95% percentile bootstrap over seeds, 10000 resamples, bootstrap seed "pair-bootstrap". Paired differences are A minus B.
+
+1. Thresholds chosen on the calibration seeds (max mean score, ties to the lower threshold)
+   method          on-grid  off-grid
+   random               -        -
+   alone             0.70     0.75
+   ticks only s1     0.65     0.70
+   eq s1             0.60     0.65
+   shield s1         0.65     0.70
+   full pair s1      0.65     0.65
+   ticks only s2     0.70     0.75
+   eq s2             0.60     0.70
+   shield s2         0.65     0.70
+   full pair s2      0.65     0.70
+   ticks only s3     0.70     0.75
+   eq s3             0.65     0.70
+   shield s3         0.65     0.70
+   full pair s3      0.65     0.70
+   ticks only s4     0.70     0.80
+   eq s4             0.70     0.70
+   shield s4         0.65     0.75
+   full pair s4      0.70     0.70
+   oracle            0.65     0.65
+
+2. Held-out results at the primary share s = 2 (mean per contest [95% CI])
+   On-grid fades (mean fade rank 2.00 of 16)
+   method        score                false outputs     true outputs        on-fade % of declarations
+   random        10.5 [9.4, 11.5]     47.7 [46.7, 48.6] 0.0 [0.0, 0.0]      0.0 [0.0, 0.0]
+   alone         41.9 [41.1, 42.8]    17.4 [16.8, 18.1] 39.0 [38.5, 39.5]   38.1 [37.0, 39.2]
+   ticks only s2 44.2 [43.1, 45.3]    10.6 [10.1, 11.1] 36.5 [35.9, 37.2]   28.6 [27.5, 29.6]
+   eq s2         55.9 [55.1, 56.6]    5.2 [4.8, 5.6]    42.0 [41.6, 42.5]   1.2 [0.9, 1.4]
+   shield s2     74.1 [72.9, 75.2]    2.5 [2.3, 2.8]    34.3 [33.8, 34.9]   30.7 [29.7, 31.7]
+   full pair s2  83.1 [81.8, 84.3]    2.3 [2.0, 2.6]    41.0 [40.4, 41.5]   1.0 [0.7, 1.3]
+   oracle        92.7 [92.0, 93.5]    1.3 [1.0, 1.5]    45.2 [44.9, 45.5]   0.1 [0.0, 0.1]
+
+   Off-grid fades (mean fade rank 4.92 of 16)
+   method        score                false outputs     true outputs        on-fade % of declarations
+   random        10.5 [9.4, 11.5]     47.7 [46.7, 48.6] 0.0 [0.0, 0.0]      9.1 [8.4, 9.9]
+   alone         36.9 [35.9, 37.9]    20.4 [19.7, 21.0] 35.8 [35.2, 36.3]   61.2 [60.0, 62.3]
+   ticks only s2 36.0 [34.8, 37.3]    14.9 [14.3, 15.6] 32.4 [31.8, 33.1]   58.5 [57.3, 59.6]
+   eq s2         45.4 [44.4, 46.5]    7.1 [6.6, 7.5]    35.9 [35.3, 36.5]   31.9 [30.9, 33.0]
+   shield s2     63.3 [62.2, 64.5]    2.5 [2.2, 2.7]    27.0 [26.4, 27.6]   59.8 [58.8, 60.8]
+   full pair s2  64.7 [63.3, 66.1]    6.0 [5.6, 6.5]    34.0 [33.4, 34.6]   31.9 [30.8, 33.0]
+   oracle        86.2 [85.3, 87.0]    1.1 [0.9, 1.3]    40.6 [40.2, 41.0]   10.3 [9.5, 11.0]
+
+3. Hypotheses (s = 2; a difference counts only if its 95% interval excludes zero)
+   H1 on-grid: false outputs, full pair - alone = -15.15 [-15.82, -14.48], d_z -4.00, seeds A>B/=/< 0/0/120: supported
+   H2 on-grid: score, full pair - alone = 41.11 [39.80, 42.42], d_z 5.51, seeds A>B/=/< 120/0/0: supported
+   H3 on-grid: on-fade %, eq - ticks only = -27.44 [-28.47, -26.42], d_z -4.76, seeds A>B/=/< 0/0/120 (120 seeds with declarations in both): supported
+   H4 on-grid: false declarations the shield stopped (eq - full pair at 0.65) = 0.12 [0.06, 0.18], d_z 0.34, seeds A>B/=/< 13/107/0: supported
+   H1 off-grid: false outputs, full pair - alone = -14.33 [-14.99, -13.68], d_z -3.91, seeds A>B/=/< 0/0/120: supported
+   H2 off-grid: score, full pair - alone = 27.78 [26.31, 29.25], d_z 3.42, seeds A>B/=/< 120/0/0: supported
+   H3 off-grid: on-fade %, eq - ticks only = -26.56 [-27.67, -25.42], d_z -4.17, seeds A>B/=/< 0/0/120 (120 seeds with declarations in both): supported
+   H4 off-grid: false declarations the shield stopped (eq - full pair at 0.70) = 1.02 [0.84, 1.21], d_z 1.00, seeds A>B/=/< 74/46/0: supported
+   H5: pair benefit in score, on-grid - off-grid = 13.33 [11.63, 14.98], d_z 1.42, seeds A>B/=/< 114/0/6: supported
+   H5: pair change in false outputs, on-grid - off-grid = -0.82 [-1.57, -0.04], d_z -0.19, seeds A>B/=/< 46/11/63: supported
+
+4. The shield: filtering against the scoring rule (s = 2, at the full pair's threshold)
+   on-grid: score, full pair - eq = 26.81 [26.34, 27.27] = filtering -0.07 [-0.17, 0.03] + weighting 26.88 [26.42, 27.34].
+   on-grid: false outputs stopped 0.12 [0.06, 0.18] per contest; true outputs stopped 0.30 [0.20, 0.41] per contest.
+   off-grid: score, full pair - eq = 19.25 [18.60, 19.89] = filtering -0.16 [-0.55, 0.22] + weighting 19.42 [18.85, 19.97].
+   off-grid: false outputs stopped 1.02 [0.84, 1.21] per contest; true outputs stopped 1.89 [1.65, 2.13] per contest.
+   The weighting part comes only from the arena rule that unshielded outputs count a third.
+
+5. Other paired comparisons (s = 2, descriptive)
+   on-grid: score, full pair - oracle = -9.68 [-10.95, -8.37], d_z -1.34, seeds A>B/=/< 10/0/110
+   on-grid: score, full pair - random = 72.60 [70.93, 74.26], d_z 7.77, seeds A>B/=/< 120/0/0
+   on-grid: score, eq - ticks only = 11.68 [10.54, 12.84], d_z 1.78, seeds A>B/=/< 118/0/2
+   on-grid: false outputs, shield - ticks only = -8.09 [-8.66, -7.53], d_z -2.55, seeds A>B/=/< 0/2/118
+   on-grid: score, ticks only - alone (the cost of giving ticks away) = 2.27 [1.15, 3.37], d_z 0.36, seeds A>B/=/< 82/0/38
+   off-grid: score, full pair - oracle = -21.47 [-23.00, -19.91], d_z -2.49, seeds A>B/=/< 1/0/119
+   off-grid: score, full pair - random = 54.25 [52.63, 55.88], d_z 5.97, seeds A>B/=/< 120/0/0
+   off-grid: score, eq - ticks only = 9.40 [8.22, 10.58], d_z 1.41, seeds A>B/=/< 111/0/9
+   off-grid: false outputs, shield - ticks only = -12.50 [-13.14, -11.87], d_z -3.44, seeds A>B/=/< 0/0/120
+   off-grid: score, ticks only - alone (the cost of giving ticks away) = -0.87 [-2.08, 0.35], d_z -0.13, seeds A>B/=/< 52/0/68
+
+6. All tick shares, held-out, at each method's chosen threshold (mean score [95% CI] / mean false outputs)
+   On-grid
+   ticks only s1 41.5 [40.4, 42.5] / 10.7   s2 44.2 [43.1, 45.3] / 10.6   s3 43.7 [42.8, 44.6] / 12.3   s4 43.6 [42.6, 44.7] / 13.6
+   eq         s1 50.7 [49.7, 51.6] / 5.0   s2 55.9 [55.1, 56.6] / 5.2   s3 56.6 [55.8, 57.4] / 4.0   s4 54.0 [53.0, 55.0] / 3.6
+   shield     s1 66.2 [64.9, 67.4] / 3.4   s2 74.1 [72.9, 75.2] / 2.5   s3 75.1 [74.1, 76.1] / 2.8   s4 74.6 [73.5, 75.8] / 3.1
+   full pair  s1 73.7 [72.5, 75.0] / 2.2   s2 83.1 [81.8, 84.3] / 2.3   s3 83.2 [82.0, 84.4] / 3.7   s4 80.5 [79.1, 81.8] / 2.7
+   Off-grid
+   ticks only s1 34.6 [33.3, 35.8] / 14.4   s2 36.0 [34.8, 37.3] / 14.9   s3 37.3 [36.2, 38.4] / 15.8   s4 35.9 [34.7, 37.1] / 12.7
+   eq         s1 42.8 [41.7, 43.9] / 7.9   s2 45.4 [44.4, 46.5] / 7.1   s3 45.0 [43.8, 46.1] / 10.5   s4 44.4 [43.3, 45.4] / 12.9
+   shield     s1 57.2 [56.0, 58.3] / 2.6   s2 63.3 [62.2, 64.5] / 2.5   s3 63.6 [62.3, 64.8] / 3.7   s4 60.9 [59.4, 62.4] / 3.6
+   full pair  s1 59.6 [58.1, 61.1] / 7.0   s2 64.7 [63.3, 66.1] / 6.0   s3 63.7 [62.1, 65.3] / 8.6   s4 62.9 [61.3, 64.5] / 10.4
+
+7. Calibration check (H6): mean absolute reading error, measured [95% CI] against predicted
+   Clean tones (untouched by the fade, or no fade). Predicted: 0.0399 (0.05 x sqrt(2/pi)).
+   On-grid: prediction inside the interval for 32 of 36 frequency-share cells.
+   s1  f0 0.0401 [0.0399, 0.0403]  f1 0.0400 [0.0398, 0.0402]  f2 0.0398 [0.0396, 0.0401]  f3 0.0398 [0.0396, 0.0401]  f4 0.0401 [0.0399, 0.0403]  f5 0.0398 [0.0396, 0.0400]  f6 0.0400 [0.0397, 0.0402]  f7 0.0397 [0.0395, 0.0400]  f8 0.0398 [0.0396, 0.0401]
+   s2  f0 0.0400 [0.0397, 0.0403]  f1 0.0397 [0.0394, 0.0400]  f2 0.0402 [0.0399, 0.0405]  f3 0.0400 [0.0396, 0.0403]  f4 0.0401 [0.0397, 0.0404]  f5 0.0397 [0.0395, 0.0400]  f6 0.0398 [0.0396, 0.0401]  f7 0.0398 [0.0395, 0.0402]  f8 0.0400 [0.0397, 0.0403]
+   s3  f0 0.0397 [0.0394, 0.0401]  f1 0.0395 [0.0391, 0.0399]  f2 0.0398 [0.0394, 0.0401]  f3 0.0396 [0.0393, 0.0400]  f4 0.0399 [0.0396, 0.0402]  f5 0.0398 [0.0395, 0.0402]  f6 0.0400 [0.0396, 0.0404]  f7 0.0402 [0.0398, 0.0405]  f8 0.0398 [0.0395, 0.0402]
+   s4  f0 0.0395 [0.0391, 0.0398]  f1 0.0398 [0.0394, 0.0402]  f2 0.0397 [0.0393, 0.0401]  f3 0.0403 [0.0399, 0.0406]  f4 0.0400 [0.0396, 0.0404]  f5 0.0397 [0.0393, 0.0402]  f6 0.0397 [0.0393, 0.0401]  f7 0.0402 [0.0398, 0.0407]  f8 0.0399 [0.0396, 0.0403]
+   Faded tone (the tone most inside the fade): error including stale readings, by share
+   s1  all 0.1486 [0.1472, 0.1500]   f1 0.148  f2 0.150  f3 0.146  f4 0.150  f5 0.153  f6 0.149  f7 0.145
+   s2  all 0.2067 [0.2046, 0.2089]   f1 0.207  f2 0.215  f3 0.210  f4 0.211  f5 0.209  f6 0.201  f7 0.193
+   s3  all 0.2514 [0.2488, 0.2540]   f1 0.252  f2 0.267  f3 0.255  f4 0.255  f5 0.249  f6 0.245  f7 0.239
+   s4  all 0.2843 [0.2816, 0.2869]   f1 0.267  f2 0.274  f3 0.277  f4 0.292  f5 0.309  f6 0.299  f7 0.272
+   Growth, s4 - s1 = 0.1357 [0.1337, 0.1377], d_z 12.28, seeds A>B/=/< 120/0/0: supported
+   Off-grid: prediction inside the interval for 32 of 36 frequency-share cells.
+   s1  f0 0.0403 [0.0399, 0.0408]  f1 0.0400 [0.0396, 0.0404]  f2 0.0398 [0.0393, 0.0402]  f3 0.0399 [0.0395, 0.0404]  f4 0.0398 [0.0393, 0.0402]  f5 0.0398 [0.0393, 0.0403]  f6 0.0402 [0.0397, 0.0406]  f7 0.0398 [0.0393, 0.0402]  f8 0.0404 [0.0400, 0.0409]
+   s2  f0 0.0399 [0.0393, 0.0406]  f1 0.0401 [0.0395, 0.0406]  f2 0.0403 [0.0397, 0.0408]  f3 0.0399 [0.0394, 0.0405]  f4 0.0395 [0.0389, 0.0400]  f5 0.0401 [0.0396, 0.0407]  f6 0.0398 [0.0393, 0.0404]  f7 0.0399 [0.0393, 0.0405]  f8 0.0404 [0.0397, 0.0410]
+   s3  f0 0.0399 [0.0393, 0.0405]  f1 0.0397 [0.0390, 0.0404]  f2 0.0400 [0.0393, 0.0407]  f3 0.0395 [0.0389, 0.0402]  f4 0.0402 [0.0395, 0.0409]  f5 0.0396 [0.0390, 0.0403]  f6 0.0396 [0.0389, 0.0402]  f7 0.0404 [0.0397, 0.0410]  f8 0.0406 [0.0399, 0.0412]
+   s4  f0 0.0395 [0.0387, 0.0403]  f1 0.0395 [0.0387, 0.0403]  f2 0.0400 [0.0393, 0.0407]  f3 0.0408 [0.0400, 0.0415]  f4 0.0407 [0.0400, 0.0414]  f5 0.0396 [0.0388, 0.0404]  f6 0.0396 [0.0389, 0.0403]  f7 0.0399 [0.0391, 0.0407]  f8 0.0401 [0.0394, 0.0409]
+   Faded tone (the tone most inside the fade): error including stale readings, by share
+   s1  all 0.1415 [0.1401, 0.1429]   f1 0.146  f2 0.134  f3 0.141  f4 0.145  f5 0.145  f6 0.141  f7 0.134
+   s2  all 0.1957 [0.1935, 0.1979]   f1 0.203  f2 0.190  f3 0.203  f4 0.203  f5 0.196  f6 0.188  f7 0.177
+   s3  all 0.2373 [0.2348, 0.2397]   f1 0.248  f2 0.241  f3 0.241  f4 0.241  f5 0.241  f6 0.229  f7 0.213
+   s4  all 0.2694 [0.2668, 0.2719]   f1 0.258  f2 0.245  f3 0.263  f4 0.281  f5 0.296  f6 0.273  f7 0.251
+   Growth, s4 - s1 = 0.1279 [0.1260, 0.1297], d_z 12.29, seeds A>B/=/< 120/0/0: supported
+
+8. Notes
+   The on-fade rule (at least 0.5 of a vector's energy in the fade subspace) is not adjusted for the fade's rank. Off-grid fades
+   span 4.92 of 16 dimensions on average, so a vector can be "on the fade" by chance. The random
+   baseline's on-fade % is that chance level: on-grid 0.0%, off-grid 9.1%. The oracle's veto uses the same rule.
+   Results apply to this simulation only.

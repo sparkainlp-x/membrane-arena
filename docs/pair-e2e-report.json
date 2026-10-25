@@ -1,0 +1,934 @@
+{
+  "version": "0.3.2",
+  "chrome": "/usr/bin/google-chrome",
+  "allOk": true,
+  "servedOther": [],
+  "cases": [
+    {
+      "name": "pair-en-desktop",
+      "ok": true,
+      "wallMs": 2266,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p1",
+        "share": 2,
+        "th": 0.7,
+        "shotStart": true,
+        "shotRound": true
+      },
+      "finalScore": 75,
+      "reference": 84,
+      "checks": [
+        {
+          "what": "starts at the seeded setup (even tick, helpers off, on-grid fades)",
+          "ok": true,
+          "got": {
+            "share": "1",
+            "th": "0.65",
+            "eq": false,
+            "shield": false,
+            "off": false
+          }
+        },
+        {
+          "what": "evaluation section quotes the held-out headline",
+          "ok": true,
+          "got": [
+            "41.11",
+            "39.80",
+            "42.42",
+            "27.78",
+            "26.31",
+            "29.25"
+          ]
+        },
+        {
+          "what": "nine tone plots, 16 stems each",
+          "ok": true,
+          "got": [
+            9,
+            144
+          ]
+        },
+        {
+          "what": "tick strip alternates O and the tone sweep",
+          "ok": true,
+          "got": "O 0 O 1 O 2 O 3 O 4 O 5 O 6 O 7 O 8 O 0"
+        },
+        {
+          "what": "round 1 score matches Node",
+          "ok": true,
+          "got": [
+            63,
+            63
+          ]
+        },
+        {
+          "what": "round 1 draws 8 episode charts",
+          "ok": true,
+          "got": 8
+        },
+        {
+          "what": "round 1 explains the missing equalizer and shield",
+          "ok": true,
+          "got": "Round 1: 3 true, 0 false, 1 missed, 0 held by the shield.The equalizer is off, so a faded band looks like missing energy to the observer.The shield is off: outp"
+        },
+        {
+          "what": "controls now 2 : 1, both helpers on, threshold 0.7",
+          "ok": true,
+          "got": {
+            "share": "2",
+            "eq": true,
+            "shield": true,
+            "off": false,
+            "th": "0.70"
+          }
+        },
+        {
+          "what": "tick strip follows the share",
+          "ok": true,
+          "got": "O O 0 O O 1 O O 2 O O 3 O O 4 O O 5 O O"
+        },
+        {
+          "what": "tick text gives the tick counts",
+          "ok": true,
+          "got": "The first 20 of 120 ticks: O is the observer, a number is the calibrator playing that tone. Per episode: 80 observer ticks, 40 calibrator ticks, 4.4 sweeps of the nine tones."
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            67,
+            67
+          ]
+        },
+        {
+          "what": "chart geometry: threshold above chance, dots on or above it, 9 bars per panel",
+          "ok": true,
+          "got": {
+            "n": 2,
+            "bars": 72,
+            "bad": []
+          }
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            75,
+            75
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "old 0.65, equalizer and shield on; the threshold was chosen on the calibration seeds for these fades) scores 84 on this seed.The reference is still ahead. Try changing the tick share or the threshold."
+        },
+        {
+          "what": "calibration: 4 rows matching Node",
+          "ok": true,
+          "got": [
+            [
+              60,
+              0.146,
+              0.041
+            ],
+            [
+              80,
+              0.213,
+              0.041
+            ],
+            [
+              90,
+              0.23,
+              0.042
+            ],
+            [
+              96,
+              0.285,
+              0.04
+            ]
+          ]
+        },
+        {
+          "what": "calibration: clean error near the predicted 0.040, faded error grows with the share",
+          "ok": true,
+          "got": [
+            [
+              0.146,
+              0.041
+            ],
+            [
+              0.213,
+              0.041
+            ],
+            [
+              0.23,
+              0.042
+            ],
+            [
+              0.285,
+              0.04
+            ]
+          ]
+        }
+      ],
+      "lang": "en",
+      "title": "Reverse Pair",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Reverse Pair, seed e2e-p1\nScore 75/100\nTrue 35, false 1, missed 13, precision 97%\nLast setup: 2 : 1, threshold 0.70, equalizer on, shield on\nFades: on-grid\nTick pattern ooC\nSYNTHETIC classical simulation"
+    },
+    {
+      "name": "pair-fr-phone",
+      "ok": true,
+      "wallMs": 2799,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p2",
+        "share": 2,
+        "th": 0.7,
+        "keyboard": true,
+        "shotRound": true
+      },
+      "finalScore": 69,
+      "reference": 68,
+      "checks": [
+        {
+          "what": "starts at the seeded setup (even tick, helpers off, on-grid fades)",
+          "ok": true,
+          "got": {
+            "share": "1",
+            "th": "0.6",
+            "eq": false,
+            "shield": false,
+            "off": false
+          }
+        },
+        {
+          "what": "evaluation section quotes the held-out headline",
+          "ok": true,
+          "got": [
+            "41.11",
+            "39.80",
+            "42.42",
+            "27.78",
+            "26.31",
+            "29.25"
+          ]
+        },
+        {
+          "what": "nine tone plots, 16 stems each",
+          "ok": true,
+          "got": [
+            9,
+            144
+          ]
+        },
+        {
+          "what": "tick strip alternates O and the tone sweep",
+          "ok": true,
+          "got": "O 0 O 1 O 2 O 3 O 4 O 5 O 6 O 7 O 8 O 0"
+        },
+        {
+          "what": "round 1 score matches Node",
+          "ok": true,
+          "got": [
+            52,
+            52
+          ]
+        },
+        {
+          "what": "round 1 draws 8 episode charts",
+          "ok": true,
+          "got": 8
+        },
+        {
+          "what": "round 1 explains the missing equalizer and shield",
+          "ok": true,
+          "got": "Manche 1 : 3 vrais, 1 faux, 1 manqués, 0 retenus par le bouclier.Une sortie fausse signifie que l'observatrice s'est posée sur un évanouissement ou sur du bruit"
+        },
+        {
+          "what": "controls now 2 : 1, both helpers on, threshold 0.7",
+          "ok": true,
+          "got": {
+            "share": "2",
+            "eq": true,
+            "shield": true,
+            "off": false,
+            "th": "0,70"
+          }
+        },
+        {
+          "what": "tick strip follows the share",
+          "ok": true,
+          "got": "O O 0 O O 1 O O 2 O O 3 O O 4 O O 5 O O"
+        },
+        {
+          "what": "tick text gives the tick counts",
+          "ok": true,
+          "got": "Les 20 premiers des 120 tics : O est l'observatrice, un nombre est la calibreuse jouant ce ton. Par épisode : 80 tics d'observatrice, 40 tics de calibreuse, 4,4 balayages des neuf tons."
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            76,
+            76
+          ]
+        },
+        {
+          "what": "chart geometry: threshold above chance, dots on or above it, 9 bars per panel",
+          "ok": true,
+          "got": {
+            "n": 4,
+            "bars": 72,
+            "bad": []
+          }
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            69,
+            69
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "re de référence (2 : 1, seuil 0,65, égaliseur et bouclier activés ; le seuil a été choisi sur les graines de calibration pour ces évanouissements) obtient 68 sur cette graine.Vous battez la référence."
+        },
+        {
+          "what": "calibration: 4 rows matching Node",
+          "ok": true,
+          "got": [
+            [
+              60,
+              0.139,
+              0.039
+            ],
+            [
+              80,
+              0.191,
+              0.04
+            ],
+            [
+              90,
+              0.23,
+              0.04
+            ],
+            [
+              96,
+              0.278,
+              0.039
+            ]
+          ]
+        },
+        {
+          "what": "calibration: clean error near the predicted 0.040, faded error grows with the share",
+          "ok": true,
+          "got": [
+            [
+              0.139,
+              0.039
+            ],
+            [
+              0.191,
+              0.04
+            ],
+            [
+              0.23,
+              0.04
+            ],
+            [
+              0.278,
+              0.039
+            ]
+          ]
+        }
+      ],
+      "lang": "fr",
+      "title": "Paire inversée",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Paire inversée, graine e2e-p2\nScore 69/100\nVrais 36, faux 2, manqués 12, précision 95 %\nDernier réglage : 2 : 1, seuil 0.70, égaliseur oui, bouclier oui\nÉvanouissements : sur la grille\nMotif des tics ooC\nsimulation classique SYNTHÉTIQUE"
+    },
+    {
+      "name": "pair-en-phone",
+      "ok": true,
+      "wallMs": 2840,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p3",
+        "share": 3,
+        "th": 0.6,
+        "off": true,
+        "shotRound": true
+      },
+      "finalScore": 46,
+      "reference": 64,
+      "checks": [
+        {
+          "what": "starts at the seeded setup (even tick, helpers off, on-grid fades)",
+          "ok": true,
+          "got": {
+            "share": "1",
+            "th": "0.65",
+            "eq": false,
+            "shield": false,
+            "off": false
+          }
+        },
+        {
+          "what": "evaluation section quotes the held-out headline",
+          "ok": true,
+          "got": [
+            "41.11",
+            "39.80",
+            "42.42",
+            "27.78",
+            "26.31",
+            "29.25"
+          ]
+        },
+        {
+          "what": "nine tone plots, 16 stems each",
+          "ok": true,
+          "got": [
+            9,
+            144
+          ]
+        },
+        {
+          "what": "tick strip alternates O and the tone sweep",
+          "ok": true,
+          "got": "O 0 O 1 O 2 O 3 O 4 O 5 O 6 O 7 O 8 O 0"
+        },
+        {
+          "what": "round 1 score matches Node",
+          "ok": true,
+          "got": [
+            38,
+            38
+          ]
+        },
+        {
+          "what": "round 1 draws 8 episode charts",
+          "ok": true,
+          "got": 8
+        },
+        {
+          "what": "round 1 explains the missing equalizer and shield",
+          "ok": true,
+          "got": "Round 1: 2 true, 2 false, 2 missed, 0 held by the shield.A false output means the observer settled on a fade or on noise and nothing stopped it.The equalizer is"
+        },
+        {
+          "what": "controls now 3 : 1, both helpers on, threshold 0.6, off-grid fades",
+          "ok": true,
+          "got": {
+            "share": "3",
+            "eq": true,
+            "shield": true,
+            "off": true,
+            "th": "0.60"
+          }
+        },
+        {
+          "what": "tick strip follows the share",
+          "ok": true,
+          "got": "O O O 0 O O O 1 O O O 2 O O O 3 O O O 4"
+        },
+        {
+          "what": "tick text gives the tick counts",
+          "ok": true,
+          "got": "The first 20 of 120 ticks: O is the observer, a number is the calibrator playing that tone. Per episode: 90 observer ticks, 30 calibrator ticks, 3.3 sweeps of the nine tones."
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            43,
+            43
+          ]
+        },
+        {
+          "what": "chart geometry: threshold above chance, dots on or above it, 9 bars per panel",
+          "ok": true,
+          "got": {
+            "n": 5,
+            "bars": 72,
+            "bad": []
+          }
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            46,
+            46
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "old 0.70, equalizer and shield on; the threshold was chosen on the calibration seeds for these fades) scores 64 on this seed.The reference is still ahead. Try changing the tick share or the threshold."
+        },
+        {
+          "what": "calibration: 4 rows matching Node",
+          "ok": true,
+          "got": [
+            [
+              60,
+              0.132,
+              0.039
+            ],
+            [
+              80,
+              0.178,
+              0.04
+            ],
+            [
+              90,
+              0.224,
+              0.04
+            ],
+            [
+              96,
+              0.244,
+              0.043
+            ]
+          ]
+        },
+        {
+          "what": "calibration: clean error near the predicted 0.040, faded error grows with the share",
+          "ok": true,
+          "got": [
+            [
+              0.132,
+              0.039
+            ],
+            [
+              0.178,
+              0.04
+            ],
+            [
+              0.224,
+              0.04
+            ],
+            [
+              0.244,
+              0.043
+            ]
+          ]
+        }
+      ],
+      "lang": "en",
+      "title": "Reverse Pair",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Reverse Pair, seed e2e-p3\nScore 46/100\nTrue 32, false 19, missed 16, precision 63%\nLast setup: 3 : 1, threshold 0.60, equalizer on, shield on\nFades: off-grid (between tones)\nTick pattern oooC\nSYNTHETIC classical simulation"
+    },
+    {
+      "name": "pair-en-desktop-contrast",
+      "ok": true,
+      "wallMs": 1888,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p4",
+        "share": 4,
+        "th": 0.7,
+        "hc": true,
+        "off": true,
+        "shotRound": true
+      },
+      "finalScore": 52,
+      "reference": 63,
+      "checks": [
+        {
+          "what": "starts at the seeded setup (even tick, helpers off, on-grid fades)",
+          "ok": true,
+          "got": {
+            "share": "1",
+            "th": "0.55",
+            "eq": false,
+            "shield": false,
+            "off": false
+          }
+        },
+        {
+          "what": "evaluation section quotes the held-out headline",
+          "ok": true,
+          "got": [
+            "41.11",
+            "39.80",
+            "42.42",
+            "27.78",
+            "26.31",
+            "29.25"
+          ]
+        },
+        {
+          "what": "nine tone plots, 16 stems each",
+          "ok": true,
+          "got": [
+            9,
+            144
+          ]
+        },
+        {
+          "what": "tick strip alternates O and the tone sweep",
+          "ok": true,
+          "got": "O 0 O 1 O 2 O 3 O 4 O 5 O 6 O 7 O 8 O 0"
+        },
+        {
+          "what": "round 1 score matches Node",
+          "ok": true,
+          "got": [
+            50,
+            50
+          ]
+        },
+        {
+          "what": "round 1 draws 8 episode charts",
+          "ok": true,
+          "got": 8
+        },
+        {
+          "what": "round 1 explains the missing equalizer and shield",
+          "ok": true,
+          "got": "Round 1: 4 true, 2 false, 0 missed, 0 held by the shield.A false output means the observer settled on a fade or on noise and nothing stopped it.The equalizer is"
+        },
+        {
+          "what": "controls now 4 : 1, both helpers on, threshold 0.7, off-grid fades",
+          "ok": true,
+          "got": {
+            "share": "4",
+            "eq": true,
+            "shield": true,
+            "off": true,
+            "th": "0.70"
+          }
+        },
+        {
+          "what": "tick strip follows the share",
+          "ok": true,
+          "got": "O O O O 0 O O O O 1 O O O O 2 O O O O 3"
+        },
+        {
+          "what": "tick text gives the tick counts",
+          "ok": true,
+          "got": "The first 20 of 120 ticks: O is the observer, a number is the calibrator playing that tone. Per episode: 96 observer ticks, 24 calibrator ticks, 2.7 sweeps of the nine tones."
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            66,
+            66
+          ]
+        },
+        {
+          "what": "chart geometry: threshold above chance, dots on or above it, 9 bars per panel",
+          "ok": true,
+          "got": {
+            "n": 4,
+            "bars": 72,
+            "bad": []
+          }
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            52,
+            52
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "old 0.70, equalizer and shield on; the threshold was chosen on the calibration seeds for these fades) scores 63 on this seed.The reference is still ahead. Try changing the tick share or the threshold."
+        },
+        {
+          "what": "calibration: 4 rows matching Node",
+          "ok": true,
+          "got": [
+            [
+              60,
+              0.141,
+              0.038
+            ],
+            [
+              80,
+              0.19,
+              0.04
+            ],
+            [
+              90,
+              0.224,
+              0.037
+            ],
+            [
+              96,
+              0.277,
+              0.034
+            ]
+          ]
+        },
+        {
+          "what": "calibration: clean error near the predicted 0.040, faded error grows with the share",
+          "ok": true,
+          "got": [
+            [
+              0.141,
+              0.038
+            ],
+            [
+              0.19,
+              0.04
+            ],
+            [
+              0.224,
+              0.037
+            ],
+            [
+              0.277,
+              0.034
+            ]
+          ]
+        }
+      ],
+      "lang": "en",
+      "title": "Reverse Pair",
+      "overflowX": false,
+      "hc": true,
+      "untranslated": [],
+      "share": "Reverse Pair, seed e2e-p4\nScore 52/100\nTrue 36, false 14, missed 12, precision 72%\nLast setup: 4 : 1, threshold 0.70, equalizer on, shield on\nFades: off-grid (between tones)\nTick pattern ooooC\nSYNTHETIC classical simulation"
+    },
+    {
+      "name": "pair-fr-desktop",
+      "ok": true,
+      "wallMs": 2124,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p5",
+        "share": 2,
+        "th": 0.75,
+        "off": true,
+        "shotRound": true
+      },
+      "finalScore": 68,
+      "reference": 59,
+      "checks": [
+        {
+          "what": "starts at the seeded setup (even tick, helpers off, on-grid fades)",
+          "ok": true,
+          "got": {
+            "share": "1",
+            "th": "0.55",
+            "eq": false,
+            "shield": false,
+            "off": false
+          }
+        },
+        {
+          "what": "evaluation section quotes the held-out headline",
+          "ok": true,
+          "got": [
+            "41.11",
+            "39.80",
+            "42.42",
+            "27.78",
+            "26.31",
+            "29.25"
+          ]
+        },
+        {
+          "what": "nine tone plots, 16 stems each",
+          "ok": true,
+          "got": [
+            9,
+            144
+          ]
+        },
+        {
+          "what": "tick strip alternates O and the tone sweep",
+          "ok": true,
+          "got": "O 0 O 1 O 2 O 3 O 4 O 5 O 6 O 7 O 8 O 0"
+        },
+        {
+          "what": "round 1 score matches Node",
+          "ok": true,
+          "got": [
+            57,
+            57
+          ]
+        },
+        {
+          "what": "round 1 draws 8 episode charts",
+          "ok": true,
+          "got": 8
+        },
+        {
+          "what": "round 1 explains the missing equalizer and shield",
+          "ok": true,
+          "got": "Manche 1 : 4 vrais, 1 faux, 0 manqués, 0 retenus par le bouclier.Une sortie fausse signifie que l'observatrice s'est posée sur un évanouissement ou sur du bruit"
+        },
+        {
+          "what": "controls now 2 : 1, both helpers on, threshold 0.75, off-grid fades",
+          "ok": true,
+          "got": {
+            "share": "2",
+            "eq": true,
+            "shield": true,
+            "off": true,
+            "th": "0,75"
+          }
+        },
+        {
+          "what": "tick strip follows the share",
+          "ok": true,
+          "got": "O O 0 O O 1 O O 2 O O 3 O O 4 O O 5 O O"
+        },
+        {
+          "what": "tick text gives the tick counts",
+          "ok": true,
+          "got": "Les 20 premiers des 120 tics : O est l'observatrice, un nombre est la calibreuse jouant ce ton. Par épisode : 80 tics d'observatrice, 40 tics de calibreuse, 4,4 balayages des neuf tons."
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            64,
+            64
+          ]
+        },
+        {
+          "what": "chart geometry: threshold above chance, dots on or above it, 9 bars per panel",
+          "ok": true,
+          "got": {
+            "n": 4,
+            "bars": 72,
+            "bad": []
+          }
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            68,
+            68
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "re de référence (2 : 1, seuil 0,70, égaliseur et bouclier activés ; le seuil a été choisi sur les graines de calibration pour ces évanouissements) obtient 59 sur cette graine.Vous battez la référence."
+        },
+        {
+          "what": "calibration: 4 rows matching Node",
+          "ok": true,
+          "got": [
+            [
+              60,
+              0.141,
+              0.038
+            ],
+            [
+              80,
+              0.19,
+              0.036
+            ],
+            [
+              90,
+              0.245,
+              0.039
+            ],
+            [
+              96,
+              0.271,
+              0.041
+            ]
+          ]
+        },
+        {
+          "what": "calibration: clean error near the predicted 0.040, faded error grows with the share",
+          "ok": true,
+          "got": [
+            [
+              0.141,
+              0.038
+            ],
+            [
+              0.19,
+              0.036
+            ],
+            [
+              0.245,
+              0.039
+            ],
+            [
+              0.271,
+              0.041
+            ]
+          ]
+        }
+      ],
+      "lang": "fr",
+      "title": "Paire inversée",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Paire inversée, graine e2e-p5\nScore 68/100\nVrais 39, faux 6, manqués 9, précision 87 %\nDernier réglage : 2 : 1, seuil 0.75, égaliseur oui, bouclier oui\nÉvanouissements : hors grille (entre les tons)\nMotif des tics ooC\nsimulation classique SYNTHÉTIQUE"
+    }
+  ]
+}

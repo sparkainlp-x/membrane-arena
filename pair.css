@@ -1,0 +1,33 @@
+/* Membrane Arena: extra styles for Reverse Pair (loaded after reverse.css). Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+.ticks { list-style: none; margin: 8px 0 2px; padding: 0; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; }
+.ticks li { height: 22px; border-radius: 3px; border: 1px solid var(--line); font-size: 0.68rem; line-height: 20px; text-align: center; color: #fff; font-variant-numeric: tabular-nums; }
+.ticks li.o { background: #135a66; border-color: #40d0e0; }
+.ticks li.c { background: #5a4712; border-color: #c9a84c; }
+.tones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 760px) { .tones { grid-template-columns: repeat(9, minmax(0, 1fr)); } }
+.tone { background: #070e26; border: 1px solid var(--line); border-radius: 8px; padding: 4px; min-width: 0; text-align: center; font-size: 0.75rem; color: var(--muted); }
+.tone svg { display: block; width: 100%; height: auto; }
+.tone .axis { stroke: #6f7fae; stroke-width: 0.8; }
+.tone .stem { stroke: #c9a84c; stroke-width: 1.4; }
+.tone .tip { fill: #c9a84c; }
+.tone .tip.neg { fill: #40d0e0; } .tone .stem.neg { stroke: #40d0e0; }
+.tone .wave { fill: none; stroke: #6f7fae; stroke-width: 0.8; stroke-dasharray: 2 2; }
+.ep .obs { fill: none; stroke: #40d0e0; stroke-width: 1.6; stroke-linejoin: round; }
+.ep .dot.obs { fill: #40d0e0; stroke: #fff; stroke-width: 1; }
+.ep .ctick { stroke: #c9a84c; stroke-width: 1; }
+.ep .bar { fill: #c9a84c; }
+.ep .bar.faded { fill: #f07a50; }
+.ep .truth { stroke: #fff; stroke-width: 1.6; }
+.ep .pred { stroke: #6f7fae; stroke-width: 1; stroke-dasharray: 3 2; }
+.ep .flabel { fill: var(--muted); font-size: 7px; text-anchor: middle; }
+.ep.h { border-color: var(--gold); border-style: dashed; } .ep.h .out { color: var(--gold-bright); }
+.key.ko { border-top: 2px solid #40d0e0; } .key.kcal { border-top: 2px dotted #c9a84c; }
+.key.kbar { border-top: 6px solid #c9a84c; } .key.ktrue { border-top: 2px solid #fff; } .key.kpred { border-top: 1px dashed #6f7fae; }
+html.hc .ticks li.o { background: #000; border-color: #fff; } html.hc .ticks li.c { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .tone { background: #000; border-color: #fff; color: #fff; }
+html.hc .tone .stem, html.hc .tone .tip { stroke: #ffd400; fill: #ffd400; } html.hc .tone .stem.neg, html.hc .tone .tip.neg { stroke: #00ffff; fill: #00ffff; }
+html.hc .ep .obs, html.hc .key.ko { stroke: #fff; border-top-color: #fff; } html.hc .ep .dot.obs { fill: #fff; stroke: #000; }
+html.hc .ep .ctick, html.hc .key.kcal { stroke: #ffd400; border-top-color: #ffd400; }
+html.hc .ep .bar, html.hc .key.kbar { fill: #ffd400; border-top-color: #ffd400; } html.hc .ep .bar.faded { fill: #ff6ad5; }
+html.hc .ep .truth, html.hc .key.ktrue { stroke: #00ffff; border-top-color: #00ffff; }
+html.hc .ep.h { border-color: #ffd400; }
