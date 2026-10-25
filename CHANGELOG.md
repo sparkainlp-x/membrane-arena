@@ -12,8 +12,9 @@ A seed, a daily seed or a challenge link from 0.1.0 plays exactly as before (a g
 - Replay slider and rail for the whole contest; arena text description that follows it.
 - Guided tour, missions saved in this browser only, best score per scheme, motion switch, high-contrast mode.
 - The engine records the alignment trace without drawing any random number; `game.js` adds `BUILD` for the page footer; `VERSION`, `package.json`, `CITATION.cff` and `.zenodo.json` now say 0.2.0.
-- Tests grew from 88 to 143; the headless Chrome check now covers the Lab, ensemble, A/B test, replay, exports, reduced motion and high contrast, plus 36 browser checks (`scripts/e2e-check.js`).
+- Tests grew from 88 to 144; the headless Chrome check now covers the Lab, ensemble, A/B test, replay, exports, reduced motion and high contrast, plus 36 browser checks (`scripts/e2e-check.js`).
 - Page size limit in the page test raised from 250 KB to 450 KB (the built page is about 300 KB).
+- Closing the tour returns the focus to the Run button, so the keyboard shortcuts keep working.
 - Port check re-run with 100 seeds: 36 comparisons, none beyond 2 standard errors, largest 1.07 (`docs/port-check.txt`).
 
 ## 0.1.0 (first published on GitHub Pages, never tagged)

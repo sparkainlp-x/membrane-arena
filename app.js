@@ -284,8 +284,13 @@
     $('btn-tut-next').textContent = t(tutIdx + 1 >= max ? 'tut.done' : 'tut.next');
   }
   function openTutorial() { tutIdx = 0; $('tutorial').hidden = false; renderTutorial(); }
-  function closeTutorial() { $('tutorial').hidden = true; if (!store.tutorialSeen) { store.tutorialSeen = true; saveStore(); } }
-  function nextTutorial() { if (tutIdx + 1 >= 5) { closeTutorial(); $('btn-run').focus(); return; } tutIdx++; renderTutorial(); }
+  function closeTutorial() {
+    var had = $('tutorial').contains(document.activeElement);
+    $('tutorial').hidden = true;
+    if (had) $('btn-run').focus();       // a hidden button must not keep the focus
+    if (!store.tutorialSeen) { store.tutorialSeen = true; saveStore(); }
+  }
+  function nextTutorial() { if (tutIdx + 1 >= 5) { closeTutorial(); return; } tutIdx++; renderTutorial(); }
 
   /* ---------- the contest loop ---------- */
 

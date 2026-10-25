@@ -175,6 +175,11 @@ test('motion and contrast: system setting plus a page switch, high-contrast styl
   assert.match(html, /aria-describedby="arena-desc"/);
 });
 
+test('closing the tour returns the focus to the Run button (a hidden button must not keep it)', () => {
+  const app = read('app.js');
+  assert.match(app, /function closeTutorial\(\) \{[^}]*contains\(document\.activeElement\)[^}]*\$\('btn-run'\)\.focus\(\)/s);
+});
+
 test('the method panel names what was measured, what is a design choice and what is not verified', () => {
   const I = require('../i18n.js');
   for (const l of Object.keys(I.LANGS)) {
