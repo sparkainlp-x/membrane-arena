@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased 0.2.0
+
+Not released. The package version, `CITATION.cff` and `.zenodo.json` still say 0.1.0, and a seed, a daily seed or a challenge link from 0.1.0 plays exactly as before (a golden test pins this).
+
+- Lab view with six tabs (meters, Lab, ensemble, A/B test, missions, method). Instruments, all computed from the simulation: event rates with Wilson bands, weight-vector alignment, energy-ratio histogram with thresholds, precision and recall against the threshold, shield counts, stabilizer gain trace with clamp bounds, (1+1) evolution landscape, and the repository's amplifier measurement. Each has a text equivalent in English and French.
+- `stats.js`: Wilson interval, Student t interval, seeded percentile bootstrap, paired difference, histogram; tested against known values and by coverage simulation.
+- `lab.js`: probe run, threshold sweep, time-sliced multi-seed ensembles with the repository CSV baselines overlaid and their file named, A/B tests on the same seeds with paired differences, five missions, CSV and JSON export.
+- `charts.js`: instrument drawing with a high-contrast palette.
+- `scene.js`: deforming membrane meshes with interference from the other two, an interference field, energy-scaled particle streaks, per-membrane compass dials with trails, branching crystals for true events and dull cracks for false ones, a shield gate, a skippable intro, a replay position that redraws the arena at any step.
+- Replay slider and rail for the whole contest; arena text description that follows it.
+- Guided tour, missions saved in this browser only, best score per scheme, motion switch, high-contrast mode.
+- The engine records the alignment trace without drawing any random number; `game.js` keeps `VERSION` 0.1.0 and adds `BUILD`.
+- Tests grew from 88 to 142; the headless Chrome check now covers the Lab, ensemble, A/B test, replay, exports, reduced motion and high contrast, plus 36 browser checks (`scripts/e2e-check.js`).
+- Page size limit in the page test raised from 250 KB to 450 KB (the built page is about 300 KB).
+- Port check re-run with 100 seeds: 36 comparisons, none beyond 2 standard errors, largest 1.07 (`docs/port-check.txt`).
+
 ## 0.1.0 (unreleased)
 
 - Documentation only: added a lineage line to the README that acknowledges Mun Seok Lee for the package received under his name that membrane-crystallization began as, and states that he is not an author of this release and has not endorsed it.
