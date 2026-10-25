@@ -159,8 +159,9 @@
     $('hud-prec').textContent = T + F > 0 ? Math.round(100 * T / (T + F)) + '%' : '-';
     var done = hist.slice(0, mode === 'done' ? hist.length : Math.max(0, hist.length - (curRec && mode !== 'done' ? 1 : 0)));
     $('hud-score').textContent = done.length ? String(Math.round(G.summarize(done).score)) : '-';
-    var pos = arena && arena.position();
-    $('hud-ep').textContent = t('hud.ep', { e: pos ? pos.ep + 1 : 0, max: G.EP });
+    var pos = arena && arena.position(), rp = mode === 'done' && !$('replay').hidden ? S.indexToPos(replayIdx) : null;
+    if (rp) $('hud-gen').textContent = t('hud.gen', { g: rp.gen + 1, max: G.GENS });
+    $('hud-ep').textContent = t('hud.ep', { e: rp ? rp.ep + 1 : pos ? pos.ep + 1 : 0, max: G.EP });
   }
   var ribbonState = [];
   function renderRibbon() {
@@ -248,7 +249,7 @@
     var p = S.indexToPos(replayIdx), rec = contest.hist[Math.min(p.gen, contest.hist.length - 1)];
     $('replay-pos').value = String(replayIdx);
     if (arena && rec) { arena.showAt(rec, p.ep, p.step, rec.settings); renderArenaDesc(arena.snapshot()); }
-    renderReplay(); drawRail();
+    renderReplay(); drawRail(); renderHud();
   }
   function stopReplay() { replaying = false; renderReplay(); }
   function onReplayPlay() {
@@ -559,7 +560,7 @@
     labui = LU.create({
       $: $, t: function () { return t; }, hc: function () { return hc; }, doneHist: doneHist, contest: function () { return contest; }, readSettings: readSettings,
       applySettings: applySettings, announce: announce, store: function () { return store; }, saveStore: saveStore, seedInfo: function () { return seedInfo; },
-      drawSci: drawSci, drawMeters: drawFit, onTab: function () { }
+      running: function () { return mode === 'running' || mode === 'paused'; }, drawSci: drawSci, drawMeters: drawFit, onTab: function () { }
     });
     labui.init();
     if (arena) arena.setSpeed($('speed').value);

@@ -16,7 +16,8 @@
   var TABS = ['meters', 'lab', 'ens', 'ab', 'missions', 'method'];
   var METRIC_KEYS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DIGITS = { T: 1, F: 1, precision: 3, rateVar: 3, score: 1 };
-  var PROBE_K = 60;
+  var PROBE_K = 60;          // episodes in the probe run once the contest is over
+  var PROBE_K_LIVE = 24;     // fewer while the contest is running, so a generation boundary does not stall the animation
 
   function create(env) {
     var $ = env.$, tab = 'meters';
@@ -94,25 +95,26 @@
       var amp = LAB.ampBaseline();
       C.drawAmp($('lab-amp'), amp, o); setAlt('alt-amp', LAB.describeAmp(tt, amp));
       $('lab-amp-help').textContent = t('lab.amp.help', { file: amp.file, seeds: amp.seeds, dp: f(amp.maxDeltaP, 3) });
-      $('lab-hist-help').textContent = t('lab.hist.help', { k: PROBE_K });
-      if (env.drawSci) env.drawSci();
+            if (env.drawSci) env.drawSci();
       refreshProbe(has);
     }
     // the probe costs about a tenth of a second, so it runs after the cheap charts and only when the contest changed
     function refreshProbe(has) {
       var c = env.contest(), o = copts(), tt = env.t(), hist = env.doneHist();
-      if (!has || !c) { C.drawHist($('lab-hist'), null, o); C.drawSweep($('lab-sweep'), null, o); setAlt('alt-hist', ''); setAlt('alt-sweep', ''); return; }
-      var last = hist[hist.length - 1].settings, key = c.seed + ':' + c.gen + ':' + last.stab + ':' + last.amp;
+      if (!has || !c) { C.drawHist($('lab-hist'), null, o); C.drawSweep($('lab-sweep'), null, o); setAlt('alt-hist', ''); setAlt('alt-sweep', ''); $('lab-hist-help').textContent = t('lab.hist.help', { k: PROBE_K }); return; }
+      var K = env.running() ? PROBE_K_LIVE : PROBE_K;
+      var last = hist[hist.length - 1].settings, key = c.seed + ':' + c.gen + ':' + last.stab + ':' + last.amp + ':' + K;
       var draw = function () {
         var h = LAB.ratioHistogram(lab.probe), sw = LAB.sweep(lab.probe, 40), cur = LAB.atThreshold(lab.probe, lab.probe.thr.reduce(function (a, b) { return a + b; }, 0) / 3);
         C.drawHist($('lab-hist'), h, o); setAlt('alt-hist', LAB.describeHist(tt, h));
         C.drawSweep($('lab-sweep'), sw, o); setAlt('alt-sweep', LAB.describeSweep(tt, sw, cur));
       };
-      if (lab.probe && lab.probeKey === key) { draw(); return; }
+      if (lab.probe && lab.probeKey === key) { $('lab-hist-help').textContent = t('lab.hist.help', { k: lab.probeK }); draw(); return; }
       var token = ++lab.token;
       setTimeout(function () {
         if (token !== lab.token) return;
-        lab.probe = LAB.probe(c, last, PROBE_K); lab.probeKey = key;
+        lab.probe = LAB.probe(c, last, K); lab.probeKey = key; lab.probeK = K;
+        $('lab-hist-help').textContent = t('lab.hist.help', { k: K });
         draw();
       }, 0);
     }
