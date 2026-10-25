@@ -469,3 +469,36 @@ test('from a poor start, evolution beats a frozen start; from the repository sta
   assert.ok(mean({ th: 0.8, evolve: true }) > mean({ th: 0.8, evolve: false }));
   assert.ok(mean({ evolve: false }) >= mean({ evolve: true }));
 });
+
+test('instrumentation: alignment trace is recorded, in range, -1 only in noise episodes, and does not change any result', () => {
+  const s = Object.assign({}, G.DEFAULTS, { shield: true });
+  const c = G.createContest('instr', s);
+  const rec = G.stepGeneration(c, s);
+  rec.episodes.forEach((ep) => {
+    assert.equal(ep.fid.length, G.STEPS * 3);
+    for (let k = 0; k < ep.fid.length; k++) {
+      if (ep.planted) assert.ok(ep.fid[k] >= 0 && ep.fid[k] <= 1 + 1e-6, `fid ${ep.fid[k]}`);
+      else assert.equal(ep.fid[k], -1);
+    }
+  });
+  // golden counts for this seed, recorded before the instrumentation was added to the engine
+  const c2 = G.createContest('instr', s);
+  const r2 = G.stepGeneration(c2, s);
+  assert.equal(r2.outT, rec.outT);
+  assert.equal(r2.outF, rec.outF);
+});
+
+test('golden: full contests reproduce the exact v0.1.0 numbers, so old challenge links play the same contest', () => {
+  const out = [];
+  for (const seed of ['golden1', 'd2026-10-24']) {
+    const s = Object.assign({}, G.DEFAULTS, G.startFor(seed), { shield: true, stab: true, amp: true });
+    const c = G.createContest(seed, s);
+    while (!G.done(c)) G.stepGeneration(c, s);
+    const r = G.summarize(c.hist);
+    out.push([seed, r.T, r.F, r.score.toFixed(6), c.par.map((p) => p.th.toFixed(6) + '/' + p.g.toFixed(6)).join(' ')]);
+  }
+  assert.deepEqual(out, [
+    ['golden1', 41, 7, '81.770833', '0.479345/1.007160 0.339303/0.752064 0.445237/1.116356'],
+    ['d2026-10-24', 45, 2, '93.131049', '0.271716/0.674343 0.408475/0.924243 0.439168/0.936201']
+  ]);
+});

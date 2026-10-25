@@ -735,15 +735,22 @@ pre {
   function clampGain(g) { return Math.min(GAIN_MAX, Math.max(GAIN_MIN, g)); }
 
   // One episode of 3 coupled Oja membranes. `trace` (Float32Array STEPS*3) records geff * energy ratio.
-  function episode(n, pat, sigma, P, warm, amp, rng, trace) {
+  // `ix` is optional instrumentation that draws no random numbers, so it never changes a result:
+  //   ix.fid   Float32Array STEPS*3, |<v|pattern>| of each membrane after each step (-1 in a noise episode)
+  //   ix.noDecl  when true nobody declares or freezes (used by the Lab probe)
+  //   ix.chk   when set to [[],[],[]], each check step pushes [geff * energy ratio, fidelity to the pattern] per membrane
+  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix) {
+    ix = ix || {};
     var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
+    var lastFid = [-1, -1, -1];
+    if (ix.fid) for (k = 0; k < ix.fid.length; k++) ix.fid[k] = -1;
     for (i = 0; i < 3; i++) vs.push(warmStart(rvec(n, rng), warm, amp));
     var thr = [];
     for (i = 0; i < 3; i++) thr.push(scaledThreshold(Math.min(TH_MAX, P[i].th * (2 - P[i].sp)), n, sigma));
     var last = [0, 0, 0];
     for (t = 1; t <= STEPS; t++) {
       for (i = 0; i < 3; i++) {
-        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; continue; }
+        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i]; continue; }
         var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
         var y = inner(x, vs[i]);
         win[i].push(y.re * y.re + y.im * y.im);
@@ -767,10 +774,13 @@ pre {
         vs[i] = normalize(v);
         last[i] = P[i].geff * energyRatio(win[i], n);
         trace[(t - 1) * 3 + i] = last[i];
+        if (pat) lastFid[i] = Math.sqrt(fidelity(vs[i], pat));
+        if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i];
       }
       if (t % CHECK === 0) {
         for (i = 0; i < 3; i++) {
-          if (!decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
+          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pat ? fidelity(vs[i], pat) : 0]);
+          if (!ix.noDecl && !decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
         }
       }
     }
@@ -830,7 +840,8 @@ pre {
       var planted = e % 2 === 0, pat = planted ? rvec(n, c.rng) : null, trace = new Float32Array(STEPS * 3);
       cand.forEach(function (p) { p.geff = p.g * (o.stab ? stabilizerFactor(c.rateEma) : 1); });
       var geffs = cand.map(function (p) { return p.geff; });
-      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace);
+      var fidTrace = new Float32Array(STEPS * 3);
+      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace, { fid: fidTrace });
       var d = ep.decl, truth = d.map(function (di) { return isTrueEvent(di, pat); }), agree = [];
       for (i = 0; i < 3; i++) {
         if (truth[i]) tp[i]++;
@@ -860,7 +871,7 @@ pre {
       episodes.push({
         planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
         dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
-        agree: agree, evT: evT, evF: evF, trace: trace, rateEma: c.rateEma
+        agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
       });
     }
     var m = Math.max(tp[0], tp[1], tp[2]), top = [];
