@@ -3657,15 +3657,23 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     return { sx: sx, sy: sy };
   }
   function boxFor(p, bottom) { return { x0: 38, x1: p.w - 10, y0: 16, y1: p.h - (bottom || 36) }; }
+  // a legend that wraps inside the canvas and sits on a backing panel so it never hides the data
   function legend(ctx, items, x, y, o) {
-    var P = pal(o);
+    var P = pal(o), tr = ctx.getTransform && ctx.getTransform(), dpr = (tr && tr.a) || 1, cw = ctx.canvas && ctx.canvas.width, maxX = (typeof cw === 'number' && cw > 0 ? cw / dpr : 400) - 6, rowH = 15;
     ctx.font = '11px system-ui, sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-    items.forEach(function (it) {
-      ctx.strokeStyle = rgba(P[it.c] || it.c, 1); ctx.fillStyle = rgba(P[it.c] || it.c, 1); ctx.lineWidth = P.lw;
+    var cx = x, cy = y, widest = x, laid = items.map(function (it) {
+      var w = 26 + ctx.measureText(it.label).width;
+      if (cx > x && cx + w > maxX) { cx = x; cy += rowH; }
+      var pos = { it: it, x: cx, y: cy }; cx += w + 8; if (cx > widest) widest = cx; return pos;
+    });
+    ctx.fillStyle = o && o.hc ? '#000000' : 'rgba(7,14,38,0.82)';
+    ctx.fillRect(x - 4, y - rowH / 2 - 1, Math.min(maxX, widest) - x + 2, cy - y + rowH + 2);
+    laid.forEach(function (l) {
+      var it = l.it;
+      ctx.strokeStyle = rgba(P[it.c] || it.c, 1); ctx.lineWidth = P.lw;
       if (it.dash) ctx.setLineDash(it.dash); else ctx.setLineDash([]);
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 16, y); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = P.text; ctx.fillText(it.label, x + 20, y);
-      x += 26 + ctx.measureText(it.label).width + 8;
+      ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(l.x + 16, l.y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = P.text; ctx.fillText(it.label, l.x + 20, l.y);
     });
   }
   function polyline(ctx, pts, color, width, dash) {
@@ -3994,7 +4002,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
   var TABS = ['meters', 'lab', 'ens', 'ab', 'missions', 'method'];
   var METRIC_KEYS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DIGITS = { T: 1, F: 1, precision: 3, rateVar: 3, score: 1 };
-  var PROBE_K = 60;
+  var PROBE_K = 60;          // episodes in the probe run once the contest is over
+  var PROBE_K_LIVE = 24;     // fewer while the contest is running, so a generation boundary does not stall the animation
 
   function create(env) {
     var $ = env.$, tab = 'meters';
@@ -4072,25 +4081,26 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       var amp = LAB.ampBaseline();
       C.drawAmp($('lab-amp'), amp, o); setAlt('alt-amp', LAB.describeAmp(tt, amp));
       $('lab-amp-help').textContent = t('lab.amp.help', { file: amp.file, seeds: amp.seeds, dp: f(amp.maxDeltaP, 3) });
-      $('lab-hist-help').textContent = t('lab.hist.help', { k: PROBE_K });
-      if (env.drawSci) env.drawSci();
+            if (env.drawSci) env.drawSci();
       refreshProbe(has);
     }
     // the probe costs about a tenth of a second, so it runs after the cheap charts and only when the contest changed
     function refreshProbe(has) {
       var c = env.contest(), o = copts(), tt = env.t(), hist = env.doneHist();
-      if (!has || !c) { C.drawHist($('lab-hist'), null, o); C.drawSweep($('lab-sweep'), null, o); setAlt('alt-hist', ''); setAlt('alt-sweep', ''); return; }
-      var last = hist[hist.length - 1].settings, key = c.seed + ':' + c.gen + ':' + last.stab + ':' + last.amp;
+      if (!has || !c) { C.drawHist($('lab-hist'), null, o); C.drawSweep($('lab-sweep'), null, o); setAlt('alt-hist', ''); setAlt('alt-sweep', ''); $('lab-hist-help').textContent = t('lab.hist.help', { k: PROBE_K }); return; }
+      var K = env.running() ? PROBE_K_LIVE : PROBE_K;
+      var last = hist[hist.length - 1].settings, key = c.seed + ':' + c.gen + ':' + last.stab + ':' + last.amp + ':' + K;
       var draw = function () {
         var h = LAB.ratioHistogram(lab.probe), sw = LAB.sweep(lab.probe, 40), cur = LAB.atThreshold(lab.probe, lab.probe.thr.reduce(function (a, b) { return a + b; }, 0) / 3);
         C.drawHist($('lab-hist'), h, o); setAlt('alt-hist', LAB.describeHist(tt, h));
         C.drawSweep($('lab-sweep'), sw, o); setAlt('alt-sweep', LAB.describeSweep(tt, sw, cur));
       };
-      if (lab.probe && lab.probeKey === key) { draw(); return; }
+      if (lab.probe && lab.probeKey === key) { $('lab-hist-help').textContent = t('lab.hist.help', { k: lab.probeK }); draw(); return; }
       var token = ++lab.token;
       setTimeout(function () {
         if (token !== lab.token) return;
-        lab.probe = LAB.probe(c, last, PROBE_K); lab.probeKey = key;
+        lab.probe = LAB.probe(c, last, K); lab.probeKey = key; lab.probeK = K;
+        $('lab-hist-help').textContent = t('lab.hist.help', { k: K });
         draw();
       }, 0);
     }
@@ -4514,8 +4524,9 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     $('hud-prec').textContent = T + F > 0 ? Math.round(100 * T / (T + F)) + '%' : '-';
     var done = hist.slice(0, mode === 'done' ? hist.length : Math.max(0, hist.length - (curRec && mode !== 'done' ? 1 : 0)));
     $('hud-score').textContent = done.length ? String(Math.round(G.summarize(done).score)) : '-';
-    var pos = arena && arena.position();
-    $('hud-ep').textContent = t('hud.ep', { e: pos ? pos.ep + 1 : 0, max: G.EP });
+    var pos = arena && arena.position(), rp = mode === 'done' && !$('replay').hidden ? S.indexToPos(replayIdx) : null;
+    if (rp) $('hud-gen').textContent = t('hud.gen', { g: rp.gen + 1, max: G.GENS });
+    $('hud-ep').textContent = t('hud.ep', { e: rp ? rp.ep + 1 : pos ? pos.ep + 1 : 0, max: G.EP });
   }
   var ribbonState = [];
   function renderRibbon() {
@@ -4603,7 +4614,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     var p = S.indexToPos(replayIdx), rec = contest.hist[Math.min(p.gen, contest.hist.length - 1)];
     $('replay-pos').value = String(replayIdx);
     if (arena && rec) { arena.showAt(rec, p.ep, p.step, rec.settings); renderArenaDesc(arena.snapshot()); }
-    renderReplay(); drawRail();
+    renderReplay(); drawRail(); renderHud();
   }
   function stopReplay() { replaying = false; renderReplay(); }
   function onReplayPlay() {
@@ -4914,7 +4925,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     labui = LU.create({
       $: $, t: function () { return t; }, hc: function () { return hc; }, doneHist: doneHist, contest: function () { return contest; }, readSettings: readSettings,
       applySettings: applySettings, announce: announce, store: function () { return store; }, saveStore: saveStore, seedInfo: function () { return seedInfo; },
-      drawSci: drawSci, drawMeters: drawFit, onTab: function () { }
+      running: function () { return mode === 'running' || mode === 'paused'; }, drawSci: drawSci, drawMeters: drawFit, onTab: function () { }
     });
     labui.init();
     if (arena) arena.setSpeed($('speed').value);
