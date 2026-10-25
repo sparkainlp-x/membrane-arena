@@ -1,0 +1,16 @@
+/* Membrane Arena: extra styles for the brain architecture page. AGPL-3.0-only. */
+.bgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 18px; }
+.bgrid .field { margin: 10px 0; }
+.bgrid input[type=text] { width: 100%; min-height: 44px; background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; }
+.tablewrap { overflow-x: auto; }
+#plan-table, #results-table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+#plan-table th, #plan-table td, #results-table th, #results-table td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+#plan-table td:nth-child(2), #results-table td { font-variant-numeric: tabular-nums; }
+#plan-table td:nth-child(2) { font-weight: 700; color: var(--gold-bright); text-align: right; }
+.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.diagram svg { display: block; max-width: 100%; height: auto; }
+#checks .error { color: var(--danger); font-weight: 600; }
+#checks .warning { color: var(--gold-bright); }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; color: var(--text); }
+html.hc .diagram, html.hc .bgrid input[type=text] { background: #000; border: 2px solid #fff; }
+html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.hc #results-table td { border-bottom: 2px solid #fff; }

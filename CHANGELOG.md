@@ -1,4 +1,13 @@
 # Changelog
+## 0.3.0 (2026-10-25)
+The arena's mechanics and seeds are unchanged: a seed, a daily seed or a challenge link from 0.1.0 or 0.2.0 plays exactly as before, and `dist/index.html` changes only in its version string.
+- Brain architecture: `brain.js` plans the necessary membranes of each kind (sensory columns, gates, integrators, output, optional inhibitory and memory) from the faults each layer must tolerate (2f + 1 voters, strict-majority quorum). It builds the microtubule links with delays and transport noise, checks wiring and timing, runs seeded simulations with colluding, stuck or silent faults, and draws an SVG diagram.
+- `brain.html` page (English and French, high contrast, built to `dist/brain.html`), `brain-i18n.js`, `brainui.js`, `brain.css`.
+- `scripts/brain.js` (command line), `scripts/brain-check.js` (writes `docs/brain-check.txt`), `scripts/brain-e2e-check.js` (headless Chrome, writes `docs/brain-e2e-report.json` and `docs/screenshots/brain-*.png`), `docs/BRAIN.md`.
+- `build.js` builds both pages; the workflows check and deploy `dist/brain.html`.
+- Quorum Keeper game: `quorum.js` (symbolic vote evaluator, exhaustive adversary that groups interchangeable placements, 7 Build and 7 Break levels, scoring, SVG diagram), `quorum.html`, `quorum-i18n.js` (English and French), `quorumui.js`, `quorum.css`, built to `dist/quorum.html`; `scripts/quorum-check.js` (level calibration, writes `docs/quorum-check.txt`), `scripts/quorum-e2e-check.js` (headless Chrome playthrough, writes `docs/quorum-e2e-report.json` and `docs/screenshots/quorum-*.png`), `docs/QUORUM.md`. The workflows check and deploy `dist/quorum.html`.
+- `VERSION` in `game.js`, `brain.js` and `quorum.js`, `package.json`, `CITATION.cff` and `.zenodo.json` now say 0.3.0; the brain and Quorum Keeper check reports were re-run for 0.3.0.
+- Tests grew from 146 to 184.
 
 ## 0.2.0 (2026-10-25)
 

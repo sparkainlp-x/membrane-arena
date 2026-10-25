@@ -1,0 +1,71 @@
+Brain architecture check (SYNTHETIC classical simulation)
+brain 0.3.0; Node v24.19.0; seeds chk1, chk2, chk3, chk4, chk5; 200 episodes per seed (half planted).
+Counts are pooled over seeds. Wilson 95 percent intervals treat episodes as independent; the stabilizer links
+consecutive episodes, so the intervals are approximate. Nothing here measures a physical or biological system.
+
+A. Counting rule, logic level (no learning): one column of m voters, every placement of k colluding faults.
+   Entry: what the output does in the worst placement. T = releases the true vector, F = can release the
+   faults' vector, - = can release nothing.
+   m \ k 0  1  2  3  4  5  6  7  
+   1     T  F    quorum 1, tolerates 0
+   2     T  -  F    quorum 2, tolerates 0
+   3     T  T  F  F    quorum 2, tolerates 1
+   4     T  T  -  F  F    quorum 3, tolerates 1
+   5     T  T  T  F  F  F    quorum 3, tolerates 2
+   6     T  T  T  -  F  F  F    quorum 4, tolerates 2
+   7     T  T  T  T  F  F  F  F    quorum 4, tolerates 3
+   Reading: T in every column up to k = f needs m >= 2f + 1. Even m adds no tolerance over m - 1.
+
+B. Simulation, planned architecture for f = 1, g = 1, h = 0: 3 columns of 3 sensory membranes (9 in all), 3 gates (quorum 2 of 3), 1 integrator (quorum 2 of 3 columns), 1 output (quorum 1 of 1), 1 inhibitory; 15 membranes and 17 microtubules (13 signal, 4 modulatory).
+   Coupling 0, threshold 0.5, gain 1, stabilizer on, fusion on, delays sensory>gate 0, gate>integrator 1, integrator>output 0.
+   scenario                                      true  false recall                  false per episode       fid    step  lost
+   no faults                                     495   0     0.990 [0.977, 0.996]    0.000 [0.000, 0.004]    0.968  50.8  1.1%
+   1 colluding member per column                 404   0     0.808 [0.771, 0.840]    0.000 [0.000, 0.004]    0.962  53.9  2.3%
+   1 colluding member per column + 1 column      205   0     0.410 [0.368, 0.454]    0.000 [0.000, 0.004]    0.954  53.5  1.0%
+   1 stuck member per column + 1 column          205   0     0.410 [0.368, 0.454]    0.000 [0.000, 0.004]    0.954  53.5  1.0%
+   1 silent member per column + 1 column         216   0     0.432 [0.389, 0.476]    0.000 [0.000, 0.004]    0.955  53.4  1.9%
+   PAST BOUND: 2 colluding members per column    0     1000  0.000 [0.000, 0.008]    1.000 [0.996, 1.000]    0.156  20.0  0.0%
+   PAST BOUND: 2 colluding columns               0     1000  0.000 [0.000, 0.008]    1.000 [0.996, 1.000]    0.156  20.0  0.0%
+   One honest sensory membrane alone, same runs without faults: true 468, false 3, recall 0.936 [0.911, 0.954], mean fidelity 0.874.
+
+C. Coupling inside a column, same plan. Within the bound (1 colluding member per column) the vote count only
+   protects the output when the honest members are independent of the faulty one.
+   coupling  faults                        true  false recall                  false per episode
+   0.00      none                          495   0     0.990 [0.977, 0.996]    0.000 [0.000, 0.004]
+   0.00      1 colluding member per column 404   0     0.808 [0.771, 0.840]    0.000 [0.000, 0.004]
+   0.02      none                          499   0     0.998 [0.989, 1.000]    0.000 [0.000, 0.004]
+   0.02      1 colluding member per column 419   1     0.838 [0.803, 0.868]    0.001 [0.000, 0.006]
+   0.05      none                          494   0     0.988 [0.974, 0.994]    0.000 [0.000, 0.004]
+   0.05      1 colluding member per column 7     313   0.014 [0.007, 0.029]    0.313 [0.285, 0.342]
+   The checker reports coupling above 0 as an error whenever faults must be tolerated.
+
+D. Delay on the gate to integrator microtubules (check periods of 10 steps), same plan.
+   delay  faults                                    recall                  step   lost
+   0      none                                      1.000 [0.992, 1.000]    41.1   0.0%
+   0      1 colluding member per column + 1 column  0.638 [0.595, 0.679]    48.4   0.0%
+   1      none                                      0.990 [0.977, 0.996]    50.8   1.1%
+   1      1 colluding member per column + 1 column  0.410 [0.368, 0.454]    53.5   1.0%
+   2      none                                      0.858 [0.825, 0.886]    57.7   5.2%
+   2      1 colluding member per column + 1 column  0.220 [0.186, 0.258]    57.7   2.6%
+   3      none                                      0.378 [0.337, 0.421]    59.9   11.7%
+   3      1 colluding member per column + 1 column  0.054 [0.037, 0.077]    60.0   5.6%
+   4      none                                      0.004 [0.001, 0.014]    60.0   19.6%
+   4      1 colluding member per column + 1 column  0.000 [0.000, 0.008]    n/a    9.0%
+   A delay of 5 is rejected by the checker: the first declaration is at step 10 and nothing can arrive by step 60.
+
+E. Fusing agreeing vectors at each gate and integrator, against passing the leader's vector, no faults.
+   fuse on   true 495   false 0    recall 0.990 [0.977, 0.996] mean fidelity of the output 0.968
+   fuse off  true 486   false 1    recall 0.972 [0.954, 0.983] mean fidelity of the output 0.864
+
+F. Size of the plan as requirements grow (membranes / microtubules), and work in the no-fault run of B.
+   f=0 g=0 h=0: 5    membranes (1 sensory, 1 gates, 1 integrators, 1 output, 1 inhibitory), 5 microtubules
+   f=1 g=0 h=0: 7    membranes (3 sensory, 1 gates, 1 integrators, 1 output, 1 inhibitory), 7 microtubules
+   f=1 g=1 h=0: 15   membranes (9 sensory, 3 gates, 1 integrators, 1 output, 1 inhibitory), 17 microtubules
+   f=1 g=1 h=1: 17   membranes (9 sensory, 3 gates, 3 integrators, 1 output, 1 inhibitory), 25 microtubules
+   f=2 g=1 h=0: 21   membranes (15 sensory, 3 gates, 1 integrators, 1 output, 1 inhibitory), 23 microtubules
+   f=2 g=2 h=1: 35   membranes (25 sensory, 5 gates, 3 integrators, 1 output, 1 inhibitory), 49 microtubules
+   f=3 g=2 h=2: 47   membranes (35 sensory, 5 gates, 5 integrators, 1 output, 1 inhibitory), 71 microtubules
+   No-fault run of B: 453440 Oja updates for 1000 episodes, 5951 ms of wall time in Node on this
+   machine (single thread). This is a software timing, not a hardware measurement.
+
+Total run time 139 s.

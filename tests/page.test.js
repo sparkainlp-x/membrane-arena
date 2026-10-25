@@ -7,7 +7,7 @@ const { build } = require('../build.js');
 
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
-const SOURCES = ['index.html', 'style.css', 'baselines.js', 'game.js', 'stats.js', 'lab.js', 'i18n.js', 'scene.js', 'charts.js', 'labui.js', 'app.js', 'build.js', 'scripts/make-baselines.js', 'scripts/port-check.js', 'scripts/scheme-check.js', 'scripts/evolve-check.js', 'scripts/e2e-check.js', 'scripts/serve.js'];
+const SOURCES = ['index.html', 'style.css', 'baselines.js', 'game.js', 'stats.js', 'lab.js', 'i18n.js', 'scene.js', 'charts.js', 'labui.js', 'app.js', 'build.js', 'scripts/make-baselines.js', 'scripts/port-check.js', 'scripts/scheme-check.js', 'scripts/evolve-check.js', 'scripts/e2e-check.js', 'scripts/serve.js', 'brain.html', 'brain.css', 'brain.js', 'brain-i18n.js', 'brainui.js', 'scripts/brain.js', 'scripts/brain-check.js'];
 // word lists are assembled from fragments so this file does not contain the words it forbids
 const join = (parts) => new RegExp('\\b(' + parts.map((p) => p.join('')).join('|') + ')\\b', 'i');
 const BANNED = join([['pro', 'ven'], ['valid', 'ated'], ['production', '-ready'], ['quantum ', 'advantage'], ['real-world ', 'performance']]);
@@ -32,7 +32,7 @@ test('dist/index.html, when present, matches a fresh build', { skip: !fs.existsS
 });
 
 test('no banned wording, emoji or forbidden names anywhere in the shipped sources and documents', () => {
-  for (const f of SOURCES.concat(['README.md', 'DESIGN.md', 'CHANGELOG.md', 'CITATION.cff', '.zenodo.json', 'docs/port-check.txt', 'docs/scheme-check.txt', 'docs/evolve-check.txt', 'data/SOURCE.txt'])) {
+  for (const f of SOURCES.concat(['README.md', 'DESIGN.md', 'CHANGELOG.md', 'CITATION.cff', '.zenodo.json', 'docs/port-check.txt', 'docs/scheme-check.txt', 'docs/evolve-check.txt', 'docs/brain-check.txt', 'data/SOURCE.txt'])) {
     if (!fs.existsSync(path.join(root, f))) continue;
     const s = read(f);
     assert.ok(!BANNED.test(s), `banned word in ${f}`);

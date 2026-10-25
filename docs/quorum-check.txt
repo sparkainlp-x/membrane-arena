@@ -1,0 +1,123 @@
+Quorum Keeper level check (SYNTHETIC classical simulation, quorum.js 0.3.0)
+Every design: members per column 1-9, columns 1-7, integrators 1-5, inhibitory on/off.
+Recall is measured over 60 episodes (half planted) with the level seed, under the most fragile placement.
+
+A. Build levels
+b1  mode collude, threat {"total":1,"perColumn":1,"gates":0,"integrators":0}, delays sg 0 gi 1 io 0, budget 8, recall target 0.6, par 6
+    designs within budget: 32; logic holds for 10
+    cheapest design whose logic holds: 3x1, 1 int = 6 membranes (4 placements tried)
+    simulated in order of cost until the recall target was met: 1 designs, false outputs 0
+      3x1, 1 int             cost  6  recall 0.667 [0.49, 0.81]  false 0  stars 3
+    cheapest design meeting the recall target: 3x1, 1 int = 6 membranes, recall 0.667
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+b2  mode collude, threat {"total":1,"perColumn":0,"gates":1,"integrators":0}, delays sg 0 gi 1 io 0, budget 10, recall target 0.6, par 9
+    designs within budget: 66; logic holds for 6
+    cheapest design whose logic holds: 1x3, 1 int = 8 membranes (4 placements tried)
+    simulated in order of cost until the recall target was met: 3 designs, false outputs 0
+      1x3, 1 int             cost  8  recall 0.433 [0.27, 0.61]  false 0  stars 1
+      1x3, 2 int             cost  9  recall 0.433 [0.27, 0.61]  false 0  stars 1
+      1x3, 1 int, inh        cost  9  recall 0.600 [0.42, 0.75]  false 0  stars 3
+    cheapest design meeting the recall target: 1x3, 1 int, inh = 9 membranes, recall 0.600
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+b3  mode collude, threat {"total":99,"perColumn":1,"gates":1,"integrators":0}, delays sg 0 gi 1 io 0, budget 22, recall target 0.9, par 21
+    designs within budget: 286; logic holds for 36
+    cheapest design whose logic holds: 3x3, 1 int = 14 membranes (256 placements tried)
+    simulated in order of cost until the recall target was met: 29 designs, false outputs 0
+      3x4, 2 int, inh        cost 20  recall 0.333 [0.19, 0.51]  false 0  stars 1
+      4x3, 3 int, inh        cost 20  recall 0.500 [0.33, 0.67]  false 0  stars 1
+      3x4, 4 int             cost 21  recall 0.200 [0.10, 0.37]  false 0  stars 1
+      4x3, 5 int             cost 21  recall 0.300 [0.17, 0.48]  false 0  stars 1
+      5x3, 2 int             cost 21  recall 0.533 [0.36, 0.70]  false 0  stars 1
+      3x4, 3 int, inh        cost 21  recall 0.333 [0.19, 0.51]  false 0  stars 1
+      4x3, 4 int, inh        cost 21  recall 0.500 [0.33, 0.67]  false 0  stars 1
+      5x3, 1 int, inh        cost 21  recall 0.933 [0.79, 0.98]  false 0  stars 3
+      (the 21 cheaper designs above these also missed the target)
+    cheapest design meeting the recall target: 5x3, 1 int, inh = 21 membranes, recall 0.933
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+b4  mode collude, threat {"total":1,"perColumn":1,"gates":1,"integrators":1}, delays sg 0 gi 1 io 0, budget 14, recall target 0.85, par 11
+    designs within budget: 150; logic holds for 15
+    cheapest design whose logic holds: 1x3, 3 int = 10 membranes (10 placements tried)
+    simulated in order of cost until the recall target was met: 3 designs, false outputs 0
+      1x3, 3 int             cost 10  recall 0.700 [0.52, 0.83]  false 0  stars 1
+      1x3, 4 int             cost 11  recall 0.700 [0.52, 0.83]  false 0  stars 1
+      1x3, 3 int, inh        cost 11  recall 0.900 [0.74, 0.97]  false 0  stars 3
+    cheapest design meeting the recall target: 1x3, 3 int, inh = 11 membranes, recall 0.900
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+b5  mode silent, threat {"total":99,"perColumn":1,"gates":1,"integrators":0}, delays sg 0 gi 1 io 0, budget 28, recall target 0.95, par 27
+    designs within budget: 368; logic holds for 88
+    cheapest design whose logic holds: 3x3, 1 int = 14 membranes (256 placements tried)
+    simulated in order of cost until the recall target was met: 79 designs, false outputs 0
+      6x3, 5 int             cost 27  recall 0.233 [0.12, 0.41]  false 0  stars 1
+      7x3, 2 int             cost 27  recall 0.500 [0.33, 0.67]  false 0  stars 1
+      3x5, 5 int, inh        cost 27  recall 0.733 [0.56, 0.86]  false 0  stars 1
+      3x6, 1 int, inh        cost 27  recall 0.500 [0.33, 0.67]  false 0  stars 1
+      4x4, 5 int, inh        cost 27  recall 0.167 [0.07, 0.34]  false 0  stars 1
+      5x4, 1 int, inh        cost 27  recall 0.767 [0.59, 0.88]  false 0  stars 1
+      6x3, 4 int, inh        cost 27  recall 0.733 [0.56, 0.86]  false 0  stars 1
+      7x3, 1 int, inh        cost 27  recall 0.967 [0.83, 0.99]  false 0  stars 3
+      (the 71 cheaper designs above these also missed the target)
+    cheapest design meeting the recall target: 7x3, 1 int, inh = 27 membranes, recall 0.967
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+b6  mode collude, threat {"total":99,"perColumn":1,"gates":0,"integrators":0}, delays sg 0 gi 3 io 0, budget 16, recall target 0.35, par 11
+    designs within budget: 189; logic holds for 99
+    cheapest design whose logic holds: 3x1, 1 int = 6 membranes (4 placements tried)
+    simulated in order of cost until the recall target was met: 38 designs, false outputs 0
+      7x1, 2 int             cost 11  recall 0.000 [0.00, 0.11]  false 0  stars 1
+      8x1, 1 int             cost 11  recall 0.000 [0.00, 0.11]  false 0  stars 1
+      3x1, 5 int, inh        cost 11  recall 0.167 [0.07, 0.34]  false 0  stars 1
+      3x2, 1 int, inh        cost 11  recall 0.033 [0.01, 0.17]  false 0  stars 1
+      4x1, 4 int, inh        cost 11  recall 0.033 [0.01, 0.17]  false 0  stars 1
+      5x1, 3 int, inh        cost 11  recall 0.200 [0.10, 0.37]  false 0  stars 1
+      6x1, 2 int, inh        cost 11  recall 0.133 [0.05, 0.30]  false 0  stars 1
+      7x1, 1 int, inh        cost 11  recall 0.367 [0.22, 0.54]  false 0  stars 3
+      (the 30 cheaper designs above these also missed the target)
+    cheapest design meeting the recall target: 7x1, 1 int, inh = 11 membranes, recall 0.367
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+b7  mode collude, threat {"total":2,"perColumn":2,"gates":2,"integrators":2}, delays sg 0 gi 1 io 0, budget 24, recall target 0.95, par 17
+    designs within budget: 318; logic holds for 9
+    cheapest design whose logic holds: 1x5, 5 int = 16 membranes (121 placements tried)
+    simulated in order of cost until the recall target was met: 2 designs, false outputs 0
+      1x5, 5 int             cost 16  recall 0.800 [0.63, 0.90]  false 0  stars 1
+      1x5, 5 int, inh        cost 17  recall 0.967 [0.83, 0.99]  false 0  stars 3
+    cheapest design meeting the recall target: 1x5, 5 int, inh = 17 membranes, recall 0.967
+    par equals the cheapest 3-star design: yes; the starting design fails the logic: yes
+
+B. Break levels
+x1  4x1, 1 int, mode collude, goal silence, up to 2 faults on sensory
+    placements tried: 11 (true 5, false 0, none 6)
+    breakable with 2 faults: s0.0, s0.1
+x2  3x3, 1 int, mode collude, goal fool, up to 1 faults on sensory/gate/integrator
+    placements tried: 14 (true 13, false 1, none 0)
+    breakable with 1 fault: i0
+x3  3x3, 1 int, mode collude, goal fool, up to 4 faults on sensory
+    placements tried: 256 (true 229, false 27, none 0)
+    breakable with 4 faults: s0.0, s0.1, s1.0, s1.1
+x4  3x3, 1 int, mode collude, goal fool, up to 3 faults on sensory
+    placements tried: 130 (true 130, false 0, none 0)
+    cannot be broken: the right move is the claim
+x5  3x5, 3 int, mode collude, goal fool, up to 3 faults on sensory/gate/integrator
+    placements tried: 2048 (true 1974, false 74, none 0)
+    breakable with 2 faults: i0, i1
+x6  3x3, 3 int, mode stuck, goal fool, up to 3 faults on sensory/gate/integrator
+    placements tried: 576 (true 478, false 0, none 98)
+    cannot be broken: the right move is the claim
+x7  3x5, 1 int, mode silent, goal silence, up to 3 faults on sensory/gate
+    placements tried: 1351 (true 1341, false 0, none 10)
+    breakable with 3 faults: g0, g1, g2
+
+C. Inhibitory membrane on and off at each par design (same layers), recall over three seeds
+b1  3x1, 1 int: without 0.67 0.53 0.37 | with 0.73 0.80 0.67
+b2  1x3, 1 int: without 0.43 0.60 0.33 | with 0.60 0.70 0.77
+b3  5x3, 1 int: without 0.53 0.47 0.40 | with 0.93 0.80 0.80
+b4  1x3, 3 int: without 0.70 0.83 0.73 | with 0.90 0.97 0.90
+b5  7x3, 1 int: without 0.50 0.53 0.70 | with 0.97 0.93 0.93
+b6  7x1, 1 int: without 0.00 0.03 0.00 | with 0.37 0.37 0.30
+b7  1x5, 5 int: without 0.80 0.93 0.80 | with 0.97 1.00 0.97
+All build levels consistent: yes
+Wall time not recorded in the file (it varies by machine).

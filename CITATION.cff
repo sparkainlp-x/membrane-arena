@@ -7,7 +7,7 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.2.0
+version: 0.3.0
 date-released: 2026-10-25
 license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
@@ -26,7 +26,11 @@ abstract: >-
   a plain-text share card and challenge links. A Lab view plots the
   simulation's own instruments with confidence intervals, runs multi-seed
   ensembles and paired A/B tests against the repository baselines, and
-  replays any contest. Classical simulation only.
+  replays any contest. A brain page sizes layers of membranes with the
+  2f + 1 rule and joins them with delayed links called microtubules (a
+  metaphor only; nothing models real neurons, microtubules or a brain), and
+  the Quorum Keeper logic game builds and breaks such fault-tolerant brains
+  against an exhaustive adversary. Classical simulation only.
 keywords:
   - "scientific-reasoning"
   - "oja-rule"
@@ -35,6 +39,8 @@ keywords:
   - "education"
   - "synthetic"
   - "javascript"
+  - "fault-tolerance"
+  - "logic-game"
 references:
   - type: article
     title: "Simplified neuron model as a principal component analyzer"

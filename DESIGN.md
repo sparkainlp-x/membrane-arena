@@ -67,6 +67,9 @@ Keyboard: Space, G, F, S (open the Lab), Escape (skip the intro), arrow keys, Ho
 - **Storage.** `sanitizeStore` rebuilds the record entry by entry; wrong types, impossible dates, out-of-range scores and unknown tags are dropped. If `localStorage` throws, the game continues and says the record will not persist.
 - **Share card.** Plain text, no emoji, at most 40 characters per line (tested for the worst case in both languages), with the SYNTHETIC label.
 
+## Brain architecture
+`brain.js` reuses `game.js` for learning, so one column of three honest membranes reproduces `episode()` draw for draw (tested). Each layer is a vote: 2f + 1 voters and a quorum of f + 1, the smallest size at which f colluding voters cannot release and the honest ones still can. `tests/brain.test.js` checks this by enumerating every placement. The release rule (earliest time, lowest index, one per episode) generalizes the 2-of-3 shield, and a test confirms it picks the same membrane. Microtubules carry released vectors with a delay in check periods and optional noise. Arrivals after step 60 are lost. Coupling defaults to 0 because it lets a faulty member pull honest ones toward its vector (measured: 313 false outputs in 1,000 episodes at 0.05). The output, inhibitory and memory membranes are assumed fault-free and reported as single points of failure. Details and measurements: [docs/BRAIN.md](docs/BRAIN.md), [docs/brain-check.txt](docs/brain-check.txt).
+
 ## Known weaknesses
 
 - The game's scoring and the scheme bonus are design choices, not findings.
@@ -74,3 +77,4 @@ Keyboard: Space, G, F, S (open the Lab), Escape (skip the intro), arrow keys, Ho
 - Eight episodes per generation make the evolution step noisy by construction; a single run is one sample.
 - The daily result can be computed from the page source.
 - Headless-Chrome checks run on software rendering; phone hardware was not tested.
+- The brain architecture is sized for safety. At exactly 2f + 1 voters there is no spare honest voter, so recall falls at the fault bound (0.41 in `docs/brain-check.txt`). Its layout, fusion and fault-free output are design choices.

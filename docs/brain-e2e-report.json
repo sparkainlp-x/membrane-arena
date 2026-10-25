@@ -1,0 +1,384 @@
+{
+  "version": "0.3.0",
+  "chrome": "/usr/bin/google-chrome",
+  "allOk": true,
+  "servedOther": [],
+  "cases": [
+    {
+      "name": "brain-en-desktop",
+      "ok": true,
+      "wallMs": 356,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "f": "1",
+        "g": "1",
+        "h": "0",
+        "fs": "1",
+        "fc": "1"
+      },
+      "lang": "en",
+      "title": "Membrane Arena: brain architecture",
+      "membranesDrawn": 15,
+      "microtubulesDrawn": 17,
+      "faultyDrawn": 4,
+      "planTotal": "Total: 15 membranes and 17 microtubules (13 signal, 4 modulatory).",
+      "checks": [
+        "Note: the longest signal path adds a delay of 1 x 10 steps; 4 of the 5 later check points are left for the membranes to declare.",
+        "Note: single points of failure, assumed fault-free: output, inhibitory."
+      ],
+      "results": [
+        [
+          "True events",
+          "8",
+          "18"
+        ],
+        [
+          "False events",
+          "0",
+          "1"
+        ],
+        [
+          "Recall (true events per planted episode), 95% Wilson",
+          "0.40 [0.22, 0.61]",
+          "0.90 [0.70, 0.97]"
+        ],
+        [
+          "False events per episode, 95% Wilson",
+          "0.00 [0.00, 0.09]",
+          "0.03 [0.00, 0.13]"
+        ],
+        [
+          "Precision",
+          "1.00",
+          "0.95"
+        ],
+        [
+          "Mean |<v|pattern>| of what was released",
+          "0.95",
+          "0.84"
+        ],
+        [
+          "Mean step of the output (of 60)",
+          "56.3",
+          "not applicable"
+        ],
+        [
+          "Vectors lost past step 60 / vectors moved",
+          "4 / 237",
+          "not applicable"
+        ],
+        [
+          "Oja updates computed",
+          "11490",
+          "not applicable"
+        ]
+      ],
+      "status": "Done: 40 episodes in 214 ms in this browser.",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": []
+    },
+    {
+      "name": "brain-fr-desktop",
+      "ok": true,
+      "wallMs": 624,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "f": "2",
+        "g": "1",
+        "h": "1",
+        "fs": "2",
+        "fc": "0"
+      },
+      "lang": "fr",
+      "title": "Membrane Arena : architecture cérébrale",
+      "membranesDrawn": 23,
+      "microtubulesDrawn": 31,
+      "faultyDrawn": 6,
+      "planTotal": "Total : 23 membranes et 31 microtubules (27 de signal, 4 de modulation).",
+      "checks": [
+        "Remarque: le plus long chemin de signal ajoute un délai de 1 x 10 pas ; il reste 4 des 5 points de contrôle suivants pour que les membranes déclarent.",
+        "Remarque: points uniques de défaillance, supposés sans panne : sortie, inhibitrice."
+      ],
+      "results": [
+        [
+          "Événements vrais",
+          "17",
+          "20"
+        ],
+        [
+          "Événements faux",
+          "0",
+          "0"
+        ],
+        [
+          "Rappel (événements vrais par épisode avec motif), Wilson 95 %",
+          "0.85 [0.64, 0.95]",
+          "1.00 [0.84, 1.00]"
+        ],
+        [
+          "Événements faux par épisode, Wilson 95 %",
+          "0.00 [0.00, 0.09]",
+          "0.00 [0.00, 0.09]"
+        ],
+        [
+          "Précision",
+          "1.00",
+          "1.00"
+        ],
+        [
+          "|<v|motif>| moyen de ce qui a été libéré",
+          "0.97",
+          "0.87"
+        ],
+        [
+          "Pas moyen de la sortie (sur 60)",
+          "55.3",
+          "sans objet"
+        ],
+        [
+          "Vecteurs perdus après le pas 60 / vecteurs transportés",
+          "39 / 634",
+          "sans objet"
+        ],
+        [
+          "Mises à jour d'Oja calculées",
+          "17570",
+          "sans objet"
+        ]
+      ],
+      "status": "Terminé : 40 épisodes en 334 ms dans ce navigateur.",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": []
+    },
+    {
+      "name": "brain-en-phone",
+      "ok": true,
+      "wallMs": 540,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "f": "1",
+        "g": "1",
+        "h": "0",
+        "fs": "0",
+        "fc": "0"
+      },
+      "lang": "en",
+      "title": "Membrane Arena: brain architecture",
+      "membranesDrawn": 15,
+      "microtubulesDrawn": 17,
+      "faultyDrawn": 0,
+      "planTotal": "Total: 15 membranes and 17 microtubules (13 signal, 4 modulatory).",
+      "checks": [
+        "Note: the longest signal path adds a delay of 1 x 10 steps; 4 of the 5 later check points are left for the membranes to declare.",
+        "Note: single points of failure, assumed fault-free: output, inhibitory."
+      ],
+      "results": [
+        [
+          "True events",
+          "20",
+          "20"
+        ],
+        [
+          "False events",
+          "0",
+          "0"
+        ],
+        [
+          "Recall (true events per planted episode), 95% Wilson",
+          "1.00 [0.84, 1.00]",
+          "1.00 [0.84, 1.00]"
+        ],
+        [
+          "False events per episode, 95% Wilson",
+          "0.00 [0.00, 0.09]",
+          "0.00 [0.00, 0.09]"
+        ],
+        [
+          "Precision",
+          "1.00",
+          "1.00"
+        ],
+        [
+          "Mean |<v|pattern>| of what was released",
+          "0.97",
+          "0.87"
+        ],
+        [
+          "Mean step of the output (of 60)",
+          "49.5",
+          "not applicable"
+        ],
+        [
+          "Vectors lost past step 60 / vectors moved",
+          "6 / 253",
+          "not applicable"
+        ],
+        [
+          "Oja updates computed",
+          "18070",
+          "not applicable"
+        ]
+      ],
+      "status": "Done: 40 episodes in 288 ms in this browser.",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": []
+    },
+    {
+      "name": "brain-fr-phone",
+      "ok": true,
+      "wallMs": 379,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "f": "1",
+        "g": "0",
+        "h": "0",
+        "fs": "1",
+        "fc": "0"
+      },
+      "lang": "fr",
+      "title": "Membrane Arena : architecture cérébrale",
+      "membranesDrawn": 7,
+      "microtubulesDrawn": 7,
+      "faultyDrawn": 1,
+      "planTotal": "Total : 7 membranes et 7 microtubules (5 de signal, 2 de modulation).",
+      "checks": [
+        "Remarque: le plus long chemin de signal ajoute un délai de 1 x 10 pas ; il reste 4 des 5 points de contrôle suivants pour que les membranes déclarent.",
+        "Remarque: points uniques de défaillance, supposés sans panne : sortie, inhibitrice."
+      ],
+      "results": [
+        [
+          "Événements vrais",
+          "12",
+          "19"
+        ],
+        [
+          "Événements faux",
+          "0",
+          "0"
+        ],
+        [
+          "Rappel (événements vrais par épisode avec motif), Wilson 95 %",
+          "0.60 [0.39, 0.78]",
+          "0.95 [0.76, 0.99]"
+        ],
+        [
+          "Événements faux par épisode, Wilson 95 %",
+          "0.00 [0.00, 0.09]",
+          "0.00 [0.00, 0.09]"
+        ],
+        [
+          "Précision",
+          "1.00",
+          "1.00"
+        ],
+        [
+          "|<v|motif>| moyen de ce qui a été libéré",
+          "0.92",
+          "0.86"
+        ],
+        [
+          "Pas moyen de la sortie (sur 60)",
+          "50.8",
+          "sans objet"
+        ],
+        [
+          "Vecteurs perdus après le pas 60 / vecteurs transportés",
+          "4 / 107",
+          "sans objet"
+        ],
+        [
+          "Mises à jour d'Oja calculées",
+          "3960",
+          "sans objet"
+        ]
+      ],
+      "status": "Terminé : 40 épisodes en 107 ms dans ce navigateur.",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": []
+    },
+    {
+      "name": "brain-en-desktop-contrast",
+      "ok": true,
+      "wallMs": 526,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "f": "2",
+        "g": "2",
+        "h": "1",
+        "fs": "3",
+        "fc": "0",
+        "hc": true
+      },
+      "lang": "en",
+      "title": "Membrane Arena: brain architecture",
+      "membranesDrawn": 35,
+      "microtubulesDrawn": 49,
+      "faultyDrawn": 15,
+      "planTotal": "Total: 35 membranes and 49 microtubules (43 signal, 6 modulatory).",
+      "checks": [
+        "Note: the longest signal path adds a delay of 1 x 10 steps; 4 of the 5 later check points are left for the membranes to declare.",
+        "Note: single points of failure, assumed fault-free: output, inhibitory."
+      ],
+      "results": [
+        [
+          "True events",
+          "0",
+          "1"
+        ],
+        [
+          "False events",
+          "40",
+          "0"
+        ],
+        [
+          "Recall (true events per planted episode), 95% Wilson",
+          "0.00 [0.00, 0.16]",
+          "0.05 [0.01, 0.24]"
+        ],
+        [
+          "False events per episode, 95% Wilson",
+          "1.00 [0.91, 1.00]",
+          "0.00 [0.00, 0.09]"
+        ],
+        [
+          "Precision",
+          "0.00",
+          "1.00"
+        ],
+        [
+          "Mean |<v|pattern>| of what was released",
+          "0.17",
+          "0.91"
+        ],
+        [
+          "Mean step of the output (of 60)",
+          "20.0",
+          "not applicable"
+        ],
+        [
+          "Vectors lost past step 60 / vectors moved",
+          "0 / 1328",
+          "not applicable"
+        ],
+        [
+          "Oja updates computed",
+          "23860",
+          "not applicable"
+        ]
+      ],
+      "status": "Done: 40 episodes in 444 ms in this browser.",
+      "overflowX": false,
+      "hc": true,
+      "untranslated": []
+    }
+  ]
+}

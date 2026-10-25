@@ -1,0 +1,2177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Membrane Arena brain architecture: an offline, synthetic, classical simulation of many membranes of several kinds joined by microtubules, sized by counting votes.">
+<title>Membrane Arena: brain architecture</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='16' cy='9' r='5' fill='none' stroke='%2340d0e0' stroke-width='2'/%3E%3Ccircle cx='9' cy='21' r='5' fill='none' stroke='%237aa8ff' stroke-width='2'/%3E%3Ccircle cx='23' cy='21' r='5' fill='none' stroke='%23c9a84c' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #0a1330;
+  --bg2: #101c40;
+  --panel: #12204a;
+  --line: #2a3b6e;
+  --text: #eef2ff;
+  --muted: #b3bedb;
+  --gold: #c9a84c;
+  --gold-bright: #e0c36a;
+  --cyan: #40d0e0;
+  --blue: #7aa8ff;
+  --aqua: #5ee6b8;
+  --danger: #ff9a9a;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: radial-gradient(1400px 700px at 50% -10%, #16275a 0%, var(--bg) 60%) fixed;
+  color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 12px 28px;
+}
+.skip { position: absolute; left: -999px; top: 0; background: var(--gold); color: #0a1330; padding: 8px 12px; z-index: 30; }
+.skip:focus { left: 8px; top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.top, main, .foot { width: 100%; max-width: 1180px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 0 6px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 1.7rem; letter-spacing: 0.22em; color: var(--gold); font-weight: 700; }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { border: 1px solid var(--cyan); color: var(--cyan); border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; letter-spacing: 0.08em; }
+main { outline: none; }
+.card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 12px; min-width: 0; }
+[hidden] { display: none !important; }
+h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--gold-bright); }
+h3 { margin: 16px 0 6px; font-size: 1rem; color: var(--gold-bright); }
+h4 { margin: 0 0 4px; font-size: 1rem; color: var(--cyan); }
+h2:focus, h2[tabindex="-1"]:focus { outline: none; }
+p { margin: 8px 0; }
+.muted { color: var(--muted); }
+.small-text { font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.84rem; margin: 2px 0 10px; }
+.beat { color: var(--cyan); font-weight: 600; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: #1a2a5c; color: var(--text); padding: 12px 16px;
+  min-height: 44px; border-radius: 10px; font: inherit; cursor: pointer; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: var(--gold); color: #0a1330; border-color: var(--gold); font-weight: 700; }
+.btn.primary:hover { background: var(--gold-bright); }
+.btn.small { padding: 6px 12px; min-height: 40px; font-size: 0.9rem; }
+.btn[aria-pressed="true"] { border-color: var(--cyan); background: #12426a; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+.col-main { min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 14px; }
+@media (min-width: 980px) { .layout { grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); align-items: start; } }
+
+.hud { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.92rem; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.hud-item { color: var(--muted); } .hud-item b { color: var(--text); }
+.c-true { color: var(--cyan) !important; } .c-false { color: var(--danger) !important; } .c-gold { color: var(--gold-bright) !important; }
+.canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #070e26; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .canvas-wrap { aspect-ratio: 1 / 1.05; } }
+#arena { width: 100%; height: 100%; display: block; }
+.canvas-msg { position: absolute; left: 12px; right: 12px; bottom: 8px; margin: 0; font-size: 0.85rem; color: var(--muted); }
+.ribbon { list-style: none; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 10px 0 0; padding: 0; }
+.ribbon li { height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #0d1840; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: var(--muted); }
+.ribbon li.planted { border-style: solid; }
+.ribbon li.noise { border-style: dashed; }
+.ribbon li.t { background: #0f4b5a; border-color: var(--cyan); color: var(--text); }
+.ribbon li.f { background: #4b2a34; border-color: var(--danger); color: var(--text); }
+.ribbon li.h { background: #2a3350; border-color: var(--muted); color: var(--text); }
+.ribbon li.cur { box-shadow: 0 0 0 2px var(--gold); }
+.ticker { min-height: 1.5em; margin: 8px 0 0; color: var(--gold-bright); font-size: 0.92rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.inline { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
+select {
+  background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 44px; font: inherit; max-width: 100%;
+}
+.field { margin: 14px 0; }
+.field > label { display: block; margin: 0 0 4px; font-weight: 600; }
+.field select { width: 100%; }
+.sliderrow { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+.sliderrow label { flex: 0 0 9.5em; margin: 0; }
+.sliderrow .end { font-size: 0.8rem; color: var(--muted); }
+input[type=range] { flex: 1; min-width: 110px; min-height: 44px; accent-color: var(--gold); }
+output { min-width: 4ch; text-align: right; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.switch { display: flex; gap: 10px; align-items: center; min-height: 44px; margin: 6px 0 0; font-weight: 600; cursor: pointer; }
+.switch input { width: 22px; height: 22px; accent-color: var(--gold); flex: none; }
+.switches .hint { margin-left: 32px; }
+details summary { cursor: pointer; padding: 8px 0; color: var(--cyan); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+details[disabled] input { opacity: .5; }
+
+.meters-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .meters-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.meter-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.m-name { width: 1.4em; font-weight: 700; color: var(--gold-bright); }
+.meter { position: relative; flex: 1; height: 18px; background: #070e26; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.m-band { position: absolute; top: 0; bottom: 0; left: calc(0.33 / 3.2 * 100%); width: calc((3 - 0.33) / 3.2 * 100%); background: rgba(64, 208, 224, 0.12); border-left: 1px dashed var(--cyan); border-right: 1px dashed var(--cyan); }
+.meter.off .m-band { display: none; }
+.m-fill { position: absolute; left: 0; top: 3px; bottom: 3px; width: 0; background: var(--cyan); border-radius: 6px; }
+.m-fill.rate { background: var(--gold); }
+.m-eff { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--text); left: 0; }
+.m-tick { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--muted); }
+.meter.clamped { border-color: var(--danger); }
+.m-val { width: 9.5em; white-space: nowrap; text-align: right; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: 190px; background: #070e26; border: 1px solid var(--line); border-radius: 10px; display: block; }
+.chart.tall { height: 340px; }
+.chart.ens { height: 280px; }
+.rail { width: 100%; height: 44px; display: block; background: #070e26; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
+.key { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--cyan); vertical-align: middle; margin-right: 6px; }
+.key-base { border-top: 3px dashed var(--gold); margin-left: 14px; }
+
+.big { font-size: 1.6rem; font-weight: 700; color: var(--gold-bright); margin: 4px 0 8px; }
+.parts { display: grid; gap: 8px; }
+.part { display: grid; grid-template-columns: 9.5em 1fr 6.8em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.part .bar { height: 10px; background: #070e26; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.part .bar span { display: block; height: 100%; background: var(--cyan); }
+.part .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+.scores { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.scores th, .scores td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.scores th:first-child, .scores td:first-child { text-align: left; white-space: normal; }
+.scores th { color: var(--cyan); font-weight: 600; }
+.lesson { margin-top: 14px; padding: 12px; border: 1px solid var(--gold); border-radius: 10px; background: #0e1a3d; }
+.lesson h3 { margin-top: 0; }
+pre {
+  white-space: pre-wrap; word-break: break-word; background: #070e26; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
+}
+.stats { list-style: none; margin: 0; padding: 0; color: var(--muted); }
+.stats li { padding: 2px 0; }
+.modal { position: fixed; inset: 0; background: rgba(4, 8, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.modal-box { max-width: 560px; max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: var(--radius); padding: 18px; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 0.8rem; }
+.foot p { margin: 4px 0; }
+@media (max-width: 480px) { .sliderrow label { flex-basis: 100%; } .part { grid-template-columns: 7em 1fr 6.8em; } h1 { font-size: 1.35rem; } }
+@media (prefers-reduced-motion: no-preference) {
+  .m-fill { transition: width 0.25s ease; }
+  .m-eff { transition: left 0.25s ease; }
+  .card { animation: rise 0.25s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- v0.2: tabs, Lab, ensemble, A/B, missions, replay, tour ---------- */
+.tabs { padding-top: 8px; }
+.tablist { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 -4px 12px; padding: 0 4px; scrollbar-width: thin; }
+.tab {
+  appearance: none; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 3px solid transparent;
+  padding: 8px 14px; min-height: 44px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 8px 8px 0 0; touch-action: manipulation;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--gold-bright); border-bottom-color: var(--gold); background: rgba(201, 168, 76, 0.08); }
+.tabpanel { outline: none; }
+.tabpanel:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.inst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 6px 16px; }
+.inst { margin: 10px 0 14px; min-width: 0; }
+.inst.wide { grid-column: 1 / -1; }
+.inst h3 { margin-top: 4px; }
+.inst select { min-height: 40px; padding: 4px 8px; }
+.alt { margin: 6px 0 2px; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); font-size: 0.86rem; }
+.alt:empty { display: none; }
+.formrow { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 8px 0; }
+.formrow .switch { margin: 0; }
+progress { width: min(100%, 320px); height: 14px; accent-color: var(--gold); vertical-align: middle; }
+.exp { width: 100%; background: #070e26; color: var(--text); border: 1px solid var(--line); border-radius: 8px; font: 0.8rem/1.3 ui-monospace, Menlo, Consolas, monospace; padding: 8px; }
+.method { margin: 4px 0 8px; padding-left: 1.2em; color: var(--muted); font-size: 0.92rem; }
+.method li { margin: 3px 0; }
+.missions { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
+.mission { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #0e1a3d; }
+.mission h3 { margin: 0 0 2px; }
+.mission.done { border-color: var(--gold); }
+.mission .status { font-weight: 600; color: var(--cyan); margin: 4px 0; font-size: 0.9rem; }
+.mission.done .status { color: var(--gold-bright); }
+.replay { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.replay h3 { margin-top: 0; }
+.replay-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.replay-row input[type=range] { flex: 1; min-width: 140px; }
+.tour { border-color: var(--gold); }
+#help .modal-box h2:focus { outline: none; }
+.row-end { display: flex; justify-content: flex-end; }
+
+/* motion switched off in the page (in addition to the system setting) */
+html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+
+/* high-contrast mode: white on black, heavier outlines, no gradients */
+html.hc { --bg: #000; --bg2: #000; --panel: #000; --line: #fff; --text: #fff; --muted: #f0f0f0; --gold: #ffd400; --gold-bright: #ffd400; --cyan: #00ffff; --blue: #9ec0ff; --aqua: #00ff96; --danger: #ff8a8a; }
+html.hc body { background: #000; }
+html.hc .card { background: #000; border-width: 2px; }
+html.hc .btn { background: #000; border-width: 2px; }
+html.hc .btn.primary { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .btn[aria-pressed="true"] { background: #003a3a; border-color: #00ffff; }
+html.hc select, html.hc .exp, html.hc pre, html.hc .chart, html.hc .rail, html.hc .canvas-wrap, html.hc .meter { background: #000; border: 2px solid #fff; }
+html.hc .tab[aria-selected="true"] { background: #1a1a00; border-bottom-width: 4px; }
+html.hc .mission, html.hc .lesson { background: #000; border-width: 2px; }
+html.hc .ribbon li { background: #000; border-width: 2px; color: #fff; }
+html.hc .ribbon li.t { background: #003a3a; } html.hc .ribbon li.f { background: #3a0000; } html.hc .ribbon li.h { background: #222; }
+html.hc .alt { border-left-color: #fff; }
+html.hc .tag { border-width: 2px; }
+html.hc :focus-visible { outline: 4px solid #ffd400; outline-offset: 2px; }
+html.hc .hint, html.hc .muted { color: #f0f0f0; }
+@media (max-width: 480px) { .tab { padding: 8px 10px; } .formrow { gap: 6px 12px; } }
+@media (forced-colors: active) { .btn.primary { border: 2px solid ButtonText; } .m-fill, .m-eff { background: Highlight; forced-color-adjust: none; } }
+</style>
+<style>
+/* Membrane Arena: extra styles for the brain architecture page. AGPL-3.0-only. */
+.bgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 18px; }
+.bgrid .field { margin: 10px 0; }
+.bgrid input[type=text] { width: 100%; min-height: 44px; background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; }
+.tablewrap { overflow-x: auto; }
+#plan-table, #results-table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+#plan-table th, #plan-table td, #results-table th, #results-table td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+#plan-table td:nth-child(2), #results-table td { font-variant-numeric: tabular-nums; }
+#plan-table td:nth-child(2) { font-weight: 700; color: var(--gold-bright); text-align: right; }
+.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.diagram svg { display: block; max-width: 100%; height: auto; }
+#checks .error { color: var(--danger); font-weight: 600; }
+#checks .warning { color: var(--gold-bright); }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; color: var(--text); }
+html.hc .diagram, html.hc .bgrid input[type=text] { background: #000; border: 2px solid #fff; }
+html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.hc #results-table td { border-bottom: 2px solid #fff; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Membrane Arena: brain architecture</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a id="link-back" class="btn small" href="index.html" data-i18n="page.back"></a>
+  </div>
+</header>
+<noscript><p class="card">This page needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+
+  <form id="brain-form" class="card" novalidate>
+    <h2 data-i18n="sec.req"></h2>
+    <div class="bgrid">
+      <div class="field"><label for="f" data-i18n="req.f"></label><select id="f"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></div>
+      <div class="field"><label for="g" data-i18n="req.g"></label><select id="g"><option>0</option><option selected>1</option><option>2</option></select></div>
+      <div class="field"><label for="h" data-i18n="req.h"></label><select id="h"><option selected>0</option><option>1</option><option>2</option></select></div>
+      <div class="field"><label for="sg" data-i18n="req.sg"></label><select id="sg"><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label for="gi" data-i18n="req.gi"></label><select id="gi"><option>0</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label for="io" data-i18n="req.io"></label><select id="io"><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+    </div>
+    <div class="sliderrow"><label for="jitter" data-i18n="req.jitter"></label><input id="jitter" type="range" min="0" max="0.3" step="0.01" value="0"><output id="jitter-val" for="jitter">0.00</output></div>
+    <div class="sliderrow"><label for="c" data-i18n="req.c"></label><input id="c" type="range" min="0" max="0.3" step="0.01" value="0"><output id="c-val" for="c">0.00</output></div>
+    <div class="sliderrow"><label for="th" data-i18n="req.th"></label><input id="th" type="range" min="0.1" max="1.2" step="0.01" value="0.5"><output id="th-val" for="th">0.50</output></div>
+    <div class="sliderrow"><label for="gain" data-i18n="req.gain"></label><input id="gain" type="range" min="0.5" max="2" step="0.01" value="1"><output id="gain-val" for="gain">1.00</output></div>
+    <div class="formrow">
+      <label class="switch"><input id="stab" type="checkbox" checked><span data-i18n="req.stab"></span></label>
+      <label class="switch"><input id="mem" type="checkbox"><span data-i18n="req.mem"></span></label>
+      <label class="switch"><input id="fuse" type="checkbox" checked><span data-i18n="req.fuse"></span></label>
+    </div>
+
+    <h2 data-i18n="sec.faults"></h2>
+    <div class="bgrid">
+      <div class="field"><label for="fs" data-i18n="fault.sensory"></label><select id="fs"></select></div>
+      <div class="field"><label for="fc" data-i18n="fault.columns"></label><select id="fc"></select></div>
+      <div class="field"><label for="fi" data-i18n="fault.integrators"></label><select id="fi"></select></div>
+      <div class="field"><label for="mode" data-i18n="fault.mode"></label><select id="mode"><option value="collude" data-i18n="mode.collude"></option><option value="stuck" data-i18n="mode.stuck"></option><option value="silent" data-i18n="mode.silent"></option></select></div>
+      <div class="field"><label for="episodes" data-i18n="run.episodes"></label><select id="episodes"><option>40</option><option selected>100</option><option>200</option><option>400</option></select></div>
+      <div class="field"><label for="seed" data-i18n="run.seed"></label><input id="seed" type="text" value="brain1" maxlength="24" pattern="[A-Za-z0-9_-]{1,24}" autocomplete="off" spellcheck="false"></div>
+    </div>
+    <div class="controls"><button id="btn-run" class="btn primary" type="submit" data-i18n="run.go"></button><progress id="run-progress" max="1" value="0"></progress></div>
+    <p id="run-status" class="ticker" aria-live="polite"></p>
+  </form>
+
+  <section class="card">
+    <h2 data-i18n="sec.plan"></h2>
+    <div class="tablewrap"><table id="plan-table"><thead><tr><th scope="col" data-i18n="plan.kind"></th><th scope="col" data-i18n="plan.count"></th><th scope="col" data-i18n="plan.why"></th></tr></thead><tbody id="plan-body"></tbody></table></div>
+    <p id="plan-total"></p>
+    <h3 data-i18n="sec.check"></h3>
+    <ul id="checks" class="method"></ul>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.diagram"></h2>
+    <div id="diagram" class="diagram"></div>
+    <p id="diagram-desc" class="alt"></p>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.results"></h2>
+    <div class="tablewrap"><table id="results-table"><thead><tr><th scope="col" data-i18n="res.metric"></th><th scope="col" data-i18n="res.brain"></th><th scope="col" data-i18n="res.single"></th></tr></thead><tbody id="results-body"></tbody></table></div>
+    <p id="results-note" class="muted"></p>
+    <details><summary data-i18n="res.json"></summary><pre id="json" class="exp"></pre></details>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.method"></h2>
+    <p data-i18n="method.p1"></p>
+    <p data-i18n="method.p2"></p>
+    <p data-i18n="method.p3"></p>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script>
+/* GENERATED by scripts/make-baselines.js from data/*.csv. Do not edit by hand. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaBaselines = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {
+   "SOURCE": {
+    "commit": "c74c60beeb9706ea6d30fd6973b2a821a5b23926",
+    "repo": "sparkainlp-x/crystallization-contest",
+    "contest": "results/contest_w32-128_summary.csv",
+    "contest256": "results/contest_256_summary.csv",
+    "sweep": "results/sweep_summary.csv",
+    "stress": "results/stress_summary.csv"
+   },
+   "CONTEST32": [
+    {
+     "w": 0,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 113.8,
+     "Tsd": 10.4,
+     "F": 13,
+     "Fsd": 8.111,
+     "P": 0.901,
+     "Psd": 0.059,
+     "rv": 0.04,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 41.5,
+     "Tsd": 2.819,
+     "F": 3.75,
+     "Fsd": 2.845,
+     "P": 0.919,
+     "Psd": 0.061,
+     "rv": 0.005,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 41.25,
+     "Tsd": 4.908,
+     "F": 3.9,
+     "Fsd": 4.756,
+     "P": 0.915,
+     "Psd": 0.104,
+     "rv": 0.006,
+     "mg": 1.398,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.8,
+     "Tsd": 6.856,
+     "F": 5.65,
+     "Fsd": 6.368,
+     "P": 0.877,
+     "Psd": 0.141,
+     "rv": 0.002,
+     "mg": 1.397,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.9,
+     "Tsd": 5.92,
+     "F": 10.2,
+     "Fsd": 6.005,
+     "P": 0.922,
+     "Psd": 0.044,
+     "rv": 0.041,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.528,
+     "F": 3.95,
+     "Fsd": 3.913,
+     "P": 0.915,
+     "Psd": 0.083,
+     "rv": 0.004,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.117,
+     "F": 4.05,
+     "Fsd": 3.3,
+     "P": 0.913,
+     "Psd": 0.071,
+     "rv": 0.004,
+     "mg": 1.362,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.2,
+     "Tsd": 6.204,
+     "F": 10,
+     "Fsd": 6.481,
+     "P": 0.923,
+     "Psd": 0.048,
+     "rv": 0.043,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.675,
+     "F": 3.75,
+     "Fsd": 4.025,
+     "P": 0.92,
+     "Psd": 0.086,
+     "rv": 0.004,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.297,
+     "F": 3.75,
+     "Fsd": 3.552,
+     "P": 0.919,
+     "Psd": 0.076,
+     "rv": 0.004,
+     "mg": 1.319,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    }
+   ],
+   "SCHEMES32": [
+    {
+     "scheme": "individual",
+     "seeds": 20,
+     "T": 6.75,
+     "F": 0.5,
+     "P": 0.937
+    },
+    {
+     "scheme": "team",
+     "seeds": 20,
+     "T": 12.35,
+     "F": 0.5,
+     "P": 0.959
+    },
+    {
+     "scheme": "difference",
+     "seeds": 20,
+     "T": 12.75,
+     "F": 0.45,
+     "P": 0.965
+    },
+    {
+     "scheme": "consensus",
+     "seeds": 20,
+     "T": 13.15,
+     "F": 0.2,
+     "P": 0.985
+    },
+    {
+     "scheme": "random",
+     "seeds": 20,
+     "T": 11.5,
+     "F": 0.4,
+     "P": 0.966
+    }
+   ],
+   "LESSON": {
+    "shieldFpMin": 2.3,
+    "shieldFpMax": 3.2,
+    "shieldVarMin": 8,
+    "shieldVarMax": 17,
+    "ampMaxDeltaP": 0.004,
+    "stabCostMin": 0.3,
+    "stabCostMax": 4.8,
+    "indLowest": 10,
+    "indCells": 15,
+    "runawayNoZMin": 20,
+    "runawayNoZMax": 35,
+    "runawayZMax": 0,
+    "seeds": 20
+   }
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: pure game logic (SYNTHETIC classical simulation).
+ *
+ * A JavaScript port of the three-membrane crystallization contest of
+ * sparkainlp-x/crystallization-contest at width n = 32, with seeded
+ * determinism, lazy per-generation stepping (so the player can steer between
+ * generations), reward schemes, scoring, baseline comparison, lessons, daily
+ * seeds, hash links, a store sanitizer and the plain-text share card.
+ * No DOM, no network, no storage.
+ *
+ * The port is statistically comparable to the Python original, not
+ * bit-identical: the random number generators differ. See DESIGN.md.
+ * Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./baselines.js'));
+  else root.ArenaGame = factory(root.ArenaBaselines);
+})(typeof self !== 'undefined' ? self : this, function (BASE) {
+  'use strict';
+
+  var VERSION = '0.3.0';
+  var BUILD = VERSION;   // shown in the page footer
+  var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
+  var EPOCH = '2026-10-24';              // day number 1
+  var N = 32;                            // width of the measured baselines used here
+  var EP = 8, GENS = 12, STEPS = 60;     // as in the repository contest
+  var CHECK = 10, WINDOW = 5, ETA = 0.5;
+  var AGREE = 0.4, TRUTH = 0.5, SIGMA_SCALE = 1.5;
+  var AMP_CAP = 0.5, TARGET = 0.5, LEAK = 0.3, KSTAB = 1.5;
+  var GAIN_MIN = 0.33, GAIN_MAX = 3.0, FACTOR_MIN = 0.2;
+  var TH_MIN = 0.02, TH_MAX = 1.5, C_MAX = 0.5;
+  var SCHEMES = ['individual', 'team', 'difference', 'consensus', 'random'];
+  var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
+  var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
+  var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
+  var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
+
+  /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
+
+  function hashStr(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seedStr) { return mulberry32(hashStr(String(seedStr))); }
+  function gauss(rng) {
+    var u = 0;
+    while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+
+  /* ---------- complex vectors in C^n: {r, i} Float64Array pairs ---------- */
+
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function normalize(v) {
+    var s = 0, k, n = v.r.length;
+    for (k = 0; k < n; k++) s += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    s = Math.sqrt(s);
+    if (!(s > 0) || !isFinite(s)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= s; v.i[k] /= s; }
+    return v;
+  }
+  function rvec(n, rng) {
+    var v = zeros(n);
+    for (var k = 0; k < n; k++) { v.r[k] = gauss(rng); v.i[k] = gauss(rng); }
+    return normalize(v);
+  }
+  function noisy(state, sigma, rng) {
+    var n = state.r.length, v = zeros(n);
+    for (var k = 0; k < n; k++) {
+      v.r[k] = state.r[k] + sigma * gauss(rng);
+      v.i[k] = state.i[k] + sigma * gauss(rng);
+    }
+    return normalize(v);
+  }
+  // <a|b> = sum conj(a) b
+  function inner(a, b) {
+    var re = 0, im = 0, n = a.r.length;
+    for (var k = 0; k < n; k++) {
+      re += a.r[k] * b.r[k] + a.i[k] * b.i[k];
+      im += a.r[k] * b.i[k] - a.i[k] * b.r[k];
+    }
+    return { re: re, im: im };
+  }
+  function fidelity(a, b) { var z = inner(a, b); return z.re * z.re + z.im * z.im; }
+  function copyVec(v) { return { r: Float64Array.from(v.r), i: Float64Array.from(v.i) }; }
+
+  /* ---------- the contest, as in crystallization_contest/{events,rewards,contest}.py ---------- */
+
+  function sigmaFor(n) { return SIGMA_SCALE / Math.sqrt(n); }
+  function scaledThreshold(q, n, sigma) { return 1 + q * n / (1 + 2 * sigma * sigma * n); }
+  function energyRatio(win, n) {
+    var s = 0;
+    for (var k = 0; k < win.length; k++) s += win[k];
+    return n * s / win.length;
+  }
+  function agreeing(vec, decls, thresh) {
+    var c = 0;
+    for (var k = 0; k < decls.length; k++) if (decls[k] && fidelity(vec, decls[k]) >= thresh) c++;
+    return c;
+  }
+  function systemEvent(decls, thresh) {            // need ceil(3/2) = 2 of 3
+    for (var k = 0; k < decls.length; k++) if (decls[k] && agreeing(decls[k], decls, thresh) >= 2) return k;
+    return null;
+  }
+  function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
+
+  function reward(scheme, i, decls) {              // rewards.py, for 3 agents
+    var without, team;
+    if (scheme === 'individual') return decls[i] ? 1 : 0;
+    if (scheme === 'team' || scheme === 'difference') team = systemEvent(decls, AGREE) !== null ? 1 : 0;
+    if (scheme === 'team') return team;
+    if (scheme === 'difference') {
+      without = decls.slice(); without[i] = null;
+      return team - (systemEvent(without, AGREE) !== null ? 1 : 0);
+    }
+    if (scheme === 'consensus') return decls[i] && agreeing(decls[i], decls, AGREE) >= 2 ? 1 : 0;
+    return 0;                                      // random
+  }
+
+  function warmStart(v, warm, amp) {
+    amp = Math.min(Math.max(amp, 0), AMP_CAP);
+    if (!warm || amp === 0) return v;
+    var o = zeros(v.r.length);
+    for (var k = 0; k < o.r.length; k++) { o.r[k] = (1 - amp) * v.r[k] + amp * warm.r[k]; o.i[k] = (1 - amp) * v.i[k] + amp * warm.i[k]; }
+    return normalize(o);
+  }
+  function stabilizerFactor(rateEma) { return Math.max(FACTOR_MIN, 1 - KSTAB * (rateEma - TARGET)); }
+  function leakyUpdate(rateEma, evRate) { return (1 - LEAK) * rateEma + LEAK * evRate; }
+  function clampGain(g) { return Math.min(GAIN_MAX, Math.max(GAIN_MIN, g)); }
+
+  // One episode of 3 coupled Oja membranes. `trace` (Float32Array STEPS*3) records geff * energy ratio.
+  // `ix` is optional instrumentation that draws no random numbers, so it never changes a result:
+  //   ix.fid   Float32Array STEPS*3, |<v|pattern>| of each membrane after each step (-1 in a noise episode)
+  //   ix.noDecl  when true nobody declares or freezes (used by the Lab probe)
+  //   ix.chk   when set to [[],[],[]], each check step pushes [geff * energy ratio, fidelity to the pattern] per membrane
+  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix) {
+    ix = ix || {};
+    var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
+    var lastFid = [-1, -1, -1];
+    if (ix.fid) for (k = 0; k < ix.fid.length; k++) ix.fid[k] = -1;
+    for (i = 0; i < 3; i++) vs.push(warmStart(rvec(n, rng), warm, amp));
+    var thr = [];
+    for (i = 0; i < 3; i++) thr.push(scaledThreshold(Math.min(TH_MAX, P[i].th * (2 - P[i].sp)), n, sigma));
+    var last = [0, 0, 0];
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i]; continue; }
+        var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+        var y = inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im);
+        if (win[i].length > WINDOW) win[i].shift();
+        var v = zeros(n), c = P[i].c;
+        for (k = 0; k < n; k++) {
+          v.r[k] = vs[i].r[k] + ETA * (x.r[k] * y.re - x.i[k] * y.im);
+          v.i[k] = vs[i].i[k] + ETA * (x.r[k] * y.im + x.i[k] * y.re);
+        }
+        if (c > 0) {
+          for (j = 0; j < 3; j++) {
+            if (j === i) continue;
+            var ph = inner(vs[j], v), m = Math.sqrt(ph.re * ph.re + ph.im * ph.im), pr = 1, pi = 0;
+            if (m > 0) { pr = ph.re / m; pi = ph.im / m; }
+            for (k = 0; k < n; k++) {
+              v.r[k] += c * (pr * vs[j].r[k] - pi * vs[j].i[k]);
+              v.i[k] += c * (pr * vs[j].i[k] + pi * vs[j].r[k]);
+            }
+          }
+        }
+        vs[i] = normalize(v);
+        last[i] = P[i].geff * energyRatio(win[i], n);
+        trace[(t - 1) * 3 + i] = last[i];
+        if (pat) lastFid[i] = Math.sqrt(fidelity(vs[i], pat));
+        if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pat ? fidelity(vs[i], pat) : 0]);
+          if (!ix.noDecl && !decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, thr: thr };
+  }
+
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      scheme: SCHEMES.indexOf(s.scheme) >= 0 ? s.scheme : d.scheme,
+      w: num(s.w, 0, 1, d.w),
+      shield: s.shield === undefined ? d.shield : !!s.shield,
+      amp: s.amp === undefined ? d.amp : !!s.amp,
+      stab: s.stab === undefined ? d.stab : !!s.stab,
+      evolve: s.evolve === undefined ? d.evolve : !!s.evolve,
+      fcost: num(s.fcost, 0, 2, d.fcost),
+      th: num(s.th, 0.1, 1.2, d.th), c: num(s.c, 0, C_MAX, d.c), g: num(s.g, 0.5, 2, d.g)
+    };
+  }
+
+  function createContest(seed, init) {
+    var o = sanitizeSettings(init), sigma = sigmaFor(N), par = [];
+    for (var i = 0; i < 3; i++) par.push({ th: o.th, c: o.c, g: o.g, sp: 0.5, geff: 1 });
+    return {
+      seed: String(seed), n: N, sigma: sigma, par: par, best: [-1, -1, -1], rateEma: TARGET, warm: null, hist: [], gen: 0,
+      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut')
+    };
+  }
+  function done(c) { return c.gen >= GENS; }
+
+  // Starting parameters of a contest are set by its seed, so every player of a daily contest begins in the same place.
+  // The repository baselines all began at DEFAULTS (th 0.5, c 0.05, g 1.0).
+  function startFor(seed) {
+    var r = makeRng(GEN + seed + '/start'), r2 = function (x) { return Math.round(x * 100) / 100; };
+    return { th: r2(0.3 + 0.5 * r()), c: r2(0.3 * r()), g: r2(0.7 + 0.8 * r()) };
+  }
+
+  // Run generation c.gen with `settings`; returns the generation record (also appended to c.hist).
+  function stepGeneration(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), n = c.n, i, e, cand = [];
+    for (i = 0; i < 3; i++) cand.push({ th: c.par[i].th, c: c.par[i].c, g: c.par[i].g, sp: c.par[i].sp, geff: 1 });
+    var clamped = [false, false, false], mutated = false;
+    if (c.gen > 0 && o.evolve) {
+      mutated = true;
+      cand.forEach(function (p, k) {
+        p.th = Math.min(TH_MAX, Math.max(TH_MIN, p.th * Math.exp(0.2 * gauss(c.mrng))));
+        p.c = Math.min(C_MAX, Math.max(0, p.c + 0.05 * gauss(c.mrng)));
+        p.g = p.g * Math.exp(0.2 * gauss(c.mrng));
+      });
+    }
+    if (o.stab) cand.forEach(function (p, k) { var g = clampGain(p.g); clamped[k] = g !== p.g; p.g = g; });
+    var fp = [0, 0, 0], tp = [0, 0, 0], bonus = [0, 0, 0], joint = 0, outT = 0, outF = 0, episodes = [];
+    var paramsStart = cand.map(function (p) { return { th: p.th, c: p.c, g: p.g }; });
+    for (e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? rvec(n, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      cand.forEach(function (p) { p.geff = p.g * (o.stab ? stabilizerFactor(c.rateEma) : 1); });
+      var geffs = cand.map(function (p) { return p.geff; });
+      var fidTrace = new Float32Array(STEPS * 3);
+      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace, { fid: fidTrace });
+      var d = ep.decl, truth = d.map(function (di) { return isTrueEvent(di, pat); }), agree = [];
+      for (i = 0; i < 3; i++) {
+        if (truth[i]) tp[i]++;
+        if (d[i] && !truth[i]) fp[i]++;
+        bonus[i] += reward(o.scheme, i, d);
+        if (d[i]) {
+          var conf = false;
+          for (var j = 0; j < 3; j++) if (j !== i && d[j] && fidelity(d[i], d[j]) >= AGREE) { conf = true; if (j > i) agree.push([i, j]); }
+          cand[i].sp = 0.8 * cand[i].sp + 0.2 * (conf ? 1 : 0);
+        }
+      }
+      if (truth[0] && truth[1] && truth[2]) joint++;
+      var outs, passed = null;
+      if (o.shield) {
+        passed = null;
+        for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        outs = passed === null ? [] : [passed];
+      } else {
+        outs = [];
+        for (i = 0; i < 3; i++) if (d[i]) outs.push(i);
+      }
+      var evT = 0, evF = 0;
+      outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+      outT += evT; outF += evF;
+      c.warm = outs.length ? d[outs[0]] : null;
+      c.rateEma = leakyUpdate(c.rateEma, outs.length / (o.shield ? 1 : 3));
+      episodes.push({
+        planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
+        dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
+        agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
+      });
+    }
+    var m = Math.max(tp[0], tp[1], tp[2]), top = [];
+    for (i = 0; i < 3; i++) if (tp[i] === m) top.push(i);
+    var scores = [], accepted = [], contest = [];
+    for (i = 0; i < 3; i++) {
+      var rank = top.indexOf(i) >= 0 && m > 0 ? 1 / top.length : 0;
+      var base = o.w * joint + (1 - o.w) * rank;
+      var s = base + SCHEME_SCALE * bonus[i] - o.fcost * fp[i] / EP;
+      scores.push(s); contest.push(base);
+      if (s >= c.best[i]) { c.best[i] = s; c.par[i] = cand[i]; accepted.push(true); } else accepted.push(false);
+    }
+    var rec = {
+      gen: c.gen, settings: o, episodes: episodes, outT: outT, outF: outF, shield: o.shield, mutated: mutated,
+      params: paramsStart, geff: episodes[EP - 1].geff, clamped: clamped,
+      maxG: Math.max(c.par[0].g, c.par[1].g, c.par[2].g), gains: c.par.map(function (p) { return p.g; }),
+      scores: scores, contest: contest, bonus: bonus.map(function (b) { return SCHEME_SCALE * b; }), accepted: accepted,
+      best: c.best.slice(), joint: joint, tp: tp, fp: fp, rateEma: c.rateEma,
+      parAfter: c.par.map(function (p) { return { th: p.th, c: p.c, g: p.g, sp: p.sp }; })
+    };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+
+  /* ---------- scoring (the game's own weights; the repository has no game score) ---------- */
+
+  function pvariance(xs) {
+    if (!xs.length) return 0;
+    var m = 0, v = 0, k;
+    for (k = 0; k < xs.length; k++) m += xs[k];
+    m /= xs.length;
+    for (k = 0; k < xs.length; k++) v += (xs[k] - m) * (xs[k] - m);
+    return v / xs.length;
+  }
+  function clamp01(x) { return Math.min(1, Math.max(0, x)); }
+
+  function summarize(hist) {
+    var T = 0, F = 0, teq = 0, feq = 0, rates = [], maxG = 0, k;
+    hist.forEach(function (h) {
+      var w = h.shield ? 1 : 1 / 3;
+      T += h.outT; F += h.outF; teq += h.outT * w; feq += h.outF * w;
+      rates.push((h.outT + h.outF) / EP);
+      if (h.maxG > maxG) maxG = h.maxG;
+    });
+    var gens = hist.length, planted = gens * EP / 2;
+    var precision = T + F > 0 ? T / (T + F) : 0;
+    var rateVar = pvariance(rates);
+    var net = planted > 0 ? (teq - feq) / planted : 0;
+    var steadiness = T + F > 0 ? 1 - clamp01(rateVar / STEADY_REF) : 0;
+    var score = 100 * (0.5 * clamp01(net) + 0.25 * precision + 0.25 * steadiness);
+    return {
+      gens: gens, T: T, F: F, precision: precision, rateVar: rateVar, maxG: maxG, finalG: gens ? hist[gens - 1].maxG : 0,
+      net: net, steadiness: steadiness, score: score,
+      parts: { net: 50 * clamp01(net), precision: 25 * precision, steadiness: 25 * steadiness }
+    };
+  }
+
+  /* ---------- baselines from the repository's results ---------- */
+
+  function cfgTag(s) { return (s.shield ? 'S' : '-') + (s.amp ? 'A' : '-') + (s.stab ? 'Z' : '-'); }
+  function nearestW(w) {
+    var best = W_STEPS[0];
+    W_STEPS.forEach(function (x) { if (Math.abs(x - w) < Math.abs(best - w)) best = x; });
+    return best;
+  }
+  // measured width-32 row for the player's configuration, or null when the repository did not measure it
+  function baselineFor(settings) {
+    var s = sanitizeSettings(settings), tag = cfgTag(s), wm = [0, 0.5, 1], w = wm[0];
+    wm.forEach(function (x) { if (Math.abs(x - s.w) < Math.abs(w - s.w) - 1e-9) w = x; });
+    for (var k = 0; k < BASE.CONTEST32.length; k++) {
+      var r = BASE.CONTEST32[k];
+      if (r.cfg === tag && r.w === w) return { row: r, w: w, exactW: Math.abs(w - s.w) < 1e-9, tag: tag, file: BASE.SOURCE.contest };
+    }
+    return null;
+  }
+  // The same game score applied to the repository's mean counts (an approximation, labelled as such).
+  function baselineScore(b) {
+    if (!b) return null;
+    var shielded = b.tag.charAt(0) === 'S', r = b.row, planted = GENS * EP / 2;
+    var wgt = shielded ? 1 : 1 / 3;
+    var net = (r.T - r.F) * wgt / planted;
+    var steady = 1 - clamp01(r.rv / STEADY_REF);
+    return 100 * (0.5 * clamp01(net) + 0.25 * r.P + 0.25 * steady);
+  }
+
+  /* ---------- lessons (numbers come from baselines.js, which comes from the CSV copies) ---------- */
+
+  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'evolve', 'handpicked', 'synthetic'];
+  function lessonVars() {
+    var L = BASE.LESSON;
+    return {
+      fpmin: L.shieldFpMin, fpmax: L.shieldFpMax, vmin: L.shieldVarMin, vmax: L.shieldVarMax, ampd: L.ampMaxDeltaP.toFixed(3),
+      cmin: L.stabCostMin, cmax: L.stabCostMax, low: L.indLowest, cells: L.indCells,
+      rmin: L.runawayNoZMin, rmax: L.runawayNoZMax, seeds: L.seeds
+    };
+  }
+  // Which lesson fits this run: the one about the thing the player just did, otherwise a rotation by seed.
+  function pickLesson(settings, seed) {
+    var s = sanitizeSettings(settings);
+    if (!s.shield) return 'shield';
+    if (s.amp) return 'amp';
+    if (s.stab) return 'stab';
+    if (s.scheme === 'individual') return 'individual';
+    return LESSON_IDS[hashStr(String(seed || '')) % LESSON_IDS.length];
+  }
+
+  /* ---------- dates, daily seeds, streaks ---------- */
+
+  function dateIndex(str) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str));
+    if (!m) return NaN;
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var ms = Date.UTC(y, mo - 1, d), dt = new Date(ms);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return NaN;
+    return Math.round(ms / 86400000);
+  }
+  function dayNumber(dateStr) { return dateIndex(dateStr) - dateIndex(EPOCH) + 1; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function localDateString(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function dailySeed(dateStr) { return 'd' + dateStr; }
+  function seedDate(seed) { return seed.charAt(0) === 'd' && !isNaN(dateIndex(seed.slice(1))) ? seed.slice(1) : null; }
+  function computeStreak(dates, today) {
+    var idx = {};
+    dates.forEach(function (d) { var i = dateIndex(d); if (!isNaN(i)) idx[i] = true; });
+    var days = Object.keys(idx).map(Number).sort(function (a, b) { return a - b; });
+    var best = 0, run = 0, prev = null;
+    days.forEach(function (d) { run = prev !== null && d === prev + 1 ? run + 1 : 1; prev = d; if (run > best) best = run; });
+    var t = dateIndex(today), cur = 0;
+    var d0 = idx[t] ? t : (idx[t - 1] ? t - 1 : null);
+    if (d0 !== null) { for (var d = d0; idx[d]; d--) cur++; }
+    return { current: cur, best: best };
+  }
+
+  /* ---------- hash links, checked field by field ---------- */
+
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  var CFG_RE = /^([itdcr])-(0|25|50|75|100)-([S-])([A-])([Z-])$/;
+  var SCHEME_CODE = { i: 'individual', t: 'team', d: 'difference', c: 'consensus', r: 'random' };
+  function parseHash(hash) {
+    var out = { mode: 'daily', seed: null, date: null, best: null, lang: null, preset: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1), m;
+      if (k === 'd' && dateIndex(v) >= dateIndex(EPOCH)) { out.date = v; out.seed = dailySeed(v); out.mode = 'challenge'; }
+      else if (k === 's' && SEED_RE.test(v)) { out.seed = v; out.mode = 'challenge'; }
+      else if (k === 'b' && /^\d{1,3}$/.test(v) && +v <= 100) out.best = parseInt(v, 10);
+      else if (k === 'l' && /^[a-z]{2}$/.test(v)) out.lang = v;
+      else if (k === 'c' && (m = CFG_RE.exec(v))) {
+        out.preset = { scheme: SCHEME_CODE[m[1]], w: +m[2] / 100, shield: m[3] === 'S', amp: m[4] === 'A', stab: m[5] === 'Z' };
+      }
+    });
+    if (out.seed === null) { out.best = null; out.preset = null; }
+    return out;
+  }
+  function presetCode(s) {
+    var o = sanitizeSettings(s), code = 'itdcr'.charAt(SCHEMES.indexOf(o.scheme));
+    return code + '-' + Math.round(nearestW(o.w) * 100) + '-' + cfgTag(o);
+  }
+  function buildChallengeHash(o) {
+    var parts = [];
+    if (o.date) parts.push('d=' + o.date); else parts.push('s=' + o.seed);
+    if (typeof o.best === 'number' && isFinite(o.best)) parts.push('b=' + Math.max(0, Math.min(100, Math.round(o.best))));
+    if (o.settings) parts.push('c=' + presetCode(o.settings));
+    if (o.lang) parts.push('l=' + o.lang);
+    return '#' + parts.join('&');
+  }
+
+  /* ---------- share card (plain text, no emoji) ---------- */
+
+  function fmt(str, vars) {
+    return String(str).replace(/\{(\w+)\}/g, function (m, k) { return vars && k in vars ? vars[k] : m; });
+  }
+  function bar(value, max, width) {
+    width = width || 10;
+    var f = Math.round(Math.min(1, Math.max(0, value / max)) * width);
+    return new Array(f + 1).join('\u2588') + new Array(width - f + 1).join('\u2591');
+  }
+  function buildShare(o) {
+    var L = o.labels, r = o.result, lines = [];
+    lines.push(o.seed ? fmt(L['share.title_seed'], { seed: o.seed }) : fmt(L['share.title'], { day: o.day, date: o.date }));
+    lines.push(fmt(L['share.score'], { score: Math.round(r.score) }) + (o.ref === null || o.ref === undefined ? '' : ' ' + fmt(L['share.ref'], { ref: Math.round(o.ref) })));
+    lines.push(fmt(L['share.events'], { t: r.T, f: r.F, p: Math.round(r.precision * 100) }));
+    lines.push(fmt(L['share.setup'], { tag: cfgTag(o.settings), scheme: L['scheme.' + o.settings.scheme + '.short'], w: Math.round(o.settings.w * 100) }));
+    lines.push(L['share.steady'] + ' ' + bar(r.steadiness, 1, 10));
+    lines.push(L['share.synthetic']);
+    if (o.url) lines.push(o.url);
+    return lines.join('\n');
+  }
+
+  /* ---------- defensive store ---------- */
+
+  function sanitizeStore(raw) {
+    var out = { daily: {}, bestDaily: null, bestPractice: null, bestScheme: {}, missions: {}, hc: false, still: false, introSeen: false, tutorialSeen: false }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (raw.hc === true) out.hc = true;
+    if (raw.still === true) out.still = true;
+    if (raw.introSeen === true) out.introSeen = true;
+    if (raw.tutorialSeen === true) out.tutorialSeen = true;
+    var bs = raw.bestScheme;
+    if (bs && typeof bs === 'object' && !Array.isArray(bs)) SCHEMES.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(bs, k) && num(bs[k]) && bs[k] >= 0 && bs[k] <= 100) out.bestScheme[k] = bs[k]; });
+    var ms = raw.missions;
+    if (ms && typeof ms === 'object' && !Array.isArray(ms)) {
+      MISSION_IDS.forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(ms, id)) return;
+        var m = ms[id];
+        if (!m || typeof m !== 'object' || OUTCOMES.indexOf(m.outcome) < 0) return;
+        var n = num(m.n) && m.n >= 0 && m.n <= 200 && Math.floor(m.n) === m.n ? m.n : 0;
+        var metrics = Array.isArray(m.metrics) ? m.metrics.filter(function (x) { return METRIC_IDS.indexOf(x) >= 0; }).slice(0, 5) : [];
+        out.missions[id] = { outcome: m.outcome, n: n, metrics: metrics };
+      });
+    }
+    if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
+    if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
+    if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
+    var d = raw.daily;
+    if (d && typeof d === 'object' && !Array.isArray(d)) {
+      Object.keys(d).forEach(function (k) {
+        var e = d[k];
+        if (isNaN(dateIndex(k)) || dateIndex(k) < dateIndex(EPOCH) || !e || typeof e !== 'object') return;
+        if (!num(e.score) || !num(e.T) || !num(e.F) || !num(e.precision)) return;
+        if (e.score < 0 || e.score > 100 || e.precision < 0 || e.precision > 1) return;
+        if (e.T < 0 || e.F < 0 || e.T > 1000 || e.F > 1000 || Math.floor(e.T) !== e.T || Math.floor(e.F) !== e.F) return;
+        var st = typeof e.tag === 'string' && /^[S-][A-][Z-]$/.test(e.tag) ? e.tag : '---';
+        out.daily[k] = { score: e.score, T: e.T, F: e.F, precision: e.precision, tag: st };
+      });
+    }
+    return out;
+  }
+
+  return {
+    VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
+    AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
+    MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
+    sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
+    sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
+    summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
+    pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
+    dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
+    computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
+    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE,
+    episode: episode, copyVec: copyVec, pvariance: pvariance, clamp01: clamp01, SIGMA_SCALE: SIGMA_SCALE, STEADY_REF: STEADY_REF
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: small statistics toolkit (SYNTHETIC classical simulation).
+ *
+ * Wilson score interval for a proportion, Student-t interval for a mean,
+ * percentile bootstrap for a mean, paired difference with both intervals,
+ * histograms and quantiles. Pure functions, no DOM, no storage. Every
+ * interval is 95 percent two-sided. Bootstrap resampling takes a seeded
+ * generator, so a result is reproducible.
+ *
+ * Wilson, E. B. (1927), J. Am. Stat. Assoc. 22, 209-212.
+ * Efron, B. (1979), Ann. Stat. 7, 1-26.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaStats = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var Z95 = 1.959964;
+  // two-sided 95 percent critical values of Student's t, df = 1..30, then 40, 60, 120, infinity
+  var T95 = [12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101,
+    2.093, 2.086, 2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042];
+  var T95_TAIL = [[40, 2.021], [60, 2.000], [120, 1.980]];
+
+  function tCrit95(df) {
+    df = Math.floor(df);
+    if (!(df >= 1)) return NaN;
+    if (df <= 30) return T95[df - 1];
+    for (var k = 0; k < T95_TAIL.length; k++) if (df <= T95_TAIL[k][0]) return T95_TAIL[k][1];
+    return df <= 120 ? 1.980 : Z95;
+  }
+
+  function sum(a) { var s = 0; for (var k = 0; k < a.length; k++) s += a[k]; return s; }
+  function mean(a) { return a.length ? sum(a) / a.length : NaN; }
+  function sd(a) {                                   // sample standard deviation (n - 1)
+    if (a.length < 2) return 0;
+    var m = mean(a), s = 0;
+    for (var k = 0; k < a.length; k++) s += (a[k] - m) * (a[k] - m);
+    return Math.sqrt(s / (a.length - 1));
+  }
+  function sem(a) { return a.length ? sd(a) / Math.sqrt(a.length) : NaN; }
+
+  // Wilson score interval for k successes in n trials
+  function wilson(k, n, z) {
+    z = z || Z95;
+    if (!(n > 0)) return { p: 0, lo: 0, hi: 1, n: 0 };
+    k = Math.min(n, Math.max(0, k));
+    var p = k / n, z2 = z * z, den = 1 + z2 / n, c = p + z2 / (2 * n);
+    var h = z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n));
+    return { p: p, lo: Math.max(0, (c - h) / den), hi: Math.min(1, (c + h) / den), n: n };
+  }
+
+  // Student-t interval for the mean of a
+  function tCI(a) {
+    var n = a.length, m = mean(a);
+    if (n < 2) return { mean: m, lo: m, hi: m, half: 0, n: n, sd: 0 };
+    var half = tCrit95(n - 1) * sd(a) / Math.sqrt(n);
+    return { mean: m, lo: m - half, hi: m + half, half: half, n: n, sd: sd(a) };
+  }
+
+  function quantile(sorted, q) {                     // linear interpolation between order statistics, sorted ascending
+    if (!sorted.length) return NaN;
+    var pos = (sorted.length - 1) * Math.min(1, Math.max(0, q)), lo = Math.floor(pos), hi = Math.ceil(pos);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  }
+
+  // percentile bootstrap of the mean; rng() must return uniform [0,1)
+  function bootstrapCI(a, rng, B) {
+    var n = a.length, m = mean(a);
+    if (n < 2) return { mean: m, lo: m, hi: m, B: 0 };
+    B = B || 1000;
+    var means = new Array(B), b, k, s;
+    for (b = 0; b < B; b++) {
+      s = 0;
+      for (k = 0; k < n; k++) s += a[Math.floor(rng() * n)];
+      means[b] = s / n;
+    }
+    means.sort(function (x, y) { return x - y; });
+    return { mean: m, lo: quantile(means, 0.025), hi: quantile(means, 0.975), B: B };
+  }
+
+  // paired difference a[k] - b[k] with the t interval, the bootstrap interval and a standardised effect (mean / sd of the differences)
+  function paired(a, b, rng, B) {
+    if (a.length !== b.length) throw new Error('paired samples need equal length');
+    var d = [], k;
+    for (k = 0; k < a.length; k++) d.push(a[k] - b[k]);
+    var t = tCI(d), bs = rng ? bootstrapCI(d, rng, B) : null, wins = 0, ties = 0;
+    for (k = 0; k < d.length; k++) { if (d[k] > 0) wins++; else if (d[k] === 0) ties++; }
+    return {
+      n: d.length, diffs: d, mean: t.mean, sd: t.sd, lo: t.lo, hi: t.hi, half: t.half,
+      excludesZero: t.n >= 2 && (t.lo > 0 || t.hi < 0), boot: bs,
+      effect: t.sd > 0 ? t.mean / t.sd : 0, aWins: wins, ties: ties
+    };
+  }
+
+  // counts of values in `bins` equal-width bins over [lo, hi]; values outside are clipped into the end bins
+  function histogram(values, lo, hi, bins) {
+    var out = new Array(bins), k;
+    for (k = 0; k < bins; k++) out[k] = 0;
+    var w = (hi - lo) / bins;
+    for (k = 0; k < values.length; k++) {
+      var v = values[k];
+      if (!isFinite(v)) continue;
+      var i = Math.floor((v - lo) / w);
+      out[Math.min(bins - 1, Math.max(0, i))]++;
+    }
+    return out;
+  }
+
+  // five-number style description used by the text equivalents
+  function describe(a) {
+    if (!a.length) return { n: 0, mean: NaN, sd: 0, min: NaN, max: NaN, median: NaN };
+    var s = a.slice().sort(function (x, y) { return x - y; });
+    return { n: a.length, mean: mean(a), sd: sd(a), min: s[0], max: s[s.length - 1], median: quantile(s, 0.5) };
+  }
+
+  return {
+    Z95: Z95, tCrit95: tCrit95, mean: mean, sd: sd, sem: sem, wilson: wilson, tCI: tCI, quantile: quantile,
+    bootstrapCI: bootstrapCI, paired: paired, histogram: histogram, describe: describe
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: brain architecture of many membranes joined by microtubules
+ * (SYNTHETIC classical simulation).
+ *
+ * A layered network built from the same Oja-rule membrane as game.js:
+ *
+ *   sensory membranes  -> learn the planted pattern from noisy observations
+ *   gate membranes     -> one per column, release a vector when a strict
+ *                         majority of the column's sensory membranes agree
+ *   integrator         -> release a vector when a strict majority of columns agree
+ *   output membrane    -> release the final event when a strict majority of
+ *                         integrators agree
+ *   inhibitory         -> optional; the stabilizer of game.js (leaky output
+ *                         rate scales every sensory gain)
+ *   memory             -> optional; the capped amplifier of game.js (warm start
+ *                         from the last output)
+ *
+ * A "microtubule" here is a directed transport link between two membranes with
+ * a delay (in check periods of 10 steps) and an optional transport noise. The
+ * name borrows the cell's transport filaments as a metaphor; nothing here is a
+ * model of real microtubules, neurons or a brain.
+ *
+ * How many membranes of each kind are necessary follows from counting votes:
+ * a layer of n voters with a strict-majority quorum q = floor(n / 2) + 1 keeps
+ * f faulty voters from releasing anything on their own (f < q) and still lets
+ * the honest ones release (n - f >= q) exactly when n >= 2f + 1. The planner
+ * therefore uses 2f + 1 sensory membranes per column, 2g + 1 columns and
+ * 2h + 1 integrators for f, g and h tolerated faults. tests/brain.test.js
+ * checks this by exhaustive enumeration with the same quorum code.
+ *
+ * Pure functions, no DOM, no network, no storage.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./game.js'), require('./stats.js'));
+  else root.ArenaBrain = factory(root.ArenaGame, root.ArenaStats);
+})(typeof self !== 'undefined' ? self : this, function (G, ST) {
+  'use strict';
+  var VERSION = '0.3.0';
+  var NS = 'membrane-arena/brain/v1/';      // generator namespace for brain runs
+  var KINDS = ['sensory', 'gate', 'integrator', 'output', 'inhibitory', 'memory'];
+  var MODES = ['collude', 'stuck', 'silent'];
+  var CHECKS = G.STEPS / G.CHECK;            // 6 check points per episode
+  var LIMITS = { f: 3, g: 2, h: 2, perColumn: 9, columns: 7, integrators: 5, delay: 5, jitter: 0.3, episodes: 2000 };
+  var SP = 0.5;                              // self-knowledge held at the game's starting value
+
+  // the truth label of game.js: planted episode and fidelity to the pattern at least 0.5
+  function isTrueEvent(vec, pat) { return !!vec && !!pat && G.fidelity(vec, pat) >= G.TRUTH; }
+
+  /* ---------- counting rules ---------- */
+  function replicasFor(f) { return 2 * f + 1; }
+  function quorum(n) { return Math.floor(n / 2) + 1; }
+  function tolerated(n) { return n >= 1 ? Math.floor((n - 1) / 2) : -1; }
+
+  function int(v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, Math.round(v))) : dv; }
+  function num(v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; }
+  function bool(v, dv) { return v === undefined ? dv : !!v; }
+
+  var DEFAULT_REQ = {
+    sensoryFaults: 1, columnFaults: 1, integratorFaults: 0, stabilizer: true, memory: false, fuse: true,
+    delays: { sg: 0, gi: 1, io: 0 }, jitter: 0, th: G.DEFAULTS.th, c: 0, g: G.DEFAULTS.g
+  };
+  // Coupling defaults to 0 here (the game's start is 0.05): coupling pulls each membrane toward its
+  // peers' states, so a faulty peer's vector leaks into honest voters and the vote count no longer
+  // bounds what faults can do. docs/brain-check.txt measures this.
+
+  function sanitizeDelays(d, dv) {
+    d = d && typeof d === 'object' ? d : {};
+    return { sg: int(d.sg, 0, LIMITS.delay, dv.sg), gi: int(d.gi, 0, LIMITS.delay, dv.gi), io: int(d.io, 0, LIMITS.delay, dv.io) };
+  }
+  function sanitizeCommon(r, out) {
+    var d = DEFAULT_REQ;
+    out.stabilizer = bool(r.stabilizer, d.stabilizer);
+    out.memory = bool(r.memory, d.memory);
+    out.fuse = bool(r.fuse, d.fuse);
+    out.delays = sanitizeDelays(r.delays, d.delays);
+    out.jitter = num(r.jitter, 0, LIMITS.jitter, d.jitter);
+    out.th = num(r.th, 0.1, 1.2, d.th);
+    out.c = num(r.c, 0, 0.5, d.c);
+    out.g = num(r.g, 0.5, 2, d.g);
+    return out;
+  }
+  function sanitizeRequirements(r) {
+    r = r && typeof r === 'object' ? r : {};
+    var d = DEFAULT_REQ;
+    return sanitizeCommon(r, {
+      sensoryFaults: int(r.sensoryFaults, 0, LIMITS.f, d.sensoryFaults),
+      columnFaults: int(r.columnFaults, 0, LIMITS.g, d.columnFaults),
+      integratorFaults: int(r.integratorFaults, 0, LIMITS.h, d.integratorFaults)
+    });
+  }
+  function sanitizeSpec(s) {
+    s = s && typeof s === 'object' ? s : {};
+    return sanitizeCommon(s, {
+      perColumn: int(s.perColumn, 1, LIMITS.perColumn, 3),
+      columns: int(s.columns, 1, LIMITS.columns, 3),
+      integrators: int(s.integrators, 1, LIMITS.integrators, 1)
+    });
+  }
+
+  /* ---------- architecture: membranes and microtubules ---------- */
+  function sid(k, i) { return 's' + k + '.' + i; }
+  function buildArchitecture(spec) {
+    var s = sanitizeSpec(spec), C = s.columns, m = s.perColumn, I = s.integrators, k, i, j;
+    var mem = [], mt = [];
+    var add = function (from, to, kind, delay, jitter) {
+      mt.push({ id: 'mt' + mt.length, from: from, to: to, kind: kind, delay: delay, jitter: jitter });
+    };
+    for (k = 0; k < C; k++) for (i = 0; i < m; i++) mem.push({ id: sid(k, i), kind: 'sensory', layer: 0, column: k, index: i });
+    for (k = 0; k < C; k++) mem.push({ id: 'g' + k, kind: 'gate', layer: 1, column: k, index: k });
+    for (j = 0; j < I; j++) mem.push({ id: 'i' + j, kind: 'integrator', layer: 2, column: null, index: j });
+    mem.push({ id: 'o', kind: 'output', layer: 3, column: null, index: 0 });
+    if (s.stabilizer) mem.push({ id: 'z', kind: 'inhibitory', layer: -1, column: null, index: 0 });
+    if (s.memory) mem.push({ id: 'mem', kind: 'memory', layer: -1, column: null, index: 0 });
+    for (k = 0; k < C; k++) for (i = 0; i < m; i++) add(sid(k, i), 'g' + k, 'signal', s.delays.sg, 0);
+    for (k = 0; k < C; k++) for (j = 0; j < I; j++) add('g' + k, 'i' + j, 'signal', s.delays.gi, s.jitter);
+    for (j = 0; j < I; j++) add('i' + j, 'o', 'signal', s.delays.io, 0);
+    if (s.stabilizer) { add('o', 'z', 'modulatory', 0, 0); for (k = 0; k < C; k++) add('z', 'g' + k, 'modulatory', 0, 0); }
+    if (s.memory) { add('o', 'mem', 'modulatory', 0, 0); for (k = 0; k < C; k++) add('mem', 'g' + k, 'modulatory', 0, 0); }
+    var counts = { total: mem.length };
+    KINDS.forEach(function (kd) { counts[kd] = mem.filter(function (x) { return x.kind === kd; }).length; });
+    var sig = mt.filter(function (e) { return e.kind === 'signal'; }).length;
+    return {
+      version: VERSION, spec: s, columns: C, perColumn: m, integrators: I,
+      membranes: mem, microtubules: mt,
+      quorum: { gate: quorum(m), integrator: quorum(C), output: quorum(I) },
+      counts: counts, tubes: { signal: sig, modulatory: mt.length - sig, total: mt.length },
+      plan: null
+    };
+  }
+
+  // The smallest architecture that meets the requirements, with the rule behind each count.
+  function planArchitecture(req) {
+    var r = sanitizeRequirements(req);
+    var m = replicasFor(r.sensoryFaults), C = replicasFor(r.columnFaults), I = replicasFor(r.integratorFaults);
+    var arch = buildArchitecture({
+      perColumn: m, columns: C, integrators: I, stabilizer: r.stabilizer, memory: r.memory, fuse: r.fuse,
+      delays: r.delays, jitter: r.jitter, th: r.th, c: r.c, g: r.g
+    });
+    arch.req = r;
+    arch.plan = [
+      { kind: 'sensory', count: C * m, rule: 'sensory', vars: { f: r.sensoryFaults, n: m, q: quorum(m), cols: C } },
+      { kind: 'gate', count: C, rule: 'gate', vars: { cols: C, q: quorum(m) } },
+      { kind: 'integrator', count: I, rule: 'integrator', vars: { h: r.integratorFaults, n: I, g: r.columnFaults, cols: C, q: quorum(C) } },
+      { kind: 'output', count: 1, rule: 'output', vars: { q: quorum(I), n: I } },
+      { kind: 'inhibitory', count: r.stabilizer ? 1 : 0, rule: r.stabilizer ? 'inhibitory' : 'inhibitory_off', vars: {} },
+      { kind: 'memory', count: r.memory ? 1 : 0, rule: r.memory ? 'memory' : 'memory_off', vars: {} }
+    ];
+    return arch;
+  }
+
+  /* ---------- structural checks ---------- */
+  function signalGraph(arch) {
+    var ids = {}, out = {}, indeg = {}, bad = [];
+    arch.membranes.forEach(function (x) { ids[x.id] = x; out[x.id] = []; indeg[x.id] = 0; });
+    arch.microtubules.forEach(function (e) {
+      if (!ids[e.from] || !ids[e.to]) { bad.push(e.id); return; }
+      if (e.kind !== 'signal') return;
+      out[e.from].push(e); indeg[e.to]++;
+    });
+    return { ids: ids, out: out, indeg: indeg, dangling: bad };
+  }
+  // Kahn's algorithm; returns the order, or null when the signal graph has a cycle.
+  function topoOrder(gr) {
+    var indeg = {}, q = [], order = [];
+    Object.keys(gr.indeg).forEach(function (k) { indeg[k] = gr.indeg[k]; if (!indeg[k]) q.push(k); });
+    while (q.length) {
+      var u = q.shift(); order.push(u);
+      gr.out[u].forEach(function (e) { if (--indeg[e.to] === 0) q.push(e.to); });
+    }
+    return order.length === Object.keys(indeg).length ? order : null;
+  }
+
+  function checkArchitecture(arch, req) {
+    var problems = [], gr = signalGraph(arch), order = topoOrder(gr);
+    var err = function (code, vars) { problems.push({ level: 'error', code: code, vars: vars || {} }); };
+    var warn = function (code, vars) { problems.push({ level: 'warning', code: code, vars: vars || {} }); };
+    var note = function (code, vars) { problems.push({ level: 'note', code: code, vars: vars || {} }); };
+    var layers = [['sensory', arch.perColumn], ['column', arch.columns], ['integrator', arch.integrators]];
+    var tol = { sensory: tolerated(arch.perColumn), column: tolerated(arch.columns), integrator: tolerated(arch.integrators) };
+    layers.forEach(function (L) {
+      if (!(L[1] >= 1)) err('empty_layer', { layer: L[0] });
+      else if (L[1] % 2 === 0) warn('even', { layer: L[0], n: L[1], f: tolerated(L[1]) });
+    });
+    if (arch.counts.output !== 1) err('output_count', { n: arch.counts.output });
+    if (gr.dangling.length) err('dangling', { ids: gr.dangling.join(', ') });
+    var longest = null;
+    if (!order) err('cycle');
+    else {
+      // longest signal delay from any sensory membrane to the output, and reachability
+      var dist = {};
+      order.forEach(function (u) {
+        if (gr.ids[u].kind === 'sensory') dist[u] = 0;
+        if (dist[u] === undefined) return;
+        gr.out[u].forEach(function (e) { var d = dist[u] + e.delay; if (dist[e.to] === undefined || d > dist[e.to]) dist[e.to] = d; });
+      });
+      var cut = arch.membranes.filter(function (x) {
+        if (x.kind !== 'sensory') return false;
+        var seen = {}, st = [x.id];
+        while (st.length) { var u = st.pop(); if (seen[u]) continue; seen[u] = true; gr.out[u].forEach(function (e) { st.push(e.to); }); }
+        return !seen.o;
+      });
+      if (cut.length) err('unreachable', { n: cut.length });
+      longest = dist.o === undefined ? null : dist.o;
+      // the first declaration can happen at the first check; every later hop adds delay * CHECK steps
+      if (longest !== null && 1 + longest > CHECKS) err('deadline', { d: longest, max: CHECKS - 1 });
+      else if (longest !== null) note('slack', { d: longest, slack: CHECKS - 1 - longest });
+    }
+    if (arch.spec.c > 0 && arch.perColumn > 1) {
+      var needF = req ? sanitizeRequirements(req).sensoryFaults : 0;
+      (needF > 0 ? err : warn)('coupling_channel', { c: arch.spec.c });
+    }
+    if (req) {
+      var r = sanitizeRequirements(req);
+      [['sensory', r.sensoryFaults], ['column', r.columnFaults], ['integrator', r.integratorFaults]].forEach(function (x) {
+        var have = tol[x[0]];
+        if (have < x[1]) err('below_requirement', { layer: x[0], need: x[1], have: Math.max(0, have) });
+        else if (have > x[1]) note('above_requirement', { layer: x[0], need: x[1], have: have });
+      });
+    }
+    note('single_points', { kinds: ['output'].concat(arch.spec.stabilizer ? ['inhibitory'] : [], arch.spec.memory ? ['memory'] : []).join(', ') });
+    return {
+      ok: !problems.some(function (p) { return p.level === 'error'; }),
+      problems: problems, tolerance: tol, longestDelay: longest,
+      slack: longest === null ? null : CHECKS - 1 - longest
+    };
+  }
+
+  /* ---------- one column of coupled sensory membranes ---------- */
+  // Mirrors game.js episode() draw for draw: with 3 honest members it gives the same declarations.
+  // Coupling to each peer is scaled by 2 / (m - 1), so the total pull matches the three-membrane case.
+  // faulty[i]: membrane i ignores its observations; bogus[i] is the vector it declares at the first
+  // check (null means it stays silent). Its state vector is that bogus vector, so peers are pulled to it.
+  function columnEpisode(n, pat, sigma, P, warm, amp, rng, faulty, bogus) {
+    var m = P.length, cs = m > 1 ? 2 / (m - 1) : 0, vs = [], win = [], decl = [], declStep = [], thr = [], i, j, k, t;
+    faulty = faulty || []; bogus = bogus || [];
+    for (i = 0; i < m; i++) { vs.push(G.warmStart(G.rvec(n, rng), warm, amp)); win.push([]); decl.push(null); declStep.push(null); }
+    for (i = 0; i < m; i++) if (faulty[i] && bogus[i]) vs[i] = G.copyVec(bogus[i]);
+    for (i = 0; i < m; i++) thr.push(G.scaledThreshold(Math.min(1.5, P[i].th * (2 - P[i].sp)), n, sigma));
+    var updates = 0;
+    for (t = 1; t <= G.STEPS; t++) {
+      for (i = 0; i < m; i++) {
+        if (decl[i]) continue;
+        var x = pat ? G.noisy(pat, sigma, rng) : G.rvec(n, rng);
+        if (faulty[i]) continue;
+        var y = G.inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im);
+        if (win[i].length > 5) win[i].shift();
+        var v = { r: new Float64Array(n), i: new Float64Array(n) }, c = P[i].c * cs;
+        for (k = 0; k < n; k++) {
+          v.r[k] = vs[i].r[k] + 0.5 * (x.r[k] * y.re - x.i[k] * y.im);
+          v.i[k] = vs[i].i[k] + 0.5 * (x.r[k] * y.im + x.i[k] * y.re);
+        }
+        if (c > 0) {
+          for (j = 0; j < m; j++) {
+            if (j === i) continue;
+            var ph = G.inner(vs[j], v), mg = Math.sqrt(ph.re * ph.re + ph.im * ph.im), pr = 1, pi = 0;
+            if (mg > 0) { pr = ph.re / mg; pi = ph.im / mg; }
+            for (k = 0; k < n; k++) {
+              v.r[k] += c * (pr * vs[j].r[k] - pi * vs[j].i[k]);
+              v.i[k] += c * (pr * vs[j].i[k] + pi * vs[j].r[k]);
+            }
+          }
+        }
+        vs[i] = G.normalize(v);
+        updates++;
+      }
+      if (t % G.CHECK === 0) {
+        for (i = 0; i < m; i++) {
+          if (decl[i]) continue;
+          if (faulty[i]) { if (bogus[i]) { decl[i] = G.copyVec(bogus[i]); declStep[i] = t; } continue; }
+          if (P[i].geff * G.energyRatio(win[i], n) >= thr[i]) { decl[i] = G.copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, thr: thr, updates: updates };
+  }
+
+  /* ---------- quorum, fusion and transport ---------- */
+  // Phase-align every vector to the first and average: the direction a few Oja steps on them would reach.
+  function fuseVecs(vecs) {
+    var ref = vecs[0], n = ref.r.length, o = { r: new Float64Array(n), i: new Float64Array(n) };
+    vecs.forEach(function (v) {
+      var z = G.inner(v, ref), mg = Math.sqrt(z.re * z.re + z.im * z.im), pr = 1, pi = 0;
+      if (mg > 0) { pr = z.re / mg; pi = z.im / mg; }
+      for (var k = 0; k < n; k++) { o.r[k] += pr * v.r[k] - pi * v.i[k]; o.i[k] += pr * v.i[k] + pi * v.r[k]; }
+    });
+    return G.normalize(o);
+  }
+  // inputs: one entry per voter, in index order, {vec, t} or null. A release happens at the earliest
+  // time t at which some available vector is matched (fidelity >= AGREE, itself included) by at least q
+  // available vectors; the lowest such index leads. One release per episode, as with the 2-of-3 shield.
+  function quorumRelease(inputs, q, fuse) {
+    var times = [], i, j;
+    inputs.forEach(function (x) { if (x && x.vec && times.indexOf(x.t) < 0) times.push(x.t); });
+    times.sort(function (a, b) { return a - b; });
+    for (var a = 0; a < times.length; a++) {
+      var t = times[a], avail = [];
+      for (i = 0; i < inputs.length; i++) if (inputs[i] && inputs[i].vec && inputs[i].t <= t) avail.push(i);
+      for (var b = 0; b < avail.length; b++) {
+        i = avail[b];
+        var S = [];
+        for (var c = 0; c < avail.length; c++) { j = avail[c]; if (G.fidelity(inputs[i].vec, inputs[j].vec) >= G.AGREE) S.push(j); }
+        if (S.length >= q) {
+          // put the leader first so fusion aligns to it
+          var vs = [inputs[i].vec].concat(S.filter(function (x) { return x !== i; }).map(function (x) { return inputs[x].vec; }));
+          return { t: t, vec: fuse ? fuseVecs(vs) : G.copyVec(inputs[i].vec), members: S, lead: i };
+        }
+      }
+    }
+    return null;
+  }
+  function transport(item, edge, trng, tally) {
+    if (!item || !item.vec) return null;
+    var t = item.t + edge.delay * G.CHECK;
+    if (t > G.STEPS) { tally.lost++; return null; }
+    tally.moved++;
+    return { t: t, vec: edge.jitter > 0 ? G.noisy(item.vec, edge.jitter, trng) : item.vec };
+  }
+  function edgeIndex(arch) {
+    var idx = {};
+    arch.microtubules.forEach(function (e) { if (e.kind === 'signal') idx[e.from + '>' + e.to] = e; });
+    return idx;
+  }
+  // From the sensory declarations to the output. cols[k] = {decl, declStep}; faultyGate[k] / faultyInt[j]
+  // are vectors a compromised gate / integrator emits at the first check (null: honest or silent).
+  function runPipeline(arch, cols, faultyGate, faultyInt, trng, gateSilent, intSilent) {
+    var E = edgeIndex(arch), fuse = arch.spec.fuse, tally = { lost: 0, moved: 0 }, gates = [], ints = [], k, i, j;
+    faultyGate = faultyGate || []; faultyInt = faultyInt || []; gateSilent = gateSilent || []; intSilent = intSilent || [];
+    for (k = 0; k < arch.columns; k++) {
+      if (faultyGate[k] || gateSilent[k]) { gates.push(faultyGate[k] ? { t: G.CHECK, vec: faultyGate[k], members: [], lead: -1 } : null); continue; }
+      var ins = [];
+      for (i = 0; i < arch.perColumn; i++) ins.push(transport({ vec: cols[k].decl[i], t: cols[k].declStep[i] }, E[sid(k, i) + '>g' + k], trng, tally));
+      gates.push(quorumRelease(ins, arch.quorum.gate, fuse));
+    }
+    for (j = 0; j < arch.integrators; j++) {
+      if (faultyInt[j] || intSilent[j]) { ints.push(faultyInt[j] ? { t: G.CHECK, vec: faultyInt[j], members: [], lead: -1 } : null); continue; }
+      var gin = [];
+      for (k = 0; k < arch.columns; k++) gin.push(transport(gates[k], E['g' + k + '>i' + j], trng, tally));
+      ints.push(quorumRelease(gin, arch.quorum.integrator, fuse));
+    }
+    var oin = [];
+    for (j = 0; j < arch.integrators; j++) oin.push(transport(ints[j], E['i' + j + '>o'], trng, tally));
+    return { out: quorumRelease(oin, arch.quorum.output, fuse), gates: gates, ints: ints, lost: tally.lost, moved: tally.moved };
+  }
+
+  /* ---------- fault placement ---------- */
+  function sanitizeFaults(arch, f) {
+    f = f && typeof f === 'object' ? f : {};
+    return {
+      sensory: int(f.sensory, 0, arch.perColumn, 0),
+      sensoryColumns: int(f.sensoryColumns, 0, arch.columns, arch.columns),
+      columns: int(f.columns, 0, arch.columns, 0),
+      integrators: int(f.integrators, 0, arch.integrators, 0),
+      mode: MODES.indexOf(f.mode) >= 0 ? f.mode : 'collude'
+    };
+  }
+  // Faulty units take the lowest indices, the worst place for them because a quorum's leader is the
+  // lowest qualifying index. Faulty sensory membranes sit in the first `sensoryColumns` columns.
+  function faultMap(arch, faults) {
+    var F = sanitizeFaults(arch, faults), map = {}, k, i;
+    for (k = 0; k < F.sensoryColumns; k++) for (i = 0; i < F.sensory; i++) map[sid(k, i)] = true;
+    for (k = 0; k < F.columns; k++) map['g' + k] = true;
+    for (k = 0; k < F.integrators; k++) map['i' + k] = true;
+    return { spec: F, map: map };
+  }
+
+  /* ---------- logic-level evaluation (no learning, symbolic votes) ---------- */
+  // Every honest sensory membrane declares the true vector at the first check; faulty units act by
+  // mode. Returns 'true', 'false' or 'none' for the output. Used to check the counting rules exhaustively.
+  function logicOutcome(arch, faults, faultySet) {
+    // one dimension per possible faulty unit, so stuck units never agree with each other or with T and A
+    var n = 2 + LIMITS.perColumn * LIMITS.columns + LIMITS.columns + LIMITS.integrators, F = sanitizeFaults(arch, faults), fm = faultySet || faultMap(arch, F).map;
+    var T = { r: new Float64Array(n), i: new Float64Array(n) }, A = { r: new Float64Array(n), i: new Float64Array(n) };
+    T.r[0] = 1; A.r[1] = 1;
+    var junk = 2, bog = function () {
+      if (F.mode === 'silent') return null;
+      if (F.mode === 'collude') return A;
+      var v = { r: new Float64Array(n), i: new Float64Array(n) }; v.r[junk] = 1; junk++; return v;
+    };
+    var cols = [], fg = [], fi = [], gs = [], is = [], k, i;
+    for (k = 0; k < arch.columns; k++) {
+      var d = [], s = [];
+      for (i = 0; i < arch.perColumn; i++) {
+        var b = fm[sid(k, i)] ? bog() : T;
+        d.push(b); s.push(b ? G.CHECK : null);
+      }
+      cols.push({ decl: d, declStep: s });
+      fg.push(fm['g' + k] ? bog() : null); gs.push(!!fm['g' + k] && F.mode === 'silent');
+    }
+    for (k = 0; k < arch.integrators; k++) { fi.push(fm['i' + k] ? bog() : null); is.push(!!fm['i' + k] && F.mode === 'silent'); }
+    var res = runPipeline(arch, cols, fg, fi, null, gs, is);
+    if (!res.out) return 'none';
+    return G.fidelity(res.out.vec, T) >= G.TRUTH ? 'true' : 'false';
+  }
+
+  /* ---------- simulation ---------- */
+  function sanitizeRun(arch, o) {
+    o = o && typeof o === 'object' ? o : {};
+    return {
+      seed: typeof o.seed === 'string' && o.seed.length <= 40 ? o.seed : 'brain1',
+      episodes: int(o.episodes, 2, LIMITS.episodes, 100),
+      faults: sanitizeFaults(arch, o.faults)
+    };
+  }
+  // A run that can be stepped a few episodes at a time (the page does this to stay responsive).
+  function createBrainRun(arch, opts) {
+    var o = sanitizeRun(arch, opts), fm = faultMap(arch, o.faults).map, s = arch.spec;
+    return {
+      arch: arch, opts: o, fm: fm, e: 0, episodes: [], rateEma: G.TARGET, warm: null,
+      g: s.stabilizer ? G.clampGain(s.g) : s.g, main: G.makeRng(NS + o.seed + '/main'),
+      refK: arch.columns - 1, refI: arch.perColumn - 1                 // the reference membrane
+    };
+  }
+  function brainDone(R) { return R.e >= R.opts.episodes; }
+  function stepBrainRun(R, count) {
+    var arch = R.arch, s = arch.spec, F = R.opts.faults, fm = R.fm, n = G.N, sigma = G.sigmaFor(n), seed = R.opts.seed, k, i;
+    count = Math.max(1, count || 1);
+    for (var step = 0; step < count && !brainDone(R); step++) {
+      var e = R.e, planted = e % 2 === 0, pat = planted ? G.rvec(n, R.main) : null;
+      var frng = G.makeRng(NS + seed + '/e' + e + '/fault'), trng = G.makeRng(NS + seed + '/e' + e + '/mt');
+      var A = F.mode === 'collude' ? G.rvec(n, frng) : null;
+      var bog = function () { return F.mode === 'silent' ? null : F.mode === 'collude' ? G.copyVec(A) : G.rvec(n, frng); };
+      var geff = R.g * (s.stabilizer ? G.stabilizerFactor(R.rateEma) : 1), cols = [], updates = 0, declN = 0, declT = 0;
+      for (k = 0; k < arch.columns; k++) {
+        var P = [], fl = [], bg = [];
+        for (i = 0; i < arch.perColumn; i++) {
+          P.push({ th: s.th, c: s.c, g: R.g, sp: SP, geff: geff });
+          fl.push(!!fm[sid(k, i)]); bg.push(fl[i] ? bog() : null);
+        }
+        var ce = columnEpisode(n, pat, sigma, P, s.memory ? R.warm : null, s.memory ? G.AMP_CAP : 0, G.makeRng(NS + seed + '/e' + e + '/c' + k), fl, bg);
+        cols.push(ce); updates += ce.updates;
+        for (i = 0; i < arch.perColumn; i++) if (ce.decl[i] && !fl[i]) { declN++; if (isTrueEvent(ce.decl[i], pat)) declT++; }
+      }
+      var fg = [], fi = [], gs = [], is = [];
+      for (k = 0; k < arch.columns; k++) { var gf = fm['g' + k] ? bog() : null; fg.push(gf); gs.push(!!fm['g' + k] && !gf); }
+      for (k = 0; k < arch.integrators; k++) { var jf = fm['i' + k] ? bog() : null; fi.push(jf); is.push(!!fm['i' + k] && !jf); }
+      var res = runPipeline(arch, cols, fg, fi, trng, gs, is);
+      var refDecl = cols[R.refK].decl[R.refI];
+      R.episodes.push({
+        planted: planted, out: !!res.out, outTrue: !!res.out && isTrueEvent(res.out.vec, pat), outStep: res.out ? res.out.t : null,
+        outFid: res.out && pat ? Math.sqrt(G.fidelity(res.out.vec, pat)) : null,
+        gatesReleased: res.gates.filter(Boolean).length,
+        gatesTrue: res.gates.filter(function (x) { return x && isTrueEvent(x.vec, pat); }).length,
+        lost: res.lost, moved: res.moved, honestDecl: declN, honestTrue: declT,
+        ref: { decl: !!refDecl, true: isTrueEvent(refDecl, pat), fid: refDecl && pat ? Math.sqrt(G.fidelity(refDecl, pat)) : null },
+        geff: geff, rateEma: R.rateEma, updates: updates
+      });
+      if (s.stabilizer) R.rateEma = G.leakyUpdate(R.rateEma, res.out ? 1 : 0);
+      if (s.memory) R.warm = res.out ? res.out.vec : null;
+      R.e++;
+    }
+    return R;
+  }
+  function finishBrainRun(R) {
+    return { arch: R.arch, opts: R.opts, episodes: R.episodes, summary: summarizeBrain(R.episodes, !R.fm[sid(R.refK, R.refI)]) };
+  }
+  function runBrain(arch, opts) {
+    var R = createBrainRun(arch, opts);
+    while (!brainDone(R)) stepBrainRun(R, 50);
+    return finishBrainRun(R);
+  }
+
+  function summarizeBrain(eps, refHonest) {
+    var planted = 0, T = 0, F = 0, Fn = 0, Fp = 0, lat = [], fid = [], lost = 0, moved = 0, upd = 0;
+    var rT = 0, rF = 0, rfid = [];
+    eps.forEach(function (x) {
+      if (x.planted) planted++;
+      if (x.out) { lat.push(x.outStep); if (x.outTrue) T++; else { F++; if (x.planted) Fp++; else Fn++; } }
+      if (x.outFid !== null && x.out) fid.push(x.outFid);
+      if (x.ref.decl) { if (x.ref.true) rT++; else rF++; if (x.ref.fid !== null) rfid.push(x.ref.fid); }
+      lost += x.lost; moved += x.moved; upd += x.updates;
+    });
+    var N = eps.length, mean = function (a) { return a.length ? ST.mean(a) : null; };
+    return {
+      episodes: N, planted: planted, noise: N - planted, T: T, F: F, Fplanted: Fp, Fnoise: Fn,
+      precision: T + F > 0 ? T / (T + F) : 0,
+      recall: ST.wilson(T, planted), falseRate: ST.wilson(F, N), falseNoise: ST.wilson(Fn, N - planted),
+      meanLatency: mean(lat), meanFidelity: mean(fid), lost: lost, moved: moved, ojaUpdates: upd,
+      single: { honest: refHonest, T: rT, F: rF, precision: rT + rF > 0 ? rT / (rT + rF) : 0, recall: ST.wilson(rT, planted), falseRate: ST.wilson(rF, N), meanFidelity: mean(rfid) }
+    };
+  }
+
+  /* ---------- drawing: an SVG string, no DOM ---------- */
+  var COLORS = { sensory: '#40d0e0', gate: '#c9a84c', integrator: '#7aa8ff', output: '#e0c36a', inhibitory: '#ff9a9a', memory: '#5ee6b8', tube: '#b3bedb', bg: '#0a1330', text: '#eef2ff' };
+  var HC = { sensory: '#ffffff', gate: '#ffffff', integrator: '#ffffff', output: '#ffffff', inhibitory: '#ffffff', memory: '#ffffff', tube: '#ffffff', bg: '#000000', text: '#ffffff' };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function r1(x) { return Math.round(x * 10) / 10; }
+  function layout(arch) {
+    var C = arch.columns, m = arch.perColumn, gap = 34, colW = Math.max(m * gap, 70) + 30;
+    var side = (arch.spec.stabilizer || arch.spec.memory) ? 150 : 0;
+    var W = Math.max(520, C * colW + 40 + side), inner = W - side, pos = {}, k, i;
+    var x0 = (inner - C * colW) / 2;
+    for (k = 0; k < C; k++) {
+      var cx = x0 + k * colW + colW / 2;
+      for (i = 0; i < m; i++) pos[sid(k, i)] = { x: cx + (i - (m - 1) / 2) * gap, y: 70 };
+      pos['g' + k] = { x: cx, y: 175 };
+    }
+    for (k = 0; k < arch.integrators; k++) pos['i' + k] = { x: inner / 2 + (k - (arch.integrators - 1) / 2) * 90, y: 280 };
+    pos.o = { x: inner / 2, y: 375 };
+    if (arch.spec.stabilizer) pos.z = { x: inner + side / 2, y: 230 };
+    if (arch.spec.memory) pos.mem = { x: inner + side / 2, y: 330 };
+    return { W: W, H: 430, pos: pos, colW: colW, x0: x0 };
+  }
+  function shape(kind, x, y, col, fill) {
+    var p = function (pts) { return '<polygon points="' + pts.map(function (q) { return r1(q[0]) + ',' + r1(q[1]); }).join(' ') + '" fill="' + fill + '" stroke="' + col + '" stroke-width="2"/>'; };
+    if (kind === 'sensory') return '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="11" fill="' + fill + '" stroke="' + col + '" stroke-width="2"/>';
+    if (kind === 'gate') return p([[x, y - 15], [x + 15, y], [x, y + 15], [x - 15, y]]);
+    if (kind === 'integrator') { var h = []; for (var a = 0; a < 6; a++) h.push([x + 18 * Math.cos(Math.PI / 3 * a), y + 18 * Math.sin(Math.PI / 3 * a)]); return p(h); }
+    if (kind === 'output') return '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="18" fill="' + fill + '" stroke="' + col + '" stroke-width="2"/><circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="11" fill="none" stroke="' + col + '" stroke-width="2"/>';
+    if (kind === 'inhibitory') return '<rect x="' + r1(x - 14) + '" y="' + r1(y - 14) + '" width="28" height="28" fill="' + fill + '" stroke="' + col + '" stroke-width="2"/>';
+    return '<rect x="' + r1(x - 15) + '" y="' + r1(y - 12) + '" width="30" height="24" rx="8" fill="' + fill + '" stroke="' + col + '" stroke-width="2"/>';
+  }
+  // opts: {faults, hc, title, desc, labels: {kind: text}}
+  function renderSvg(arch, opts) {
+    opts = opts || {};
+    var L = layout(arch), P = L.pos, pal = opts.hc ? HC : COLORS, fm = opts.faults ? faultMap(arch, opts.faults).map : {}, out = [];
+    var labels = opts.labels || {};
+    out.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + L.W + ' ' + L.H + '" width="' + L.W + '" height="' + L.H + '" role="img" aria-labelledby="bt bd">');
+    out.push('<title id="bt">' + esc(opts.title || 'Brain architecture') + '</title><desc id="bd">' + esc(opts.desc || describe(arch)) + '</desc>');
+    out.push('<rect width="100%" height="100%" fill="' + pal.bg + '"/>');
+    // column frames
+    for (var k = 0; k < arch.columns; k++) {
+      var fx = L.x0 + k * L.colW + 4;
+      out.push('<rect x="' + r1(fx) + '" y="40" width="' + r1(L.colW - 8) + '" height="165" rx="10" fill="none" stroke="' + pal.tube + '" stroke-opacity="0.35" stroke-dasharray="3 4"/>');
+      out.push('<text x="' + r1(fx + 8) + '" y="34" fill="' + pal.text + '" font-size="11" font-family="system-ui, sans-serif">' + esc((labels.column || 'column') + ' ' + (k + 1)) + '</text>');
+    }
+    // microtubules: a tube (wide pale stroke) with a core line; modulatory ones dashed
+    arch.microtubules.forEach(function (e) {
+      var a = P[e.from], b = P[e.to];
+      if (!a || !b) return;
+      var dash = e.kind === 'modulatory' ? ' stroke-dasharray="6 5"' : '';
+      out.push('<g class="mt" data-from="' + esc(e.from) + '" data-to="' + esc(e.to) + '">');
+      if (e.kind === 'signal') out.push('<line x1="' + r1(a.x) + '" y1="' + r1(a.y) + '" x2="' + r1(b.x) + '" y2="' + r1(b.y) + '" stroke="' + pal.tube + '" stroke-opacity="0.18" stroke-width="7" stroke-linecap="round"/>');
+      out.push('<line x1="' + r1(a.x) + '" y1="' + r1(a.y) + '" x2="' + r1(b.x) + '" y2="' + r1(b.y) + '" stroke="' + pal.tube + '" stroke-opacity="0.8" stroke-width="1.4"' + dash + '/>');
+      if (e.kind === 'signal' && e.delay > 0 && e.from.charAt(0) !== 's') {
+        var mx = a.x + (b.x - a.x) * 0.55, my = a.y + (b.y - a.y) * 0.55;
+        out.push('<text x="' + r1(mx + 4) + '" y="' + r1(my) + '" fill="' + pal.text + '" font-size="10" font-family="system-ui, sans-serif">+' + e.delay + '</text>');
+      }
+      out.push('</g>');
+    });
+    arch.membranes.forEach(function (x) {
+      var p = P[x.id], col = pal[x.kind], bad = !!fm[x.id];
+      out.push('<g class="membrane" data-id="' + esc(x.id) + '" data-kind="' + x.kind + '"' + (bad ? ' data-faulty="1"' : '') + '>');
+      out.push(shape(x.kind, p.x, p.y, col, pal.bg));
+      if (bad) out.push('<path d="M' + r1(p.x - 8) + ' ' + r1(p.y - 8) + 'L' + r1(p.x + 8) + ' ' + r1(p.y + 8) + 'M' + r1(p.x + 8) + ' ' + r1(p.y - 8) + 'L' + r1(p.x - 8) + ' ' + r1(p.y + 8) + '" stroke="' + (opts.hc ? '#ffffff' : '#ff9a9a') + '" stroke-width="3"/>');
+      out.push('</g>');
+    });
+    // layer labels
+    var lab = function (txt, y) { out.push('<text x="8" y="' + y + '" fill="' + pal.text + '" font-size="11" font-family="system-ui, sans-serif">' + esc(txt) + '</text>'); };
+    lab((labels.gate || 'gate') + ' ' + arch.quorum.gate + '/' + arch.perColumn, 200);
+    lab((labels.integrator || 'integrator') + ' ' + arch.quorum.integrator + '/' + arch.columns, 305);
+    lab((labels.output || 'output') + ' ' + arch.quorum.output + '/' + arch.integrators, 400);
+    if (P.z) out.push('<text x="' + r1(P.z.x) + '" y="' + r1(P.z.y + 30) + '" text-anchor="middle" fill="' + pal.text + '" font-size="11" font-family="system-ui, sans-serif">' + esc(labels.inhibitory || 'inhibitory') + '</text>');
+    if (P.mem) out.push('<text x="' + r1(P.mem.x) + '" y="' + r1(P.mem.y + 28) + '" text-anchor="middle" fill="' + pal.text + '" font-size="11" font-family="system-ui, sans-serif">' + esc(labels.memory || 'memory') + '</text>');
+    out.push('</svg>');
+    return out.join('');
+  }
+
+  function describe(arch) {
+    var c = arch.counts;
+    return arch.columns + ' columns of ' + arch.perColumn + ' sensory membranes (' + c.sensory + ' in all), ' + c.gate + ' gates (quorum ' +
+      arch.quorum.gate + ' of ' + arch.perColumn + '), ' + c.integrator + ' integrator' + (c.integrator > 1 ? 's' : '') + ' (quorum ' + arch.quorum.integrator +
+      ' of ' + arch.columns + ' columns), 1 output (quorum ' + arch.quorum.output + ' of ' + arch.integrators + ')' +
+      (c.inhibitory ? ', 1 inhibitory' : '') + (c.memory ? ', 1 memory' : '') + '; ' + c.total + ' membranes and ' +
+      arch.tubes.total + ' microtubules (' + arch.tubes.signal + ' signal, ' + arch.tubes.modulatory + ' modulatory).';
+  }
+
+  function toJSON(run) {
+    return JSON.stringify({
+      tool: 'membrane-arena brain', version: VERSION, synthetic: true,
+      spec: run.arch.spec, req: run.arch.req || null, counts: run.arch.counts, tubes: run.arch.tubes, quorum: run.arch.quorum,
+      run: run.opts, summary: run.summary
+    }, null, 2);
+  }
+
+  return {
+    VERSION: VERSION, KINDS: KINDS, MODES: MODES, LIMITS: LIMITS, CHECKS: CHECKS, DEFAULT_REQ: DEFAULT_REQ,
+    replicasFor: replicasFor, quorum: quorum, tolerated: tolerated,
+    sanitizeRequirements: sanitizeRequirements, sanitizeSpec: sanitizeSpec, sanitizeFaults: sanitizeFaults,
+    buildArchitecture: buildArchitecture, planArchitecture: planArchitecture, checkArchitecture: checkArchitecture,
+    columnEpisode: columnEpisode, fuseVecs: fuseVecs, quorumRelease: quorumRelease, runPipeline: runPipeline,
+    faultMap: faultMap, logicOutcome: logicOutcome, runBrain: runBrain,
+    createBrainRun: createBrainRun, stepBrainRun: stepBrainRun, brainDone: brainDone, finishBrainRun: finishBrainRun, summarizeBrain: summarizeBrain,
+    layout: layout, renderSvg: renderSvg, describe: describe, toJSON: toJSON, topoOrder: topoOrder, signalGraph: signalGraph
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: strings for the brain architecture page, English and French
+ * (SYNTHETIC classical simulation). A test checks both languages have the same keys.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.BrainI18n = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var en = {
+    'page.title': 'Membrane Arena: brain architecture',
+    'page.tagline': 'Many membranes of several kinds, joined by microtubules, sized by counting votes.',
+    'page.tag': 'SYNTHETIC',
+    'page.lang': 'Français',
+    'page.hc': 'High contrast',
+    'page.back': 'Back to the arena',
+    'intro.p1': 'Sensory membranes learn a hidden pattern from noisy observations with the same Oja rule as the arena. Each column of sensory membranes has a gate that releases a vector only when a strict majority of the column agrees. An integrator releases when a strict majority of columns agree, and the output membrane releases the final event when a strict majority of integrators agree. An optional inhibitory membrane is the arena\'s stabilizer and an optional memory membrane is its amplifier.',
+    'intro.p2': 'A microtubule here is a directed link that carries a released vector from one membrane to the next, with a delay in check periods of 10 steps and an optional transport noise. The name is a metaphor taken from cell biology; this page does not model real microtubules, neurons or a brain.',
+    'sec.req': 'Requirements',
+    'sec.plan': 'The necessary membranes',
+    'sec.check': 'Checks',
+    'sec.diagram': 'Diagram',
+    'sec.faults': 'Inject faults',
+    'sec.results': 'Measured in this run',
+    'sec.method': 'What is measured and what is not',
+    'req.f': 'Faulty sensory membranes to tolerate per column (f)',
+    'req.g': 'Compromised columns to tolerate (g)',
+    'req.h': 'Faulty integrators to tolerate (h)',
+    'req.stab': 'Inhibitory membrane (stabilizer)',
+    'req.mem': 'Memory membrane (warm start)',
+    'req.fuse': 'Fuse agreeing vectors',
+    'req.sg': 'Delay sensory to gate (check periods)',
+    'req.gi': 'Delay gate to integrator (check periods)',
+    'req.io': 'Delay integrator to output (check periods)',
+    'req.jitter': 'Transport noise on gate to integrator links',
+    'req.c': 'Coupling inside a column',
+    'req.th': 'Threshold',
+    'req.gain': 'Gain',
+    'fault.sensory': 'Faulty sensory membranes per column',
+    'fault.columns': 'Compromised columns (gate faulty)',
+    'fault.integrators': 'Faulty integrators',
+    'fault.mode': 'Fault behaviour',
+    'mode.collude': 'collude (all send the same wrong vector)',
+    'mode.stuck': 'stuck (each sends its own random vector)',
+    'mode.silent': 'silent (never sends anything)',
+    'run.episodes': 'Episodes (half planted)',
+    'run.seed': 'Seed',
+    'run.go': 'Plan and run',
+    'run.busy': 'Running: {done} of {total} episodes',
+    'run.done': 'Done: {total} episodes in {ms} ms in this browser.',
+    'plan.kind': 'Membrane',
+    'plan.count': 'Count',
+    'plan.why': 'Why this many',
+    'plan.total': 'Total: {m} membranes and {t} microtubules ({s} signal, {d} modulatory).',
+    'kind.sensory': 'sensory',
+    'kind.gate': 'gate',
+    'kind.integrator': 'integrator',
+    'kind.output': 'output',
+    'kind.inhibitory': 'inhibitory',
+    'kind.memory': 'memory',
+    'kind.column': 'column',
+    'rule.sensory': '{cols} columns of 2 x {f} + 1 = {n}. A column releases when {q} of {n} agree, so faulty members (up to f = {f}) cannot release on their own and the {q} honest ones still can.',
+    'rule.gate': 'One per column ({cols}). It counts its column\'s votes (quorum {q}) and releases at most one vector per episode.',
+    'rule.integrator': '2 x {h} + 1 = {n}. Each releases when {q} of the {cols} = 2 x {g} + 1 columns agree, so compromised columns (up to g = {g}) cannot decide alone; with {n} integrators, faulty ones (up to h = {h}) cannot either.',
+    'rule.output': 'One. It releases the final event when {q} of {n} integrators agree. It is assumed fault-free.',
+    'rule.inhibitory': 'One, because the stabilizer is on: it follows the output rate and scales every sensory gain, as the arena\'s stabilizer does.',
+    'rule.inhibitory_off': 'None: the stabilizer is off.',
+    'rule.memory': 'One, because warm start is on: each episode starts partly (weight 0.5) from the last output, as the arena\'s amplifier does.',
+    'rule.memory_off': 'None: warm start is off.',
+    'level.error': 'Error',
+    'level.warning': 'Warning',
+    'level.note': 'Note',
+    'layer.sensory': 'sensory',
+    'layer.column': 'column',
+    'layer.integrator': 'integrator',
+    'prob.empty_layer': 'the {layer} layer is empty.',
+    'prob.even': 'an even {layer} layer of {n} tolerates f = {f}, no more than one voter fewer would.',
+    'prob.output_count': 'there must be exactly one output membrane (found {n}).',
+    'prob.dangling': 'microtubules {ids} point to membranes that do not exist.',
+    'prob.cycle': 'the signal microtubules form a loop.',
+    'prob.unreachable': '{n} sensory membranes have no path to the output.',
+    'prob.deadline': 'the signal path adds a delay of {d} x 10 steps but at most {max} x 10 fit in a 60-step episode, so no output can ever arrive.',
+    'prob.slack': 'the longest signal path adds a delay of {d} x 10 steps; {slack} of the 5 later check points are left for the membranes to declare.',
+    'prob.below_requirement': 'the {layer} layer tolerates f = {have}, but {need} is required.',
+    'prob.above_requirement': 'the {layer} layer tolerates f = {have}, more than the {need} required.',
+    'prob.single_points': 'single points of failure, assumed fault-free: {kinds}.',
+    'prob.coupling_channel': 'coupling {c} pulls each member toward its peers, so a faulty member drags honest ones toward its vector and the vote count no longer bounds what faults can do. Set the coupling to 0 for the guarantee.',
+    'res.metric': 'Measure',
+    'res.brain': 'Brain output',
+    'res.single': 'One honest sensory membrane alone',
+    'res.true': 'True events',
+    'res.false': 'False events',
+    'res.recall': 'Recall (true events per planted episode), 95% Wilson',
+    'res.falseRate': 'False events per episode, 95% Wilson',
+    'res.precision': 'Precision',
+    'res.fidelity': 'Mean |<v|pattern>| of what was released',
+    'res.latency': 'Mean step of the output (of 60)',
+    'res.lost': 'Vectors lost past step 60 / vectors moved',
+    'res.updates': 'Oja updates computed',
+    'res.na': 'not applicable',
+    'res.ref_faulty': 'the reference membrane is one of the faulty ones',
+    'res.json': 'Run record (JSON)',
+    'method.p1': 'Measured here: what this simulation does with the chosen sizes, faults and seed. The counting rule (2f + 1 voters, strict-majority quorum) is checked by exhaustive enumeration in tests/brain.test.js with the same quorum code. The simulated rates are one seeded run; scripts/brain-check.js writes a larger table to docs/brain-check.txt.',
+    'method.p2': 'Design choices, not findings: the column, gate, integrator and output layout; the fusion of agreeing vectors; delays counted in check periods; faulty units taking the lowest indices; the output, inhibitory and memory membranes being fault-free.',
+    'method.p3': 'Not shown: anything about real neurons, real microtubules or a physical device. The data are synthetic and the parameters were hand-picked. No hardware was used or measured; the run time shown is this browser on this device.',
+    'foot.license': 'Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. SYNTHETIC classical simulation; no network calls, nothing stored.'
+  };
+  var fr = {
+    'page.title': 'Membrane Arena : architecture cérébrale',
+    'page.tagline': 'De nombreuses membranes de plusieurs types, reliées par des microtubules, dimensionnées en comptant les votes.',
+    'page.tag': 'SYNTHÉTIQUE',
+    'page.lang': 'English',
+    'page.hc': 'Contraste élevé',
+    'page.back': 'Retour à l\'arène',
+    'intro.p1': 'Les membranes sensorielles apprennent un motif caché à partir d\'observations bruitées, avec la même règle d\'Oja que l\'arène. Chaque colonne de membranes sensorielles a une porte qui ne libère un vecteur que si une majorité stricte de la colonne est d\'accord. Un intégrateur libère quand une majorité stricte des colonnes est d\'accord, et la membrane de sortie libère l\'événement final quand une majorité stricte des intégrateurs est d\'accord. Une membrane inhibitrice facultative est le stabilisateur de l\'arène, et une membrane mémoire facultative est son amplificateur.',
+    'intro.p2': 'Ici, un microtubule est un lien orienté qui transporte un vecteur libéré d\'une membrane à la suivante, avec un délai compté en périodes de contrôle de 10 pas et un bruit de transport facultatif. Le nom est une métaphore empruntée à la biologie cellulaire ; cette page ne modélise ni de vrais microtubules, ni des neurones, ni un cerveau.',
+    'sec.req': 'Exigences',
+    'sec.plan': 'Les membranes nécessaires',
+    'sec.check': 'Vérifications',
+    'sec.diagram': 'Schéma',
+    'sec.faults': 'Injecter des pannes',
+    'sec.results': 'Mesuré dans cette exécution',
+    'sec.method': 'Ce qui est mesuré et ce qui ne l\'est pas',
+    'req.f': 'Membranes sensorielles en panne tolérées par colonne (f)',
+    'req.g': 'Colonnes compromises tolérées (g)',
+    'req.h': 'Intégrateurs en panne tolérés (h)',
+    'req.stab': 'Membrane inhibitrice (stabilisateur)',
+    'req.mem': 'Membrane mémoire (démarrage à chaud)',
+    'req.fuse': 'Fusionner les vecteurs concordants',
+    'req.sg': 'Délai sensoriel vers porte (périodes de contrôle)',
+    'req.gi': 'Délai porte vers intégrateur (périodes de contrôle)',
+    'req.io': 'Délai intégrateur vers sortie (périodes de contrôle)',
+    'req.jitter': 'Bruit de transport sur les liens porte vers intégrateur',
+    'req.c': 'Couplage dans une colonne',
+    'req.th': 'Seuil',
+    'req.gain': 'Gain',
+    'fault.sensory': 'Membranes sensorielles en panne par colonne',
+    'fault.columns': 'Colonnes compromises (porte en panne)',
+    'fault.integrators': 'Intégrateurs en panne',
+    'fault.mode': 'Comportement des pannes',
+    'mode.collude': 'collusion (toutes envoient le même mauvais vecteur)',
+    'mode.stuck': 'bloquée (chacune envoie son propre vecteur aléatoire)',
+    'mode.silent': 'muette (n\'envoie jamais rien)',
+    'run.episodes': 'Épisodes (moitié avec motif)',
+    'run.seed': 'Graine',
+    'run.go': 'Planifier et exécuter',
+    'run.busy': 'Exécution : {done} épisodes sur {total}',
+    'run.done': 'Terminé : {total} épisodes en {ms} ms dans ce navigateur.',
+    'plan.kind': 'Membrane',
+    'plan.count': 'Nombre',
+    'plan.why': 'Pourquoi ce nombre',
+    'plan.total': 'Total : {m} membranes et {t} microtubules ({s} de signal, {d} de modulation).',
+    'kind.sensory': 'sensorielle',
+    'kind.gate': 'porte',
+    'kind.integrator': 'intégrateur',
+    'kind.output': 'sortie',
+    'kind.inhibitory': 'inhibitrice',
+    'kind.memory': 'mémoire',
+    'kind.column': 'colonne',
+    'rule.sensory': '{cols} colonnes de 2 x {f} + 1 = {n}. Une colonne libère quand {q} sur {n} sont d\'accord : les membres en panne (jusqu\'à f = {f}) ne peuvent rien libérer seuls et les {q} membres honnêtes le peuvent encore.',
+    'rule.gate': 'Une par colonne ({cols}). Elle compte les votes de sa colonne (quorum {q}) et libère au plus un vecteur par épisode.',
+    'rule.integrator': '2 x {h} + 1 = {n}. Chacun libère quand {q} des {cols} = 2 x {g} + 1 colonnes sont d\'accord : les colonnes compromises (jusqu\'à g = {g}) ne peuvent pas décider seules ; avec {n} intégrateurs, les intégrateurs en panne (jusqu\'à h = {h}) non plus.',
+    'rule.output': 'Une. Elle libère l\'événement final quand {q} intégrateurs sur {n} sont d\'accord. Elle est supposée sans panne.',
+    'rule.inhibitory': 'Une, car le stabilisateur est actif : elle suit le taux de sortie et ajuste le gain de chaque membrane sensorielle, comme le stabilisateur de l\'arène.',
+    'rule.inhibitory_off': 'Aucune : le stabilisateur est désactivé.',
+    'rule.memory': 'Une, car le démarrage à chaud est actif : chaque épisode part en partie (poids 0,5) de la dernière sortie, comme l\'amplificateur de l\'arène.',
+    'rule.memory_off': 'Aucune : le démarrage à chaud est désactivé.',
+    'level.error': 'Erreur',
+    'level.warning': 'Avertissement',
+    'level.note': 'Remarque',
+    'layer.sensory': 'sensorielle',
+    'layer.column': 'des colonnes',
+    'layer.integrator': 'des intégrateurs',
+    'prob.empty_layer': 'la couche {layer} est vide.',
+    'prob.even': 'une couche {layer} paire de {n} tolère f = {f}, pas plus qu\'avec un votant de moins.',
+    'prob.output_count': 'il faut exactement une membrane de sortie ({n} trouvées).',
+    'prob.dangling': 'les microtubules {ids} pointent vers des membranes inexistantes.',
+    'prob.cycle': 'les microtubules de signal forment une boucle.',
+    'prob.unreachable': '{n} membranes sensorielles n\'ont aucun chemin vers la sortie.',
+    'prob.deadline': 'le chemin de signal ajoute un délai de {d} x 10 pas alors qu\'au plus {max} x 10 tiennent dans un épisode de 60 pas : aucune sortie ne peut arriver.',
+    'prob.slack': 'le plus long chemin de signal ajoute un délai de {d} x 10 pas ; il reste {slack} des 5 points de contrôle suivants pour que les membranes déclarent.',
+    'prob.below_requirement': 'la couche {layer} tolère f = {have}, mais {need} est exigé.',
+    'prob.above_requirement': 'la couche {layer} tolère f = {have}, plus que les {need} exigés.',
+    'prob.single_points': 'points uniques de défaillance, supposés sans panne : {kinds}.',
+    'prob.coupling_channel': 'le couplage {c} tire chaque membre vers ses voisins : un membre en panne entraîne les membres honnêtes vers son vecteur et le décompte des votes ne borne plus l\'effet des pannes. Mettez le couplage à 0 pour la garantie.',
+    'res.metric': 'Mesure',
+    'res.brain': 'Sortie du cerveau',
+    'res.single': 'Une membrane sensorielle honnête seule',
+    'res.true': 'Événements vrais',
+    'res.false': 'Événements faux',
+    'res.recall': 'Rappel (événements vrais par épisode avec motif), Wilson 95 %',
+    'res.falseRate': 'Événements faux par épisode, Wilson 95 %',
+    'res.precision': 'Précision',
+    'res.fidelity': '|<v|motif>| moyen de ce qui a été libéré',
+    'res.latency': 'Pas moyen de la sortie (sur 60)',
+    'res.lost': 'Vecteurs perdus après le pas 60 / vecteurs transportés',
+    'res.updates': 'Mises à jour d\'Oja calculées',
+    'res.na': 'sans objet',
+    'res.ref_faulty': 'la membrane de référence fait partie des membranes en panne',
+    'res.json': 'Enregistrement de l\'exécution (JSON)',
+    'method.p1': 'Mesuré ici : ce que fait cette simulation avec les tailles, les pannes et la graine choisies. La règle de décompte (2f + 1 votants, quorum à majorité stricte) est vérifiée par énumération exhaustive dans tests/brain.test.js avec le même code de quorum. Les taux simulés viennent d\'une seule exécution avec graine ; scripts/brain-check.js écrit un tableau plus large dans docs/brain-check.txt.',
+    'method.p2': 'Choix de conception, pas des résultats : la disposition en colonnes, portes, intégrateurs et sortie ; la fusion des vecteurs concordants ; les délais comptés en périodes de contrôle ; les unités en panne aux indices les plus bas ; les membranes de sortie, inhibitrice et mémoire supposées sans panne.',
+    'method.p3': 'Non montré : quoi que ce soit sur de vrais neurones, de vrais microtubules ou un dispositif physique. Les données sont synthétiques et les paramètres choisis à la main. Aucun matériel n\'a été utilisé ni mesuré ; la durée affichée est celle de ce navigateur sur cet appareil.',
+    'foot.license': 'Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Simulation classique SYNTHÉTIQUE ; aucun appel réseau, rien n\'est enregistré.'
+  };
+  return { LANGS: { en: en, fr: fr } };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: brain architecture page (SYNTHETIC classical simulation).
+ *
+ * Reads the requirements, plans the necessary membranes with brain.js, prints
+ * the plan and the checks, draws the diagram, and runs the simulation a few
+ * episodes at a time so the page stays responsive. No network, no storage.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function () {
+  'use strict';
+  var B = window.ArenaBrain, G = window.ArenaGame, LANGS = window.BrainI18n.LANGS;
+  var $ = function (id) { return document.getElementById(id); };
+  var lang = /(^|[#&])l=fr(&|$)/.test(location.hash) ? 'fr' : 'en', hc = false, arch = null, last = null, timer = null;
+
+  function t(k, vars) { var s = (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; return G.fmt(s, vars); }
+  function text(el, s) { el.textContent = s; }
+  function f2(x) { return x === null || x === undefined || !isFinite(x) ? t('res.na') : x.toFixed(2); }
+  function ci(w) { return w.n ? w.p.toFixed(2) + ' [' + w.lo.toFixed(2) + ', ' + w.hi.toFixed(2) + ']' : t('res.na'); }
+
+  function readReq() {
+    return {
+      sensoryFaults: +$('f').value, columnFaults: +$('g').value, integratorFaults: +$('h').value,
+      stabilizer: $('stab').checked, memory: $('mem').checked, fuse: $('fuse').checked,
+      delays: { sg: +$('sg').value, gi: +$('gi').value, io: +$('io').value },
+      jitter: +$('jitter').value, c: +$('c').value, th: +$('th').value, g: +$('gain').value
+    };
+  }
+  function readFaults() { return { sensory: +$('fs').value, columns: +$('fc').value, integrators: +$('fi').value, mode: $('mode').value }; }
+  function fillSelect(sel, max) {
+    var keep = Math.min(+sel.value || 0, max);
+    while (sel.firstChild) sel.removeChild(sel.firstChild);
+    for (var k = 0; k <= max; k++) { var o = document.createElement('option'); o.value = String(k); o.textContent = String(k); sel.appendChild(o); }
+    sel.value = String(keep);
+  }
+  function layerName(v) { return v.layer ? t('layer.' + v.layer) : v.layer; }
+  function kindsList(s) { return String(s).split(', ').map(function (k) { return t('kind.' + k); }).join(', '); }
+
+  function renderPlan() {
+    arch = B.planArchitecture(readReq());
+    fillSelect($('fs'), arch.perColumn); fillSelect($('fc'), arch.columns); fillSelect($('fi'), arch.integrators);
+    var body = $('plan-body');
+    while (body.firstChild) body.removeChild(body.firstChild);
+    arch.plan.forEach(function (p) {
+      var tr = document.createElement('tr');
+      [t('kind.' + p.kind), String(p.count), t('rule.' + p.rule, p.vars)].forEach(function (s, i) {
+        var td = document.createElement(i === 0 ? 'th' : 'td'); if (i === 0) td.scope = 'row'; td.textContent = s; tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    text($('plan-total'), t('plan.total', { m: arch.counts.total, t: arch.tubes.total, s: arch.tubes.signal, d: arch.tubes.modulatory }));
+    var ck = B.checkArchitecture(arch, arch.req), ul = $('checks');
+    while (ul.firstChild) ul.removeChild(ul.firstChild);
+    ck.problems.forEach(function (p) {
+      var li = document.createElement('li'), v = {};
+      Object.keys(p.vars).forEach(function (k) { v[k] = p.vars[k]; });
+      if (v.layer) v.layer = layerName(p.vars);
+      if (p.code === 'single_points') v.kinds = kindsList(p.vars.kinds);
+      li.className = p.level;
+      li.textContent = t('level.' + p.level) + ': ' + t('prob.' + p.code, v);
+      ul.appendChild(li);
+    });
+    $('btn-run').disabled = !ck.ok;
+    renderDiagram();
+    return ck;
+  }
+  function renderDiagram() {
+    if (!arch) return;
+    var labels = { column: t('kind.column'), gate: t('kind.gate'), integrator: t('kind.integrator'), output: t('kind.output'), inhibitory: t('kind.inhibitory'), memory: t('kind.memory') };
+    var desc = B.describe(arch);
+    // the SVG is built from numbers and escaped strings only (brain.js renderSvg)
+    $('diagram').innerHTML = B.renderSvg(arch, { faults: readFaults(), hc: hc, labels: labels, title: t('sec.diagram'), desc: desc });
+    text($('diagram-desc'), desc);
+  }
+
+  function renderResults(run, ms) {
+    var s = run.summary, body = $('results-body'), one = s.single;
+    while (body.firstChild) body.removeChild(body.firstChild);
+    var rows = [
+      ['res.true', String(s.T), String(one.T)],
+      ['res.false', String(s.F), String(one.F)],
+      ['res.recall', ci(s.recall), ci(one.recall)],
+      ['res.falseRate', ci(s.falseRate), ci(one.falseRate)],
+      ['res.precision', f2(s.T + s.F ? s.precision : null), f2(one.T + one.F ? one.precision : null)],
+      ['res.fidelity', f2(s.meanFidelity), f2(one.meanFidelity)],
+      ['res.latency', s.meanLatency === null ? t('res.na') : s.meanLatency.toFixed(1), t('res.na')],
+      ['res.lost', s.lost + ' / ' + (s.lost + s.moved), t('res.na')],
+      ['res.updates', String(s.ojaUpdates), t('res.na')]
+    ];
+    rows.forEach(function (r) {
+      var tr = document.createElement('tr'), th = document.createElement('th');
+      th.scope = 'row'; th.textContent = t(r[0]); tr.appendChild(th);
+      [r[1], r[2]].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+      body.appendChild(tr);
+    });
+    text($('results-note'), one.honest ? '' : t('res.ref_faulty'));
+    text($('json'), B.toJSON(run));
+    text($('run-status'), t('run.done', { total: s.episodes, ms: Math.round(ms) }));
+  }
+
+  function run() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    var ck = renderPlan();
+    if (!ck.ok) return;
+    var seed = $('seed').value;
+    if (!/^[A-Za-z0-9_-]{1,24}$/.test(seed)) { seed = 'brain1'; $('seed').value = seed; }
+    var R = B.createBrainRun(arch, { seed: seed, episodes: +$('episodes').value, faults: readFaults() });
+    var t0 = performance.now(), total = R.opts.episodes, btn = $('btn-run'), prog = $('run-progress');
+    btn.disabled = true; prog.max = total; prog.value = 0;
+    var slice = function () {
+      var s0 = performance.now();
+      while (!B.brainDone(R) && performance.now() - s0 < 14) B.stepBrainRun(R, 1);
+      prog.value = R.e;
+      if (B.brainDone(R)) { timer = null; btn.disabled = false; last = B.finishBrainRun(R); renderResults(last, performance.now() - t0); return; }
+      text($('run-status'), t('run.busy', { done: R.e, total: total }));
+      timer = setTimeout(slice, 0);
+    };
+    slice();
+  }
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.title = t('page.title');
+    renderPlan();
+    if (last) renderResults(last, 0);
+    text($('footer-version'), 'brain ' + B.VERSION + ' / arena ' + G.BUILD);
+  }
+
+  function bindSlider(id) {
+    var el = $(id), out = $(id + '-val');
+    var upd = function () { out.textContent = (+el.value).toFixed(2); renderPlan(); };
+    el.addEventListener('input', upd);
+  }
+
+  ['f', 'g', 'h', 'sg', 'gi', 'io', 'stab', 'mem', 'fuse'].forEach(function (id) { $(id).addEventListener('change', renderPlan); });
+  ['fs', 'fc', 'fi', 'mode'].forEach(function (id) { $(id).addEventListener('change', renderDiagram); });
+  ['jitter', 'c', 'th', 'gain'].forEach(bindSlider);
+  $('brain-form').addEventListener('submit', function (ev) { ev.preventDefault(); run(); });
+  $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; applyLang(); });
+  $('btn-contrast').addEventListener('click', function () {
+    hc = !hc;
+    document.documentElement.classList.toggle('hc', hc);
+    this.setAttribute('aria-pressed', hc ? 'true' : 'false');
+    renderDiagram();
+  });
+  applyLang();
+})();
+</script>
+</body>
+</html>

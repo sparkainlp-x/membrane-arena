@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Membrane Arena brain architecture: an offline, synthetic, classical simulation of many membranes of several kinds joined by microtubules, sized by counting votes.">
+<title>Membrane Arena: brain architecture</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='16' cy='9' r='5' fill='none' stroke='%2340d0e0' stroke-width='2'/%3E%3Ccircle cx='9' cy='21' r='5' fill='none' stroke='%237aa8ff' stroke-width='2'/%3E%3Ccircle cx='23' cy='21' r='5' fill='none' stroke='%23c9a84c' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="brain.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Membrane Arena: brain architecture</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a id="link-back" class="btn small" href="index.html" data-i18n="page.back"></a>
+  </div>
+</header>
+<noscript><p class="card">This page needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+
+  <form id="brain-form" class="card" novalidate>
+    <h2 data-i18n="sec.req"></h2>
+    <div class="bgrid">
+      <div class="field"><label for="f" data-i18n="req.f"></label><select id="f"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></div>
+      <div class="field"><label for="g" data-i18n="req.g"></label><select id="g"><option>0</option><option selected>1</option><option>2</option></select></div>
+      <div class="field"><label for="h" data-i18n="req.h"></label><select id="h"><option selected>0</option><option>1</option><option>2</option></select></div>
+      <div class="field"><label for="sg" data-i18n="req.sg"></label><select id="sg"><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label for="gi" data-i18n="req.gi"></label><select id="gi"><option>0</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div class="field"><label for="io" data-i18n="req.io"></label><select id="io"><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+    </div>
+    <div class="sliderrow"><label for="jitter" data-i18n="req.jitter"></label><input id="jitter" type="range" min="0" max="0.3" step="0.01" value="0"><output id="jitter-val" for="jitter">0.00</output></div>
+    <div class="sliderrow"><label for="c" data-i18n="req.c"></label><input id="c" type="range" min="0" max="0.3" step="0.01" value="0"><output id="c-val" for="c">0.00</output></div>
+    <div class="sliderrow"><label for="th" data-i18n="req.th"></label><input id="th" type="range" min="0.1" max="1.2" step="0.01" value="0.5"><output id="th-val" for="th">0.50</output></div>
+    <div class="sliderrow"><label for="gain" data-i18n="req.gain"></label><input id="gain" type="range" min="0.5" max="2" step="0.01" value="1"><output id="gain-val" for="gain">1.00</output></div>
+    <div class="formrow">
+      <label class="switch"><input id="stab" type="checkbox" checked><span data-i18n="req.stab"></span></label>
+      <label class="switch"><input id="mem" type="checkbox"><span data-i18n="req.mem"></span></label>
+      <label class="switch"><input id="fuse" type="checkbox" checked><span data-i18n="req.fuse"></span></label>
+    </div>
+
+    <h2 data-i18n="sec.faults"></h2>
+    <div class="bgrid">
+      <div class="field"><label for="fs" data-i18n="fault.sensory"></label><select id="fs"></select></div>
+      <div class="field"><label for="fc" data-i18n="fault.columns"></label><select id="fc"></select></div>
+      <div class="field"><label for="fi" data-i18n="fault.integrators"></label><select id="fi"></select></div>
+      <div class="field"><label for="mode" data-i18n="fault.mode"></label><select id="mode"><option value="collude" data-i18n="mode.collude"></option><option value="stuck" data-i18n="mode.stuck"></option><option value="silent" data-i18n="mode.silent"></option></select></div>
+      <div class="field"><label for="episodes" data-i18n="run.episodes"></label><select id="episodes"><option>40</option><option selected>100</option><option>200</option><option>400</option></select></div>
+      <div class="field"><label for="seed" data-i18n="run.seed"></label><input id="seed" type="text" value="brain1" maxlength="24" pattern="[A-Za-z0-9_-]{1,24}" autocomplete="off" spellcheck="false"></div>
+    </div>
+    <div class="controls"><button id="btn-run" class="btn primary" type="submit" data-i18n="run.go"></button><progress id="run-progress" max="1" value="0"></progress></div>
+    <p id="run-status" class="ticker" aria-live="polite"></p>
+  </form>
+
+  <section class="card">
+    <h2 data-i18n="sec.plan"></h2>
+    <div class="tablewrap"><table id="plan-table"><thead><tr><th scope="col" data-i18n="plan.kind"></th><th scope="col" data-i18n="plan.count"></th><th scope="col" data-i18n="plan.why"></th></tr></thead><tbody id="plan-body"></tbody></table></div>
+    <p id="plan-total"></p>
+    <h3 data-i18n="sec.check"></h3>
+    <ul id="checks" class="method"></ul>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.diagram"></h2>
+    <div id="diagram" class="diagram"></div>
+    <p id="diagram-desc" class="alt"></p>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.results"></h2>
+    <div class="tablewrap"><table id="results-table"><thead><tr><th scope="col" data-i18n="res.metric"></th><th scope="col" data-i18n="res.brain"></th><th scope="col" data-i18n="res.single"></th></tr></thead><tbody id="results-body"></tbody></table></div>
+    <p id="results-note" class="muted"></p>
+    <details><summary data-i18n="res.json"></summary><pre id="json" class="exp"></pre></details>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.method"></h2>
+    <p data-i18n="method.p1"></p>
+    <p data-i18n="method.p2"></p>
+    <p data-i18n="method.p3"></p>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="stats.js"></script>
+<script src="brain.js"></script>
+<script src="brain-i18n.js"></script>
+<script src="brainui.js"></script>
+</body>
+</html>

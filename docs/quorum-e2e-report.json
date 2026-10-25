@@ -1,0 +1,214 @@
+{
+  "version": "0.3.0",
+  "chrome": "/usr/bin/google-chrome",
+  "allOk": true,
+  "servedOther": [],
+  "cases": [
+    {
+      "name": "quorum-en-desktop",
+      "ok": true,
+      "wallMs": 15040,
+      "errors": [],
+      "external": [],
+      "opts": {},
+      "played": [
+        {
+          "level": "b1",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "The logic holds: all 4 placements the threat allows were tried, and each one gives the true output.Measured with the learning membranes (60 episodes, half with a hidden pattern, seed qk-b1), with faults at the most fragile placement (1 sensory member in column 1): recall 0.67 (target 0.60), false outputs 0.Three stars: safe, lively and lean.3 of 3 stars.",
+          "faultyDrawn": 1,
+          "membranesDrawn": 6,
+          "symbols": 6
+        },
+        {
+          "level": "b3",
+          "expect": 0,
+          "ok": true,
+          "stars": "☆☆☆",
+          "text": "Fooled. 3 of the 4 placements the threat allows make the output wrong. The one shown uses the gate of column 1.",
+          "faultyDrawn": 1,
+          "membranesDrawn": 4,
+          "symbols": 4
+        },
+        {
+          "level": "b3",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "The logic holds: all 864 placements the threat allows were tried, and each one gives the true output.Measured with the learning membranes (60 episodes, half with a hidden pattern, seed qk-b3), with faults at the most fragile placement (1 sensory member in column 1, the gate of column 1, 1 sensory member in column 2, 1 sensory member in column 3): recall 0.93 (target 0.90), false outputs 0.Three stars: safe, lively and lean.3 of 3 stars.",
+          "faultyDrawn": 4,
+          "membranesDrawn": 21,
+          "symbols": 21
+        },
+        {
+          "level": "x2",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "Fooled. The output released a wrong vector. Faulty units used: 1.3 of 3 stars.",
+          "faultyDrawn": 1,
+          "membranesDrawn": 14,
+          "symbols": 14
+        },
+        {
+          "level": "x4",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "Right. All 130 placements within the budget were tried and none reaches the goal.3 of 3 stars.",
+          "faultyDrawn": 0,
+          "membranesDrawn": 14,
+          "symbols": 14
+        },
+        {
+          "level": "x5",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "Fooled. The output released a wrong vector. Faulty units used: 2.3 of 3 stars.",
+          "faultyDrawn": 2,
+          "membranesDrawn": 24,
+          "symbols": 24
+        }
+      ],
+      "lang": "en",
+      "title": "Quorum Keeper",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Quorum Keeper\nSYNTHETIC simulation\nB1 ***\nB2 ---\nB3 ***\nB4 ---\nB5 ---\nB6 ---\nB7 ---\nX1 ---\nX2 ***\nX3 ---\nX4 ***\nX5 ***\nX6 ---\nX7 ---\n15 of 42 stars"
+    },
+    {
+      "name": "quorum-fr-phone",
+      "ok": true,
+      "wallMs": 7119,
+      "errors": [],
+      "external": [],
+      "opts": {},
+      "played": [
+        {
+          "level": "b2",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "La logique tient : les 4 placements permis par la menace ont été essayés, et chacun donne la vraie sortie.Mesuré avec les membranes apprenantes (60 épisodes, la moitié avec un motif caché, graine qk-b2), pannes au placement le plus fragile (la porte de la colonne 1) : rappel 0.60 (cible 0.60), fausses sorties 0.Trois étoiles : sûr, vif et économe.3 étoiles sur 3.",
+          "faultyDrawn": 1,
+          "membranesDrawn": 9,
+          "symbols": 9
+        },
+        {
+          "level": "x1",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "Réduit au silence. La sortie n'a rien libéré. Unités en panne utilisées : 2.3 étoiles sur 3.",
+          "faultyDrawn": 2,
+          "membranesDrawn": 7,
+          "symbols": 7
+        },
+        {
+          "level": "x6",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "Exact. Les 576 placements dans le budget ont été essayés et aucun n'atteint le but.3 étoiles sur 3.",
+          "faultyDrawn": 0,
+          "membranesDrawn": 16,
+          "symbols": 16
+        }
+      ],
+      "lang": "fr",
+      "title": "Gardien du quorum",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Gardien du quorum\nsimulation SYNTHÉTIQUE\nB1 ---\nB2 ***\nB3 ---\nB4 ---\nB5 ---\nB6 ---\nB7 ---\nX1 ***\nX2 ---\nX3 ---\nX4 ---\nX5 ---\nX6 ***\nX7 ---\n9 étoiles sur 42"
+    },
+    {
+      "name": "quorum-en-phone",
+      "ok": true,
+      "wallMs": 8108,
+      "errors": [],
+      "external": [],
+      "opts": {},
+      "played": [
+        {
+          "level": "b4",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "The logic holds: all 10 placements the threat allows were tried, and each one gives the true output.Measured with the learning membranes (60 episodes, half with a hidden pattern, seed qk-b4), with faults at the most fragile placement (integrator 1): recall 0.90 (target 0.85), false outputs 0.Three stars: safe, lively and lean.3 of 3 stars.",
+          "faultyDrawn": 1,
+          "membranesDrawn": 11,
+          "symbols": 11
+        },
+        {
+          "level": "x3",
+          "expect": 0,
+          "ok": true,
+          "stars": "☆☆☆",
+          "text": "Not yet: the output released the true vector.",
+          "faultyDrawn": 3,
+          "membranesDrawn": 14,
+          "symbols": 14
+        },
+        {
+          "level": "x3",
+          "expect": 2,
+          "ok": true,
+          "stars": "★★☆",
+          "text": "Fooled. The output released a wrong vector. Faulty units used: 4.2 of 3 stars.",
+          "faultyDrawn": 4,
+          "membranesDrawn": 14,
+          "symbols": 14
+        }
+      ],
+      "lang": "en",
+      "title": "Quorum Keeper",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Quorum Keeper\nSYNTHETIC simulation\nB1 ---\nB2 ---\nB3 ---\nB4 ***\nB5 ---\nB6 ---\nB7 ---\nX1 ---\nX2 ---\nX3 **-\nX4 ---\nX5 ---\nX6 ---\nX7 ---\n5 of 42 stars"
+    },
+    {
+      "name": "quorum-en-desktop-contrast",
+      "ok": true,
+      "wallMs": 5458,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "hc": true
+      },
+      "played": [
+        {
+          "level": "x7",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "Silenced. The output released nothing. Faulty units used: 3.3 of 3 stars.",
+          "faultyDrawn": 3,
+          "membranesDrawn": 22,
+          "symbols": 22
+        },
+        {
+          "level": "b7",
+          "expect": 3,
+          "ok": true,
+          "stars": "★★★",
+          "text": "The logic holds: all 121 placements the threat allows were tried, and each one gives the true output.Measured with the learning membranes (60 episodes, half with a hidden pattern, seed qk-b7), with faults at the most fragile placement (integrator 1, integrator 2): recall 0.97 (target 0.95), false outputs 0.Three stars: safe, lively and lean.3 of 3 stars.",
+          "faultyDrawn": 2,
+          "membranesDrawn": 17,
+          "symbols": 17
+        }
+      ],
+      "lang": "en",
+      "title": "Quorum Keeper",
+      "overflowX": false,
+      "hc": true,
+      "untranslated": [],
+      "share": "Quorum Keeper\nSYNTHETIC simulation\nB1 ---\nB2 ---\nB3 ---\nB4 ---\nB5 ---\nB6 ---\nB7 ***\nX1 ---\nX2 ---\nX3 ---\nX4 ---\nX5 ---\nX6 ---\nX7 ***\n6 of 42 stars"
+    }
+  ]
+}

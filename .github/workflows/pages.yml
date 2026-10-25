@@ -32,6 +32,8 @@ jobs:
           node build.js
           mkdir _site
           cp dist/index.html _site/index.html
+          cp dist/brain.html _site/brain.html
+          cp dist/quorum.html _site/quorum.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

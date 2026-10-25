@@ -1,27 +1,33 @@
 'use strict';
 /*
- * Build dist/index.html: one self-contained file with the stylesheet and every script inlined.
- *   node build.js            write dist/index.html
- * build() returns the HTML string (used by the tests).
+ * Build dist/index.html (the arena), dist/brain.html (the brain architecture page) and
+ * dist/quorum.html (the Quorum Keeper game): each one self-contained file with its stylesheets
+ * and every script inlined.
+ *   node build.js            write all three files
+ * build() returns the arena HTML string, buildBrain() the brain page and buildQuorum() the game
+ * (used by the tests).
  */
 const fs = require('node:fs');
 const path = require('node:path');
-
 const root = __dirname;
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 
-function build() {
-  let html = read('index.html');
-  html = html.replace(/<link rel="stylesheet" href="([^"]+)">/, (m, f) => `<style>\n${read(f).trimEnd()}\n</style>`);
+function inline(page) {
+  let html = read(page);
+  html = html.replace(/<link rel="stylesheet" href="([^"]+)">/g, (m, f) => `<style>\n${read(f).trimEnd()}\n</style>`);
   html = html.replace(/<script src="([^"]+)"><\/script>/g, (m, f) => `<script>\n${read(f).trimEnd().replace(/<\/script/gi, '<\\/script')}\n</script>`);
   return html;
 }
+function build() { return inline('index.html'); }
+function buildBrain() { return inline('brain.html'); }
+function buildQuorum() { return inline('quorum.html'); }
 
 if (require.main === module) {
-  const out = path.join(root, 'dist', 'index.html');
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  const html = build();
-  fs.writeFileSync(out, html);
-  console.log(`wrote dist/index.html (${html.length} bytes)`);
+  fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
+  for (const [name, fn] of [['index.html', build], ['brain.html', buildBrain], ['quorum.html', buildQuorum]]) {
+    const html = fn();
+    fs.writeFileSync(path.join(root, 'dist', name), html);
+    console.log(`wrote dist/${name} (${html.length} bytes)`);
+  }
 }
-module.exports = { build };
+module.exports = { build, buildBrain, buildQuorum };

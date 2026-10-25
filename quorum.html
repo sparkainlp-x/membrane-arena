@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Quorum Keeper: an offline logic puzzle on the Membrane Arena brain architecture. Build brains that outvote faults, then try to break them. Synthetic classical simulation.">
+<title>Quorum Keeper</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='8' cy='9' r='4' fill='%232fbf8f'/%3E%3Ccircle cx='16' cy='9' r='4' fill='%232fbf8f'/%3E%3Ccircle cx='24' cy='9' r='4' fill='%23e2504c'/%3E%3Cpath d='M16 18l6 6-6 6-6-6z' fill='%23c9a84c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="quorum.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Quorum Keeper</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+  <nav class="card" aria-labelledby="levels-h">
+    <h2 id="levels-h" data-i18n="sec.levels"></h2>
+    <h3 data-i18n="group.build"></h3>
+    <ul id="lv-build" class="levels"></ul>
+    <h3 data-i18n="group.break"></h3>
+    <ul id="lv-break" class="levels"></ul>
+  </nav>
+  <div class="playgrid">
+    <section class="card" aria-labelledby="lv-title">
+      <h2 id="lv-title"></h2>
+      <p id="lv-brief" class="brief"></p>
+      <ul id="lv-facts" class="facts"></ul>
+      <details id="lv-hint-box"><summary data-i18n="hint.show"></summary><p id="lv-hint"></p></details>
+      <div id="build-controls">
+        <h3 data-i18n="sec.design"></h3>
+        <div class="stepper"><span id="m-label" class="slabel" data-i18n="design.m"></span><button id="m-dec" class="btn step" type="button">&minus;</button><output id="m-val" aria-labelledby="m-label">1</output><button id="m-inc" class="btn step" type="button">+</button></div>
+        <div class="stepper"><span id="c-label" class="slabel" data-i18n="design.C"></span><button id="c-dec" class="btn step" type="button">&minus;</button><output id="c-val" aria-labelledby="c-label">1</output><button id="c-inc" class="btn step" type="button">+</button></div>
+        <div class="stepper"><span id="i-label" class="slabel" data-i18n="design.I"></span><button id="i-dec" class="btn step" type="button">&minus;</button><output id="i-val" aria-labelledby="i-label">1</output><button id="i-inc" class="btn step" type="button">+</button></div>
+        <label class="switch"><input id="stab" type="checkbox"><span data-i18n="design.stab"></span></label>
+        <p id="cost" class="cost"></p>
+        <div class="controls"><button id="btn-test" class="btn primary" type="button" data-i18n="btn.test"></button><progress id="sim-progress" max="1" value="0"></progress></div>
+      </div>
+      <div id="break-controls" hidden>
+        <h3 data-i18n="sec.attack"></h3>
+        <p id="picked" class="cost"></p>
+        <div class="controls">
+          <button id="btn-attack" class="btn primary" type="button" data-i18n="btn.attack"></button>
+          <button id="btn-claim" class="btn" type="button" data-i18n="btn.claim"></button>
+          <button id="btn-clear" class="btn" type="button" data-i18n="btn.clear"></button>
+          <button id="btn-solution" class="btn" type="button" data-i18n="btn.solution" hidden></button>
+        </div>
+      </div>
+    </section>
+    <section class="card result" aria-labelledby="res-h">
+      <h2 id="res-h" data-i18n="sec.result"></h2>
+      <p id="res-stars" class="stars" aria-hidden="true"></p>
+      <div id="res-text" aria-live="polite"></div>
+      <div class="controls"><button id="btn-next" class="btn" type="button" data-i18n="btn.next" hidden></button></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="dia-h">
+    <h2 id="dia-h" data-i18n="sec.diagram"></h2>
+    <div id="diagram" class="diagram"></div>
+    <ul class="legend">
+      <li><span class="sw sw-t">T</span><span data-i18n="legend.T"></span></li>
+      <li><span class="sw sw-f">F</span><span data-i18n="legend.F"></span></li>
+      <li><span class="sw sw-n"></span><span data-i18n="legend.none"></span></li>
+      <li><span class="sw sw-x"></span><span data-i18n="legend.fault"></span></li>
+    </ul>
+    <p class="hint" data-i18n="legend.pick"></p>
+  </section>
+  <section class="card">
+    <h2 data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p id="how-p3"></p>
+    <p data-i18n="how.p4"></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="stats.js"></script>
+<script src="brain.js"></script>
+<script src="quorum.js"></script>
+<script src="quorum-i18n.js"></script>
+<script src="quorumui.js"></script>
+</body>
+</html>

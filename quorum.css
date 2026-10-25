@@ -1,0 +1,44 @@
+/* Membrane Arena: extra styles for Quorum Keeper. AGPL-3.0-only. */
+.levels { list-style: none; margin: 4px 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.levels .btn { min-width: 76px; min-height: 48px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 10px; line-height: 1.15; }
+.levels .lvid { font-weight: 700; letter-spacing: 0.06em; }
+.levels .lvstars { font-size: 0.85rem; color: var(--gold-bright); letter-spacing: 0.1em; }
+.levels .btn[aria-current="true"] { border-color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); }
+.playgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; }
+@media (min-width: 900px) { .playgrid { grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr); align-items: start; } }
+.brief { font-size: 1.05rem; }
+.facts { margin: 8px 0; padding-left: 1.1em; color: var(--muted); }
+.facts li { margin: 3px 0; }
+.stepper { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.stepper .slabel { flex: 1 1 14em; font-weight: 600; }
+.stepper output { min-width: 2.2em; text-align: center; font-size: 1.25rem; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.btn.step { min-width: 48px; min-height: 48px; padding: 0; font-size: 1.4rem; line-height: 1; }
+.cost { margin: 10px 0 4px; font-weight: 600; }
+.cost .over, .cost .slow { color: var(--danger); }
+.cost .ok { color: var(--aqua); }
+.result .stars { font-size: 2rem; letter-spacing: 0.15em; color: var(--gold-bright); margin: 0; min-height: 1.4em; }
+#res-text p { margin: 6px 0; }
+#res-text .win { color: var(--aqua); font-weight: 700; }
+#res-text .lose { color: var(--danger); font-weight: 700; }
+.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #0a1330; }
+.diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; min-width: 360px; }
+.diagram .pickable { cursor: pointer; }
+.diagram .pickable:hover .hit { fill-opacity: 0.25; }
+.diagram .pickable:focus { outline: none; }
+.diagram .pickable:focus-visible .hit { fill: #40d0e0; fill-opacity: 0.35; stroke: #40d0e0; stroke-width: 2; }
+.legend { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.88rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.sw { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; font-weight: 700; color: #06101f; border: 2px solid var(--line); }
+.sw-t { background: #2fbf8f; } .sw-f { background: #e2504c; } .sw-n { background: #2a3866; }
+.sw-x { border: 3px solid #ffd36b; border-radius: 3px; background: transparent; }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; color: var(--text); }
+@media (prefers-reduced-motion: no-preference) {
+  .diagram .membrane { transition: opacity 0.2s; }
+  .result .stars.pop { animation: qk-pop 0.5s ease-out; }
+}
+@keyframes qk-pop { 0% { transform: scale(0.6); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+html.hc .diagram { background: #000; border: 2px solid #fff; }
+html.hc .levels .btn[aria-current="true"] { box-shadow: inset 0 0 0 3px #ffd400; }
+html.hc .sw-t { background: #fff; color: #000; } html.hc .sw-f { background: #000; color: #fff; border-color: #fff; } html.hc .sw-n { background: #000; border-color: #fff; }
+html.hc .sw-x { border-color: #fff; }
+html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
