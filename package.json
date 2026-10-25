@@ -1,6 +1,6 @@
 {
   "name": "membrane-arena",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Membrane Arena: a zero-dependency browser game about three coupled membranes, reward schemes, a shield, an amplifier and a stabilizer (SYNTHETIC classical simulation).",
   "license": "AGPL-3.0-only",
   "author": "Jean-François Brisson",

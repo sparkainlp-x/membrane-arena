@@ -20,8 +20,8 @@
 })(typeof self !== 'undefined' ? self : this, function (BASE) {
   'use strict';
 
-  var VERSION = '0.1.0';
-  var BUILD = '0.2.0-preview (unreleased)';   // shown in the page footer; VERSION stays the released engine version
+  var VERSION = '0.2.0';
+  var BUILD = VERSION;   // shown in the page footer
   var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
   var EPOCH = '2026-10-24';              // day number 1
   var N = 32;                            // width of the measured baselines used here
