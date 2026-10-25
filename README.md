@@ -1,12 +1,14 @@
 # Membrane Arena
 
-**Steer three coupled membranes toward true crystallization events.** A SYNTHETIC, classical simulation turned into a game: three glowing membranes ripple on a canvas, particles flow between them, a true event bursts into a gold lattice and a false one into grey cracks. Zero dependencies, one HTML file, English and French, works offline. No accounts, no network calls.
+**Steer three coupled membranes toward true crystallization events.** A SYNTHETIC, classical simulation turned into a game and a small lab: three glowing membranes ripple on a canvas, particles flow between them, a true event grows a branching gold crystal and a false one leaves grey cracks, and a Lab view plots every instrument from the simulation with its uncertainty. Zero dependencies, one HTML file, English and French, works offline. No accounts, no network calls.
 
 Résumé FR : jeu éducatif SYNTHÉTIQUE (simulation classique) construit sur le dépôt crystallization-contest. Trois membranes couplées apprennent un motif planté dans le bruit par la règle d'Oja ; vous choisissez le schéma de récompense, la coopération, le bouclier 2 sur 3, l'amplificateur et le stabilisateur, puis comparez votre score aux mesures du dépôt, avec la source citée. Concours quotidien identique pour tous, carte de partage en texte brut, liens de défi. Interface EN/FR.
 
-![Membrane Arena mid-contest on desktop: gold lattices mark true events, the ribbon shows each episode](docs/screenshots/en-desktop-2-running.png)
+![Membrane Arena mid-contest on desktop: gold crystals mark true events, compass dials show each weight vector, the ribbon shows each episode](docs/screenshots/en-desktop-02-running.png)
 
-Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: version 0.1.0. The tagged release and its DOI are not issued yet; this line is updated when they are.
+![The Lab view on desktop: Wilson-banded event rates, weight alignment, the energy-ratio histogram with thresholds, precision and recall against the threshold, shield counts, stabilizer trace, evolution landscape and the amplifier measurement](docs/screenshots/en-desktop-04-lab.png)
+
+Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: the published version is 0.1.0. This branch carries **Unreleased 0.2.0** (the Lab, ensembles, A/B tests, missions, replay, high-contrast mode); it is not released, and the live page and the DOI still describe 0.1.0.
 
 ## What you do
 
@@ -26,7 +28,24 @@ Starting parameters are set by the seed, so the daily contest begins in the same
 
 When the contest ends you see your score, a comparison with the repository's measured means (file cited), a lesson card, the parameters each membrane started and ended with, and a plain-text share card.
 
-Keys: Space run or pause, G next generation, F finish now, S science view.
+Keys: Space run or pause, G next generation, F finish now, S open the Lab. Escape skips the intro.
+
+## The Lab (Unreleased 0.2.0)
+
+Six tabs under the arena. Every plotted number is computed by the simulation in the page or read from a repository CSV copy, and every chart has a text equivalent printed under it.
+
+| Tab | What it shows | Where the numbers come from |
+| --- | --- | --- |
+| Meters | the three gains, the output rate, the evolution fitness | the contest record |
+| Lab | event rates with 95 percent Wilson bands; alignment of each weight vector with the signal; energy-ratio histogram of planted against noise with the three thresholds; precision and recall as the threshold moves; shield counts (left, held, redundant); stabilizer gain and rate trace with the clamp bounds; the (1+1) evolution landscape; the amplifier measurement from the repository | the contest record, plus a seeded probe run of extra episodes for the histogram and the sweep (`lab.js`) |
+| Ensemble | N seeds (10 to 80) run a little at a time in the page, mean with a 95 percent t interval and a seeded bootstrap interval, the repository mean overlaid and its file named, a like-for-like note | `lab.js` `createEnsemble`; baselines from `baselines.js` |
+| A/B test | two settings of one factor on the same seeds, paired difference with a t interval and a bootstrap interval, wins per seed | `lab.js` `createPaired`, `stats.js` |
+| Missions | five small experiments tied to the repository's findings; each is scored by the same code, as measured, whether or not it matches the repository; progress is kept in this browser only | `lab.js` `evaluateMission` |
+| Method | what was measured, what is the game's own design, what is not verified, and what each visual encodes | `i18n.js` |
+
+Contest and ensemble results export as CSV or JSON, and the plain-text share card is unchanged. After a contest a **replay** slider scrubs the whole run (5760 steps) with a rail of every declaration; the arena redraws crystals, cracks, compass needles and the shield gate for the position you choose.
+
+Accessibility modes: a **Motion** switch (in addition to the system setting) stops ripples, particles and the intro; **High contrast** draws white on black with heavier lines and no glow; the arena has a text description that follows the replay, and the tabs work with arrow keys, Home and End.
 
 ## The score
 
@@ -71,8 +90,12 @@ Not real: the data are synthetic, the parameters were hand-picked, the reward-sc
 | Self-knowledge `sp`, effective threshold `th * (2 - sp)` | `game.js` `episode()`, `stepGeneration` |
 | Seeded determinism | `game.js` `makeRng`, `createContest` |
 | Baselines and lessons | `baselines.js` (generated), `game.js` `baselineFor`, `lessonVars` |
-| Membranes, particles, lattice, cracks, shield flash | `scene.js` `createArena` |
-| Gain meters, charts, controls, share card | `app.js`, `scene.js` `drawFitness`, `drawScience` |
+| Membranes, particles, crystals, cracks, compass dials, shield gate, intro, replay | `scene.js` `createArena`, `crystalSegments`, `snapshotAt` |
+| Statistics: Wilson, Student t, bootstrap, paired difference | `stats.js` |
+| Probe, sweep, ensembles, A/B pairs, missions, exports, text equivalents | `lab.js` |
+| Instrument drawing | `charts.js` |
+| Tabs, ensemble and A/B interface, missions interface | `labui.js` |
+| Gain meters, controls, replay, tour, share card | `app.js`, `scene.js` `drawFitness`, `drawScience` |
 
 ## Privacy
 
@@ -91,9 +114,9 @@ Open `dist/index.html` directly in a browser, or serve it. Node 20 or later is o
 
 ## Tests
 
-`node --test tests/*.test.js` runs 88 tests with Node's built-in runner and no dependencies. It covers: seeded determinism of the whole contest and of lazy stepping, the contest mechanics (shield, amplifier cap, stabilizer clamp and leaky update, evolution acceptance and bounds, reward schemes), scoring, baseline lookup, hash links and hostile input, the store sanitizer, dates and streaks, i18n parity and share-card line length in both languages, the timeline and layout helpers, the arena with a stub canvas, and the built page (self-contained, no network APIs, ids and keys exist, accessibility basics, brand colours, no banned wording).
+`node --test tests/*.test.js` runs 142 tests with Node's built-in runner and no dependencies. It covers: seeded determinism of the whole contest and of lazy stepping, the contest mechanics (shield, amplifier cap, stabilizer clamp and leaky update, evolution acceptance and bounds, reward schemes), scoring, baseline lookup, hash links and hostile input, the store sanitizer, dates and streaks, i18n parity and share-card line length in both languages, the timeline and layout helpers, the arena with a stub canvas, the statistics (Wilson and t interval coverage against known cases by simulation, bootstrap, the paired test's false-positive rate near 5 percent, histograms), the Lab data (probe, sweep, shield counts, ensembles reproducing the repository means, A/B pairing, missions, CSV and JSON), the instrument drawing at four sizes, text equivalents in both languages, a golden test that seeds `golden1` and `d2026-10-24` still give the exact v0.1.0 numbers (so v0.1 challenge links keep working), and the built page (self-contained, no network APIs, ids and keys exist, accessibility basics, brand colours, no banned wording).
 
-`scripts/e2e-check.js` plays a full round in headless Chrome (English and French, phone and desktop, plus reduced motion) and records console errors, external requests and frame times. It needs playwright-core and Chrome, so it is not part of `node --test`. The last run's report is `docs/e2e-report.json` and screenshots are in `docs/screenshots/`.
+`scripts/e2e-check.js` plays a full round in headless Chrome (English and French, phone and desktop, reduced motion, high contrast), opens every Lab tab, runs a 20-seed ensemble and a 20-pair A/B test, scrubs and plays the replay, exports CSV and JSON, checks that every instrument canvas is drawn and described, and records console errors, external requests, horizontal overflow, frame times, draw time per frame and ensemble run time. A second part runs 36 checks of storage, hash, keyboard, tabs, tour, intro and switches. It needs playwright-core and Chrome, so it is not part of `node --test`. The last run's report is `docs/e2e-report.json` and screenshots are in `docs/screenshots/`.
 
 ## Limits
 
@@ -102,7 +125,11 @@ Open `dist/index.html` directly in a browser, or serve it. Node 20 or later is o
 - Hand-picked parameters, 8 noisy episodes per generation, 20 seeds per repository row.
 - The repository baseline rows exist only for the shield, amplifier and stabilizer combinations `---`, `S--`, `SA-`, `SAZ` and for w of 0, 0.5 and 1. Other combinations show "not measured".
 - No screen-reader session was run; keyboard operation, `aria-live` announcements, `role="meter"` gauges and reduced-motion handling were implemented and checked in a browser, not with assistive technology.
-- Frame times were measured in software-rendered headless Chrome on one machine, not on phones.
+- Frame times were measured in software-rendered headless Chrome on one machine, not on phones. Ensemble and A/B run times are from the same machine; a phone will be slower.
+- The probe behind the energy-ratio histogram and the precision and recall sweep lets all three membranes keep learning after a threshold crossing, so with coupling above zero it approximates the live episode. It uses 24 episodes while a contest runs and 60 after it ends, so the live histogram is noisier.
+- Ensemble and A/B comparisons with the repository table are like for like only with the repository setup (scheme none, no failure cost, evolution on, repository starting parameters); the page says when they are not.
+- The A/B test is exploratory: four metrics are reported with no correction for that, and episodes inside one contest are not independent trials.
+- Only Chrome was tested, with no screen reader.
 
 See [DESIGN.md](DESIGN.md) and [CHANGELOG.md](CHANGELOG.md).
 
