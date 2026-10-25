@@ -1,6 +1,6 @@
 # Changelog
 ## 0.3.1 (2026-10-25)
-The arena, brain and Quorum Keeper mechanics and their seeds are unchanged; their built pages change only in the version string, and the Quorum Keeper header gains a link to the new page.
+Archived on Zenodo as 10.5281/zenodo.23642469 (all versions: 10.5281/zenodo.23633126). The arena, brain and Quorum Keeper mechanics and their seeds are unchanged; their built pages change only in the version string, and the Quorum Keeper header gains a link to the new page.
 - Reverse Membranes: `reverse.js` (anti-Hebbian membranes that learn away from energy, dark patterns with part of a direction's energy removed, opposite energy `1 - ratio`, echo replay, seeded darkness tide, contest, mirror test, score card), `reverse.html`, `reverse-i18n.js` (English and French), `reverseui.js`, `reverse.css`, built to `dist/reverse.html`. The page runs at width 16; see `docs/REVERSE.md`.
 - `scripts/reverse-check.js` (writes `docs/reverse-check.txt`), `scripts/reverse-e2e-check.js` (headless Chrome playthrough, writes `docs/reverse-e2e-report.json` and `docs/screenshots/reverse-*.png`).
 - `build.js` builds the page; the workflows check and deploy `dist/reverse.html`; the Quorum Keeper page links to it.
