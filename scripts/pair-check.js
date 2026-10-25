@@ -33,6 +33,9 @@ const SHARES = [1, 2, 3, 4];
 const PRIMARY = 2;
 const THS = [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85];
 const BOOT = 10000, BOOT_SEED = 'pair-bootstrap';
+// The evaluation is the one frozen and published with v0.3.2. Later releases re-verify it unchanged, so
+// its report keeps that version; pair.js and the protocol are not changed after it.
+const EVAL_VERSION = '0.3.2';
 const SHARED = { ticks: 1, eq: 1, shield: 1, full: 1 };          // methods that depend on the tick share
 const LABEL = { random: 'random', alone: 'alone', ticks: 'ticks only', eq: 'eq', shield: 'shield', full: 'full pair', oracle: 'oracle' };
 const CLEAN_W = 1e-6;                     // a tone counts as clean when the fade does not touch it
@@ -216,7 +219,7 @@ async function main() {
   const cmp = (c, fmt) => (fmt || ci2)(c) + ', d_z ' + f2(c.dz) + ', seeds A>B/=/< ' + c.above + '/' + c.equal + '/' + c.below;
   const name = (key) => { const [m, s] = key.split('|'); return LABEL[m] + (SHARED[m] ? ' s' + s : ''); };
   const KN = (k) => (k === 'grid' ? 'on-grid' : 'off-grid');
-  o('Reverse Pair evaluation report, v' + P.VERSION + '. SYNTHETIC classical simulation; no physical claims.');
+  o('Reverse Pair evaluation report, v' + EVAL_VERSION + '. SYNTHETIC classical simulation; no physical claims.');
   o('Protocol: docs/PAIR-PROTOCOL.md, SHA-256 ' + protocolSha + '.');
   o('Generator ' + P.GEN + '. Calibration seeds cal-000 to cal-039 (40 contests), used only to choose thresholds.');
   o('Held-out seeds test-000 to test-119 (120 contests), never used for tuning; the two sets are disjoint.');
@@ -296,7 +299,7 @@ async function main() {
   /* ---------------- results files ---------------- */
   const round = (x) => (typeof x === 'number' ? Math.round(x * 1e6) / 1e6 : x);
   const tidy = (v) => JSON.parse(JSON.stringify(v, (k, x) => round(x)));
-  const results = tidy({ version: P.VERSION, generator: P.GEN, protocolSha256: protocolSha, primaryShare: PRIMARY, thresholds: THS,
+  const results = tidy({ version: EVAL_VERSION, generator: P.GEN, protocolSha256: protocolSha, primaryShare: PRIMARY, thresholds: THS,
     bootstrap: { resamples: BOOT, seed: BOOT_SEED, interval: '95% percentile' }, chosen, summary, comparisons: comps, decomposition: decomp,
     calibration: calib, cleanPredictionMet: cleanMet, predictedCleanError: P.PRED_ERR, fadeRank: rank });
   const csv = ['seed,fade,method,share,threshold,score,true,false,missed,declared,on_fade,held'];
@@ -307,7 +310,7 @@ async function main() {
   const files = { 'docs/pair-check.txt': report, 'docs/pair-results.json': JSON.stringify(results, null, 1) + '\n', 'docs/pair-results.csv': csv.join('\n') + '\n' };
   const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
   const inputs = ['game.js', 'reverse.js', 'pair.js', 'scripts/pair-check.js', 'docs/PAIR-PROTOCOL.md'];
-  const manifest = { version: P.VERSION, generator: P.GEN, command: 'node scripts/pair-check.js --write',
+  const manifest = { version: EVAL_VERSION, checkedWith: P.VERSION, generator: P.GEN, command: 'node scripts/pair-check.js --write',
     seeds: { calibration: CAL, heldOut: TEST }, kinds: KINDS, shares: SHARES, primaryShare: PRIMARY, thresholds: THS,
     bootstrap: { resamples: BOOT, seed: BOOT_SEED },
     inputs: Object.fromEntries(inputs.map((f) => [f, sha(fs.readFileSync(path.join(ROOT, f)))])),

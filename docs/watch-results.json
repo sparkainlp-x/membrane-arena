@@ -1,0 +1,1746 @@
+{
+ "version": "0.3.3",
+ "generator": "membrane-arena/watch/v1/",
+ "protocolSha256": "fcb3adfce65c9e0d22b881404f7ad7642d94a0949bc4cfc35c2732d434fd684c",
+ "breakEven": 0.6,
+ "mainProfile": "2/on",
+ "bootstrap": {
+  "resamples": 2000,
+  "seed": "watch-bootstrap",
+  "interval": "95% percentile"
+ },
+ "coach": {
+  "iterations": 7,
+  "converged": true,
+  "declarations": 17634,
+  "baseRate": 0.77912
+ },
+ "calibration": {
+  "declarations": 17749,
+  "ece": {
+   "value": 0.008268,
+   "ci": [
+    0.006326,
+    0.013633
+   ]
+  },
+  "brier": {
+   "value": 0.086469,
+   "ci": [
+    0.082312,
+    0.090723
+   ]
+  },
+  "brierBase": {
+   "value": 0.172457,
+   "ci": [
+    0.167109,
+    0.177605
+   ]
+  },
+  "brierDiff": {
+   "value": -0.085988,
+   "ci": [
+    -0.091028,
+    -0.081398
+   ]
+  },
+  "bins": [
+   {
+    "lo": 0,
+    "hi": 0.1,
+    "n": 1084,
+    "predicted": 0.053684,
+    "observed": 0.045203,
+    "wilson": [
+     0.034359,
+     0.059259
+    ]
+   },
+   {
+    "lo": 0.1,
+    "hi": 0.2,
+    "n": 840,
+    "predicted": 0.143771,
+    "observed": 0.140476,
+    "wilson": [
+     0.118611,
+     0.165615
+    ]
+   },
+   {
+    "lo": 0.2,
+    "hi": 0.3,
+    "n": 466,
+    "predicted": 0.248618,
+    "observed": 0.240343,
+    "wilson": [
+     0.203771,
+     0.281162
+    ]
+   },
+   {
+    "lo": 0.3,
+    "hi": 0.4,
+    "n": 399,
+    "predicted": 0.351167,
+    "observed": 0.373434,
+    "wilson": [
+     0.327388,
+     0.421893
+    ]
+   },
+   {
+    "lo": 0.4,
+    "hi": 0.5,
+    "n": 367,
+    "predicted": 0.448898,
+    "observed": 0.487738,
+    "wilson": [
+     0.436991,
+     0.53874
+    ]
+   },
+   {
+    "lo": 0.5,
+    "hi": 0.6,
+    "n": 414,
+    "predicted": 0.550942,
+    "observed": 0.55314,
+    "wilson": [
+     0.504978,
+     0.600325
+    ]
+   },
+   {
+    "lo": 0.6,
+    "hi": 0.7,
+    "n": 496,
+    "predicted": 0.653228,
+    "observed": 0.627016,
+    "wilson": [
+     0.583633,
+     0.668447
+    ]
+   },
+   {
+    "lo": 0.7,
+    "hi": 0.8,
+    "n": 892,
+    "predicted": 0.761602,
+    "observed": 0.789238,
+    "wilson": [
+     0.761261,
+     0.814734
+    ]
+   },
+   {
+    "lo": 0.8,
+    "hi": 0.9,
+    "n": 2055,
+    "predicted": 0.859183,
+    "observed": 0.841849,
+    "wilson": [
+     0.825437,
+     0.856986
+    ]
+   },
+   {
+    "lo": 0.9,
+    "hi": 1,
+    "n": 10736,
+    "predicted": 0.950297,
+    "observed": 0.953428,
+    "wilson": [
+     0.949277,
+     0.957254
+    ]
+   }
+  ],
+  "groups": {
+   "grid|raw": {
+    "n": 7396,
+    "predicted": 0.747471,
+    "observed": 0.746349,
+    "wilson": [
+     0.736307,
+     0.756136
+    ]
+   },
+   "grid|eq": {
+    "n": 3235,
+    "predicted": 0.923159,
+    "observed": 0.921484,
+    "wilson": [
+     0.911707,
+     0.930261
+    ]
+   },
+   "off|raw": {
+    "n": 3823,
+    "predicted": 0.66171,
+    "observed": 0.668585,
+    "wilson": [
+     0.6535,
+     0.683331
+    ]
+   },
+   "off|eq": {
+    "n": 3295,
+    "predicted": 0.836022,
+    "observed": 0.837633,
+    "wilson": [
+     0.824649,
+     0.849831
+    ]
+   }
+  }
+ },
+ "summary": {
+  "1/on": {
+   "coach": {
+    "points": {
+     "mean": 963.7,
+     "ci": [
+      931.64375,
+      994.65
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.785,
+     "ci": [
+      0.665,
+      0.910125
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.165,
+     "ci": [
+      0.11,
+      0.22
+     ]
+    },
+    "declared": 11.18
+   },
+   "shield": {
+    "points": {
+     "mean": 938.15,
+     "ci": [
+      904.66625,
+      969.9
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.77,
+     "ci": [
+      0.65,
+      0.9
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.37,
+     "ci": [
+      0.29,
+      0.455
+     ]
+    },
+    "declared": 11.18
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 876.55,
+     "ci": [
+      834.89875,
+      915.50125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.31,
+     "ci": [
+      1.15,
+      1.48
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 11.18
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -230.15,
+     "ci": [
+      -243.6025,
+      -215.65
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 9.87,
+     "ci": [
+      9.685,
+      10.06
+     ]
+    },
+    "declared": 11.18
+   },
+   "random": {
+    "points": {
+     "mean": 341.4,
+     "ci": [
+      300.735,
+      381.65125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.635,
+     "ci": [
+      0.52,
+      0.76
+     ]
+    },
+    "realVetoed": {
+     "mean": 4.835,
+     "ci": [
+      4.61,
+      5.07
+     ]
+    },
+    "declared": 11.18
+   },
+   "perfect": {
+    "points": {
+     "mean": 1151.65,
+     "ci": [
+      1134.44875,
+      1168.6075
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 11.18
+   }
+  },
+  "2/on": {
+   "coach": {
+    "points": {
+     "mean": 1084.8,
+     "ci": [
+      1055.0475,
+      1113.50375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.815,
+     "ci": [
+      0.699875,
+      0.945
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.29,
+     "ci": [
+      0.21,
+      0.37
+     ]
+    },
+    "declared": 12.66
+   },
+   "shield": {
+    "points": {
+     "mean": 1052.95,
+     "ci": [
+      1022.69875,
+      1084.55375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.83,
+     "ci": [
+      0.715,
+      0.95
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.495,
+     "ci": [
+      0.4,
+      0.585
+     ]
+    },
+    "declared": 12.66
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 914.35,
+     "ci": [
+      878.64875,
+      951.15125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.82,
+     "ci": [
+      1.644875,
+      1.99
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 12.66
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -221.05,
+     "ci": [
+      -234.55125,
+      -208.04875
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 10.84,
+     "ci": [
+      10.7,
+      10.99
+     ]
+    },
+    "declared": 12.66
+   },
+   "random": {
+    "points": {
+     "mean": 293.45,
+     "ci": [
+      253.13625,
+      335.10125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.99,
+     "ci": [
+      0.87,
+      1.11
+     ]
+    },
+    "realVetoed": {
+     "mean": 5.68,
+     "ci": [
+      5.425,
+      5.925125
+     ]
+    },
+    "declared": 12.66
+   },
+   "perfect": {
+    "points": {
+     "mean": 1296.55,
+     "ci": [
+      1283.6,
+      1310.15625
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 12.66
+   }
+  },
+  "3/on": {
+   "coach": {
+    "points": {
+     "mean": 1048.55,
+     "ci": [
+      1017.69875,
+      1080.9525
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.04,
+     "ci": [
+      0.9,
+      1.17
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.485,
+     "ci": [
+      0.395,
+      0.58
+     ]
+    },
+    "declared": 13.285
+   },
+   "shield": {
+    "points": {
+     "mean": 1011.1,
+     "ci": [
+      978.89375,
+      1045
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.175,
+     "ci": [
+      1.03,
+      1.320125
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.55,
+     "ci": [
+      0.455,
+      0.65
+     ]
+    },
+    "declared": 13.285
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 837.15,
+     "ci": [
+      798.03875,
+      876.51
+     ]
+    },
+    "falseAccepted": {
+     "mean": 2.37,
+     "ci": [
+      2.18,
+      2.565
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 13.285
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -193.25,
+     "ci": [
+      -207.85125,
+      -178.89875
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 10.915,
+     "ci": [
+      10.78,
+      11.06
+     ]
+    },
+    "declared": 13.285
+   },
+   "random": {
+    "points": {
+     "mean": 331.75,
+     "ci": [
+      289.3425,
+      370.7
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.16,
+     "ci": [
+      1.029875,
+      1.29
+     ]
+    },
+    "realVetoed": {
+     "mean": 5.425,
+     "ci": [
+      5.16,
+      5.685
+     ]
+    },
+    "declared": 13.285
+   },
+   "perfect": {
+    "points": {
+     "mean": 1334.85,
+     "ci": [
+      1323.4,
+      1347.35125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 13.285
+   }
+  },
+  "4/on": {
+   "coach": {
+    "points": {
+     "mean": 1018.9,
+     "ci": [
+      982.445,
+      1054.1025
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.31,
+     "ci": [
+      1.155,
+      1.470125
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.475,
+     "ci": [
+      0.38,
+      0.57
+     ]
+    },
+    "declared": 13.845
+   },
+   "shield": {
+    "points": {
+     "mean": 959.75,
+     "ci": [
+      922.6,
+      996.56
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.605,
+     "ci": [
+      1.45,
+      1.765125
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.455,
+     "ci": [
+      0.37,
+      0.545
+     ]
+    },
+    "declared": 13.845
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 717.9,
+     "ci": [
+      671.8425,
+      761.86
+     ]
+    },
+    "falseAccepted": {
+     "mean": 3.06,
+     "ci": [
+      2.835,
+      3.29
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 13.845
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -149.4,
+     "ci": [
+      -165.75125,
+      -132.54875
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 10.785,
+     "ci": [
+      10.625,
+      10.935
+     ]
+    },
+    "declared": 13.845
+   },
+   "random": {
+    "points": {
+     "mean": 269.9,
+     "ci": [
+      225.8875,
+      313.65125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.52,
+     "ci": [
+      1.355,
+      1.69
+     ]
+    },
+    "realVetoed": {
+     "mean": 5.51,
+     "ci": [
+      5.3,
+      5.72
+     ]
+    },
+    "declared": 13.845
+   },
+   "perfect": {
+    "points": {
+     "mean": 1360.5,
+     "ci": [
+      1348.1,
+      1372.30375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 13.845
+   }
+  },
+  "1/off": {
+   "coach": {
+    "points": {
+     "mean": 922.3,
+     "ci": [
+      887.68625,
+      956.00125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.885,
+     "ci": [
+      0.76,
+      1.025
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.65,
+     "ci": [
+      0.555,
+      0.745
+     ]
+    },
+    "declared": 12.32
+   },
+   "shield": {
+    "points": {
+     "mean": 901.65,
+     "ci": [
+      869,
+      934.0075
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.73,
+     "ci": [
+      0.62,
+      0.86
+     ]
+    },
+    "realVetoed": {
+     "mean": 1.03,
+     "ci": [
+      0.9,
+      1.155
+     ]
+    },
+    "declared": 12.32
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 598.55,
+     "ci": [
+      548.58875,
+      645.65375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 2.86,
+     "ci": [
+      2.64,
+      3.095
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 12.32
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -125.25,
+     "ci": [
+      -141.75125,
+      -107.45
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 9.46,
+     "ci": [
+      9.274875,
+      9.645
+     ]
+    },
+    "declared": 12.32
+   },
+   "random": {
+    "points": {
+     "mean": 252.75,
+     "ci": [
+      207.15,
+      294.95
+     ]
+    },
+    "falseAccepted": {
+     "mean": 1.41,
+     "ci": [
+      1.245,
+      1.59
+     ]
+    },
+    "realVetoed": {
+     "mean": 4.645,
+     "ci": [
+      4.415,
+      4.87
+     ]
+    },
+    "declared": 12.32
+   },
+   "perfect": {
+    "points": {
+     "mean": 1199.15,
+     "ci": [
+      1181.94875,
+      1218.25125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 12.32
+   }
+  },
+  "2/off": {
+   "coach": {
+    "points": {
+     "mean": 1088.4,
+     "ci": [
+      1056.29375,
+      1119.8525
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.695,
+     "ci": [
+      0.58,
+      0.82
+     ]
+    },
+    "realVetoed": {
+     "mean": 0.79,
+     "ci": [
+      0.685,
+      0.885
+     ]
+    },
+    "declared": 14.1
+   },
+   "shield": {
+    "points": {
+     "mean": 1040.1,
+     "ci": [
+      1005.85,
+      1073.50125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.645,
+     "ci": [
+      0.53,
+      0.77
+     ]
+    },
+    "realVetoed": {
+     "mean": 1.21,
+     "ci": [
+      1.079875,
+      1.35
+     ]
+    },
+    "declared": 14.1
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 517.55,
+     "ci": [
+      463.04,
+      570.55125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 3.94,
+     "ci": [
+      3.68,
+      4.205
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 14.1
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -77.45,
+     "ci": [
+      -97.10375,
+      -57.35
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 10.16,
+     "ci": [
+      9.975,
+      10.330125
+     ]
+    },
+    "declared": 14.1
+   },
+   "random": {
+    "points": {
+     "mean": 181.2,
+     "ci": [
+      136.29875,
+      223.90125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 2.015,
+     "ci": [
+      1.819875,
+      2.215
+     ]
+    },
+    "realVetoed": {
+     "mean": 5.29,
+     "ci": [
+      5.06,
+      5.530125
+     ]
+    },
+    "declared": 14.1
+   },
+   "perfect": {
+    "points": {
+     "mean": 1344.95,
+     "ci": [
+      1330.75,
+      1359.6025
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 14.1
+   }
+  },
+  "3/off": {
+   "coach": {
+    "points": {
+     "mean": 1092.1,
+     "ci": [
+      1058.43875,
+      1127.80125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.695,
+     "ci": [
+      0.58,
+      0.805
+     ]
+    },
+    "realVetoed": {
+     "mean": 1.065,
+     "ci": [
+      0.925,
+      1.205
+     ]
+    },
+    "declared": 14.705
+   },
+   "shield": {
+    "points": {
+     "mean": 1039.6,
+     "ci": [
+      1001.14375,
+      1077.6
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.845,
+     "ci": [
+      0.715,
+      0.970125
+     ]
+    },
+    "realVetoed": {
+     "mean": 1.215,
+     "ci": [
+      1.075,
+      1.36
+     ]
+    },
+    "declared": 14.705
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 475.75,
+     "ci": [
+      422.2975,
+      527.855
+     ]
+    },
+    "falseAccepted": {
+     "mean": 4.34,
+     "ci": [
+      4.085,
+      4.605
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 14.705
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -63.95,
+     "ci": [
+      -83.50125,
+      -44.24875
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 10.365,
+     "ci": [
+      10.185,
+      10.55
+     ]
+    },
+    "declared": 14.705
+   },
+   "random": {
+    "points": {
+     "mean": 225.85,
+     "ci": [
+      177.49875,
+      271.40375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 2.2,
+     "ci": [
+      2.005,
+      2.405
+     ]
+    },
+    "realVetoed": {
+     "mean": 4.995,
+     "ci": [
+      4.749875,
+      5.23
+     ]
+    },
+    "declared": 14.705
+   },
+   "perfect": {
+    "points": {
+     "mean": 1387.15,
+     "ci": [
+      1373.79625,
+      1401.955
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 14.705
+   }
+  },
+  "4/off": {
+   "coach": {
+    "points": {
+     "mean": 1100.3,
+     "ci": [
+      1068.3975,
+      1133.0575
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.71,
+     "ci": [
+      0.595,
+      0.835
+     ]
+    },
+    "realVetoed": {
+     "mean": 1.085,
+     "ci": [
+      0.955,
+      1.220125
+     ]
+    },
+    "declared": 14.97
+   },
+   "shield": {
+    "points": {
+     "mean": 1053.05,
+     "ci": [
+      1016.59875,
+      1090.35375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0.955,
+     "ci": [
+      0.82,
+      1.095
+     ]
+    },
+    "realVetoed": {
+     "mean": 1.055,
+     "ci": [
+      0.925,
+      1.185
+     ]
+    },
+    "declared": 14.97
+   },
+   "acceptAll": {
+    "points": {
+     "mean": 440.55,
+     "ci": [
+      391.04875,
+      492.25375
+     ]
+    },
+    "falseAccepted": {
+     "mean": 4.575,
+     "ci": [
+      4.32,
+      4.83
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 14.97
+   },
+   "vetoAll": {
+    "points": {
+     "mean": -54,
+     "ci": [
+      -72.4525,
+      -35.54875
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 10.395,
+     "ci": [
+      10.234875,
+      10.55
+     ]
+    },
+    "declared": 14.97
+   },
+   "random": {
+    "points": {
+     "mean": 237.55,
+     "ci": [
+      189.54,
+      284.155
+     ]
+    },
+    "falseAccepted": {
+     "mean": 2.135,
+     "ci": [
+      1.94,
+      2.325
+     ]
+    },
+    "realVetoed": {
+     "mean": 5.11,
+     "ci": [
+      4.885,
+      5.345
+     ]
+    },
+    "declared": 14.97
+   },
+   "perfect": {
+    "points": {
+     "mean": 1401.3,
+     "ci": [
+      1387.85,
+      1414.30125
+     ]
+    },
+    "falseAccepted": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "realVetoed": {
+     "mean": 0,
+     "ci": [
+      0,
+      0
+     ]
+    },
+    "declared": 14.97
+   }
+  }
+ },
+ "comparisons": {
+  "1/on": {
+   "coach-shield": {
+    "mean": 25.55,
+    "ci": [
+     10.15,
+     41.3
+    ],
+    "dz": 0.225287,
+    "wins": 50,
+    "ties": 130,
+    "losses": 20
+   },
+   "coach-acceptAll": {
+    "mean": 87.15,
+    "ci": [
+     64.4,
+     112.7
+    ],
+    "dz": 0.505107,
+    "wins": 76,
+    "ties": 101,
+    "losses": 23
+   },
+   "shield-acceptAll": {
+    "mean": 61.6,
+    "ci": [
+     36.05,
+     88.9
+    ],
+    "dz": 0.32792,
+    "wins": 79,
+    "ties": 77,
+    "losses": 44
+   },
+   "coach-perfect": {
+    "mean": -187.95,
+    "ci": [
+     -215.60875,
+     -160.99125
+    ],
+    "dz": -0.978245,
+    "wins": 0,
+    "ties": 79,
+    "losses": 121
+   }
+  },
+  "2/on": {
+   "coach-shield": {
+    "mean": 31.85,
+    "ci": [
+     16.45,
+     47.60875
+    ],
+    "dz": 0.283222,
+    "wins": 50,
+    "ties": 138,
+    "losses": 12
+   },
+   "coach-acceptAll": {
+    "mean": 170.45,
+    "ci": [
+     141.74125,
+     200.2
+    ],
+    "dz": 0.800535,
+    "wins": 126,
+    "ties": 57,
+    "losses": 17
+   },
+   "shield-acceptAll": {
+    "mean": 138.6,
+    "ci": [
+     110.24125,
+     169.05
+    ],
+    "dz": 0.659095,
+    "wins": 122,
+    "ties": 45,
+    "losses": 33
+   },
+   "coach-perfect": {
+    "mean": -211.75,
+    "ci": [
+     -239.75875,
+     -184.8
+    ],
+    "dz": -1.0652,
+    "wins": 0,
+    "ties": 65,
+    "losses": 135
+   }
+  },
+  "3/on": {
+   "coach-shield": {
+    "mean": 37.45,
+    "ci": [
+     18.9,
+     55.65
+    ],
+    "dz": 0.281703,
+    "wins": 55,
+    "ties": 123,
+    "losses": 22
+   },
+   "coach-acceptAll": {
+    "mean": 211.4,
+    "ci": [
+     178.5,
+     245.7
+    ],
+    "dz": 0.875488,
+    "wins": 148,
+    "ties": 28,
+    "losses": 24
+   },
+   "shield-acceptAll": {
+    "mean": 173.95,
+    "ci": [
+     140.7,
+     205.80875
+    ],
+    "dz": 0.747048,
+    "wins": 139,
+    "ties": 27,
+    "losses": 34
+   },
+   "coach-perfect": {
+    "mean": -286.3,
+    "ci": [
+     -316.40875,
+     -255.5
+    ],
+    "dz": -1.26073,
+    "wins": 0,
+    "ties": 42,
+    "losses": 158
+   }
+  },
+  "4/on": {
+   "coach-shield": {
+    "mean": 59.15,
+    "ci": [
+     39.9,
+     78.05875
+    ],
+    "dz": 0.449836,
+    "wins": 76,
+    "ties": 104,
+    "losses": 20
+   },
+   "coach-acceptAll": {
+    "mean": 301,
+    "ci": [
+     263.55,
+     338.80875
+    ],
+    "dz": 1.12216,
+    "wins": 168,
+    "ties": 17,
+    "losses": 15
+   },
+   "shield-acceptAll": {
+    "mean": 241.85,
+    "ci": [
+     205.1,
+     277.90875
+    ],
+    "dz": 0.938744,
+    "wins": 151,
+    "ties": 24,
+    "losses": 25
+   },
+   "coach-perfect": {
+    "mean": -341.6,
+    "ci": [
+     -379.05,
+     -305.9
+    ],
+    "dz": -1.312477,
+    "wins": 0,
+    "ties": 31,
+    "losses": 169
+   }
+  },
+  "1/off": {
+   "coach-shield": {
+    "mean": 20.65,
+    "ci": [
+     1.39125,
+     38.85875
+    ],
+    "dz": 0.145896,
+    "wins": 67,
+    "ties": 94,
+    "losses": 39
+   },
+   "coach-acceptAll": {
+    "mean": 323.75,
+    "ci": [
+     280.69125,
+     367.5
+    ],
+    "dz": 1.022071,
+    "wins": 161,
+    "ties": 14,
+    "losses": 25
+   },
+   "shield-acceptAll": {
+    "mean": 303.1,
+    "ci": [
+     256.55,
+     348.95
+    ],
+    "dz": 0.908721,
+    "wins": 159,
+    "ties": 8,
+    "losses": 33
+   },
+   "coach-perfect": {
+    "mean": -276.85,
+    "ci": [
+     -307.65,
+     -248.15
+    ],
+    "dz": -1.309013,
+    "wins": 0,
+    "ties": 33,
+    "losses": 167
+   }
+  },
+  "2/off": {
+   "coach-shield": {
+    "mean": 48.3,
+    "ci": [
+     26.95,
+     69.3
+    ],
+    "dz": 0.31468,
+    "wins": 73,
+    "ties": 101,
+    "losses": 26
+   },
+   "coach-acceptAll": {
+    "mean": 570.85,
+    "ci": [
+     521.14125,
+     625.8
+    ],
+    "dz": 1.514976,
+    "wins": 189,
+    "ties": 5,
+    "losses": 6
+   },
+   "shield-acceptAll": {
+    "mean": 522.55,
+    "ci": [
+     472.14125,
+     577.85875
+    ],
+    "dz": 1.356596,
+    "wins": 179,
+    "ties": 5,
+    "losses": 16
+   },
+   "coach-perfect": {
+    "mean": -256.55,
+    "ci": [
+     -288.40875,
+     -227.49125
+    ],
+    "dz": -1.222501,
+    "wins": 0,
+    "ties": 34,
+    "losses": 166
+   }
+  },
+  "3/off": {
+   "coach-shield": {
+    "mean": 52.5,
+    "ci": [
+     30.45,
+     75.60875
+    ],
+    "dz": 0.319364,
+    "wins": 67,
+    "ties": 104,
+    "losses": 29
+   },
+   "coach-acceptAll": {
+    "mean": 616.35,
+    "ci": [
+     560.35,
+     676.20875
+    ],
+    "dz": 1.509443,
+    "wins": 188,
+    "ties": 4,
+    "losses": 8
+   },
+   "shield-acceptAll": {
+    "mean": 563.85,
+    "ci": [
+     509.59125,
+     621.6
+    ],
+    "dz": 1.392748,
+    "wins": 183,
+    "ties": 4,
+    "losses": 13
+   },
+   "coach-perfect": {
+    "mean": -295.05,
+    "ci": [
+     -325.15875,
+     -262.5
+    ],
+    "dz": -1.364191,
+    "wins": 0,
+    "ties": 34,
+    "losses": 166
+   }
+  },
+  "4/off": {
+   "coach-shield": {
+    "mean": 47.25,
+    "ci": [
+     26.6,
+     66.85
+    ],
+    "dz": 0.32248,
+    "wins": 65,
+    "ties": 106,
+    "losses": 29
+   },
+   "coach-acceptAll": {
+    "mean": 659.75,
+    "ci": [
+     607.2325,
+     714.7
+    ],
+    "dz": 1.643955,
+    "wins": 187,
+    "ties": 5,
+    "losses": 8
+   },
+   "shield-acceptAll": {
+    "mean": 612.5,
+    "ci": [
+     558.92375,
+     667.45
+    ],
+    "dz": 1.578922,
+    "wins": 183,
+    "ties": 6,
+    "losses": 11
+   },
+   "coach-perfect": {
+    "mean": -301,
+    "ci": [
+     -331.10875,
+     -271.59125
+    ],
+    "dz": -1.346316,
+    "wins": 0,
+    "ties": 29,
+    "losses": 171
+   }
+  }
+ },
+ "disagreement": {
+  "n": 82,
+  "coachRight": 63,
+  "shieldRight": 19,
+  "coachAcceptsShieldVetoes": 60,
+  "coachVetoesShieldAccepts": 22
+ }
+}

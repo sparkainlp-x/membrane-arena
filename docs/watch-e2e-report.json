@@ -1,0 +1,891 @@
+{
+  "version": "0.3.3",
+  "chrome": "/usr/bin/google-chrome",
+  "allOk": true,
+  "servedOther": [],
+  "cases": [
+    {
+      "name": "watch-en-desktop",
+      "ok": true,
+      "wallMs": 11587,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w1",
+        "share": 2,
+        "eqPref": true,
+        "policy": "shield",
+        "keyboard": false,
+        "waves": 24
+      },
+      "points": 1550,
+      "base": 1180,
+      "shield": 1180,
+      "acceptAll": 1320,
+      "best": 1320,
+      "checks": [
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "2"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "pause holds the tick",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 40 of 120. Opposite energy 0.75, threshold 0.65. Calibrator readings, tone 0 to 8: 1.03, 0.94, 1.11, 0.61, 0.99, 1."
+        },
+        {
+          "what": "coach panel hidden while the coach is off",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 24,
+            "node": 24
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": 1550,
+            "node": 1550
+          }
+        },
+        {
+          "what": "the shown faded share gives the shield's vote",
+          "ok": true,
+          "got": {
+            "agree": 12,
+            "declared": 12
+          }
+        },
+        {
+          "what": "run ends",
+          "ok": true,
+          "got": "end"
+        },
+        {
+          "what": "end table matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": [
+              1180,
+              1550,
+              1180,
+              1180,
+              1320,
+              -360,
+              1320
+            ],
+            "node": [
+              1180,
+              1550,
+              1180,
+              1180,
+              1320,
+              -360,
+              1320
+            ]
+          }
+        },
+        {
+          "what": "playing the shield's vote ties the shield",
+          "ok": true,
+          "got": {
+            "base": 1180,
+            "shield": 1180
+          }
+        },
+        {
+          "what": "the replay code matches Node",
+          "ok": true,
+          "got": {
+            "page": "iiggigiglljljjjlkljljllj5H",
+            "node": "iiggigiglljljjjlkljljllj5H"
+          }
+        },
+        {
+          "what": "the address holds the replay code",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "a replay link is checked on load",
+          "ok": true,
+          "got": {
+            "ok": true,
+            "error": null,
+            "points": 1550
+          }
+        },
+        {
+          "what": "the replay check is shown with its table",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "a code changed in one character is rejected",
+          "ok": true,
+          "got": {
+            "v": {
+              "ok": false,
+              "error": "check",
+              "points": null
+            },
+            "bad": true
+          }
+        },
+        {
+          "what": "score card names the seed",
+          "ok": true,
+          "got": "Pair Watch e2e-w1"
+        }
+      ],
+      "lang": "en",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        5,
+        10,
+        28
+      ],
+      "canvasW": 1064
+    },
+    {
+      "name": "watch-fr-phone",
+      "ok": true,
+      "wallMs": 6879,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w2",
+        "share": 2,
+        "eqPref": true,
+        "policy": "accept",
+        "keyboard": true,
+        "waves": 24
+      },
+      "points": 1040,
+      "base": 790,
+      "shield": 1210,
+      "acceptAll": 790,
+      "best": 1210,
+      "checks": [
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "2"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 80 sur 120. Énergie opposée 0,81, seuil 0,65. Lectures de la calibreuse, tons 0 à 8 : 1,06, 0,98, 1,03, 1,00, 1,00,"
+        },
+        {
+          "what": "coach panel hidden while the coach is off",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 24,
+            "node": 24
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": 1040,
+            "node": 1040
+          }
+        },
+        {
+          "what": "run ends",
+          "ok": true,
+          "got": "end"
+        },
+        {
+          "what": "end table matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": [
+              790,
+              1040,
+              1210,
+              860,
+              790,
+              -190,
+              1210
+            ],
+            "node": [
+              790,
+              1040,
+              1210,
+              860,
+              790,
+              -190,
+              1210
+            ]
+          }
+        },
+        {
+          "what": "accepting everything ties accept-all",
+          "ok": true,
+          "got": {
+            "base": 790,
+            "acceptAll": 790
+          }
+        },
+        {
+          "what": "the replay code matches Node",
+          "ok": true,
+          "got": {
+            "page": "giggggiijjljjlllljlljllj7T",
+            "node": "giggggiijjljjlllljlljllj7T"
+          }
+        },
+        {
+          "what": "the address holds the replay code",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "a replay link is checked on load",
+          "ok": true,
+          "got": {
+            "ok": true,
+            "error": null,
+            "points": 1040
+          }
+        },
+        {
+          "what": "the replay check is shown with its table",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "a code changed in one character is rejected",
+          "ok": true,
+          "got": {
+            "v": {
+              "ok": false,
+              "error": "check",
+              "points": null
+            },
+            "bad": true
+          }
+        },
+        {
+          "what": "score card names the seed",
+          "ok": true,
+          "got": "Veille à deux e2e-w2"
+        }
+      ],
+      "lang": "fr",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        5,
+        10,
+        28
+      ],
+      "canvasW": 330
+    },
+    {
+      "name": "watch-en-desktop-contrast",
+      "ok": true,
+      "wallMs": 3395,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w3",
+        "share": 2,
+        "eqPref": true,
+        "policy": "veto",
+        "keyboard": false,
+        "waves": 8
+      },
+      "points": -20,
+      "base": -20,
+      "shield": 400,
+      "acceptAll": 190,
+      "best": 400,
+      "checks": [
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "2"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 60 of 120. Opposite energy 0.72, threshold 0.65. Calibrator readings, tone 0 to 8: 1.02, 0.98, 0.97, 1.06, 0.99, 1."
+        },
+        {
+          "what": "coach panel hidden while the coach is off",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 8,
+            "node": 8
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": -20,
+            "node": -20
+          }
+        },
+        {
+          "what": "high contrast scene background is black",
+          "ok": true,
+          "got": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "lang": "en",
+      "hc": true,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        0,
+        0,
+        0
+      ],
+      "canvasW": 1060
+    },
+    {
+      "name": "watch-fr-desktop",
+      "ok": true,
+      "wallMs": 6601,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w4",
+        "share": 3,
+        "eqPref": false,
+        "policy": "shield",
+        "keyboard": false,
+        "waves": 24
+      },
+      "points": 1380,
+      "base": 1030,
+      "shield": 1030,
+      "acceptAll": 750,
+      "best": 1380,
+      "checks": [
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "3"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 100 sur 120. Énergie opposée 0,77, seuil 0,65. Lectures de la calibreuse, tons 0 à 8 : 0,85, 1,04, 1,00, 1,00, 0,92"
+        },
+        {
+          "what": "coach panel hidden while the coach is off",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 24,
+            "node": 24
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": 1380,
+            "node": 1380
+          }
+        },
+        {
+          "what": "the shown faded share gives the shield's vote",
+          "ok": true,
+          "got": {
+            "agree": 14,
+            "declared": 14
+          }
+        },
+        {
+          "what": "run ends",
+          "ok": true,
+          "got": "end"
+        },
+        {
+          "what": "end table matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": [
+              1030,
+              1380,
+              1030,
+              820,
+              750,
+              -160,
+              1380
+            ],
+            "node": [
+              1030,
+              1380,
+              1030,
+              820,
+              750,
+              -160,
+              1380
+            ]
+          }
+        },
+        {
+          "what": "playing the shield's vote ties the shield",
+          "ok": true,
+          "got": {
+            "base": 1030,
+            "shield": 1030
+          }
+        },
+        {
+          "what": "the replay code matches Node",
+          "ok": true,
+          "got": {
+            "page": "onmooommmmmnooomonmommomA4",
+            "node": "onmooommmmmnooomonmommomA4"
+          }
+        },
+        {
+          "what": "the address holds the replay code",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "score card names the seed",
+          "ok": true,
+          "got": "Veille à deux e2e-w4"
+        }
+      ],
+      "lang": "fr",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        5,
+        10,
+        28
+      ],
+      "canvasW": 1064
+    },
+    {
+      "name": "watch-en-phone-reduced",
+      "ok": true,
+      "wallMs": 1402,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w5",
+        "share": 2,
+        "eqPref": true,
+        "policy": "shield",
+        "keyboard": false,
+        "waves": 6
+      },
+      "points": 250,
+      "base": 200,
+      "shield": 200,
+      "acceptAll": -10,
+      "best": 200,
+      "checks": [
+        {
+          "what": "reduced motion starts at 4x",
+          "ok": true,
+          "got": "4"
+        },
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "2"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 60 of 120. Opposite energy 0.84, threshold 0.65. Calibrator readings, tone 0 to 8: 1.03, 0.90, 0.99, 0.99, 0.95, 1."
+        },
+        {
+          "what": "coach panel hidden while the coach is off",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 6,
+            "node": 6
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": 250,
+            "node": 250
+          }
+        },
+        {
+          "what": "the shown faded share gives the shield's vote",
+          "ok": true,
+          "got": {
+            "agree": 2,
+            "declared": 2
+          }
+        }
+      ],
+      "lang": "en",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        5,
+        10,
+        28
+      ],
+      "canvasW": 330
+    },
+    {
+      "name": "watch-en-desktop-coach",
+      "ok": true,
+      "wallMs": 6585,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w6",
+        "share": 2,
+        "eqPref": true,
+        "policy": "coach",
+        "keyboard": false,
+        "waves": 24
+      },
+      "points": 1360,
+      "base": 1020,
+      "shield": 1020,
+      "acceptAll": 1160,
+      "best": 1370,
+      "checks": [
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "2"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 40 of 120. Opposite energy 0.73, threshold 0.65. Calibrator readings, tone 0 to 8: 0.97, 0.96, 0.92, 1.06, 1.01, 1."
+        },
+        {
+          "what": "coach panel visible with its meter",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "meter width is the coach probability",
+          "ok": true,
+          "got": {
+            "bar": 93.6,
+            "p": 0.9356101457039334
+          }
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 24,
+            "node": 24
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": 1360,
+            "node": 1360
+          }
+        },
+        {
+          "what": "the coach shown in the browser matches Node",
+          "ok": true,
+          "got": {
+            "worst": 0,
+            "n": 13
+          }
+        },
+        {
+          "what": "advice is counted for every call made with the coach on",
+          "ok": true,
+          "got": {
+            "shown": 13,
+            "declared": 13
+          }
+        },
+        {
+          "what": "run ends",
+          "ok": true,
+          "got": "end"
+        },
+        {
+          "what": "end table matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": [
+              1020,
+              1360,
+              1020,
+              1020,
+              1160,
+              -310,
+              1370
+            ],
+            "node": [
+              1020,
+              1360,
+              1020,
+              1020,
+              1160,
+              -310,
+              1370
+            ]
+          }
+        },
+        {
+          "what": "following the coach ties the coach row",
+          "ok": true,
+          "got": {
+            "base": 1020,
+            "coach": 1020
+          }
+        },
+        {
+          "what": "the replay code matches Node",
+          "ok": true,
+          "got": {
+            "page": "iggihiigljjjljljlljjljjlEA",
+            "node": "iggihiigljjjljljlljjljjlEA"
+          }
+        },
+        {
+          "what": "the address holds the replay code",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "score card names the seed",
+          "ok": true,
+          "got": "Pair Watch e2e-w6"
+        }
+      ],
+      "lang": "en",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        5,
+        10,
+        28
+      ],
+      "canvasW": 1064
+    },
+    {
+      "name": "watch-fr-phone-contrast-coach",
+      "ok": true,
+      "wallMs": 2413,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-w7",
+        "share": 2,
+        "eqPref": true,
+        "policy": "coach",
+        "keyboard": false,
+        "waves": 8
+      },
+      "points": 620,
+      "base": 450,
+      "shield": 450,
+      "acceptAll": 30,
+      "best": 450,
+      "checks": [
+        {
+          "what": "tick share shown",
+          "ok": true,
+          "got": "2"
+        },
+        {
+          "what": "equalizer locked in stage 1",
+          "ok": true,
+          "got": true
+        },
+        {
+          "what": "decision panel visible, status hidden visually",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "scene label describes the tick",
+          "ok": true,
+          "got": "Tick 80 sur 120. Énergie opposée 0,66, seuil 0,65. Lectures de la calibreuse, tons 0 à 8 : 0,95, 0,99, 1,00, 0,92, 1,10,"
+        },
+        {
+          "what": "coach panel visible with its meter",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "meter width is the coach probability",
+          "ok": true,
+          "got": {
+            "bar": 97.4,
+            "p": 0.973611516128288
+          }
+        },
+        {
+          "what": "every wave matches the Node replay",
+          "ok": true,
+          "got": {
+            "page": 8,
+            "node": 8
+          }
+        },
+        {
+          "what": "points match the Node replay",
+          "ok": true,
+          "got": {
+            "page": 620,
+            "node": 620
+          }
+        },
+        {
+          "what": "the coach shown in the browser matches Node",
+          "ok": true,
+          "got": {
+            "worst": 1.3877787807814457e-16,
+            "n": 5
+          }
+        },
+        {
+          "what": "advice is counted for every call made with the coach on",
+          "ok": true,
+          "got": {
+            "shown": 5,
+            "declared": 5
+          }
+        },
+        {
+          "what": "high contrast scene background is black",
+          "ok": true,
+          "got": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "lang": "fr",
+      "hc": true,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        0,
+        0,
+        0
+      ],
+      "canvasW": 326
+    }
+  ]
+}

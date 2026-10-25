@@ -193,6 +193,7 @@
     'nav.quorum': 'Quorum Keeper',
     'nav.reverse': 'Reverse Membranes',
     'nav.pair': 'Reverse Pair',
+    'nav.watch': 'Pair Watch',
     'footer.version': 'Version {v}',
 
     'help.title': 'How it works',
@@ -625,6 +626,7 @@
     'nav.quorum': 'Gardien du quorum',
     'nav.reverse': 'Membranes inversées',
     'nav.pair': 'Paire inversée',
+    'nav.watch': 'Veille à deux',
     'footer.version': 'Version {v}',
 
     'help.title': 'Comment ça marche',

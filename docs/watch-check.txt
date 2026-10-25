@@ -1,0 +1,81 @@
+Pair Watch evaluation report, v0.3.3. SYNTHETIC game on a classical simulation; no physical claims.
+Protocol: docs/WATCH-PROTOCOL.md, SHA-256 fcb3adfce65c9e0d22b881404f7ad7642d94a0949bc4cfc35c2732d434fd684c
+Regenerate: node scripts/watch-check.js --write   Check: node scripts/watch-check.js --verify
+Coach fitted on 200 calibration runs (wcal-000 to wcal-199); every number below is from 200 held-out runs
+(wtest-000 to wtest-199). Intervals: 95% percentile bootstrap over held-out seeds, 2000 resamples, seed watch-bootstrap.
+Points are per 24-wave run, without the streak bonus. A difference is claimed only when its interval excludes zero.
+
+1. Decision rule
+   Accepting beats vetoing exactly when P(real) > 0.60 (from the points table: +100 / -150 for accepting, -40 / +60 for vetoing).
+   The coach accepts when its estimate is above 0.60.
+
+2. The coach (penalized logistic regression, lambda 1)
+   17634 calibration declarations, 77.9% real; 7 iterations, converged.
+   feature        coefficient    s.e.
+   intercept           3.608   0.073
+   off                 0.067   0.067
+   eq                -0.320   0.100
+   off*eq            -0.784   0.113
+   f                 -2.877   0.308
+   f^2               -4.304   0.366
+   f*eq                1.922   0.241
+   t20               -4.248   0.256
+   early             -0.932   0.063
+   late              -1.000   0.090
+   share-2           -0.152   0.024
+
+3. Calibration on held-out declarations (H1)
+   17749 declarations (every held-out wave under every setting, each once).
+   ECE 0.0083 [0.0063, 0.0136]: at most 0.05, as H1 requires.
+   Brier 0.0865 [0.0823, 0.0907] against 0.1725 for the constant base rate;
+   difference -0.0860 [-0.0910, -0.0814]: lower, as H1 requires.
+   bin          n   predicted   observed   95% Wilson
+   0.0-0.1    1084       0.054      0.045   [0.034, 0.059]
+   0.1-0.2     840       0.144      0.140   [0.119, 0.166]
+   0.2-0.3     466       0.249      0.240   [0.204, 0.281]
+   0.3-0.4     399       0.351      0.373   [0.327, 0.422]
+   0.4-0.5     367       0.449      0.488   [0.437, 0.539]
+   0.5-0.6     414       0.551      0.553   [0.505, 0.600]
+   0.6-0.7     496       0.653      0.627   [0.584, 0.668]
+   0.7-0.8     892       0.762      0.789   [0.761, 0.815]
+   0.8-0.9    2055       0.859      0.842   [0.825, 0.857]
+   0.9-1.0   10736       0.950      0.953   [0.949, 0.957]
+   by fade kind and equalizer (exploratory)
+   grid|raw   7396   predicted 0.747   observed 0.746 [0.736, 0.756]
+   grid|eq    3235   predicted 0.923   observed 0.921 [0.912, 0.930]
+   off|raw    3823   predicted 0.662   observed 0.669 [0.654, 0.683]
+   off|eq     3295   predicted 0.836   observed 0.838 [0.825, 0.850]
+
+4. Main profile (tick share 2, equalizer on when unlocked): points per run
+   policy        points                    false finds kept      real finds vetoed
+   coach       1084.8 [1055.0, 1113.5]   0.81 [0.70, 0.94]     0.29 [0.21, 0.37]
+   shield      1053.0 [1022.7, 1084.6]   0.83 [0.71, 0.95]     0.49 [0.40, 0.58]
+   accept-all  914.4 [878.6, 951.2]      1.82 [1.64, 1.99]     0.00 [0.00, 0.00]
+   veto-all    -221.0 [-234.6, -208.0]   0.00 [0.00, 0.00]     10.84 [10.70, 10.99]
+   random      293.5 [253.1, 335.1]      0.99 [0.87, 1.11]     5.68 [5.42, 5.93]
+   perfect     1296.6 [1283.6, 1310.2]   0.00 [0.00, 0.00]     0.00 [0.00, 0.00]
+   12.7 declarations per run on average.
+
+5. Paired comparisons, main profile
+   H2 coach - shield       +31.9 [+16.5, +47.6], d_z 0.28, W/T/L 50/138/12: higher
+   H3 coach - accept-all   +170.5 [+141.7, +200.2], d_z 0.80, W/T/L 126/57/17: higher
+   H4 shield - accept-all  +138.6 [+110.2, +169.1], d_z 0.66, W/T/L 122/45/33: higher
+   coach - perfect         -211.7 [-239.8, -184.8], d_z -1.07, W/T/L 0/65/135 (exploratory)
+   Coach and shield disagree on 82 held-out declarations: the coach is right on 63, the shield on 19.
+   (coach accepts, shield vetoes: 60; coach vetoes, shield accepts: 22)
+
+6. Every profile (exploratory; no correction for multiple comparisons)
+   profile  coach          shield         accept-all     coach - shield            coach - accept-all        shield - accept-all
+   1/on     963.7          938.2          876.6          +25.6 [+10.2, +41.3]      +87.2 [+64.4, +112.7]     +61.6 [+36.1, +88.9]
+   2/on     1084.8         1053.0         914.4          +31.9 [+16.5, +47.6]      +170.5 [+141.7, +200.2]   +138.6 [+110.2, +169.1]
+   3/on     1048.6         1011.1         837.2          +37.5 [+18.9, +55.7]      +211.4 [+178.5, +245.7]   +174.0 [+140.7, +205.8]
+   4/on     1018.9         959.8          717.9          +59.2 [+39.9, +78.1]      +301.0 [+263.6, +338.8]   +241.9 [+205.1, +277.9]
+   1/off    922.3          901.7          598.6          +20.7 [+1.4, +38.9]       +323.8 [+280.7, +367.5]   +303.1 [+256.6, +349.0]
+   2/off    1088.4         1040.1         517.6          +48.3 [+27.0, +69.3]      +570.9 [+521.1, +625.8]   +522.6 [+472.1, +577.9]
+   3/off    1092.1         1039.6         475.8          +52.5 [+30.5, +75.6]      +616.4 [+560.4, +676.2]   +563.9 [+509.6, +621.6]
+   4/off    1100.3         1053.1         440.6          +47.3 [+26.6, +66.9]      +659.8 [+607.2, +714.7]   +612.5 [+558.9, +667.5]
+   (profile = tick share / equalizer when unlocked)
+
+7. Notes
+   The coach sees only what the player sees at a declaration. It is fitted to this game's waves, and its
+   intervals cover the uncertainty of its coefficients, not of single waves. Results apply to this simulation only.

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Pair Watch: a visual game on the Reverse Pair. You are the second vote of a two-membrane shield: watch a reverse observer and a predictable calibrator take turns on one clock, then accept or veto each find. A game on a synthetic classical simulation.">
+<title>Pair Watch</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='12' cy='16' r='8' fill='%23050a1c' stroke='%2340d0e0' stroke-width='2.5'/%3E%3Crect x='22' y='8' width='3' height='16' rx='1' fill='%23c9a84c'/%3E%3Crect x='26.5' y='13' width='3' height='11' rx='1' fill='%23c9a84c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="watch.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Pair Watch</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="pair.html" data-i18n="page.pair"></a>
+    <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section id="verify" class="card verify" aria-labelledby="verify-h" hidden>
+    <h2 id="verify-h" data-i18n="sec.verify"></h2>
+    <p id="verify-msg" class="verify-msg"></p>
+    <div id="verify-tablewrap" class="tablewrap">
+      <table class="rtable">
+        <thead><tr><th scope="col" data-i18n="end.who"></th><th scope="col" class="n" data-i18n="end.points"></th></tr></thead>
+        <tbody id="verify-body"></tbody>
+      </table>
+    </div>
+    <p class="muted small" data-i18n="verify.note"></p>
+  </section>
+  <section class="card intro">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+
+  <section class="card game" aria-labelledby="game-h">
+    <h2 id="game-h" class="sr-only" data-i18n="sec.game"></h2>
+    <div class="hud" role="group" aria-label="">
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.stage"></span><span id="hud-stage" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.wave"></span><span id="hud-wave" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.points"></span><span id="hud-points" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.streak"></span><span id="hud-streak" class="hud-v"></span></div>
+    </div>
+    <p id="banner" class="banner"></p>
+    <div class="scene-wrap">
+      <canvas id="scene" role="img" aria-label=""></canvas>
+      <div id="pop" class="pop" aria-hidden="true"></div>
+    </div>
+    <p id="status" class="status" aria-live="polite"></p>
+
+    <div id="decide" class="decide" hidden>
+      <p id="decide-q" class="decide-q"></p>
+      <div id="coach-box" class="coach" hidden>
+        <p id="coach-p" class="coach-p"></p>
+        <div class="meter" aria-hidden="true">
+          <span id="coach-ci" class="meter-ci"></span>
+          <span id="coach-bar" class="meter-bar"></span>
+          <span id="coach-be" class="meter-be"></span>
+        </div>
+        <p id="coach-scale" class="meter-scale muted small" aria-hidden="true"></p>
+      </div>
+      <div class="decide-btns">
+        <button id="btn-accept" class="btn primary big" type="button" data-i18n="btn.accept"></button>
+        <button id="btn-veto" class="btn big veto" type="button" data-i18n="btn.veto"></button>
+      </div>
+    </div>
+
+    <div class="bar">
+      <div class="setup" role="group" aria-labelledby="setup-h">
+        <span id="setup-h" class="bar-k" data-i18n="ctl.setup"></span>
+        <div class="stepper">
+          <span class="bar-k2" data-i18n="ctl.share"></span>
+          <button id="s-dec" class="btn small" type="button">&minus;</button>
+          <output id="s-val" class="s-val" aria-live="polite">2</output>
+          <button id="s-inc" class="btn small" type="button">+</button>
+          <span id="s-ratio" class="muted"></span>
+        </div>
+        <label class="switch"><input id="eq" type="checkbox"> <span data-i18n="ctl.eq"></span></label>
+        <span id="eq-note" class="muted small"></span>
+        <label class="switch"><input id="coach" type="checkbox"> <span data-i18n="ctl.coach"></span></label>
+      </div>
+      <div class="play" role="group" aria-labelledby="play-h">
+        <span id="play-h" class="sr-only" data-i18n="ctl.play"></span>
+        <button id="btn-go" class="btn primary" type="button"></button>
+        <button id="btn-pause" class="btn" type="button" aria-pressed="false" data-i18n="btn.pause"></button>
+        <button id="btn-skip" class="btn" type="button" data-i18n="btn.skip"></button>
+        <label class="speed"><span data-i18n="ctl.speed"></span>
+          <select id="speed">
+            <option value="1">1&times;</option>
+            <option value="2" selected>2&times;</option>
+            <option value="4">4&times;</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <p class="hint" data-i18n="ctl.keys"></p>
+  </section>
+
+  <section class="card" aria-labelledby="legend-h">
+    <h2 id="legend-h" data-i18n="sec.legend"></h2>
+    <ul class="legend">
+      <li><span class="sw sw-membrane" aria-hidden="true"></span><span data-i18n="legend.membrane"></span></li>
+      <li><span class="sw sw-ring" aria-hidden="true"></span><span data-i18n="legend.ring"></span></li>
+      <li><span class="sw sw-reading" aria-hidden="true"></span><span data-i18n="legend.reading"></span></li>
+      <li><span class="sw sw-find" aria-hidden="true"></span><span data-i18n="legend.find"></span></li>
+      <li><span class="sw sw-faded" aria-hidden="true"></span><span data-i18n="legend.faded"></span></li>
+      <li><span class="sw sw-truth" aria-hidden="true"></span><span data-i18n="legend.truth"></span></li>
+      <li><span class="sw sw-rail" aria-hidden="true"></span><span data-i18n="legend.rail"></span></li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="log-h">
+    <h2 id="log-h" data-i18n="sec.log"></h2>
+    <div id="log" class="log"></div>
+    <p class="hint" data-i18n="log.key"></p>
+  </section>
+
+  <section id="end" class="card end" aria-labelledby="end-h" hidden>
+    <h2 id="end-h" data-i18n="sec.end"></h2>
+    <p id="end-rank" class="end-rank"></p>
+    <div class="tablewrap">
+      <table class="rtable" id="end-table">
+        <thead><tr><th scope="col" data-i18n="end.who"></th><th scope="col" class="n" data-i18n="end.points"></th></tr></thead>
+        <tbody id="end-body"></tbody>
+      </table>
+    </div>
+    <p id="end-note" class="hint"></p>
+    <p id="end-link" class="muted end-link"></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+
+  <section class="card" aria-labelledby="runs-h">
+    <h2 id="runs-h" data-i18n="sec.runs"></h2>
+    <p id="seed-line" class="muted"></p>
+    <div class="controls">
+      <button id="btn-again" class="btn" type="button" data-i18n="btn.again"></button>
+      <button id="btn-today" class="btn" type="button" data-i18n="btn.today"></button>
+      <button id="btn-new" class="btn" type="button" data-i18n="btn.new"></button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+    <p data-i18n="how.p5"></p>
+  </section>
+  <section class="card" aria-labelledby="eval-h">
+    <h2 id="eval-h" data-i18n="sec.eval"></h2>
+    <p data-i18n="eval.p1"></p>
+    <p data-i18n="eval.p2"></p>
+    <p data-i18n="eval.p3"></p>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license">Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.</p>
+  <p id="footer-version"></p>
+</footer>
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="reverse.js"></script>
+<script src="pair.js"></script>
+<script src="watch-coach.js"></script>
+<script src="watch.js"></script>
+<script src="watch-i18n.js"></script>
+<script src="watchui.js"></script>
+</body>
+</html>

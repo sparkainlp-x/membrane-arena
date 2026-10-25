@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2",
+  "version": "0.3.3",
   "chrome": "/usr/bin/google-chrome",
   "allOk": true,
   "servedOther": [],
@@ -7,7 +7,7 @@
     {
       "name": "pair-en-desktop",
       "ok": true,
-      "wallMs": 2266,
+      "wallMs": 2432,
       "errors": [],
       "external": [],
       "opts": {
@@ -192,7 +192,7 @@
     {
       "name": "pair-fr-phone",
       "ok": true,
-      "wallMs": 2799,
+      "wallMs": 2899,
       "errors": [],
       "external": [],
       "opts": {
@@ -377,7 +377,7 @@
     {
       "name": "pair-en-phone",
       "ok": true,
-      "wallMs": 2840,
+      "wallMs": 2975,
       "errors": [],
       "external": [],
       "opts": {
@@ -562,7 +562,7 @@
     {
       "name": "pair-en-desktop-contrast",
       "ok": true,
-      "wallMs": 1888,
+      "wallMs": 1900,
       "errors": [],
       "external": [],
       "opts": {
@@ -748,7 +748,7 @@
     {
       "name": "pair-fr-desktop",
       "ok": true,
-      "wallMs": 2124,
+      "wallMs": 2157,
       "errors": [],
       "external": [],
       "opts": {

@@ -36,6 +36,7 @@ jobs:
           cp dist/quorum.html _site/quorum.html
           cp dist/reverse.html _site/reverse.html
           cp dist/pair.html _site/pair.html
+          cp dist/watch.html _site/watch.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

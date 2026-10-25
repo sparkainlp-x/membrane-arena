@@ -131,7 +131,9 @@ test('reproducibility: the manifest records seeds, versions and SHA-256 hashes t
   const crypto = require('node:crypto');
   const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(path.join(root, f))).digest('hex');
   const m = JSON.parse(read('docs/pair-manifest.json')), pkg = JSON.parse(read('package.json'));
-  assert.equal(m.version, pkg.version);
+  // the published v0.3.2 evaluation stays as it was; later releases only re-check it
+  assert.equal(m.version, '0.3.2');
+  assert.equal(m.checkedWith, pkg.version);
   assert.equal(m.command, 'node scripts/pair-check.js --write');
   assert.ok(m.seeds.heldOut.length >= 100, 'at least 100 held-out seeds');
   assert.ok(m.seeds.calibration.length >= 20);
@@ -152,8 +154,8 @@ test('the frozen protocol states hypotheses, metrics, grid, seeds and the analys
   for (const w of [/held-out/i, /calibration seeds/i, /bootstrap/i, /paired/i, /d_z|effect size/i, /off-grid/i, /oracle/i, /random/i]) assert.match(pr, w);
   assert.match(pr, /SYNTHETIC/);
 });
-test('all five pages connect: every page links to the other four', () => {
-  const pages = ['index.html', 'brain.html', 'quorum.html', 'reverse.html', 'pair.html'];
+test('all six pages connect: every page links to the other five', () => {
+  const pages = ['index.html', 'brain.html', 'quorum.html', 'reverse.html', 'pair.html', 'watch.html'];
   for (const p of pages) {
     const html = read(p);
     for (const q of pages) if (q !== p) assert.ok(html.includes(`href="${q}"`), `${p} links to ${q}`);

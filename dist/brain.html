@@ -249,6 +249,7 @@ html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.
     <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
     <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
     <a class="btn small" href="pair.html" data-i18n="page.pair"></a>
+    <a class="btn small" href="watch.html" data-i18n="page.watch"></a>
   </div>
 </header>
 <noscript><p class="card">This page needs JavaScript. It makes no network requests.</p></noscript>
@@ -587,7 +588,7 @@ html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.
 })(typeof self !== 'undefined' ? self : this, function (BASE) {
   'use strict';
 
-  var VERSION = '0.3.2';
+  var VERSION = '0.3.3';
   var BUILD = VERSION;   // shown in the page footer
   var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
   var EPOCH = '2026-10-24';              // day number 1
@@ -1265,7 +1266,7 @@ html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.
   else root.ArenaBrain = factory(root.ArenaGame, root.ArenaStats);
 })(typeof self !== 'undefined' ? self : this, function (G, ST) {
   'use strict';
-  var VERSION = '0.3.2';
+  var VERSION = '0.3.3';
   var NS = 'membrane-arena/brain/v1/';      // generator namespace for brain runs
   var KINDS = ['sensory', 'gate', 'integrator', 'output', 'inhibitory', 'memory'];
   var MODES = ['collude', 'stuck', 'silent'];
@@ -1837,6 +1838,7 @@ html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.
     'page.quorum': 'Quorum Keeper',
     'page.reverse': 'Reverse Membranes',
     'page.pair': 'Reverse Pair',
+    'page.watch': 'Pair Watch',
     'intro.p1': 'Sensory membranes learn a hidden pattern from noisy observations with the same Oja rule as the arena. Each column of sensory membranes has a gate that releases a vector only when a strict majority of the column agrees. An integrator releases when a strict majority of columns agree, and the output membrane releases the final event when a strict majority of integrators agree. An optional inhibitory membrane is the arena\'s stabilizer and an optional memory membrane is its amplifier.',
     'intro.p2': 'A microtubule here is a directed link that carries a released vector from one membrane to the next, with a delay in check periods of 10 steps and an optional transport noise. The name is a metaphor taken from cell biology; this page does not model real microtubules, neurons or a brain.',
     'sec.req': 'Requirements',
@@ -1938,6 +1940,7 @@ html.hc #plan-table th, html.hc #plan-table td, html.hc #results-table th, html.
     'page.quorum': 'Gardien du quorum',
     'page.reverse': 'Membranes inversées',
     'page.pair': 'Paire inversée',
+    'page.watch': 'Veille à deux',
     'intro.p1': 'Les membranes sensorielles apprennent un motif caché à partir d\'observations bruitées, avec la même règle d\'Oja que l\'arène. Chaque colonne de membranes sensorielles a une porte qui ne libère un vecteur que si une majorité stricte de la colonne est d\'accord. Un intégrateur libère quand une majorité stricte des colonnes est d\'accord, et la membrane de sortie libère l\'événement final quand une majorité stricte des intégrateurs est d\'accord. Une membrane inhibitrice facultative est le stabilisateur de l\'arène, et une membrane mémoire facultative est son amplificateur.',
     'intro.p2': 'Ici, un microtubule est un lien orienté qui transporte un vecteur libéré d\'une membrane à la suivante, avec un délai compté en périodes de contrôle de 10 pas et un bruit de transport facultatif. Le nom est une métaphore empruntée à la biologie cellulaire ; cette page ne modélise ni de vrais microtubules, ni des neurones, ni un cerveau.',
     'sec.req': 'Exigences',
