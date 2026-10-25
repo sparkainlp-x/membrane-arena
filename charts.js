@@ -88,15 +88,23 @@
     return { sx: sx, sy: sy };
   }
   function boxFor(p, bottom) { return { x0: 38, x1: p.w - 10, y0: 16, y1: p.h - (bottom || 36) }; }
+  // a legend that wraps inside the canvas and sits on a backing panel so it never hides the data
   function legend(ctx, items, x, y, o) {
-    var P = pal(o);
+    var P = pal(o), tr = ctx.getTransform && ctx.getTransform(), dpr = (tr && tr.a) || 1, cw = ctx.canvas && ctx.canvas.width, maxX = (typeof cw === 'number' && cw > 0 ? cw / dpr : 400) - 6, rowH = 15;
     ctx.font = '11px system-ui, sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-    items.forEach(function (it) {
-      ctx.strokeStyle = rgba(P[it.c] || it.c, 1); ctx.fillStyle = rgba(P[it.c] || it.c, 1); ctx.lineWidth = P.lw;
+    var cx = x, cy = y, widest = x, laid = items.map(function (it) {
+      var w = 26 + ctx.measureText(it.label).width;
+      if (cx > x && cx + w > maxX) { cx = x; cy += rowH; }
+      var pos = { it: it, x: cx, y: cy }; cx += w + 8; if (cx > widest) widest = cx; return pos;
+    });
+    ctx.fillStyle = o && o.hc ? '#000000' : 'rgba(7,14,38,0.82)';
+    ctx.fillRect(x - 4, y - rowH / 2 - 1, Math.min(maxX, widest) - x + 2, cy - y + rowH + 2);
+    laid.forEach(function (l) {
+      var it = l.it;
+      ctx.strokeStyle = rgba(P[it.c] || it.c, 1); ctx.lineWidth = P.lw;
       if (it.dash) ctx.setLineDash(it.dash); else ctx.setLineDash([]);
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 16, y); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = P.text; ctx.fillText(it.label, x + 20, y);
-      x += 26 + ctx.measureText(it.label).width + 8;
+      ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.lineTo(l.x + 16, l.y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = P.text; ctx.fillText(it.label, l.x + 20, l.y);
     });
   }
   function polyline(ctx, pts, color, width, dash) {
