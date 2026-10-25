@@ -264,3 +264,39 @@ test('CSV and JSON export: rectangular, quoted correctly, labelled SYNTHETIC, wi
   assert.equal(rj.generations.length, G.GENS); assert.match(rj.meta.label, /SYNTHETIC/);
   assert.equal(rj.summary.T, G.summarize(c.hist).T);
 });
+
+test('text equivalents: every chart has one, in both languages, with every placeholder filled and no NaN', () => {
+  const I = require('../i18n.js');
+  const s = Object.assign({}, G.DEFAULTS, { shield: true, stab: true });
+  const { c } = run('lab-alt', { shield: true, stab: true });
+  const pr = L.probe(c, s, 12), sw = L.sweep(pr, 20), cur = L.atThreshold(pr, pr.thr[0]);
+  const e = L.createEnsemble({ settings: L.matchRepository({ shield: true }), n: 3, repoStart: true }); drain(e, 1000);
+  const es = L.matchRepository({ shield: true }), sum = L.summarizeEnsemble(e.results(), es, true);
+  const pm = L.createPaired({ settings: es, factor: 'amp', a: true, b: false, n: 3, repoStart: true }); drain(pm, 1000);
+  const ps = L.summarizePaired(pm.a.results(), pm.b.results());
+  for (const lang of ['en', 'fr']) {
+    const t = I.make(lang);
+    const texts = {
+      rates: L.describeRates(t, L.rateSeries(c.hist)), align: L.describeAlignment(t, L.alignment(c.hist, 5)), hist: L.describeHist(t, L.ratioHistogram(pr)),
+      sweep: L.describeSweep(t, sw, cur), shield: L.describeShield(t, L.shieldCounts(c.hist)), gain: L.describeGain(t, L.gainTrace(c.hist)),
+      land: L.describeLandscape(t, L.landscape(c.hist)), amp: L.describeAmp(t, L.ampBaseline()), ens: L.describeEnsemble(t, sum),
+      ab: L.describePaired(t, ps, pm.meta, { a: 'on', b: 'off' })
+    };
+    Object.entries(texts).forEach(([k, v]) => {
+      assert.ok(v.length > 30, `${lang} ${k} too short`);
+      assert.ok(!/[{}]|NaN|undefined|Infinity/.test(v), `${lang} ${k}: ${v}`);
+    });
+    assert.equal(L.describeRates(t, []), t('alt.empty'));
+    assert.equal(L.describeAlignment(t, null), t('alt.empty'));
+    const off = run('lab-alt-off', { shield: false });
+    assert.match(L.describeGain(t, L.gainTrace(off.c.hist)), lang === 'en' ? /Stabilizer off/ : /Stabilisateur coupé/);
+    assert.equal(L.describeShield(t, L.shieldCounts([])), t('alt.shield_none'));
+  }
+});
+
+test('the amplifier text equivalent states the repository file and the near-zero measurement', () => {
+  const I = require('../i18n.js');
+  const txt = L.describeAmp(I.make('en'), L.ampBaseline());
+  assert.match(txt, /results\/contest_w32-128_summary\.csv/);
+  assert.match(txt, /0\.00\d/);
+});
