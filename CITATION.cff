@@ -7,7 +7,8 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.1.0
+version: 0.2.0
+date-released: 2026-10-25
 license: AGPL-3.0-only
 repository-code: "https://github.com/sparkainlp-x/membrane-arena"
 abstract: >-
@@ -17,7 +18,10 @@ abstract: >-
   shield, a capped amplifier and a gain-clamped stabilizer, and watches a
   (1+1) evolution step. Scores are compared with the measured width-32 results
   of the crystallization-contest repository. Includes a daily seeded contest,
-  a plain-text share card and challenge links. Classical simulation only.
+  a plain-text share card and challenge links. A Lab view plots the
+  simulation's own instruments with confidence intervals, runs multi-seed
+  ensembles and paired A/B tests against the repository baselines, and
+  replays any contest. Classical simulation only.
 keywords:
   - "scientific-reasoning"
   - "oja-rule"

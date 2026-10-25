@@ -526,3 +526,10 @@ test('mission ids in the store whitelist match the missions defined in the Lab',
   const L = require('../lab.js');
   assert.deepEqual(G.MISSION_IDS, L.MISSIONS.map((m) => m.id));
 });
+
+test('release metadata: the page footer shows the released version, with no preview marker', () => {
+  assert.equal(G.BUILD, G.VERSION);
+  assert.match(G.VERSION, /^\d+\.\d+\.\d+$/);
+  const cff = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'CITATION.cff'), 'utf8');
+  assert.match(cff, /date-released: \d{4}-\d{2}-\d{2}/);
+});
