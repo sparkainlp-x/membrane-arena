@@ -118,6 +118,8 @@ details[disabled] input { opacity: .5; }
 .m-val { width: 9.5em; white-space: nowrap; text-align: right; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .chart { width: 100%; height: 190px; background: #070e26; border: 1px solid var(--line); border-radius: 10px; display: block; }
 .chart.tall { height: 340px; }
+.chart.ens { height: 280px; }
+.rail { width: 100%; height: 44px; display: block; background: #070e26; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
 .key { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--cyan); vertical-align: middle; margin-right: 6px; }
 .key-base { border-top: 3px dashed var(--gold); margin-left: 14px; }
 
@@ -152,6 +154,65 @@ pre {
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- v0.2: tabs, Lab, ensemble, A/B, missions, replay, tour ---------- */
+.tabs { padding-top: 8px; }
+.tablist { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 -4px 12px; padding: 0 4px; scrollbar-width: thin; }
+.tab {
+  appearance: none; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 3px solid transparent;
+  padding: 8px 14px; min-height: 44px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 8px 8px 0 0; touch-action: manipulation;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--gold-bright); border-bottom-color: var(--gold); background: rgba(201, 168, 76, 0.08); }
+.tabpanel { outline: none; }
+.tabpanel:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.inst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 6px 16px; }
+.inst { margin: 10px 0 14px; min-width: 0; }
+.inst.wide { grid-column: 1 / -1; }
+.inst h3 { margin-top: 4px; }
+.inst select { min-height: 40px; padding: 4px 8px; }
+.alt { margin: 6px 0 2px; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); font-size: 0.86rem; }
+.alt:empty { display: none; }
+.formrow { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 8px 0; }
+.formrow .switch { margin: 0; }
+progress { width: min(100%, 320px); height: 14px; accent-color: var(--gold); vertical-align: middle; }
+.exp { width: 100%; background: #070e26; color: var(--text); border: 1px solid var(--line); border-radius: 8px; font: 0.8rem/1.3 ui-monospace, Menlo, Consolas, monospace; padding: 8px; }
+.method { margin: 4px 0 8px; padding-left: 1.2em; color: var(--muted); font-size: 0.92rem; }
+.method li { margin: 3px 0; }
+.missions { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
+.mission { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #0e1a3d; }
+.mission h3 { margin: 0 0 2px; }
+.mission.done { border-color: var(--gold); }
+.mission .status { font-weight: 600; color: var(--cyan); margin: 4px 0; font-size: 0.9rem; }
+.mission.done .status { color: var(--gold-bright); }
+.replay { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.replay h3 { margin-top: 0; }
+.replay-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.replay-row input[type=range] { flex: 1; min-width: 140px; }
+.tour { border-color: var(--gold); }
+#help .modal-box h2:focus { outline: none; }
+.row-end { display: flex; justify-content: flex-end; }
+
+/* motion switched off in the page (in addition to the system setting) */
+html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+
+/* high-contrast mode: white on black, heavier outlines, no gradients */
+html.hc { --bg: #000; --bg2: #000; --panel: #000; --line: #fff; --text: #fff; --muted: #f0f0f0; --gold: #ffd400; --gold-bright: #ffd400; --cyan: #00ffff; --blue: #9ec0ff; --aqua: #00ff96; --danger: #ff8a8a; }
+html.hc body { background: #000; }
+html.hc .card { background: #000; border-width: 2px; }
+html.hc .btn { background: #000; border-width: 2px; }
+html.hc .btn.primary { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .btn[aria-pressed="true"] { background: #003a3a; border-color: #00ffff; }
+html.hc select, html.hc .exp, html.hc pre, html.hc .chart, html.hc .rail, html.hc .canvas-wrap, html.hc .meter { background: #000; border: 2px solid #fff; }
+html.hc .tab[aria-selected="true"] { background: #1a1a00; border-bottom-width: 4px; }
+html.hc .mission, html.hc .lesson { background: #000; border-width: 2px; }
+html.hc .ribbon li { background: #000; border-width: 2px; color: #fff; }
+html.hc .ribbon li.t { background: #003a3a; } html.hc .ribbon li.f { background: #3a0000; } html.hc .ribbon li.h { background: #222; }
+html.hc .alt { border-left-color: #fff; }
+html.hc .tag { border-width: 2px; }
+html.hc :focus-visible { outline: 4px solid #ffd400; outline-offset: 2px; }
+html.hc .hint, html.hc .muted { color: #f0f0f0; }
+@media (max-width: 480px) { .tab { padding: 8px 10px; } .formrow { gap: 6px 12px; } }
 @media (forced-colors: active) { .btn.primary { border: 2px solid ButtonText; } .m-fill, .m-eff { background: Highlight; forced-color-adjust: none; } }
 </style>
 </head>
@@ -165,6 +226,9 @@ pre {
   <div class="tools">
     <span class="tag" data-i18n="tag.synthetic"></span>
     <button id="btn-lang" class="btn small" type="button"></button>
+    <button id="btn-motion" class="btn small" type="button" aria-pressed="true"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false"></button>
+    <button id="btn-intro" class="btn small" type="button" data-i18n="btn.intro"></button>
     <button id="btn-help" class="btn small" type="button" aria-haspopup="dialog" data-i18n="btn.help"></button>
   </div>
 </header>
@@ -183,6 +247,16 @@ pre {
     </div>
   </section>
 
+  <section id="tutorial" class="card tour" aria-labelledby="tut-title" hidden>
+    <h2 id="tut-title" data-i18n="tut.title"></h2>
+    <p id="tut-step" class="muted small-text"></p>
+    <p id="tut-text"></p>
+    <div class="row">
+      <button id="btn-tut-next" class="btn primary small" type="button"></button>
+      <button id="btn-tut-skip" class="btn small" type="button" data-i18n="tut.skip"></button>
+    </div>
+  </section>
+
   <div class="layout">
     <div class="col-main">
     <section class="card stage" aria-labelledby="stage-title">
@@ -196,12 +270,13 @@ pre {
         <span class="hud-item"><span data-i18n="hud.score"></span> <b id="hud-score" class="c-gold">-</b></span>
       </div>
       <div class="canvas-wrap">
-        <canvas id="arena" role="img" aria-label=""></canvas>
+        <canvas id="arena" role="img" aria-label="" aria-describedby="arena-desc"></canvas>
         <p id="canvas-msg" class="canvas-msg" hidden></p>
       </div>
       <ol id="ribbon" class="ribbon" aria-label=""></ol>
       <p id="ticker" class="ticker" aria-hidden="true"></p>
       <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <p id="arena-desc" class="sr-only"></p>
       <div class="controls">
         <button id="btn-run" class="btn primary" type="button"></button>
         <button id="btn-step" class="btn" type="button" data-i18n="btn.step"></button>
@@ -209,37 +284,202 @@ pre {
         <label class="inline" for="speed"><span data-i18n="speed.label"></span>
           <select id="speed"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option></select>
         </label>
-        <button id="btn-science" class="btn" type="button" aria-pressed="false"></button>
       </div>
       <p id="hud-pending" class="muted small-text" hidden data-i18n="hud.pending"></p>
-    </section>
-
-    <section id="panel-meters" class="card" aria-labelledby="meters-title">
-      <h2 id="meters-title" data-i18n="meters.title"></h2>
-      <div class="meters-grid">
-        <div>
-          <div class="meter-row"><span class="m-name">A</span><div id="m-gain-0" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-0" class="m-fill"></span><span id="m-eff-0" class="m-eff"></span></div><span id="m-val-0" class="m-val"></span></div>
-          <div class="meter-row"><span class="m-name">B</span><div id="m-gain-1" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-1" class="m-fill"></span><span id="m-eff-1" class="m-eff"></span></div><span id="m-val-1" class="m-val"></span></div>
-          <div class="meter-row"><span class="m-name">C</span><div id="m-gain-2" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-2" class="m-fill"></span><span id="m-eff-2" class="m-eff"></span></div><span id="m-val-2" class="m-val"></span></div>
-          <div class="meter-row"><span class="m-name">R</span><div id="m-rate" class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5"><span class="m-tick"></span><span id="m-rate-fill" class="m-fill rate"></span></div><span id="m-rate-val" class="m-val"></span></div>
-          <p id="m-state" class="muted small-text"></p>
-          <p class="hint" data-i18n="meters.help"></p>
+      <div id="replay" class="replay" hidden>
+        <h3 data-i18n="replay.title"></h3>
+        <div class="replay-row">
+          <button id="btn-replay-play" class="btn small" type="button"></button>
+          <input id="replay-pos" type="range" min="0" max="5760" step="1" value="5760" aria-label="">
         </div>
-        <div>
-          <h3 data-i18n="fit.title"></h3>
-          <canvas id="fit" class="chart" role="img" aria-label=""></canvas>
-          <p class="hint" data-i18n="fit.help"></p>
-        </div>
+        <canvas id="rail" class="rail" role="img" aria-label="" aria-describedby="replay-alt"></canvas>
+        <p id="replay-text" class="small-text muted" aria-hidden="true"></p>
+        <p id="replay-alt" class="small-text"></p>
+        <p class="hint" data-i18n="replay.help"></p>
       </div>
     </section>
 
-    <section id="panel-science" class="card" aria-labelledby="sci-title" hidden>
-      <h2 id="sci-title" data-i18n="sci.title"></h2>
-      <p class="small-text"><span class="key key-prec"></span><span data-i18n="sci.prec"></span> <span class="key key-base"></span><span data-i18n="sci.base"></span></p>
-      <canvas id="sci" class="chart tall" role="img" aria-label=""></canvas>
-      <p class="small-text" data-i18n="sci.events"></p>
-      <p id="sci-base" class="hint"></p>
-      <p class="hint" data-i18n="sci.help"></p>
+    <section id="panel-tabs" class="card tabs" aria-labelledby="tabs-title">
+      <h2 id="tabs-title" class="sr-only" data-i18n="tabs.aria"></h2>
+      <div id="tablist" class="tablist" role="tablist" aria-label="">
+        <button id="tab-meters" class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-meters" data-i18n="tab.meters"></button>
+        <button id="tab-lab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-lab" tabindex="-1" data-i18n="tab.lab"></button>
+        <button id="tab-ens" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-ens" tabindex="-1" data-i18n="tab.ens"></button>
+        <button id="tab-ab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-ab" tabindex="-1" data-i18n="tab.ab"></button>
+        <button id="tab-missions" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-missions" tabindex="-1" data-i18n="tab.missions"></button>
+        <button id="tab-method" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-method" tabindex="-1" data-i18n="tab.method"></button>
+      </div>
+
+      <div id="panel-meters" class="tabpanel" role="tabpanel" aria-labelledby="tab-meters" tabindex="0">
+<h2 id="meters-title" data-i18n="meters.title"></h2>
+        <div class="meters-grid">
+          <div>
+            <div class="meter-row"><span class="m-name">A</span><div id="m-gain-0" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-0" class="m-fill"></span><span id="m-eff-0" class="m-eff"></span></div><span id="m-val-0" class="m-val"></span></div>
+            <div class="meter-row"><span class="m-name">B</span><div id="m-gain-1" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-1" class="m-fill"></span><span id="m-eff-1" class="m-eff"></span></div><span id="m-val-1" class="m-val"></span></div>
+            <div class="meter-row"><span class="m-name">C</span><div id="m-gain-2" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-2" class="m-fill"></span><span id="m-eff-2" class="m-eff"></span></div><span id="m-val-2" class="m-val"></span></div>
+            <div class="meter-row"><span class="m-name">R</span><div id="m-rate" class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5"><span class="m-tick"></span><span id="m-rate-fill" class="m-fill rate"></span></div><span id="m-rate-val" class="m-val"></span></div>
+            <p id="m-state" class="muted small-text"></p>
+            <p class="hint" data-i18n="meters.help"></p>
+          </div>
+          <div>
+            <h3 data-i18n="fit.title"></h3>
+            <canvas id="fit" class="chart" role="img" aria-label=""></canvas>
+            <p class="hint" data-i18n="fit.help"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-lab" class="tabpanel" role="tabpanel" aria-labelledby="tab-lab" tabindex="0" hidden>
+        <h2 id="lab-title" data-i18n="lab.title"></h2>
+        <p class="small-text muted" data-i18n="lab.intro"></p>
+        <p id="lab-empty" class="beat" data-i18n="lab.empty"></p>
+        <div class="inst-grid">
+        <figure class="inst">
+          <h3 id="h-lab-rates" data-i18n="lab.rates.title"></h3>
+          <canvas id="lab-rates" class="chart" role="img" aria-label="" aria-describedby="alt-rates"></canvas>
+          <p id="alt-rates" class="alt"></p>
+          <p class="hint" data-i18n="lab.rates.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-align" data-i18n="lab.align.title"></h3>
+          <label class="inline small-text" for="lab-gen"><span data-i18n="lab.gen.label"></span> <select id="lab-gen"></select></label>
+          <canvas id="lab-align" class="chart" role="img" aria-label="" aria-describedby="alt-align"></canvas>
+          <p id="alt-align" class="alt"></p>
+          <p class="hint" data-i18n="lab.align.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-hist" data-i18n="lab.hist.title"></h3>
+          <canvas id="lab-hist" class="chart" role="img" aria-label="" aria-describedby="alt-hist"></canvas>
+          <p id="alt-hist" class="alt"></p>
+          <p class="hint" id="lab-hist-help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-sweep" data-i18n="lab.sweep.title"></h3>
+          <canvas id="lab-sweep" class="chart" role="img" aria-label="" aria-describedby="alt-sweep"></canvas>
+          <p id="alt-sweep" class="alt"></p>
+          <p class="hint" data-i18n="lab.sweep.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-shield" data-i18n="lab.shield.title"></h3>
+          <canvas id="lab-shield" class="chart" role="img" aria-label="" aria-describedby="alt-shield"></canvas>
+          <p id="alt-shield" class="alt"></p>
+          <p class="hint" data-i18n="lab.shield.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-gain" data-i18n="lab.gain.title"></h3>
+          <canvas id="lab-gain" class="chart tall" role="img" aria-label="" aria-describedby="alt-gain"></canvas>
+          <p id="alt-gain" class="alt"></p>
+          <p class="hint" data-i18n="lab.gain.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-land" data-i18n="lab.land.title"></h3>
+          <label class="inline small-text" for="lab-axes"><span data-i18n="lab.axes.label"></span> <select id="lab-axes"><option value="th-g"></option><option value="th-c"></option><option value="c-g"></option></select></label>
+          <canvas id="lab-land" class="chart" role="img" aria-label="" aria-describedby="alt-land"></canvas>
+          <p id="alt-land" class="alt"></p>
+          <p class="hint" data-i18n="lab.land.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-amp" data-i18n="lab.amp.title"></h3>
+          <canvas id="lab-amp" class="chart" role="img" aria-label="" aria-describedby="alt-amp"></canvas>
+          <p id="alt-amp" class="alt"></p>
+          <p class="hint" id="lab-amp-help"></p>
+        </figure>
+        </div>
+        <figure class="inst wide">
+          <h3 id="h-sci" data-i18n="sci.title"></h3>
+          <p class="small-text"><span class="key key-prec"></span><span data-i18n="sci.prec"></span> <span class="key key-base"></span><span data-i18n="sci.base"></span></p>
+          <canvas id="sci" class="chart tall" role="img" aria-label="" aria-describedby="sci-base"></canvas>
+          <p class="small-text" data-i18n="sci.events"></p>
+          <p id="sci-base" class="hint"></p>
+          <p class="hint" data-i18n="sci.help"></p>
+        </figure>
+        <h3 data-i18n="lab.export.title"></h3>
+        <div class="row">
+          <button id="btn-exp-run-csv" class="btn small" type="button" data-i18n="lab.export.csv"></button>
+          <button id="btn-exp-run-json" class="btn small" type="button" data-i18n="lab.export.json"></button>
+        </div>
+        <p id="exp-status" class="hint" role="status"></p>
+        <textarea id="exp-text" class="exp" rows="6" readonly hidden aria-label="Export"></textarea>
+      </div>
+
+      <div id="panel-ens" class="tabpanel" role="tabpanel" aria-labelledby="tab-ens" tabindex="0" hidden>
+        <h2 data-i18n="ens.title"></h2>
+        <p class="small-text muted" data-i18n="ens.help"></p>
+        <div class="formrow">
+          <label class="inline" for="ens-n"><span data-i18n="ens.n.label"></span>
+            <select id="ens-n"><option value="10">10</option><option value="20" selected>20</option><option value="40">40</option><option value="80">80</option></select></label>
+          <label class="switch"><input id="ens-repo" type="checkbox" checked><span data-i18n="ens.repo.label"></span></label>
+        </div>
+        <div class="row">
+          <button id="btn-ens-match" class="btn small" type="button" data-i18n="ens.match"></button>
+          <button id="btn-ens-run" class="btn primary small" type="button" data-i18n="ens.run"></button>
+          <button id="btn-ens-cancel" class="btn small" type="button" data-i18n="ens.cancel" disabled></button>
+        </div>
+        <p class="small-text"><progress id="ens-progress" max="1" value="0" aria-label=""></progress> <span id="ens-status" role="status"></span></p>
+        <p id="ens-empty" class="hint" data-i18n="ens.empty"></p>
+        <div id="ens-out" hidden>
+          <canvas id="ens-chart" class="chart ens" role="img" aria-label="" aria-describedby="ens-alt"></canvas>
+          <p id="ens-alt" class="alt"></p>
+          <p id="ens-like" class="beat small-text"></p>
+          <div class="tablewrap"><table id="ens-table" class="scores"></table></div>
+          <p id="ens-note" class="hint"></p>
+          <div class="row">
+            <button id="btn-ens-csv" class="btn small" type="button" data-i18n="ens.csv"></button>
+            <button id="btn-ens-json" class="btn small" type="button" data-i18n="ens.json"></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-ab" class="tabpanel" role="tabpanel" aria-labelledby="tab-ab" tabindex="0" hidden>
+        <h2 data-i18n="ab.title"></h2>
+        <p class="small-text muted" data-i18n="ab.help"></p>
+        <div class="formrow">
+          <label class="inline" for="ab-factor"><span data-i18n="ab.factor.label"></span>
+            <select id="ab-factor"><option value="scheme"></option><option value="shield"></option><option value="amp"></option><option value="stab"></option><option value="evolve"></option><option value="w"></option></select></label>
+          <label class="inline" for="ab-a"><span data-i18n="ab.a.label"></span> <select id="ab-a"></select></label>
+          <label class="inline" for="ab-b"><span data-i18n="ab.b.label"></span> <select id="ab-b"></select></label>
+          <label class="inline" for="ab-n"><span data-i18n="ab.n.label"></span>
+            <select id="ab-n"><option value="10">10</option><option value="20" selected>20</option><option value="40">40</option><option value="80">80</option></select></label>
+        </div>
+        <label class="switch"><input id="ab-repo" type="checkbox" checked><span data-i18n="ab.repo.label"></span></label>
+        <p class="hint" data-i18n="ab.others"></p>
+        <div class="row">
+          <button id="btn-ab-run" class="btn primary small" type="button" data-i18n="ab.run"></button>
+          <button id="btn-ab-cancel" class="btn small" type="button" data-i18n="ab.cancel" disabled></button>
+        </div>
+        <p class="small-text"><progress id="ab-progress" max="1" value="0" aria-label=""></progress> <span id="ab-status" role="status"></span></p>
+        <p id="ab-empty" class="hint" data-i18n="ab.empty"></p>
+        <div id="ab-out" hidden>
+          <canvas id="ab-chart" class="chart ens" role="img" aria-label="" aria-describedby="ab-alt"></canvas>
+          <p class="hint" data-i18n="ab.legend"></p>
+          <p id="ab-alt" class="alt"></p>
+          <p id="ab-verdict" class="beat small-text"></p>
+          <div class="tablewrap"><table id="ab-table" class="scores"></table></div>
+          <div class="row">
+            <button id="btn-ab-csv" class="btn small" type="button" data-i18n="ab.csv"></button>
+            <button id="btn-ab-json" class="btn small" type="button" data-i18n="ab.json"></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-missions" class="tabpanel" role="tabpanel" aria-labelledby="tab-missions" tabindex="0" hidden>
+        <h2 data-i18n="mis.title"></h2>
+        <p class="small-text muted" data-i18n="mis.help"></p>
+        <ol id="missions-list" class="missions"></ol>
+        <p id="mis-note" class="hint" role="status"></p>
+      </div>
+
+      <div id="panel-method" class="tabpanel" role="tabpanel" aria-labelledby="tab-method" tabindex="0" hidden>
+        <h2 data-i18n="method.title"></h2>
+        <h3 data-i18n="method.measured"></h3>
+        <ul class="method"><li data-i18n="method.m1"></li><li data-i18n="method.m2"></li><li data-i18n="method.m3"></li><li data-i18n="method.m4"></li></ul>
+        <h3 data-i18n="method.design"></h3>
+        <ul class="method"><li data-i18n="method.d1"></li><li data-i18n="method.d2"></li><li data-i18n="method.d3"></li></ul>
+        <h3 data-i18n="method.unverified"></h3>
+        <ul class="method"><li data-i18n="method.u1"></li><li data-i18n="method.u2"></li><li data-i18n="method.u3"></li><li data-i18n="method.u4"></li><li data-i18n="method.u5"></li></ul>
+        <h3 data-i18n="method.visual"></h3>
+        <ul class="method"><li data-i18n="method.v1"></li><li data-i18n="method.v2"></li><li data-i18n="method.v3"></li><li data-i18n="method.v4"></li><li data-i18n="method.v5"></li><li data-i18n="method.v6"></li></ul>
+      </div>
     </section>
 
     </div>
@@ -626,6 +866,9 @@ pre {
   var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
   var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
   var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
 
   /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
@@ -1067,8 +1310,25 @@ pre {
   /* ---------- defensive store ---------- */
 
   function sanitizeStore(raw) {
-    var out = { daily: {}, bestDaily: null, bestPractice: null }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    var out = { daily: {}, bestDaily: null, bestPractice: null, bestScheme: {}, missions: {}, hc: false, still: false, introSeen: false, tutorialSeen: false }, num = function (v) { return typeof v === 'number' && isFinite(v); };
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (raw.hc === true) out.hc = true;
+    if (raw.still === true) out.still = true;
+    if (raw.introSeen === true) out.introSeen = true;
+    if (raw.tutorialSeen === true) out.tutorialSeen = true;
+    var bs = raw.bestScheme;
+    if (bs && typeof bs === 'object' && !Array.isArray(bs)) SCHEMES.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(bs, k) && num(bs[k]) && bs[k] >= 0 && bs[k] <= 100) out.bestScheme[k] = bs[k]; });
+    var ms = raw.missions;
+    if (ms && typeof ms === 'object' && !Array.isArray(ms)) {
+      MISSION_IDS.forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(ms, id)) return;
+        var m = ms[id];
+        if (!m || typeof m !== 'object' || OUTCOMES.indexOf(m.outcome) < 0) return;
+        var n = num(m.n) && m.n >= 0 && m.n <= 200 && Math.floor(m.n) === m.n ? m.n : 0;
+        var metrics = Array.isArray(m.metrics) ? m.metrics.filter(function (x) { return METRIC_IDS.indexOf(x) >= 0; }).slice(0, 5) : [];
+        out.missions[id] = { outcome: m.outcome, n: n, metrics: metrics };
+      });
+    }
     if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
     if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
     if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
@@ -1090,7 +1350,7 @@ pre {
   return {
     VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
     AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
-    SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
     hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
     sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
     stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
@@ -1101,6 +1361,601 @@ pre {
     computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
     buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE,
     episode: episode, copyVec: copyVec, pvariance: pvariance, clamp01: clamp01, SIGMA_SCALE: SIGMA_SCALE, STEADY_REF: STEADY_REF
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: small statistics toolkit (SYNTHETIC classical simulation).
+ *
+ * Wilson score interval for a proportion, Student-t interval for a mean,
+ * percentile bootstrap for a mean, paired difference with both intervals,
+ * histograms and quantiles. Pure functions, no DOM, no storage. Every
+ * interval is 95 percent two-sided. Bootstrap resampling takes a seeded
+ * generator, so a result is reproducible.
+ *
+ * Wilson, E. B. (1927), J. Am. Stat. Assoc. 22, 209-212.
+ * Efron, B. (1979), Ann. Stat. 7, 1-26.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaStats = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var Z95 = 1.959964;
+  // two-sided 95 percent critical values of Student's t, df = 1..30, then 40, 60, 120, infinity
+  var T95 = [12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101,
+    2.093, 2.086, 2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042];
+  var T95_TAIL = [[40, 2.021], [60, 2.000], [120, 1.980]];
+
+  function tCrit95(df) {
+    df = Math.floor(df);
+    if (!(df >= 1)) return NaN;
+    if (df <= 30) return T95[df - 1];
+    for (var k = 0; k < T95_TAIL.length; k++) if (df <= T95_TAIL[k][0]) return T95_TAIL[k][1];
+    return df <= 120 ? 1.980 : Z95;
+  }
+
+  function sum(a) { var s = 0; for (var k = 0; k < a.length; k++) s += a[k]; return s; }
+  function mean(a) { return a.length ? sum(a) / a.length : NaN; }
+  function sd(a) {                                   // sample standard deviation (n - 1)
+    if (a.length < 2) return 0;
+    var m = mean(a), s = 0;
+    for (var k = 0; k < a.length; k++) s += (a[k] - m) * (a[k] - m);
+    return Math.sqrt(s / (a.length - 1));
+  }
+  function sem(a) { return a.length ? sd(a) / Math.sqrt(a.length) : NaN; }
+
+  // Wilson score interval for k successes in n trials
+  function wilson(k, n, z) {
+    z = z || Z95;
+    if (!(n > 0)) return { p: 0, lo: 0, hi: 1, n: 0 };
+    k = Math.min(n, Math.max(0, k));
+    var p = k / n, z2 = z * z, den = 1 + z2 / n, c = p + z2 / (2 * n);
+    var h = z * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n));
+    return { p: p, lo: Math.max(0, (c - h) / den), hi: Math.min(1, (c + h) / den), n: n };
+  }
+
+  // Student-t interval for the mean of a
+  function tCI(a) {
+    var n = a.length, m = mean(a);
+    if (n < 2) return { mean: m, lo: m, hi: m, half: 0, n: n, sd: 0 };
+    var half = tCrit95(n - 1) * sd(a) / Math.sqrt(n);
+    return { mean: m, lo: m - half, hi: m + half, half: half, n: n, sd: sd(a) };
+  }
+
+  function quantile(sorted, q) {                     // linear interpolation between order statistics, sorted ascending
+    if (!sorted.length) return NaN;
+    var pos = (sorted.length - 1) * Math.min(1, Math.max(0, q)), lo = Math.floor(pos), hi = Math.ceil(pos);
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  }
+
+  // percentile bootstrap of the mean; rng() must return uniform [0,1)
+  function bootstrapCI(a, rng, B) {
+    var n = a.length, m = mean(a);
+    if (n < 2) return { mean: m, lo: m, hi: m, B: 0 };
+    B = B || 1000;
+    var means = new Array(B), b, k, s;
+    for (b = 0; b < B; b++) {
+      s = 0;
+      for (k = 0; k < n; k++) s += a[Math.floor(rng() * n)];
+      means[b] = s / n;
+    }
+    means.sort(function (x, y) { return x - y; });
+    return { mean: m, lo: quantile(means, 0.025), hi: quantile(means, 0.975), B: B };
+  }
+
+  // paired difference a[k] - b[k] with the t interval, the bootstrap interval and a standardised effect (mean / sd of the differences)
+  function paired(a, b, rng, B) {
+    if (a.length !== b.length) throw new Error('paired samples need equal length');
+    var d = [], k;
+    for (k = 0; k < a.length; k++) d.push(a[k] - b[k]);
+    var t = tCI(d), bs = rng ? bootstrapCI(d, rng, B) : null, wins = 0, ties = 0;
+    for (k = 0; k < d.length; k++) { if (d[k] > 0) wins++; else if (d[k] === 0) ties++; }
+    return {
+      n: d.length, diffs: d, mean: t.mean, sd: t.sd, lo: t.lo, hi: t.hi, half: t.half,
+      excludesZero: t.n >= 2 && (t.lo > 0 || t.hi < 0), boot: bs,
+      effect: t.sd > 0 ? t.mean / t.sd : 0, aWins: wins, ties: ties
+    };
+  }
+
+  // counts of values in `bins` equal-width bins over [lo, hi]; values outside are clipped into the end bins
+  function histogram(values, lo, hi, bins) {
+    var out = new Array(bins), k;
+    for (k = 0; k < bins; k++) out[k] = 0;
+    var w = (hi - lo) / bins;
+    for (k = 0; k < values.length; k++) {
+      var v = values[k];
+      if (!isFinite(v)) continue;
+      var i = Math.floor((v - lo) / w);
+      out[Math.min(bins - 1, Math.max(0, i))]++;
+    }
+    return out;
+  }
+
+  // five-number style description used by the text equivalents
+  function describe(a) {
+    if (!a.length) return { n: 0, mean: NaN, sd: 0, min: NaN, max: NaN, median: NaN };
+    var s = a.slice().sort(function (x, y) { return x - y; });
+    return { n: a.length, mean: mean(a), sd: sd(a), min: s[0], max: s[s.length - 1], median: quantile(s, 0.5) };
+  }
+
+  return {
+    Z95: Z95, tCrit95: tCrit95, mean: mean, sd: sd, sem: sem, wilson: wilson, tCI: tCI, quantile: quantile,
+    bootstrapCI: bootstrapCI, paired: paired, histogram: histogram, describe: describe
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Lab instruments (SYNTHETIC classical simulation).
+ *
+ * Pure functions that turn contest records into the numbers behind each Lab
+ * chart: rate series with Wilson bands, alignment traces, the probe run for
+ * the energy-ratio histogram and the threshold sweep, shield counts, gain
+ * trace, parameter-trial landscape, multi-seed ensembles, paired A/B runs,
+ * missions, CSV and JSON export, and a plain-text equivalent of every chart.
+ * Every number comes from the simulation in game.js or from the repository
+ * CSV copies in baselines.js. No DOM, no network, no storage.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./game.js'), require('./stats.js'));
+  else root.ArenaLab = factory(root.ArenaGame, root.ArenaStats);
+})(typeof self !== 'undefined' ? self : this, function (G, ST) {
+  'use strict';
+
+  var B = G.baselines;
+  var REPO_START = { th: G.DEFAULTS.th, c: G.DEFAULTS.c, g: G.DEFAULTS.g };
+  var METRICS = ['T', 'F', 'precision', 'rateVar', 'score'];
+  var FACTORS = {
+    scheme: { levels: G.SCHEMES },
+    shield: { levels: [true, false] },
+    amp: { levels: [true, false] },
+    stab: { levels: [true, false] },
+    evolve: { levels: [true, false] },
+    w: { levels: G.W_STEPS }
+  };
+
+  function nowMs() { return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now(); }
+  function f(x, d) { return (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d); }
+  function pct(x) { return Math.round(100 * x) + '%'; }
+
+  /* ---------- 1. rates with Wilson bands (episode level, cumulative over generations) ---------- */
+
+  // true-event rate: share of planted episodes with at least one true output
+  // false-event rate: share of all episodes with at least one false output
+  function rateSeries(hist) {
+    var out = [], planted = 0, all = 0, tEp = 0, fEp = 0;
+    hist.forEach(function (h, k) {
+      h.episodes.forEach(function (ep) {
+        all++; if (ep.planted) planted++;
+        if (ep.evT > 0) tEp++;
+        if (ep.evF > 0) fEp++;
+      });
+      var tr = ST.wilson(tEp, planted), fr = ST.wilson(fEp, all);
+      out.push({ gen: k + 1, planted: planted, episodes: all, trueEp: tEp, falseEp: fEp, tr: tr, fr: fr });
+    });
+    return out;
+  }
+
+  /* ---------- 2. alignment of the weight vectors with the signal ---------- */
+
+  // |<v|signal>| after each step, mean and sd over the planted episodes of generation `gen` (0-based)
+  function alignment(hist, gen) {
+    var rec = hist[gen];
+    if (!rec) return null;
+    var STEPS = G.STEPS, mean = [[], [], []], sd = [[], [], []], n = 0, i, t;
+    var eps = rec.episodes.filter(function (e) { return e.planted; });
+    n = eps.length;
+    for (i = 0; i < 3; i++) {
+      for (t = 0; t < STEPS; t++) {
+        var vals = eps.map(function (e) { return e.fid[t * 3 + i]; });
+        mean[i].push(ST.mean(vals)); sd[i].push(ST.sd(vals));
+      }
+    }
+    return { gen: gen + 1, n: n, mean: mean, sd: sd, steps: STEPS };
+  }
+
+  /* ---------- 3. the probe: what each membrane would do at every threshold ---------- */
+
+  function effThreshold(par, n, sigma) {
+    return G.scaledThreshold(Math.min(1.5, par.th * (2 - par.sp)), n, sigma);
+  }
+  // K episodes (half planted) with the current parameters of the contest and nobody frozen by a declaration.
+  // Each agent-episode keeps [gain x energy ratio, fidelity] at the six check steps.
+  function probe(contest, settings, K, seedTag) {
+    var s = G.sanitizeSettings(settings), n = contest.n, rng = G.makeRng('membrane-arena/v1/probe/' + contest.seed + '/' + (seedTag || contest.gen));
+    var P = contest.par.map(function (p) { return { th: p.th, c: p.c, g: p.g, sp: p.sp, geff: p.g * (s.stab ? G.stabilizerFactor(contest.rateEma) : 1) }; });
+    var samples = [], e, i, thr = P.map(function (p) { return effThreshold(p, n, contest.sigma); });
+    for (e = 0; e < K; e++) {
+      var planted = e % 2 === 0, pat = planted ? G.rvec(n, rng) : null, chk = [[], [], []];
+      var trace = new Float32Array(G.STEPS * 3);
+      G.episode(n, pat, contest.sigma, P, contest.warm, s.amp ? G.AMP_CAP : 0, rng, trace, { noDecl: true, chk: chk });
+      for (i = 0; i < 3; i++) samples.push({ planted: planted, agent: i, chk: chk[i] });
+    }
+    return { samples: samples, K: K, thr: thr, geff: P.map(function (p) { return p.geff; }), gen: contest.gen };
+  }
+  // decision statistic: the largest gain x energy ratio over the check steps
+  function decisionStat(sample) {
+    var m = 0;
+    sample.chk.forEach(function (c) { if (c[0] > m) m = c[0]; });
+    return m;
+  }
+  function ratioHistogram(pr, bins) {
+    bins = bins || 24;
+    var pl = [], no = [], hi = 4;
+    pr.samples.forEach(function (sm) { var v = decisionStat(sm); if (v > hi) hi = v; (sm.planted ? pl : no).push(v); });
+    pr.thr.forEach(function (t) { if (t * 1.15 > hi) hi = t * 1.15; });
+    hi = Math.ceil(hi);
+    return { lo: 0, hi: hi, bins: bins, planted: ST.histogram(pl, 0, hi, bins), noise: ST.histogram(no, 0, hi, bins), nPlanted: pl.length, nNoise: no.length, thr: pr.thr.slice() };
+  }
+  // a declaration at threshold th: the first check step with score >= th; it is true when planted and fidelity >= 0.5 there
+  function declareAt(sample, th) {
+    for (var k = 0; k < sample.chk.length; k++) if (sample.chk[k][0] >= th) return { step: (k + 1) * G.CHECK, ok: sample.planted && sample.chk[k][1] >= G.TRUTH };
+    return null;
+  }
+  // Precision / recall trade-off as the threshold moves, before the shield. recall = true declarations per planted
+  // agent-episode; falseRate = false declarations per agent-episode (all); precision = true / (true + false).
+  function sweep(pr, points) {
+    points = points || 40;
+    var hi = ratioHistogram(pr, 4).hi, out = [], nPl = 0, nAll = pr.samples.length, k;
+    pr.samples.forEach(function (sm) { if (sm.planted) nPl++; });
+    for (k = 0; k < points; k++) {
+      var th = 1 + (hi - 1) * k / (points - 1), tp = 0, fp = 0;
+      pr.samples.forEach(function (sm) { var d = declareAt(sm, th); if (d) { if (d.ok) tp++; else fp++; } });
+      out.push({ th: th, tp: tp, fp: fp, recall: nPl ? tp / nPl : 0, falseRate: nAll ? fp / nAll : 0, precision: tp + fp ? tp / (tp + fp) : null, recallCI: ST.wilson(tp, nPl), falseCI: ST.wilson(fp, nAll) });
+    }
+    return { points: out, nPlanted: nPl, nAll: nAll, thr: pr.thr.slice(), hi: hi };
+  }
+  function atThreshold(pr, th) {
+    var nPl = 0, tp = 0, fp = 0;
+    pr.samples.forEach(function (sm) { if (sm.planted) nPl++; var d = declareAt(sm, th); if (d) { if (d.ok) tp++; else fp++; } });
+    return { tp: tp, fp: fp, nPlanted: nPl, nAll: pr.samples.length, recall: nPl ? tp / nPl : 0, precision: tp + fp ? tp / (tp + fp) : null };
+  }
+
+  /* ---------- 4. shield counts ---------- */
+
+  // A declaration either leaves (passed), is held because no 2-of-3 agreement released anything in that episode,
+  // or is redundant because another confirmed declaration of the same episode already left.
+  var SH_KEYS = ['declared', 'passed', 'held', 'redundant', 'trueDeclared', 'truePassed', 'trueHeld', 'trueRedundant', 'falseDeclared', 'falsePassed', 'falseHeld', 'falseRedundant'];
+  function zeroShield() { var o = {}; SH_KEYS.forEach(function (k) { o[k] = 0; }); return o; }
+  function shieldCounts(hist) {
+    var gens = [], tot = zeroShield();
+    hist.forEach(function (h, k) {
+      var r = zeroShield(); r.gen = k + 1; r.shield = h.shield;
+      h.episodes.forEach(function (ep) {
+        for (var i = 0; i < 3; i++) {
+          if (ep.declStep[i] === null) continue;
+          var passed = ep.outs.indexOf(i) >= 0, truth = ep.truth[i] ? 'true' : 'false', kind = passed ? 'Passed' : (ep.passed === null && h.shield ? 'Held' : 'Redundant');
+          r.declared++; r[kind.toLowerCase()]++;
+          r[truth + 'Declared']++; r[truth + kind]++;
+        }
+      });
+      SH_KEYS.forEach(function (key) { tot[key] += r[key]; });
+      gens.push(r);
+    });
+    return { gens: gens, total: tot };
+  }
+
+  /* ---------- 5. stabilizer gain trace ---------- */
+
+  function gainTrace(hist) {
+    var geff = [[], [], []], rate = [], x = [], clampedGens = [], k = 0, gmax = 0;
+    hist.forEach(function (h) {
+      h.episodes.forEach(function (ep) {
+        x.push(k++);
+        for (var i = 0; i < 3; i++) { geff[i].push(ep.geff[i]); if (ep.geff[i] > gmax) gmax = ep.geff[i]; }
+        rate.push(ep.rateEma);
+      });
+      h.clamped.forEach(function (c, i) { if (c) clampedGens.push({ gen: h.gen + 1, i: i }); });
+    });
+    return { x: x, geff: geff, rate: rate, min: G.GAIN_MIN, max: G.GAIN_MAX, target: G.TARGET, floor: G.FACTOR_MIN, clamped: clampedGens, gmax: gmax, stab: hist.length ? hist[hist.length - 1].settings.stab : false };
+  }
+
+  /* ---------- 6. (1+1)-ES parameter trials ---------- */
+
+  function landscape(hist) {
+    var pts = [];
+    hist.forEach(function (h) {
+      for (var i = 0; i < 3; i++) pts.push({ gen: h.gen + 1, i: i, th: h.params[i].th, c: h.params[i].c, g: h.params[i].g, score: h.scores[i], accepted: !!h.accepted[i], mutated: h.mutated });
+    });
+    var acc = pts.filter(function (p) { return p.accepted; }).length;
+    return { points: pts, accepted: acc, trials: pts.length };
+  }
+
+  /* ---------- 7. amplifier: the repository's measurement ---------- */
+
+  // S-- against SA- in the repository's width-32 table, per cooperation weight
+  function ampBaseline() {
+    var rows = [], file = B.SOURCE.contest;
+    [0, 0.5, 1].forEach(function (w) {
+      var a = null, b = null;
+      B.CONTEST32.forEach(function (r) { if (r.w === w && r.cfg === 'S--') a = r; if (r.w === w && r.cfg === 'SA-') b = r; });
+      if (a && b) rows.push({ w: w, off: a, on: b, dT: b.T - a.T, dF: b.F - a.F, dP: b.P - a.P });
+    });
+    return { rows: rows, file: file, maxDeltaP: B.LESSON.ampMaxDeltaP, seeds: rows.length ? rows[0].off.seeds : 0 };
+  }
+
+  /* ---------- 8. ensembles ---------- */
+
+  function labSeed(base, k) { return base + k; }
+  function startFor(seed, repoStart) { return repoStart ? { th: REPO_START.th, c: REPO_START.c, g: REPO_START.g } : G.startFor(seed); }
+  function runOne(seed, settings, repoStart) {
+    var init = Object.assign({}, settings, startFor(seed, repoStart)), c = G.createContest(seed, init), s = G.sanitizeSettings(Object.assign({}, settings, { th: init.th, c: init.c, g: init.g }));
+    while (!G.done(c)) G.stepGeneration(c, s);
+    return metricsOf(seed, c);
+  }
+  function metricsOf(seed, c) {
+    var r = G.summarize(c.hist);
+    return { seed: seed, T: r.T, F: r.F, precision: r.precision, rateVar: r.rateVar, score: r.score, maxG: r.maxG };
+  }
+  // a time-sliced ensemble: call step(budgetMs) repeatedly (for example once per timer tick) until it reports done
+  function createEnsemble(o) {
+    var settings = G.sanitizeSettings(o.settings), n = Math.max(1, Math.min(200, o.n | 0)), base = o.base || 'e', repo = !!o.repoStart;
+    var st = { k: 0, c: null, s: null, results: [], settings: settings, n: n, base: base, repoStart: repo, cancelled: false, ms: 0, t0: null };
+    function progress() { return Math.min(1, (st.k + (st.c ? st.c.gen / G.GENS : 0)) / n); }
+    function step(budget, clock) {
+      clock = clock || nowMs;
+      if (st.t0 === null) st.t0 = clock();
+      var start = clock();
+      while (!st.cancelled && st.k < n) {
+        if (!st.c) {
+          var seed = labSeed(base, st.k + 1), init = Object.assign({}, settings, startFor(seed, repo));
+          st.c = G.createContest(seed, init); st.s = G.sanitizeSettings(init); st.seed = seed;
+        }
+        G.stepGeneration(st.c, st.s);
+        if (G.done(st.c)) { st.results.push(metricsOf(st.seed, st.c)); st.c = null; st.k++; }
+        if (clock() - start >= budget) break;
+      }
+      st.ms += clock() - start;
+      return { done: st.cancelled || st.k >= n, progress: progress(), completed: st.k };
+    }
+    return { step: step, state: function () { return st; }, cancel: function () { st.cancelled = true; }, results: function () { return st.results; } };
+  }
+
+  // like-for-like with the repository table only when the contest is set up the way the repository ran it
+  function likeForLike(settings, repoStart) {
+    var s = G.sanitizeSettings(settings);
+    return !!(repoStart && s.scheme === 'random' && s.fcost === 0 && s.evolve);
+  }
+  function matchRepository(settings) { return Object.assign({}, G.sanitizeSettings(settings), { scheme: 'random', fcost: 0, evolve: true }); }
+
+  function summarizeEnsemble(results, settings, repoStart) {
+    var s = G.sanitizeSettings(settings), out = { n: results.length, metrics: {}, like: likeForLike(s, repoStart), baseline: null };
+    var rng = G.makeRng('membrane-arena/v1/ens-boot/' + results.length + '/' + (results.length ? results[0].seed : ''));
+    METRICS.forEach(function (m) {
+      var vals = results.map(function (r) { return r[m]; });
+      out.metrics[m] = { t: ST.tCI(vals), boot: ST.bootstrapCI(vals, rng, 1000), desc: ST.describe(vals), values: vals };
+    });
+    var b = G.baselineFor(s);
+    if (b) {
+      var r = b.row, k = r.seeds;
+      var ci = function (mean, sdv) { var h = ST.tCrit95(k - 1) * sdv / Math.sqrt(k); return { mean: mean, sd: sdv, lo: mean - h, hi: mean + h }; };
+      out.baseline = { tag: b.tag, w: b.w, exactW: b.exactW, file: b.file, seeds: k, T: ci(r.T, r.Tsd), F: ci(r.F, r.Fsd), precision: ci(r.P, r.Psd), rateVar: { mean: r.rv, sd: null, lo: null, hi: null }, score: { mean: G.baselineScore(b), sd: null, lo: null, hi: null, approx: true } };
+    }
+    return out;
+  }
+  function overlap(a, b) { return a.lo <= b.hi && b.lo <= a.hi; }
+  // how many of the three repository metrics (T, F, precision) have a baseline interval that overlaps the ensemble interval
+  function agreementWithBaseline(sum) {
+    if (!sum.baseline) return null;
+    var res = {}, count = 0;
+    ['T', 'F', 'precision'].forEach(function (m) { res[m] = overlap(sum.metrics[m].t, sum.baseline[m]); if (res[m]) count++; });
+    return { per: res, count: count, of: 3 };
+  }
+
+  /* ---------- 9. A/B paired runs ---------- */
+
+  function applyFactor(settings, factor, level) {
+    var o = Object.assign({}, G.sanitizeSettings(settings));
+    if (!FACTORS[factor]) throw new Error('unknown factor');
+    o[factor] = level;
+    return G.sanitizeSettings(o);
+  }
+  function createPaired(o) {
+    var a = createEnsemble({ settings: applyFactor(o.settings, o.factor, o.a), n: o.n, base: o.base || 'ab', repoStart: o.repoStart });
+    var b = createEnsemble({ settings: applyFactor(o.settings, o.factor, o.b), n: o.n, base: o.base || 'ab', repoStart: o.repoStart });
+    var meta = { factor: o.factor, a: o.a, b: o.b, n: a.state().n, repoStart: !!o.repoStart };
+    function step(budget, clock) {
+      clock = clock || nowMs;
+      var start = clock(), ra, rb;
+      do {
+        ra = a.step(Math.max(1, budget / 2), clock); rb = b.step(Math.max(1, budget / 2), clock);
+        if (ra.done && rb.done) break;
+      } while (clock() - start < budget);
+      return { done: ra.done && rb.done, progress: (ra.progress + rb.progress) / 2, completed: Math.min(ra.completed, rb.completed) };
+    }
+    return { step: step, meta: meta, a: a, b: b, cancel: function () { a.cancel(); b.cancel(); }, state: function () { return { a: a.state(), b: b.state(), n: meta.n }; } };
+  }
+  // paired by seed: the same seed gives both arms the same random streams until their settings make them differ
+  function summarizePaired(resA, resB) {
+    var n = Math.min(resA.length, resB.length), A = resA.slice(0, n), Bs = resB.slice(0, n), out = { n: n, metrics: {} };
+    var rng = G.makeRng('membrane-arena/v1/ab-boot/' + n);
+    METRICS.forEach(function (m) {
+      var va = A.map(function (r) { return r[m]; }), vb = Bs.map(function (r) { return r[m]; });
+      out.metrics[m] = { a: ST.tCI(va), b: ST.tCI(vb), diff: n >= 2 ? ST.paired(va, vb, rng, 1000) : null, va: va, vb: vb };
+    });
+    return out;
+  }
+
+  /* ---------- 10. missions ---------- */
+
+  var MISSIONS = [
+    { id: 'shield', kind: 'ab', factor: 'shield', a: true, b: false, minN: 20, metric: 'F' },
+    { id: 'individual', kind: 'ab', factor: 'scheme', a: 'consensus', b: 'individual', minN: 20, metric: 'T' },
+    { id: 'amp', kind: 'ab', factor: 'amp', a: true, b: false, minN: 20, metric: 'precision' },
+    { id: 'repo', kind: 'ens', minN: 20 },
+    { id: 'play', kind: 'play' }
+  ];
+  function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
+  // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
+  function evaluateMission(id, data) {
+    var m = missionById(id);
+    if (!m) return null;
+    if (m.kind === 'ab') {
+      var meta = data.meta, sum = data.summary;
+      if (!meta || meta.factor !== m.factor || meta.a !== m.a || meta.b !== m.b || sum.n < m.minN) return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var d = sum.metrics[m.metric].diff;
+      if (m.id === 'shield') return { counts: true, outcome: d.excludesZero && d.mean < 0 ? 'reproduced' : 'not_reproduced', detail: { metric: m.metric, mean: d.mean, lo: d.lo, hi: d.hi, n: sum.n } };
+      if (m.id === 'individual') {
+        var lag = ['T', 'F', 'precision', 'score'].filter(function (k) { var x = sum.metrics[k].diff; return x.excludesZero && (k === 'F' ? x.mean > 0 : x.mean > 0) ; });
+        // A is consensus, B is individual: a positive difference in T, precision or score means individual lags; a negative one in F means the same
+        var lags = [];
+        ['T', 'precision', 'score'].forEach(function (k) { var x = sum.metrics[k].diff; if (x.excludesZero && x.mean > 0) lags.push(k); });
+        var xf = sum.metrics.F.diff; if (xf.excludesZero && xf.mean < 0) lags.push('F');
+        return { counts: true, outcome: lags.length ? 'found' : 'not_found', detail: { metrics: lags, n: sum.n, unused: lag.length } };
+      }
+      if (m.id === 'amp') return { counts: true, outcome: d.excludesZero ? 'detected' : 'no_effect', detail: { metric: m.metric, mean: d.mean, lo: d.lo, hi: d.hi, n: sum.n } };
+    }
+    if (m.kind === 'ens') {
+      if (!data.summary || data.summary.n < m.minN || !data.summary.like || !data.summary.baseline) return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var ag = agreementWithBaseline(data.summary);
+      return { counts: true, outcome: ag.count === 3 ? 'agrees' : (ag.count >= 1 ? 'partly' : 'differs'), detail: ag };
+    }
+    if (m.kind === 'play') {
+      if (!data.result || data.ref === null || data.ref === undefined) return { counts: false, outcome: 'no_ref', detail: {} };
+      return { counts: true, outcome: data.result.score >= data.ref ? 'beat' : 'below', detail: { score: data.result.score, ref: data.ref } };
+    }
+    return null;
+  }
+
+  /* ---------- 11. export ---------- */
+
+  function csvCell(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'number') return isFinite(v) ? String(Math.round(v * 1e6) / 1e6) : '';
+    var s = String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function toCSV(header, rows) {
+    return [header.map(csvCell).join(',')].concat(rows.map(function (r) { return r.map(csvCell).join(','); })).join('\n') + '\n';
+  }
+  function runCSV(hist) {
+    var header = ['generation', 'shield', 'true_outputs', 'false_outputs', 'declared', 'passed', 'held', 'redundant', 'rate_ema', 'th_a', 'th_b', 'th_c', 'g_a', 'g_b', 'g_c', 'score_a', 'score_b', 'score_c', 'accepted_a', 'accepted_b', 'accepted_c'];
+    var sc = shieldCounts(hist).gens;
+    return toCSV(header, hist.map(function (h, k) {
+      return [h.gen + 1, h.shield ? 1 : 0, h.outT, h.outF, sc[k].declared, sc[k].passed, sc[k].held, sc[k].redundant, h.rateEma, h.params[0].th, h.params[1].th, h.params[2].th, h.params[0].g, h.params[1].g, h.params[2].g,
+        h.scores[0], h.scores[1], h.scores[2], h.accepted[0] ? 1 : 0, h.accepted[1] ? 1 : 0, h.accepted[2] ? 1 : 0];
+    }));
+  }
+  function ensembleCSV(results) {
+    return toCSV(['seed', 'true_outputs', 'false_outputs', 'precision', 'rate_variance', 'game_score', 'max_gain'], results.map(function (r) { return [r.seed, r.T, r.F, r.precision, r.rateVar, r.score, r.maxG]; }));
+  }
+  function pairedCSV(resA, resB) {
+    var n = Math.min(resA.length, resB.length), rows = [], k;
+    for (k = 0; k < n; k++) rows.push([resA[k].seed, resA[k].T, resB[k].T, resA[k].F, resB[k].F, resA[k].precision, resB[k].precision, resA[k].score, resB[k].score]);
+    return toCSV(['seed', 'true_a', 'true_b', 'false_a', 'false_b', 'precision_a', 'precision_b', 'score_a', 'score_b'], rows);
+  }
+  function round6(v) { return typeof v === 'number' && isFinite(v) ? Math.round(v * 1e6) / 1e6 : v; }
+  function meta(kind, extra) {
+    return Object.assign({
+      app: 'membrane-arena', build: G.BUILD, engine: G.VERSION, kind: kind, label: 'SYNTHETIC classical simulation, not a physical experiment',
+      baselines: { repo: B.SOURCE.repo, commit: B.SOURCE.commit, file: B.SOURCE.contest }
+    }, extra || {});
+  }
+  function ciJSON(c) { return c ? { mean: round6(c.mean), lo: round6(c.lo), hi: round6(c.hi) } : null; }
+  function ensembleJSON(results, summary, settings, repoStart) {
+    var m = {};
+    Object.keys(summary.metrics).forEach(function (k) { m[k] = { t95: ciJSON(summary.metrics[k].t), bootstrap95: ciJSON(summary.metrics[k].boot), sd: round6(summary.metrics[k].t.sd) }; });
+    return JSON.stringify({ meta: meta('ensemble', { n: results.length, repositoryStart: !!repoStart, likeForLikeWithRepository: summary.like, settings: G.sanitizeSettings(settings) }), summary: m, baseline: summary.baseline, results: results.map(function (r) { return { seed: r.seed, T: r.T, F: r.F, precision: round6(r.precision), rateVar: round6(r.rateVar), score: round6(r.score), maxG: round6(r.maxG) }; }) }, null, 1);
+  }
+  function pairedJSON(pm, summary, settings) {
+    var m = {};
+    Object.keys(summary.metrics).forEach(function (k) {
+      var x = summary.metrics[k];
+      m[k] = { a: ciJSON(x.a), b: ciJSON(x.b), diff: x.diff ? { mean: round6(x.diff.mean), t95: [round6(x.diff.lo), round6(x.diff.hi)], bootstrap95: x.diff.boot ? [round6(x.diff.boot.lo), round6(x.diff.boot.hi)] : null, excludesZero: x.diff.excludesZero, effect: round6(x.diff.effect), aWins: x.diff.aWins } : null };
+    });
+    return JSON.stringify({ meta: meta('paired-ab', { n: summary.n, factor: pm.factor, a: pm.a, b: pm.b, repositoryStart: pm.repoStart, settings: G.sanitizeSettings(settings), note: 'exploratory, no correction for comparing several metrics' }), metrics: m }, null, 1);
+  }
+  function runJSON(contest, seedInfo) {
+    var hist = contest.hist, sum = G.summarize(hist);
+    return JSON.stringify({
+      meta: meta('contest', { seed: contest.seed, mode: seedInfo ? seedInfo.mode : null }),
+      summary: { T: sum.T, F: sum.F, precision: round6(sum.precision), rateVar: round6(sum.rateVar), score: round6(sum.score) },
+      shield: shieldCounts(hist).total, generations: hist.map(function (h) { return { gen: h.gen + 1, settings: h.settings, outT: h.outT, outF: h.outF, params: h.params.map(function (p) { return { th: round6(p.th), c: round6(p.c), g: round6(p.g) }; }), scores: h.scores.map(round6), accepted: h.accepted }; })
+    }, null, 1);
+  }
+
+  /* ---------- 12. text equivalents (t is the i18n function) ---------- */
+
+  function describeRates(t, series) {
+    if (!series.length) return t('alt.empty');
+    var last = series[series.length - 1];
+    return t('alt.rates', { g: last.gen, tr: pct(last.tr.p), tlo: pct(last.tr.lo), thi: pct(last.tr.hi), pl: last.planted, fr: pct(last.fr.p), flo: pct(last.fr.lo), fhi: pct(last.fr.hi), n: last.episodes });
+  }
+  function describeAlignment(t, al) {
+    if (!al) return t('alt.empty');
+    var a = [0, 1, 2].map(function (i) { return f(al.mean[i][al.steps - 1], 2); });
+    var half = [0, 1, 2].map(function (i) { return f(al.mean[i][Math.floor(al.steps / 2) - 1], 2); });
+    return t('alt.align', { g: al.gen, n: al.n, h1: half[0], h2: half[1], h3: half[2], a1: a[0], a2: a[1], a3: a[2] });
+  }
+  function describeHist(t, h) {
+    if (!h) return t('alt.empty');
+    var meanOf = function (counts) { var s = 0, n = 0, w = (h.hi - h.lo) / h.bins; counts.forEach(function (c, k) { s += c * (h.lo + (k + 0.5) * w); n += c; }); return n ? s / n : 0; };
+    var above = function (counts, th) { var w = (h.hi - h.lo) / h.bins, a = 0, n = 0; counts.forEach(function (c, k) { n += c; if (h.lo + (k + 0.5) * w >= th) a += c; }); return n ? a / n : 0; };
+    var th = h.thr.reduce(function (a, b) { return a + b; }, 0) / h.thr.length;
+    return t('alt.hist', { mp: f(meanOf(h.planted), 1), mn: f(meanOf(h.noise), 1), th: f(th, 1), ap: pct(above(h.planted, th)), an: pct(above(h.noise, th)), np: h.nPlanted, nn: h.nNoise });
+  }
+  function describeSweep(t, sw, cur) {
+    if (!sw || !sw.points.length) return t('alt.empty');
+    var p = sw.points;
+    var best = null;
+    p.forEach(function (q) { if (q.precision !== null && q.recall >= 0.5 && (best === null || q.th < best.th)) best = q; });
+    var lo = p[0], hi = p[p.length - 1];
+    return t('alt.sweep', { lr: pct(lo.recall), lf: f(lo.falseRate, 2), hth: f(hi.th, 1), hr: pct(hi.recall), hf: f(hi.falseRate, 2), cur: cur ? pct(cur.recall) : '-', curp: cur && cur.precision !== null ? pct(cur.precision) : '-', n: sw.nAll });
+  }
+  function describeShield(t, sc) {
+    var x = sc.total;
+    if (!x.declared) return t('alt.shield_none');
+    return t('alt.shield', { d: x.declared, p: x.passed, h: x.held, r: x.redundant, fd: x.falseDeclared, fp: x.falsePassed, fh: x.falseHeld, td: x.trueDeclared, th: x.trueHeld });
+  }
+  function describeGain(t, gt) {
+    if (!gt.x.length) return t('alt.empty');
+    var gmin = Infinity, rmax = 0;
+    gt.geff.forEach(function (a) { a.forEach(function (v) { if (v < gmin) gmin = v; }); });
+    gt.rate.forEach(function (v) { if (v > rmax) rmax = v; });
+    return t(gt.stab ? 'alt.gain_on' : 'alt.gain_off', { n: gt.x.length, lo: f(gmin, 2), hi: f(gt.gmax, 2), cmin: gt.min, cmax: gt.max, rmax: f(rmax, 2), tgt: gt.target, cl: gt.clamped.length });
+  }
+  function describeLandscape(t, ls) {
+    if (!ls.trials) return t('alt.empty');
+    var best = ls.points.reduce(function (a, b) { return b.score > a.score ? b : a; });
+    return t('alt.land', { n: ls.trials, a: ls.accepted, th: f(best.th, 2), g: f(best.g, 2), s: f(best.score, 2), gen: best.gen, m: 'ABC'.charAt(best.i) });
+  }
+  function describeAmp(t, ab) {
+    var r0 = ab.rows[1] || ab.rows[0];
+    if (!r0) return t('alt.empty');
+    return t('alt.amp', { dp: f(ab.maxDeltaP, 3), dT: f(r0.dT, 2), dF: f(r0.dF, 2), seeds: ab.seeds, file: ab.file });
+  }
+  function describeEnsemble(t, sum) {
+    if (!sum.n) return t('alt.empty');
+    var m = sum.metrics, b = sum.baseline;
+    var txt = t('alt.ens', { n: sum.n, T: f(m.T.t.mean, 1), Tlo: f(m.T.t.lo, 1), Thi: f(m.T.t.hi, 1), F: f(m.F.t.mean, 1), Flo: f(m.F.t.lo, 1), Fhi: f(m.F.t.hi, 1), P: f(m.precision.t.mean, 3), Plo: f(m.precision.t.lo, 3), Phi: f(m.precision.t.hi, 3) });
+    if (b) txt += ' ' + t('alt.ens_base', { T: f(b.T.mean, 1), F: f(b.F.mean, 1), P: f(b.precision.mean, 3), seeds: b.seeds, file: b.file, like: t(sum.like ? 'ens.like_yes' : 'ens.like_no') });
+    else txt += ' ' + t('alt.ens_nobase');
+    return txt;
+  }
+  function describePaired(t, sum, pm, label) {
+    if (!sum.n || sum.n < 2) return t('alt.empty');
+    var m = sum.metrics;
+    var one = function (k, d) { var x = m[k].diff; return f(x.mean, d) + ' (' + f(x.lo, d) + ' to ' + f(x.hi, d) + ')' + (x.excludesZero ? '' : ' ' + t('ab.ci_zero')); };
+    return t('alt.ab', { n: sum.n, a: label.a, b: label.b, T: one('T', 1), F: one('F', 1), P: one('precision', 3), S: one('score', 1), wins: m.score.diff.aWins });
+  }
+
+  return {
+    METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
+    runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
+    agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
+    missionById: missionById, evaluateMission: evaluateMission,
+    toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
+    describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
+    describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired
   };
 });
 </script>
@@ -2713,6 +3568,792 @@ pre {
 </script>
 <script>
 /*
+ * Membrane Arena: Lab charts (SYNTHETIC classical simulation).
+ *
+ * Canvas drawing for the Lab instruments. Every chart takes the data object
+ * produced by lab.js and draws nothing that is not in it. `opts.hc` switches
+ * to the high-contrast palette (white on black, heavier lines, dashes as well
+ * as colour). `opts.labels` supplies the translated legend and axis words.
+ * Pure helpers (scales, ticks, jitter) are exported for the tests.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./stats.js'));
+  else root.ArenaCharts = factory(root.ArenaStats);
+})(typeof self !== 'undefined' ? self : this, function (ST) {
+  'use strict';
+
+  var TAU = Math.PI * 2;
+  var PAL = {
+    bg: '#070e26', grid: 'rgba(122,168,255,0.22)', axis: 'rgba(122,168,255,0.5)', text: 'rgba(179,190,219,0.95)', lw: 1.8,
+    cyan: [64, 208, 224], blue: [122, 168, 255], aqua: [94, 230, 184], gold: [201, 168, 76], warn: [255, 154, 154], grey: [138, 147, 168], white: [238, 242, 255]
+  };
+  var HC = {
+    bg: '#000000', grid: 'rgba(255,255,255,0.35)', axis: '#ffffff', text: '#ffffff', lw: 2.8,
+    cyan: [0, 255, 255], blue: [120, 170, 255], aqua: [0, 255, 150], gold: [255, 220, 0], warn: [255, 110, 110], grey: [220, 220, 220], white: [255, 255, 255]
+  };
+  var AGENTS = ['cyan', 'blue', 'aqua'];
+
+  function clamp(x, lo, hi) { return x < lo ? lo : (x > hi ? hi : x); }
+  function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a === undefined ? 1 : clamp(a, 0, 1)) + ')'; }
+  function pal(o) { return o && o.hc ? HC : PAL; }
+
+  // a linear scale from the data range to the pixel range
+  function scale(d0, d1, p0, p1) {
+    var span = d1 - d0 || 1;
+    var fn = function (v) { return p0 + (v - d0) / span * (p1 - p0); };
+    fn.d0 = d0; fn.d1 = d1; fn.p0 = p0; fn.p1 = p1;
+    return fn;
+  }
+  // "nice" tick values between lo and hi, about n of them
+  function ticks(lo, hi, n) {
+    n = n || 4;
+    var span = hi - lo;
+    if (!(span > 0)) return [lo];
+    var raw = span / n, pow = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), m = raw / pow;
+    var step = (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * pow, out = [], v = Math.ceil(lo / step - 1e-9) * step;
+    for (; v <= hi + step * 1e-9; v += step) out.push(parseFloat((Math.round(v / step) * step).toFixed(10)) + 0);
+    return out;
+  }
+  function fmtTick(v) {
+    if (Math.abs(v) >= 100) return String(Math.round(v));
+    var s = (Math.round(v * 1000) / 1000).toString();
+    return s;
+  }
+  // deterministic jitter in [-1, 1] for the k-th dot of a strip
+  function jitter(k) { var x = Math.sin((k + 1) * 12.9898) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; }
+  // colour of a score between lo and hi: navy blue -> cyan -> gold
+  function scoreColor(v, lo, hi) {
+    var t = hi > lo ? clamp((v - lo) / (hi - lo), 0, 1) : 0.5, a = [60, 90, 190], b = PAL.cyan, c = PAL.gold;
+    var m = function (p, q, u) { return [p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u, p[2] + (q[2] - p[2]) * u].map(Math.round); };
+    return t < 0.5 ? m(a, b, t * 2) : m(b, c, (t - 0.5) * 2);
+  }
+
+  function prep(canvas, minH) {
+    var r = canvas.getBoundingClientRect(), w = Math.max(160, Math.round(r.width)), h = Math.max(minH || 100, Math.round(r.height));
+    var dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1), ctx = canvas.getContext('2d');
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx: ctx, w: w, h: h };
+  }
+  function clear(p, o) { p.ctx.fillStyle = pal(o).bg; p.ctx.fillRect(0, 0, p.w, p.h); }
+
+  // grid, ticks and axis labels; returns the x and y scales
+  function frame(ctx, box, xr, yr, o, xl, yl) {
+    var P = pal(o), sx = scale(xr[0], xr[1], box.x0, box.x1), sy = scale(yr[0], yr[1], box.y1, box.y0);
+    ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = P.text; ctx.strokeStyle = P.grid; ctx.lineWidth = 1;
+    ticks(yr[0], yr[1], 4).forEach(function (v) {
+      var y = sy(v); ctx.beginPath(); ctx.moveTo(box.x0, y); ctx.lineTo(box.x1, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmtTick(v), box.x0 - 4, y);
+    });
+    ticks(xr[0], xr[1], 6).forEach(function (v) {
+      var x = sx(v); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(fmtTick(v), x, box.y1 + 3);
+      ctx.beginPath(); ctx.moveTo(x, box.y1); ctx.lineTo(x, box.y1 + 3); ctx.strokeStyle = P.axis; ctx.stroke(); ctx.strokeStyle = P.grid;
+    });
+    ctx.strokeStyle = P.axis; ctx.beginPath(); ctx.moveTo(box.x0, box.y0); ctx.lineTo(box.x0, box.y1); ctx.lineTo(box.x1, box.y1); ctx.stroke();
+    if (xl) { ctx.fillStyle = P.text; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(xl, box.x1, box.y1 + 30); }
+    if (yl) { ctx.fillStyle = P.text; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(yl, box.x0 + 4, box.y0 - 1); }
+    return { sx: sx, sy: sy };
+  }
+  function boxFor(p, bottom) { return { x0: 38, x1: p.w - 10, y0: 16, y1: p.h - (bottom || 36) }; }
+  function legend(ctx, items, x, y, o) {
+    var P = pal(o);
+    ctx.font = '11px system-ui, sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    items.forEach(function (it) {
+      ctx.strokeStyle = rgba(P[it.c] || it.c, 1); ctx.fillStyle = rgba(P[it.c] || it.c, 1); ctx.lineWidth = P.lw;
+      if (it.dash) ctx.setLineDash(it.dash); else ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 16, y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = P.text; ctx.fillText(it.label, x + 20, y);
+      x += 26 + ctx.measureText(it.label).width + 8;
+    });
+  }
+  function polyline(ctx, pts, color, width, dash) {
+    if (!pts.length) return;
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = 'round';
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath();
+    pts.forEach(function (q, k) { if (k === 0) ctx.moveTo(q[0], q[1]); else ctx.lineTo(q[0], q[1]); });
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  function band(ctx, up, down, color) {
+    if (!up.length) return;
+    ctx.fillStyle = color; ctx.beginPath();
+    up.forEach(function (q, k) { if (k === 0) ctx.moveTo(q[0], q[1]); else ctx.lineTo(q[0], q[1]); });
+    for (var k = down.length - 1; k >= 0; k--) ctx.lineTo(down[k][0], down[k][1]);
+    ctx.closePath(); ctx.fill();
+  }
+  function empty(p, o, text) {
+    clear(p, o);
+    p.ctx.fillStyle = pal(o).text; p.ctx.font = '13px system-ui, sans-serif'; p.ctx.textAlign = 'center'; p.ctx.textBaseline = 'middle';
+    p.ctx.fillText(text || '', p.w / 2, p.h / 2);
+  }
+  var L = function (o, k, d) { return o && o.labels && o.labels[k] !== undefined ? o.labels[k] : d; };
+
+  /* ---------- 1. rates with Wilson bands ---------- */
+
+  function drawRates(canvas, series, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!series.length) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var box = boxFor(p), fr = frame(ctx, box, [1, 12], [0, 1], o, L(o, 'gen', 'generation'), null);
+    var mk = function (key, field) { return series.map(function (r) { return [fr.sx(r.gen), fr.sy(r[key][field])]; }); };
+    band(ctx, mk('tr', 'hi'), mk('tr', 'lo'), rgba(P.cyan, 0.22));
+    band(ctx, mk('fr', 'hi'), mk('fr', 'lo'), rgba(P.warn, 0.22));
+    polyline(ctx, mk('tr', 'p'), rgba(P.cyan, 1), P.lw);
+    polyline(ctx, mk('fr', 'p'), rgba(P.warn, 1), P.lw, [6, 4]);
+    mk('tr', 'p').forEach(function (q) { ctx.fillStyle = rgba(P.cyan, 1); ctx.beginPath(); ctx.arc(q[0], q[1], 2.6, 0, TAU); ctx.fill(); });
+    legend(ctx, [{ c: 'cyan', label: L(o, 'trueRate', 'true-event rate') }, { c: 'warn', label: L(o, 'falseRate', 'false-event rate'), dash: [6, 4] }], box.x0 + 8, box.y0 + 8, o);
+  }
+
+  /* ---------- 2. alignment ---------- */
+
+  function drawAlignment(canvas, al, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!al) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var box = boxFor(p), fr = frame(ctx, box, [0, al.steps], [0, 1], o, L(o, 'step', 'step'), null);
+    ctx.setLineDash([2, 4]); ctx.strokeStyle = P.grid;
+    for (var c = 10; c <= al.steps; c += 10) { ctx.beginPath(); ctx.moveTo(fr.sx(c), box.y0); ctx.lineTo(fr.sx(c), box.y1); ctx.stroke(); }
+    ctx.setLineDash([]);
+    for (var i = 0; i < 3; i++) {
+      var col = P[AGENTS[i]], up = [], dn = [], mid = [];
+      for (var t = 0; t < al.steps; t++) {
+        var m = al.mean[i][t], s = al.sd[i][t];
+        up.push([fr.sx(t + 1), fr.sy(clamp(m + s, 0, 1))]); dn.push([fr.sx(t + 1), fr.sy(clamp(m - s, 0, 1))]); mid.push([fr.sx(t + 1), fr.sy(m)]);
+      }
+      band(ctx, up, dn, rgba(col, 0.16));
+      polyline(ctx, mid, rgba(col, 1), P.lw, i === 1 ? [7, 3] : (i === 2 ? [2, 3] : null));
+    }
+    legend(ctx, [{ c: 'cyan', label: 'A' }, { c: 'blue', label: 'B', dash: [7, 3] }, { c: 'aqua', label: 'C', dash: [2, 3] }], box.x0 + 8, box.y0 + 8, o);
+  }
+
+  /* ---------- 3. energy-ratio histogram ---------- */
+
+  function drawHist(canvas, h, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!h) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var ymax = 1, k;
+    for (k = 0; k < h.bins; k++) ymax = Math.max(ymax, h.planted[k], h.noise[k]);
+    var box = boxFor(p), fr = frame(ctx, box, [h.lo, h.hi], [0, ymax], o, L(o, 'ratio', 'gain x energy ratio'), null);
+    var bw = (box.x1 - box.x0) / h.bins;
+    for (k = 0; k < h.bins; k++) {
+      var x = box.x0 + k * bw;
+      ctx.fillStyle = rgba(P.grey, o && o.hc ? 0.9 : 0.55); ctx.fillRect(x + 1, fr.sy(h.noise[k]), bw * 0.46, box.y1 - fr.sy(h.noise[k]));
+      ctx.fillStyle = rgba(P.cyan, 0.95); ctx.fillRect(x + bw * 0.5, fr.sy(h.planted[k]), bw * 0.46, box.y1 - fr.sy(h.planted[k]));
+    }
+    h.thr.forEach(function (t, i) {
+      ctx.strokeStyle = rgba(P.gold, 1); ctx.lineWidth = P.lw; ctx.setLineDash(i === 0 ? [] : [4, 3]);
+      ctx.beginPath(); ctx.moveTo(fr.sx(t), box.y0); ctx.lineTo(fr.sx(t), box.y1); ctx.stroke(); ctx.setLineDash([]);
+    });
+    legend(ctx, [{ c: 'grey', label: L(o, 'noise', 'noise episodes') }, { c: 'cyan', label: L(o, 'planted', 'planted episodes') }, { c: 'gold', label: L(o, 'threshold', 'threshold') }], box.x0 + 8, box.y0 + 8, o);
+  }
+
+  /* ---------- 4. precision / recall sweep ---------- */
+
+  function drawSweep(canvas, sw, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!sw || !sw.points.length) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var box = boxFor(p), fr = frame(ctx, box, [1, sw.hi], [0, 1], o, L(o, 'threshold', 'threshold'), null);
+    var mk = function (fn) { return sw.points.map(function (q) { return [fr.sx(q.th), fr.sy(fn(q))]; }); };
+    band(ctx, mk(function (q) { return q.recallCI.hi; }), mk(function (q) { return q.recallCI.lo; }), rgba(P.cyan, 0.2));
+    band(ctx, mk(function (q) { return Math.min(1, q.falseCI.hi); }), mk(function (q) { return q.falseCI.lo; }), rgba(P.warn, 0.2));
+    polyline(ctx, mk(function (q) { return q.recall; }), rgba(P.cyan, 1), P.lw);
+    polyline(ctx, mk(function (q) { return q.falseRate; }), rgba(P.warn, 1), P.lw, [6, 4]);
+    var pr = sw.points.filter(function (q) { return q.precision !== null; }).map(function (q) { return [fr.sx(q.th), fr.sy(q.precision)]; });
+    polyline(ctx, pr, rgba(P.gold, 1), P.lw, [2, 3]);
+    sw.thr.forEach(function (t, i) {
+      ctx.strokeStyle = rgba(P.white, 0.9); ctx.lineWidth = 1.2; ctx.setLineDash(i === 0 ? [] : [3, 3]);
+      ctx.beginPath(); ctx.moveTo(fr.sx(t), box.y0); ctx.lineTo(fr.sx(t), box.y1); ctx.stroke(); ctx.setLineDash([]);
+    });
+    legend(ctx, [{ c: 'cyan', label: L(o, 'recall', 'recall') }, { c: 'warn', label: L(o, 'falsePer', 'false per agent-episode'), dash: [6, 4] }, { c: 'gold', label: L(o, 'precision', 'precision'), dash: [2, 3] }], box.x0 + 8, box.y0 + 8, o);
+  }
+
+  /* ---------- 5. shield counts ---------- */
+
+  function drawShield(canvas, sc, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!sc.gens.length) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var ymax = 4;
+    sc.gens.forEach(function (g) { if (g.declared > ymax) ymax = g.declared; });
+    ymax = Math.ceil(ymax / 4) * 4;
+    var box = boxFor(p), fr = frame(ctx, box, [0.5, 12.5], [0, ymax], o, L(o, 'gen', 'generation'), null);
+    var bw = Math.max(5, (box.x1 - box.x0) / 12 * 0.62);
+    sc.gens.forEach(function (g) {
+      var x = fr.sx(g.gen) - bw / 2, y = box.y1, segs = [['truePassed', P.cyan, 0.95], ['falsePassed', P.warn, 1], ['trueRedundant', P.blue, 0.4], ['trueHeld', P.grey, 0.7], ['falseHeld', P.grey, 0.7], ['falseRedundant', P.warn, 0.4]];
+      segs.forEach(function (sg, si) {
+        var v = g[sg[0]]; if (!v) return;
+        var hgt = (box.y1 - box.y0) * v / ymax;
+        ctx.fillStyle = rgba(sg[1], sg[2]); ctx.fillRect(x, y - hgt, bw, hgt);
+        if (si >= 3) { ctx.strokeStyle = rgba(P.white, 0.8); ctx.lineWidth = 1; ctx.setLineDash([3, 2]); ctx.strokeRect(x + 0.5, y - hgt + 0.5, bw - 1, hgt - 1); ctx.setLineDash([]); }
+        y -= hgt;
+      });
+    });
+    legend(ctx, [{ c: 'cyan', label: L(o, 'sh_true_pass', 'true, left') }, { c: 'warn', label: L(o, 'sh_false_pass', 'false, left') }, { c: 'grey', label: L(o, 'sh_held', 'held (no 2-of-3)'), dash: [3, 2] }, { c: 'blue', label: L(o, 'sh_redundant', 'redundant') }], box.x0 + 8, box.y0 + 8, o);
+  }
+
+  /* ---------- 6. stabilizer gain trace ---------- */
+
+  function drawGain(canvas, gt, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!gt.x.length) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var split = Math.round(p.h * 0.64), n = gt.x.length;
+    var top = { x0: 38, x1: p.w - 10, y0: 14, y1: split - 18 }, bot = { x0: 38, x1: p.w - 10, y0: split + 6, y1: p.h - 34 };
+    var gmax = Math.max(3.4, Math.ceil(gt.gmax * 2) / 2);
+    var f1 = frame(ctx, top, [0, n - 1], [0, gmax], o, null, null);
+    if (gt.stab) {
+      ctx.strokeStyle = rgba(P.gold, 1); ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+      [gt.min, gt.max].forEach(function (v) { ctx.beginPath(); ctx.moveTo(top.x0, f1.sy(v)); ctx.lineTo(top.x1, f1.sy(v)); ctx.stroke(); });
+      ctx.setLineDash([]);
+    }
+    for (var i = 0; i < 3; i++) polyline(ctx, gt.geff[i].map(function (v, k) { return [f1.sx(k), f1.sy(v)]; }), rgba(P[AGENTS[i]], 0.95), P.lw * 0.8, i === 1 ? [7, 3] : (i === 2 ? [2, 3] : null));
+    for (var g = 1; g < 12; g++) { ctx.strokeStyle = P.grid; ctx.setLineDash([1, 5]); ctx.beginPath(); ctx.moveTo(f1.sx(g * 8), top.y0); ctx.lineTo(f1.sx(g * 8), bot.y1); ctx.stroke(); ctx.setLineDash([]); }
+    var f2 = frame(ctx, bot, [0, n - 1], [0, 1], o, L(o, 'episode', 'episode'), null);
+    ctx.strokeStyle = rgba(P.gold, 1); ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(bot.x0, f2.sy(gt.target)); ctx.lineTo(bot.x1, f2.sy(gt.target)); ctx.stroke(); ctx.setLineDash([]);
+    polyline(ctx, gt.rate.map(function (v, k) { return [f2.sx(k), f2.sy(v)]; }), rgba(P.white, 0.95), P.lw * 0.9);
+    ctx.fillStyle = P.text; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(L(o, 'gain', 'effective gain'), top.x0 + 6, top.y0 + 1);
+    ctx.fillText(L(o, 'rate', 'output rate (leaky mean)'), bot.x0 + 6, bot.y0 + 1);
+  }
+
+  /* ---------- 7. (1+1)-ES parameter trials ---------- */
+
+  var RANGES = { th: [0, 1.6], c: [0, 0.5], g: [0, 3.4] };
+  function drawLandscape(canvas, ls, ax, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!ls.trials) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    ax = ax || { x: 'th', y: 'g' };
+    var box = boxFor(p, 38), fr = frame(ctx, box, RANGES[ax.x], RANGES[ax.y], o, L(o, 'p_' + ax.x, ax.x), L(o, 'p_' + ax.y, ax.y));
+    var lo = Infinity, hi = -Infinity;
+    ls.points.forEach(function (q) { if (q.score < lo) lo = q.score; if (q.score > hi) hi = q.score; });
+    for (var i = 0; i < 3; i++) {
+      var path = ls.points.filter(function (q) { return q.i === i && q.accepted; }).map(function (q) { return [fr.sx(q[ax.x]), fr.sy(q[ax.y])]; });
+      polyline(ctx, path, rgba(P[AGENTS[i]], 0.5), 1.2);
+    }
+    ls.points.forEach(function (q) {
+      var x = fr.sx(q[ax.x]), y = fr.sy(q[ax.y]), col = o && o.hc ? P[AGENTS[q.i]] : scoreColor(q.score, lo, hi);
+      ctx.beginPath();
+      if (q.i === 0) ctx.arc(x, y, 4.2, 0, TAU);
+      else if (q.i === 1) { ctx.rect(x - 3.6, y - 3.6, 7.2, 7.2); }
+      else { ctx.moveTo(x, y - 4.8); ctx.lineTo(x + 4.4, y + 3.4); ctx.lineTo(x - 4.4, y + 3.4); ctx.closePath(); }
+      if (q.accepted) { ctx.fillStyle = rgba(col, 0.95); ctx.fill(); ctx.strokeStyle = rgba(P.white, 0.85); ctx.lineWidth = 1; ctx.stroke(); }
+      else { ctx.strokeStyle = rgba(col, 0.9); ctx.lineWidth = 1.4; ctx.stroke(); }
+    });
+    ctx.fillStyle = P.text; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText(L(o, 'land_key', 'A circle, B square, C triangle; filled = kept'), box.x1 - 4, box.y0 + 1);
+  }
+
+  /* ---------- 8. ensemble: interval per metric, seeds as dots, repository baseline ---------- */
+
+  var ENS_ROWS = [['T', 0], ['F', 0], ['precision', 3], ['rateVar', 3], ['score', 0]];
+  function drawEnsemble(canvas, sum, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!sum || !sum.n) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var rows = ENS_ROWS, rh = (p.h - 8) / rows.length, x0 = 118, x1 = p.w - 14;
+    rows.forEach(function (rw, r) {
+      var m = sum.metrics[rw[0]], b = sum.baseline ? sum.baseline[rw[0]] : null;
+      var lo = Math.min.apply(null, m.values), hi = Math.max.apply(null, m.values);
+      if (b && b.lo !== null) { lo = Math.min(lo, b.lo); hi = Math.max(hi, b.hi); } else if (b) { lo = Math.min(lo, b.mean); hi = Math.max(hi, b.mean); }
+      var pad = (hi - lo) * 0.08 || 0.5; lo -= pad; hi += pad;
+      var sx = scale(lo, hi, x0, x1), cy = 4 + rh * r + rh * 0.5;
+      ctx.fillStyle = P.text; ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(L(o, 'm_' + rw[0], rw[0]), 6, cy);
+      ctx.strokeStyle = P.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.stroke();
+      m.values.forEach(function (v, k) { ctx.fillStyle = rgba(P.grey, o && o.hc ? 0.9 : 0.6); ctx.beginPath(); ctx.arc(sx(v), cy + jitter(k) * rh * 0.28, 2, 0, TAU); ctx.fill(); });
+      ctx.strokeStyle = rgba(P.cyan, 1); ctx.lineWidth = P.lw + 1.2;
+      ctx.beginPath(); ctx.moveTo(sx(m.t.lo), cy); ctx.lineTo(sx(m.t.hi), cy); ctx.stroke();
+      ctx.fillStyle = rgba(P.cyan, 1); ctx.beginPath(); ctx.arc(sx(m.t.mean), cy, 4.5, 0, TAU); ctx.fill();
+      if (b) {
+        ctx.strokeStyle = rgba(P.gold, 1); ctx.fillStyle = rgba(P.gold, 1); ctx.lineWidth = 2;
+        if (b.lo !== null) { ctx.beginPath(); ctx.moveTo(sx(b.lo), cy + rh * 0.34); ctx.lineTo(sx(b.hi), cy + rh * 0.34); ctx.stroke(); }
+        var bx = sx(b.mean), by = cy + rh * 0.34;
+        ctx.beginPath(); ctx.moveTo(bx, by - 5); ctx.lineTo(bx + 5, by); ctx.lineTo(bx, by + 5); ctx.lineTo(bx - 5, by); ctx.closePath();
+        if (b.approx) { ctx.lineWidth = 1.4; ctx.stroke(); } else ctx.fill();
+      }
+      ctx.fillStyle = P.text; ctx.font = '10px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(fmtTick(lo + pad), x0, cy + rh * 0.4); ctx.textAlign = 'right'; ctx.fillText(fmtTick(hi - pad), x1, cy + rh * 0.4);
+    });
+  }
+
+  /* ---------- 9. A/B: paired score per seed, and the paired difference with its interval ---------- */
+
+  function drawPaired(canvas, sum, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!sum || sum.n < 2) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var half = Math.round(p.w * 0.36), rows = ENS_ROWS, k;
+    // left: slope chart of the game score, A on the left axis, B on the right
+    var va = sum.metrics.score.va, vb = sum.metrics.score.vb, lo = Math.min.apply(null, va.concat(vb)), hi = Math.max.apply(null, va.concat(vb));
+    var pad = (hi - lo) * 0.06 || 1, sy = scale(lo - pad, hi + pad, p.h - 26, 18), xa = 30, xb = half - 14;
+    ctx.fillStyle = P.text; ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(L(o, 'labA', 'A'), xa, p.h - 22); ctx.fillText(L(o, 'labB', 'B'), xb, p.h - 22);
+    ctx.textBaseline = 'bottom'; ctx.fillText(L(o, 'm_score', 'score'), (xa + xb) / 2, 14);
+    for (k = 0; k < va.length; k++) {
+      var up = vb[k] > va[k];
+      ctx.strokeStyle = rgba(up ? P.cyan : P.warn, o && o.hc ? 0.9 : 0.45); ctx.lineWidth = 1; ctx.setLineDash(up ? [] : [4, 3]);
+      ctx.beginPath(); ctx.moveTo(xa, sy(va[k])); ctx.lineTo(xb, sy(vb[k])); ctx.stroke(); ctx.setLineDash([]);
+    }
+    [[xa, va, 'cyan'], [xb, vb, 'blue']].forEach(function (g) { g[1].forEach(function (v) { ctx.fillStyle = rgba(P[g[2]], 0.95); ctx.beginPath(); ctx.arc(g[0], sy(v), 2.4, 0, TAU); ctx.fill(); }); });
+    // right: difference A - B per metric, 95 percent t interval and bootstrap interval, zero line
+    var x0 = half + 70, x1 = p.w - 14, rh = (p.h - 8) / rows.length;
+    rows.forEach(function (rw, r) {
+      var d = sum.metrics[rw[0]].diff, cy = 4 + rh * r + rh * 0.5;
+      var ext = Math.max(Math.abs(d.lo), Math.abs(d.hi), (d.boot ? Math.max(Math.abs(d.boot.lo), Math.abs(d.boot.hi)) : 0), 1e-6) * 1.15, sx = scale(-ext, ext, x0, x1);
+      ctx.fillStyle = P.text; ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(L(o, 'm_' + rw[0], rw[0]), half + 8, cy);
+      ctx.strokeStyle = P.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.stroke();
+      ctx.strokeStyle = rgba(P.gold, 1); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(sx(0), cy - rh * 0.38); ctx.lineTo(sx(0), cy + rh * 0.38); ctx.stroke(); ctx.setLineDash([]);
+      var col = d.excludesZero ? P.cyan : P.grey;
+      ctx.strokeStyle = rgba(col, 1); ctx.lineWidth = P.lw + 1.2; ctx.beginPath(); ctx.moveTo(sx(d.lo), cy); ctx.lineTo(sx(d.hi), cy); ctx.stroke();
+      ctx.fillStyle = rgba(col, 1); ctx.beginPath(); ctx.arc(sx(d.mean), cy, 4.5, 0, TAU); ctx.fill();
+      if (d.boot) { ctx.strokeStyle = rgba(P.white, 0.9); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(sx(d.boot.lo), cy + rh * 0.3); ctx.lineTo(sx(d.boot.hi), cy + rh * 0.3); ctx.stroke(); }
+    });
+  }
+
+  /* ---------- 10. amplifier: the repository's S-- against SA-, precision with 95 percent intervals ---------- */
+
+  function drawAmp(canvas, ab, o) {
+    var p = prep(canvas), ctx = p.ctx, P = pal(o);
+    if (!ab.rows.length) return empty(p, o, L(o, 'empty', ''));
+    clear(p, o);
+    var box = { x0: 44, x1: p.w - 10, y0: 14, y1: p.h - 34 };
+    var ci = function (r) { return ST_t(r.seeds) * r.Psd / Math.sqrt(r.seeds); };
+    var lo = Infinity, hi = -Infinity;
+    ab.rows.forEach(function (r) { [r.off, r.on].forEach(function (q) { lo = Math.min(lo, q.P - ci(q)); hi = Math.max(hi, q.P + ci(q)); }); });
+    var pad = (hi - lo) * 0.15; lo -= pad; hi += pad;
+    var fr = frame(ctx, box, [0, ab.rows.length], [lo, hi], o, null, L(o, 'precision', 'precision'));
+    ab.rows.forEach(function (r, k) {
+      var cx = fr.sx(k + 0.5), dx = (box.x1 - box.x0) / ab.rows.length * 0.16;
+      [[r.off, -dx, 'grey'], [r.on, dx, 'cyan']].forEach(function (g) {
+        var q = g[0], x = cx + g[1], h = ci(q);
+        ctx.strokeStyle = rgba(P[g[2]], 1); ctx.lineWidth = P.lw + 0.6; ctx.beginPath(); ctx.moveTo(x, fr.sy(q.P - h)); ctx.lineTo(x, fr.sy(q.P + h)); ctx.stroke();
+        ctx.fillStyle = rgba(P[g[2]], 1); ctx.beginPath(); ctx.arc(x, fr.sy(q.P), 4.2, 0, TAU); ctx.fill();
+      });
+      ctx.fillStyle = P.text; ctx.font = '11px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(L(o, 'w', 'cooperation') + ' ' + Math.round(r.w * 100) + '%', cx, box.y1 + 6);
+    });
+    legend(ctx, [{ c: 'grey', label: L(o, 'amp_off', 'amplifier off') }, { c: 'cyan', label: L(o, 'amp_on', 'amplifier on') }], box.x0 + 8, box.y0 + 8, o);
+  }
+  function ST_t(n) { return ST.tCrit95(n - 1); }
+
+  /* ---------- 11. replay rail: every declaration of the whole contest ---------- */
+
+  function drawRail(canvas, hist, cursor, o) {
+    var p = prep(canvas, 36), ctx = p.ctx, P = pal(o);
+    clear(p, o);
+    var total = 12 * 8 * 60, x0 = 6, x1 = p.w - 6, sx = scale(0, total, x0, x1), y0 = 6, y1 = p.h - 6;
+    for (var g = 0; g <= 12; g++) { ctx.strokeStyle = g % 4 === 0 ? P.axis : P.grid; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(sx(g * 480), y0); ctx.lineTo(sx(g * 480), y1); ctx.stroke(); }
+    hist.forEach(function (h, gi) {
+      h.episodes.forEach(function (ep, ei) {
+        var base = (gi * 8 + ei) * 60;
+        if (ep.planted) { ctx.fillStyle = rgba(P.blue, 0.1); ctx.fillRect(sx(base), y0, sx(base + 60) - sx(base), y1 - y0); }
+        for (var i = 0; i < 3; i++) {
+          if (ep.declStep[i] === null) continue;
+          var x = sx(base + ep.declStep[i]), y = y0 + (y1 - y0) * (0.2 + 0.3 * i);
+          var out = ep.outs.indexOf(i) >= 0;
+          ctx.fillStyle = rgba(ep.truth[i] ? P.gold : P.grey, out ? 1 : 0.55);
+          ctx.beginPath(); ctx.arc(x, y, out ? 2.8 : 1.8, 0, TAU); ctx.fill();
+        }
+      });
+    });
+    if (cursor !== null && cursor !== undefined) {
+      ctx.strokeStyle = rgba(P.white, 1); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx(cursor), 0); ctx.lineTo(sx(cursor), p.h); ctx.stroke();
+    }
+  }
+
+  return {
+    PAL: PAL, HC: HC, RANGES: RANGES, scale: scale, ticks: ticks, fmtTick: fmtTick, jitter: jitter, scoreColor: scoreColor, clamp: clamp,
+    drawRates: drawRates, drawAlignment: drawAlignment, drawHist: drawHist, drawSweep: drawSweep, drawShield: drawShield, drawGain: drawGain,
+    drawLandscape: drawLandscape, drawEnsemble: drawEnsemble, drawPaired: drawPaired, drawAmp: drawAmp, drawRail: drawRail
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Lab interface (SYNTHETIC classical simulation).
+ *
+ * Tabs, the Lab instruments, the multi-seed ensemble, the A/B test, the
+ * missions and the export buttons. The numbers come from lab.js, the drawing
+ * from charts.js; this file only wires them to the page. No network.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./game.js'), require('./lab.js'), require('./charts.js'));
+  else root.ArenaLabUI = factory(root.ArenaGame, root.ArenaLab, root.ArenaCharts);
+})(typeof self !== 'undefined' ? self : this, function (G, LAB, C) {
+  'use strict';
+
+  var TABS = ['meters', 'lab', 'ens', 'ab', 'missions', 'method'];
+  var METRIC_KEYS = ['T', 'F', 'precision', 'rateVar', 'score'];
+  var DIGITS = { T: 1, F: 1, precision: 3, rateVar: 3, score: 1 };
+  var PROBE_K = 60;
+
+  function create(env) {
+    var $ = env.$, tab = 'meters';
+    var lab = { probe: null, probeKey: '', token: 0 };
+    var ens = { job: null, summary: null, results: null, settings: null, repo: true, running: false, t0: 0, runMs: 0, wallMs: 0 };
+    var ab = { job: null, summary: null, meta: null, settings: null, running: false, t0: 0, runMs: 0, labels: null };
+
+    function t(k, v) { return env.t()(k, v); }
+    // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
+    function tk(prefix, name, suffix, v) { return env.t()(prefix + name + (suffix || ''), v); }
+    function f(x, d) { return (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d); }
+    function labels() {
+      var o = { empty: t('ch.empty'), gen: t('ch.gen'), step: t('ch.step'), trueRate: t('ch.true_rate'), falseRate: t('ch.false_rate'), ratio: t('ch.ratio'), noise: t('ch.noise'), planted: t('ch.planted'),
+        threshold: t('ch.threshold'), recall: t('ch.recall'), falsePer: t('ch.false_per'), precision: t('ch.precision'), sh_true_pass: t('ch.sh_true_pass'), sh_false_pass: t('ch.sh_false_pass'),
+        sh_held: t('ch.sh_held'), sh_redundant: t('ch.sh_redundant'), gain: t('ch.gain'), rate: t('ch.rate'), episode: t('ch.episode'), p_th: t('ch.p_th'), p_c: t('ch.p_c'), p_g: t('ch.p_g'),
+        land_key: t('ch.land_key'), labA: t('ch.labA'), labB: t('ch.labB'), w: t('ch.w'), amp_off: t('ch.amp_off'), amp_on: t('ch.amp_on') };
+      METRIC_KEYS.forEach(function (k) { o['m_' + k] = tk('ch.m_', k); });
+      return o;
+    }
+    function copts() { return { hc: env.hc(), labels: labels() }; }
+    function setAlt(id, text) { $(id).textContent = text; }
+
+    /* ---------- tabs ---------- */
+
+    function showTab(name, focus) {
+      if (TABS.indexOf(name) < 0) return;
+      tab = name;
+      TABS.forEach(function (k) {
+        var on = k === name;
+        $('tab-' + k).setAttribute('aria-selected', on ? 'true' : 'false');
+        $('tab-' + k).tabIndex = on ? 0 : -1;
+        $('panel-' + k).hidden = !on;
+      });
+      if (focus) $('tab-' + name).focus();
+      refresh();
+      if (env.onTab) env.onTab(name);
+    }
+    function onTabKey(e) {
+      var i = TABS.indexOf(tab), n = i;
+      if (e.key === 'ArrowRight') n = (i + 1) % TABS.length;
+      else if (e.key === 'ArrowLeft') n = (i + TABS.length - 1) % TABS.length;
+      else if (e.key === 'Home') n = 0;
+      else if (e.key === 'End') n = TABS.length - 1;
+      else return;
+      e.preventDefault(); showTab(TABS[n], true);
+    }
+
+    /* ---------- Lab ---------- */
+
+    function fillGenSelect(n) {
+      var sel = $('lab-gen'), keep = sel.value, last = String(n);
+      if (sel.options.length !== n) {
+        sel.innerHTML = '';
+        for (var g = 1; g <= n; g++) { var o = document.createElement('option'); o.value = String(g); o.textContent = String(g); sel.appendChild(o); }
+        sel.value = last;
+      } else if (keep) sel.value = keep;
+      if (!sel.value && n) sel.value = last;
+    }
+    var AXES = { 'th-g': { x: 'th', y: 'g' }, 'th-c': { x: 'th', y: 'c' }, 'c-g': { x: 'c', y: 'g' } };
+
+    function refreshLab() {
+      var hist = env.doneHist(), has = hist.length > 0, o = copts(), tt = env.t();
+      $('lab-empty').hidden = has;
+      fillGenSelect(hist.length);
+      var series = has ? LAB.rateSeries(hist) : [];
+      C.drawRates($('lab-rates'), series, o); setAlt('alt-rates', has ? LAB.describeRates(tt, series) : '');
+      var al = has ? LAB.alignment(hist, Math.max(0, Math.min(hist.length, Number($('lab-gen').value) || hist.length) - 1)) : null;
+      C.drawAlignment($('lab-align'), al, o); setAlt('alt-align', has ? LAB.describeAlignment(tt, al) : '');
+      var sc = LAB.shieldCounts(hist);
+      C.drawShield($('lab-shield'), sc, o); setAlt('alt-shield', has ? LAB.describeShield(tt, sc) : '');
+      var gt = LAB.gainTrace(hist);
+      C.drawGain($('lab-gain'), gt, o); setAlt('alt-gain', has ? LAB.describeGain(tt, gt) : '');
+      var ls = LAB.landscape(hist), axes = AXES[$('lab-axes').value] || AXES['th-g'];
+      C.drawLandscape($('lab-land'), ls, axes, o); setAlt('alt-land', has ? LAB.describeLandscape(tt, ls) : '');
+      var amp = LAB.ampBaseline();
+      C.drawAmp($('lab-amp'), amp, o); setAlt('alt-amp', LAB.describeAmp(tt, amp));
+      $('lab-amp-help').textContent = t('lab.amp.help', { file: amp.file, seeds: amp.seeds, dp: f(amp.maxDeltaP, 3) });
+      $('lab-hist-help').textContent = t('lab.hist.help', { k: PROBE_K });
+      if (env.drawSci) env.drawSci();
+      refreshProbe(has);
+    }
+    // the probe costs about a tenth of a second, so it runs after the cheap charts and only when the contest changed
+    function refreshProbe(has) {
+      var c = env.contest(), o = copts(), tt = env.t(), hist = env.doneHist();
+      if (!has || !c) { C.drawHist($('lab-hist'), null, o); C.drawSweep($('lab-sweep'), null, o); setAlt('alt-hist', ''); setAlt('alt-sweep', ''); return; }
+      var last = hist[hist.length - 1].settings, key = c.seed + ':' + c.gen + ':' + last.stab + ':' + last.amp;
+      var draw = function () {
+        var h = LAB.ratioHistogram(lab.probe), sw = LAB.sweep(lab.probe, 40), cur = LAB.atThreshold(lab.probe, lab.probe.thr.reduce(function (a, b) { return a + b; }, 0) / 3);
+        C.drawHist($('lab-hist'), h, o); setAlt('alt-hist', LAB.describeHist(tt, h));
+        C.drawSweep($('lab-sweep'), sw, o); setAlt('alt-sweep', LAB.describeSweep(tt, sw, cur));
+      };
+      if (lab.probe && lab.probeKey === key) { draw(); return; }
+      var token = ++lab.token;
+      setTimeout(function () {
+        if (token !== lab.token) return;
+        lab.probe = LAB.probe(c, last, PROBE_K); lab.probeKey = key;
+        draw();
+      }, 0);
+    }
+
+    /* ---------- export ---------- */
+
+    function download(name, mime, text) {
+      var st = $('exp-status'), box = $('exp-text');
+      try {
+        var blob = new Blob([text], { type: mime }), url = URL.createObjectURL(blob), a = document.createElement('a');
+        a.href = url; a.download = name; a.rel = 'noopener'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+        box.hidden = true; st.textContent = t('lab.export.done', { name: name });
+      } catch (e) { box.hidden = false; box.value = text; st.textContent = t('lab.export.fail'); }
+    }
+    function stamp() { var d = env.seedInfo(); return d ? d.seed : 'run'; }
+
+    /* ---------- tables ---------- */
+
+    function row(cells, head) {
+      var tr = document.createElement('tr');
+      cells.forEach(function (c) { var td = document.createElement(head ? 'th' : 'td'); td.textContent = c; if (head) td.scope = 'col'; tr.appendChild(td); });
+      return tr;
+    }
+    function ci(c, d) { return f(c.mean, d) + ' (' + f(c.lo, d) + ' to ' + f(c.hi, d) + ')'; }
+
+    /* ---------- ensemble ---------- */
+
+    function setProgress(id, v) { $(id).value = v; }
+    function runEnsemble() {
+      if (ens.running) return;
+      var s = env.readSettings(), n = Number($('ens-n').value) || 20, repo = $('ens-repo').checked;
+      ens.job = LAB.createEnsemble({ settings: s, n: n, repoStart: repo }); ens.settings = s; ens.repo = repo; ens.running = true; ens.t0 = Date.now();
+      $('btn-ens-run').disabled = true; $('btn-ens-cancel').disabled = false;
+      setProgress('ens-progress', 0); $('ens-status').textContent = t('ens.progress', { done: 0, n: n });
+      var tick = function () {
+        if (!ens.running) return;
+        var r = ens.job.step(12);
+        setProgress('ens-progress', r.progress);
+        $('ens-status').textContent = t('ens.progress', { done: r.completed, n: n });
+        if (r.done) finishEnsemble(); else setTimeout(tick, 0);
+      };
+      setTimeout(tick, 0);
+    }
+    function finishEnsemble() {
+      var st = ens.job.state(), cancelled = st.cancelled;
+      ens.running = false; ens.results = ens.job.results(); ens.runMs = st.ms; ens.wallMs = Date.now() - ens.t0;
+      $('btn-ens-run').disabled = false; $('btn-ens-cancel').disabled = true;
+      if (!ens.results.length) { $('ens-status').textContent = t('ens.cancelled', { done: 0 }); return; }
+      ens.summary = LAB.summarizeEnsemble(ens.results, ens.settings, ens.repo);
+      $('ens-status').textContent = cancelled ? t('ens.cancelled', { done: ens.results.length }) : t('ens.done', { n: ens.results.length, sec: f(ens.wallMs / 1000, 1) });
+      renderEnsemble();
+      if (!cancelled) {
+        var res = LAB.evaluateMission('repo', { summary: ens.summary });
+        if (res && res.counts) record('repo', res, ens.summary.n);
+      }
+    }
+    function renderEnsemble() {
+      var sum = ens.summary;
+      $('ens-empty').hidden = !!sum; $('ens-out').hidden = !sum;
+      if (!sum) return;
+      var tt = env.t();
+      C.drawEnsemble($('ens-chart'), sum, copts());
+      setAlt('ens-alt', LAB.describeEnsemble(tt, sum));
+      $('ens-like').textContent = t(sum.like ? 'ens.like_note_yes' : 'ens.like_note_no');
+      var tb = $('ens-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('ens.col.metric'), t('ens.col.t'), t('ens.col.boot'), t('ens.col.repo')], true));
+      METRIC_KEYS.forEach(function (m) {
+        var x = sum.metrics[m], b = sum.baseline ? sum.baseline[m] : null, d = DIGITS[m], repoCell = '-';
+        if (b) repoCell = (b.approx ? '~' : '') + (b.lo === null ? f(b.mean, d) : ci(b, d));
+        tb.appendChild(row([tk('ch.m_', m), ci(x.t, d), f(x.boot.lo, d) + ' to ' + f(x.boot.hi, d), repoCell]));
+      });
+      var note = sum.baseline ? t('ens.file', { file: sum.baseline.file, repo: G.baselines.SOURCE.repo, commit: G.baselines.SOURCE.commit.slice(0, 7) }) + ' ' + t('ens.score_note') : t('ens.nobase');
+      var ag = LAB.agreementWithBaseline(sum);
+      if (ag) note += ' ' + t('ens.agree', { n: ag.count });
+      $('ens-note').textContent = note;
+    }
+    function matchRepository() {
+      var s = LAB.matchRepository(env.readSettings());
+      env.applySettings(s); $('ens-repo').checked = true;
+    }
+
+    /* ---------- A/B ---------- */
+
+    function levelLabel(factor, v) {
+      if (factor === 'scheme') return tk('scheme.', v, '.short');
+      if (factor === 'w') return Math.round(v * 100) + '%';
+      return t(v ? 'ab.level.on' : 'ab.level.off');
+    }
+    function levelsOf(factor) { return LAB.FACTORS[factor].levels; }
+    function fillLevels() {
+      var factor = $('ab-factor').value, lv = levelsOf(factor), a = $('ab-a'), b = $('ab-b'), ka = a.value, kb = b.value;
+      [a, b].forEach(function (sel) {
+        sel.innerHTML = '';
+        lv.forEach(function (v, i) { var o = document.createElement('option'); o.value = String(i); o.textContent = levelLabel(factor, v); sel.appendChild(o); });
+      });
+      var defs = { scheme: ['consensus', 'individual'], w: [1, 0] };
+      var ia = defs[factor] ? lv.indexOf(defs[factor][0]) : 0, ib = defs[factor] ? lv.indexOf(defs[factor][1]) : 1;
+      a.value = ka && Number(ka) < lv.length && a.dataset.f === factor ? ka : String(ia);
+      b.value = kb && Number(kb) < lv.length && b.dataset.f === factor ? kb : String(ib);
+      a.dataset.f = factor; b.dataset.f = factor;
+    }
+    function relabelFactors() {
+      var sel = $('ab-factor');
+      Array.prototype.forEach.call(sel.options, function (o) { o.textContent = tk('ab.factor.', o.value); });
+      var f0 = sel.value, ka = $('ab-a').value, kb = $('ab-b').value;
+      fillLevels(); $('ab-a').value = ka; $('ab-b').value = kb; sel.value = f0;
+      var ax = $('lab-axes');
+      Array.prototype.forEach.call(ax.options, function (o) { o.textContent = tk('lab.axes.', o.value.replace('-', '_')); });
+    }
+    function setupAB(factor, a, b, n) {
+      $('ab-factor').value = factor; $('ab-a').dataset.f = ''; $('ab-b').dataset.f = ''; fillLevels();
+      var lv = levelsOf(factor);
+      $('ab-a').value = String(lv.indexOf(a)); $('ab-b').value = String(lv.indexOf(b));
+      $('ab-n').value = String(n); $('ab-repo').checked = true;
+    }
+    function runAB() {
+      if (ab.running) return;
+      var factor = $('ab-factor').value, lv = levelsOf(factor), a = lv[Number($('ab-a').value)], b = lv[Number($('ab-b').value)], n = Number($('ab-n').value) || 20;
+      var s = env.readSettings();
+      ab.job = LAB.createPaired({ settings: s, factor: factor, a: a, b: b, n: n, repoStart: $('ab-repo').checked });
+      ab.meta = ab.job.meta; ab.settings = s; ab.running = true; ab.t0 = Date.now();
+      $('btn-ab-run').disabled = true; $('btn-ab-cancel').disabled = false;
+      setProgress('ab-progress', 0); $('ab-status').textContent = t('ens.progress', { done: 0, n: n });
+      var tick = function () {
+        if (!ab.running) return;
+        var r = ab.job.step(12);
+        setProgress('ab-progress', r.progress); $('ab-status').textContent = t('ens.progress', { done: r.completed, n: n });
+        if (r.done) finishAB(); else setTimeout(tick, 0);
+      };
+      setTimeout(tick, 0);
+    }
+    function finishAB() {
+      var st = ab.job.state(), cancelled = st.a.cancelled;
+      ab.running = false; ab.runMs = st.a.ms + st.b.ms; ab.wallMs = Date.now() - ab.t0;
+      $('btn-ab-run').disabled = false; $('btn-ab-cancel').disabled = true;
+      var ra = ab.job.a.results(), rb = ab.job.b.results();
+      if (Math.min(ra.length, rb.length) < 2) { $('ab-status').textContent = t('ens.cancelled', { done: Math.min(ra.length, rb.length) }); return; }
+      ab.summary = LAB.summarizePaired(ra, rb);
+      ab.labels = { a: levelLabel(ab.meta.factor, ab.meta.a), b: levelLabel(ab.meta.factor, ab.meta.b) };
+      $('ab-status').textContent = cancelled ? t('ens.cancelled', { done: ab.summary.n }) : t('ab.done', { n: ab.summary.n, sec: f(ab.wallMs / 1000, 1) });
+      renderAB();
+      MISSION_IDS_AB().forEach(function (id) {
+        var res = LAB.evaluateMission(id, { meta: ab.meta, summary: ab.summary });
+        if (res && res.counts) record(id, res, ab.summary.n);
+      });
+    }
+    function MISSION_IDS_AB() { return LAB.MISSIONS.filter(function (m) { return m.kind === 'ab'; }).map(function (m) { return m.id; }); }
+    function renderAB() {
+      var sum = ab.summary;
+      $('ab-empty').hidden = !!sum; $('ab-out').hidden = !sum;
+      if (!sum) return;
+      var tt = env.t();
+      C.drawPaired($('ab-chart'), sum, copts());
+      var lab2 = { a: levelLabel(ab.meta.factor, ab.meta.a), b: levelLabel(ab.meta.factor, ab.meta.b) };
+      ab.labels = lab2;
+      setAlt('ab-alt', LAB.describePaired(tt, sum, ab.meta, lab2));
+      var ds = sum.metrics.score.diff;
+      $('ab-verdict').textContent = t(ds.excludesZero ? 'ab.verdict_yes' : 'ab.verdict_no', { n: sum.n });
+      var tb = $('ab-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('ab.col.metric'), t('ab.col.a') + ' (' + lab2.a + ')', t('ab.col.b') + ' (' + lab2.b + ')', t('ab.col.diff'), t('ab.col.t'), t('ab.col.boot'), t('ab.col.wins')], true));
+      METRIC_KEYS.forEach(function (m) {
+        var x = sum.metrics[m], d = DIGITS[m], df = x.diff;
+        var wins = df.aWins;
+        tb.appendChild(row([tk('ch.m_', m), f(x.a.mean, d), f(x.b.mean, d), f(df.mean, d), f(df.lo, d) + ' to ' + f(df.hi, d) + (df.excludesZero ? '' : ' ' + t('ab.ci_zero')), f(df.boot.lo, d) + ' to ' + f(df.boot.hi, d), wins + '/' + sum.n]));
+      });
+    }
+
+    /* ---------- missions ---------- */
+
+    function outcomeText(m) {
+      var names = (m.metrics || []).map(function (k) { return tk('ch.m_', k); }).join(', ');
+      var n = (m.n !== undefined ? m.n : 0);
+      return tk('out.', m.outcome, '', { metrics: names, n: n });
+    }
+    function record(id, res, n) {
+      var s = env.store(), out;
+      if (res.outcome === 'partly') out = { outcome: 'partly', n: res.detail.count, metrics: [] };
+      else out = { outcome: res.outcome, n: n || 0, metrics: res.detail && res.detail.metrics ? res.detail.metrics : [] };
+      var o = {}; o[id] = out;
+      s.missions[id] = G.sanitizeStore({ missions: o }).missions[id] || out;
+      env.saveStore(); renderMissions();
+      env.announce(tk('mis.', id, '.title') + ': ' + t('mis.done', { outcome: outcomeText(s.missions[id]) }));
+    }
+    function renderMissions() {
+      var ol = $('missions-list'), s = env.store(), lv = G.lessonVars();
+      ol.innerHTML = '';
+      LAB.MISSIONS.forEach(function (m) {
+        var li = document.createElement('li'), done = s.missions[m.id], h = document.createElement('h3'), p = document.createElement('p'), st = document.createElement('p'), b = document.createElement('button');
+        li.className = 'mission' + (done ? ' done' : ''); li.id = 'mission-' + m.id;
+        h.textContent = tk('mis.', m.id, '.title');
+        p.textContent = G.fmt(tk('mis.', m.id, '.brief'), { low: lv.low, cells: lv.cells });
+        st.className = 'status';
+        st.textContent = done ? t('mis.done', { outcome: outcomeText(done) }) : t('mis.todo');
+        b.type = 'button'; b.className = 'btn small'; b.textContent = t('mis.setup'); b.setAttribute('data-mission', m.id);
+        b.addEventListener('click', function () { setupMission(m.id); });
+        li.appendChild(h); li.appendChild(p); li.appendChild(st); li.appendChild(b); ol.appendChild(li);
+      });
+    }
+    function setupMission(id) {
+      var m = LAB.missionById(id);
+      if (m.kind === 'ab') { setupAB(m.factor, m.a, m.b, m.minN); showTab('ab', true); }
+      else if (m.kind === 'ens') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); $('ens-repo').checked = true; $('ens-n').value = String(m.minN); showTab('ens', true); }
+      else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
+      $('mis-note').textContent = t('mis.wrong');
+    }
+    function onPlayFinished(result, ref) {
+      var res = LAB.evaluateMission('play', { result: result, ref: ref });
+      if (res && res.counts) record('play', res, 0);
+    }
+
+    /* ---------- refresh and relabel ---------- */
+
+    function refresh() {
+      if (tab === 'lab') refreshLab();
+      else if (tab === 'ens') renderEnsemble();
+      else if (tab === 'ab') renderAB();
+      else if (tab === 'missions') renderMissions();
+      else if (tab === 'meters' && env.drawMeters) env.drawMeters();
+    }
+    function relabel() {
+      $('tablist').setAttribute('aria-label', t('tabs.aria'));
+      var titles = { 'lab-rates': 'lab.rates.title', 'lab-align': 'lab.align.title', 'lab-hist': 'lab.hist.title', 'lab-sweep': 'lab.sweep.title', 'lab-shield': 'lab.shield.title', 'lab-gain': 'lab.gain.title',
+        'lab-land': 'lab.land.title', 'lab-amp': 'lab.amp.title', 'ens-chart': 'ens.title', 'ab-chart': 'ab.title' };
+      Object.keys(titles).forEach(function (id) { $(id).setAttribute('aria-label', t(titles[id])); });
+      $('ens-progress').setAttribute('aria-label', t('ens.title')); $('ab-progress').setAttribute('aria-label', t('ab.title'));
+      relabelFactors();
+      renderMissions();
+      if (ens.summary) renderEnsemble();
+      if (ab.summary) renderAB();
+      refresh();
+    }
+
+    function init() {
+      TABS.forEach(function (k) { $('tab-' + k).addEventListener('click', function () { showTab(k, false); }); $('tab-' + k).addEventListener('keydown', onTabKey); });
+      $('btn-ens-run').addEventListener('click', runEnsemble);
+      $('btn-ens-cancel').addEventListener('click', function () { if (ens.job) ens.job.cancel(); });
+      $('btn-ens-match').addEventListener('click', matchRepository);
+      $('btn-ab-run').addEventListener('click', runAB);
+      $('btn-ab-cancel').addEventListener('click', function () { if (ab.job) ab.job.cancel(); });
+      $('ab-factor').addEventListener('change', fillLevels);
+      $('lab-gen').addEventListener('change', refreshLab);
+      $('lab-axes').addEventListener('change', refreshLab);
+      $('btn-exp-run-csv').addEventListener('click', function () { var c = env.contest(); if (c) download('membrane-arena-' + stamp() + '.csv', 'text/csv', LAB.runCSV(env.doneHist())); });
+      $('btn-exp-run-json').addEventListener('click', function () { var c = env.contest(); if (c) download('membrane-arena-' + stamp() + '.json', 'application/json', LAB.runJSON(c, env.seedInfo())); });
+      $('btn-ens-csv').addEventListener('click', function () { if (ens.results) download('membrane-arena-ensemble.csv', 'text/csv', LAB.ensembleCSV(ens.results)); });
+      $('btn-ens-json').addEventListener('click', function () { if (ens.summary) download('membrane-arena-ensemble.json', 'application/json', LAB.ensembleJSON(ens.results, ens.summary, ens.settings, ens.repo)); });
+      $('btn-ab-csv').addEventListener('click', function () { if (ab.summary) download('membrane-arena-ab.csv', 'text/csv', LAB.pairedCSV(ab.job.a.results(), ab.job.b.results())); });
+      $('btn-ab-json').addEventListener('click', function () { if (ab.summary) download('membrane-arena-ab.json', 'application/json', LAB.pairedJSON(ab.meta, ab.summary, ab.settings)); });
+      relabelFactors();
+    }
+
+    return {
+      init: init, showTab: showTab, refresh: refresh, relabel: relabel, onPlayFinished: onPlayFinished, activeTab: function () { return tab; },
+      runEnsemble: runEnsemble, runAB: runAB, setupAB: setupAB, state: function () { return { ens: ens, ab: ab, lab: lab }; }
+    };
+  }
+
+  return { create: create, TABS: TABS };
+});
+</script>
+<script>
+/*
  * Membrane Arena: UI controller (SYNTHETIC classical simulation).
  * Wires the DOM to ArenaGame (logic) and ArenaScene (canvas). No network.
  *
@@ -2720,7 +4361,7 @@ pre {
  */
 (function () {
   'use strict';
-  var G = ArenaGame, S = ArenaScene, I = ArenaI18n, B = ArenaBaselines;
+  var G = ArenaGame, S = ArenaScene, I = ArenaI18n, B = ArenaBaselines, C = ArenaCharts, LU = ArenaLabUI;
   var $ = function (id) { return document.getElementById(id); };
   var STORE_KEY = 'membrane-arena/v1';
 
@@ -2730,7 +4371,9 @@ pre {
   var contest = null, mode = 'idle';   // idle | running | paused | done
   var stepOnce = false, atBoundary = false, lessonIdx = 0, lastResult = null, counted = false;
   var doneT = 0, doneF = 0, curT = 0, curF = 0, curRec = null, shownEp = -1, pendingNote = false, tickerMsg = '';
-  var arena = null, lastTs = 0, reduced = false, science = false;
+  var arena = null, lastTs = 0, sysReduced = false, hc = false, still = false, labui = null, tutIdx = 0;
+  var replayIdx = 0, replaying = false, descKey = '', TOTAL = S.TOTAL_STEPS, REPLAY_RATE = 240;
+  function reducedNow() { return sysReduced || still; }
 
   /* ---------- storage, defensive ---------- */
 
@@ -2754,11 +4397,13 @@ pre {
     $('fit').setAttribute('aria-label', t('fit.aria'));
     $('sci').setAttribute('aria-label', t('sci.aria'));
     $('ribbon').setAttribute('aria-label', t('hud.ribbon'));
-    $('footer-version').textContent = t('footer.version', { v: G.VERSION });
+    $('footer-version').textContent = t('footer.version', { v: G.BUILD });
+    $('rail').setAttribute('aria-label', t('replay.rail_aria')); $('replay-pos').setAttribute('aria-label', t('replay.pos'));
     buildSchemeOptions();
     for (var i = 0; i < 3; i++) $('m-gain-' + i).setAttribute('aria-label', t('meters.gain', { m: 'ABC'.charAt(i) }));
     $('m-rate').setAttribute('aria-label', t('meters.rate'));
-    renderMode(); renderControls(); renderCfgNote(); renderStats(); renderHud(); renderMeters(curRec); renderRibbon();
+    renderMode(); renderControls(); renderCfgNote(); renderStats(); renderHud(); renderMeters(curRec); renderRibbon(); renderTutorial(); renderReplay();
+    if (labui) labui.relabel();
     if (!contest || mode === 'idle') setTicker(t('hud.idle'));
     if (lastResult && mode === 'done') renderResult();
     drawCharts();
@@ -2841,9 +4486,14 @@ pre {
     run.textContent = mode === 'running' ? t('btn.pause') : mode === 'paused' ? t('btn.resume') : mode === 'done' ? t('btn.again') : t('btn.run');
     $('btn-step').disabled = mode === 'done';
     $('btn-finish').disabled = mode === 'done';
-    $('btn-science').textContent = t(science ? 'btn.science_on' : 'btn.science_off');
-    $('btn-science').setAttribute('aria-pressed', science ? 'true' : 'false');
+    $('btn-motion').textContent = t(still ? 'btn.motion_off' : 'btn.motion_on'); $('btn-motion').setAttribute('aria-pressed', still ? 'false' : 'true');
+    $('btn-contrast').textContent = t(hc ? 'btn.contrast_on' : 'btn.contrast_off'); $('btn-contrast').setAttribute('aria-pressed', hc ? 'true' : 'false');
     $('hud-pending').hidden = !(pendingNote && locked);
+  }
+  function applySettings(o) {
+    $('scheme').value = o.scheme; setSlider('w', o.w); setSlider('fcost', o.fcost);
+    $('t-shield').checked = !!o.shield; $('t-amp').checked = !!o.amp; $('t-stab').checked = !!o.stab; $('t-evolve').checked = !!o.evolve;
+    onControlChange();
   }
   function renderCfgNote() {
     var s = readSettings(), b = G.baselineFor(s);
@@ -2897,17 +4547,99 @@ pre {
     $('m-rate-val').textContent = r2(rate);
     $('m-state').textContent = t(stab ? 'meters.stab_on' : 'meters.stab_off');
   }
-  function drawCharts() {
-    var hist = contest ? contest.hist : [], doneHist = curRec && mode !== 'done' ? hist.slice(0, -1) : hist;
-    try {
-      S.drawFitness($('fit'), doneHist, G.GENS);
-      if (science) {
-        var b = G.baselineFor(readSettings());
-        S.drawScience($('sci'), doneHist, G.GENS, b ? b.row : null);
-        $('sci-base').textContent = b ? t('cfg.measured', { tag: b.tag, w: b.w }) + ' ' + b.file : t('sci.nobase');
-      }
-    } catch (e) { /* charts are decoration; the numbers still work */ }
+  function doneHist() {
+    var hist = contest ? contest.hist : [];
+    return curRec && mode !== 'done' ? hist.slice(0, -1) : hist;
   }
+  function drawFit() { try { S.drawFitness($('fit'), doneHist(), G.GENS); } catch (e) { /* decoration */ } }
+  function drawSci() {
+    try {
+      var b = G.baselineFor(readSettings());
+      S.drawScience($('sci'), doneHist(), G.GENS, b ? b.row : null);
+      $('sci-base').textContent = b ? t('cfg.measured', { tag: b.tag, w: b.w }) + ' ' + b.file : t('sci.nobase');
+    } catch (e) { /* decoration */ }
+  }
+  function drawCharts() {
+    if (!labui) return;
+    if (labui.activeTab() === 'meters') drawFit(); else labui.refresh();
+    drawRail();
+  }
+
+  /* ---------- arena text equivalent, replay, motion and contrast ---------- */
+
+  function renderArenaDesc(snap) {
+    var el = $('arena-desc');
+    if (!snap) { if (descKey !== 'none') { el.textContent = t('stage.aria'); descKey = 'none'; } return; }
+    var key = snap.gen + ':' + snap.ep + ':' + snap.step + ':' + lang;
+    if (key === descKey) return;
+    descKey = key;
+    var parts = [0, 1, 2].map(function (i) {
+      var m = 'ABC'.charAt(i), en = Math.round(snap.energy[i] * 100);
+      if (snap.declared[i]) return t(snap.truth[i] ? 'arena.m_decl_true' : 'arena.m_decl_false', { m: m });
+      if (snap.align[i] === null && !snap.planted) return t('arena.m_run_noise', { m: m, en: en });
+      return t('arena.m_run', { m: m, en: en, al: snap.align[i] === null ? '-' : r2(snap.align[i]) });
+    });
+    el.textContent = t('arena.desc', { g: snap.gen, e: snap.ep, kind: t(snap.planted ? 'arena.kind_planted' : 'arena.kind_noise'), s: snap.step, a: parts[0], b: parts[1], c: parts[2] });
+  }
+  function drawRail() {
+    if ($('replay').hidden || !contest) return;
+    try { C.drawRail($('rail'), contest.hist, replayIdx, { hc: hc }); } catch (e) { /* decoration */ }
+  }
+  function renderReplay() {
+    $('btn-replay-play').textContent = t(replaying ? 'replay.pause' : 'replay.play');
+    $('btn-replay-play').setAttribute('aria-pressed', replaying ? 'true' : 'false');
+    var p = S.indexToPos(replayIdx);
+    $('replay-text').textContent = t('replay.value', { g: p.gen + 1, e: p.ep + 1, s: p.step });
+    $('replay-pos').setAttribute('aria-valuetext', t('replay.value', { g: p.gen + 1, e: p.ep + 1, s: p.step }));
+    if (contest && !$('replay').hidden) {
+      var d = 0, tr = 0, fl = 0, out = 0;
+      contest.hist.forEach(function (h) { h.episodes.forEach(function (ep) { for (var i = 0; i < 3; i++) if (ep.declStep[i] !== null) { d++; if (ep.truth[i]) tr++; else fl++; } out += ep.outs.length; }); });
+      $('replay-alt').textContent = t('replay.alt', { d: d, t: tr, f: fl, p: out });
+    }
+  }
+  function setReplayIdx(i) {
+    if (!contest || !contest.hist.length) return;
+    replayIdx = Math.max(0, Math.min(TOTAL, Math.round(i)));
+    var p = S.indexToPos(replayIdx), rec = contest.hist[Math.min(p.gen, contest.hist.length - 1)];
+    $('replay-pos').value = String(replayIdx);
+    if (arena && rec) { arena.showAt(rec, p.ep, p.step, rec.settings); renderArenaDesc(arena.snapshot()); }
+    renderReplay(); drawRail();
+  }
+  function stopReplay() { replaying = false; renderReplay(); }
+  function onReplayPlay() {
+    if (replaying) { stopReplay(); return; }
+    if (replayIdx >= TOTAL) replayIdx = 0;
+    replaying = true; renderReplay();
+  }
+  function applyMotion() {
+    document.documentElement.classList.toggle('still', still);
+    if (arena) arena.setReduced(reducedNow());
+  }
+  function applyContrast() {
+    document.documentElement.classList.toggle('hc', hc);
+    if (arena) arena.setContrast(hc);
+    drawCharts(); if (labui) labui.refresh();
+  }
+
+  /* ---------- intro and tutorial ---------- */
+
+  function startIntro() {
+    if (!arena) return false;
+    return arena.playIntro({ title: t('app.title'), sub: t('intro.sub'), done: function () { store.introSeen = true; saveStore(); } });
+  }
+  function skipIntro() { if (arena && arena.stats().intro) arena.skipIntro(); }
+  function renderTutorial() {
+    var open = !$('tutorial').hidden;
+    if (!open) return;
+    var max = 5;
+    $('tut-step').textContent = t('tut.step', { n: tutIdx + 1, max: max });
+    var key = 'tut.s' + (tutIdx + 1);
+    $('tut-text').textContent = t(key);
+    $('btn-tut-next').textContent = t(tutIdx + 1 >= max ? 'tut.done' : 'tut.next');
+  }
+  function openTutorial() { tutIdx = 0; $('tutorial').hidden = false; renderTutorial(); }
+  function closeTutorial() { $('tutorial').hidden = true; if (!store.tutorialSeen) { store.tutorialSeen = true; saveStore(); } }
+  function nextTutorial() { if (tutIdx + 1 >= 5) { closeTutorial(); $('btn-run').focus(); return; } tutIdx++; renderTutorial(); }
 
   /* ---------- the contest loop ---------- */
 
@@ -2917,6 +4649,7 @@ pre {
     if (arena) { arena.clearGeneration(); arena.setPlaying(false); }
     $('s-result').hidden = true;
     renderControls(); renderHud(); renderRibbon(); renderMeters(null); setTicker(t('hud.idle')); announce('');
+    stopReplay(); $('replay').hidden = true; if (arena) arena.leaveScrub(); descKey = ''; replayIdx = 0; renderArenaDesc(null);
     drawCharts();
   }
   function beginRun() {
@@ -2968,13 +4701,14 @@ pre {
     lastTs = ts;
     if (arena) {
       try {
+        if (replaying) { replayIdx += dt * REPLAY_RATE; if (replayIdx >= TOTAL) { replayIdx = TOTAL; replaying = false; } setReplayIdx(replayIdx); }
         var fired = arena.update(dt);
         for (var k = 0; k < fired.length; k++) {
           if (fired[k].type === 'out') onOut(fired[k]);
           else if (fired[k].type === 'gen') { onGenEnd(); break; }
         }
         var pos = arena.position();
-        if (pos && mode !== 'done' && pos.ep !== shownEp) { shownEp = pos.ep; renderRibbon(); renderHud(); }
+        if (pos && mode !== 'done' && pos.ep !== shownEp) { shownEp = pos.ep; renderRibbon(); renderHud(); renderArenaDesc(arena.snapshot()); }
         arena.draw();
       } catch (e) { arena = null; showCanvasError(); }
     }
@@ -2989,6 +4723,7 @@ pre {
     renderControls();
   }
   function onRun() {
+    skipIntro();
     if (mode === 'running') { mode = 'paused'; if (arena) arena.setPlaying(false); announce(t('say.paused')); renderControls(); return; }
     if (mode === 'paused') { resume(); return; }
     if (mode === 'done') resetRun();
@@ -3028,15 +4763,20 @@ pre {
       store.daily[seedInfo.date] = { score: sum.score, T: sum.T, F: sum.F, precision: sum.precision, tag: G.cfgTag(contest.hist[contest.hist.length - 1].settings) };
       if (store.bestDaily === null || sum.score > store.bestDaily) store.bestDaily = sum.score;
     } else if (seedInfo.mode !== 'daily' && (store.bestPractice === null || sum.score > store.bestPractice)) store.bestPractice = sum.score;
-    if (counted || seedInfo.mode !== 'daily') saveStore();
+    var lastSet = contest.hist[contest.hist.length - 1].settings;
+    if (store.bestScheme[lastSet.scheme] === undefined || sum.score > store.bestScheme[lastSet.scheme]) store.bestScheme[lastSet.scheme] = sum.score;
+    saveStore();
     lessonIdx = G.LESSON_IDS.indexOf(G.pickLesson(contest.hist[contest.hist.length - 1].settings, seedInfo.seed));
     renderControls(); renderHud(); renderMode(); renderStats(); renderRibbon(); drawCharts();
     renderResult();
     $('s-result').hidden = false;
+    $('replay').hidden = false; setReplayIdx(TOTAL);
+    var bl = G.baselineFor(lastSet);
+    if (labui) labui.onPlayFinished(sum, bl ? G.baselineScore(bl) : null);
     announce(t('say.final', { score: score }));
     setTicker(t('say.final', { score: score }));
     try { $('result-title').focus({ preventScroll: false }); } catch (e) { /* focus is a courtesy */ }
-    var el = $('s-result'); if (el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+    var el = $('s-result'); if (el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: reducedNow() ? 'auto' : 'smooth' });
   }
 
   /* ---------- result ---------- */
@@ -3129,6 +4869,12 @@ pre {
       li = document.createElement('li'); li.textContent = t('stats.streak', { cur: st.current, best: st.best }); ul.appendChild(li);
       li = document.createElement('li'); li.textContent = t('stats.best', { best: Math.round(store.bestDaily === null ? 0 : store.bestDaily) }); ul.appendChild(li);
     }
+    var sk = G.SCHEMES.filter(function (k) { return store.bestScheme[k] !== undefined; });
+    if (sk.length) {
+      li = document.createElement('li');
+      li.textContent = t('stats.byscheme', { list: sk.map(function (k) { return t('scheme.' + k + '.short') + ' ' + Math.round(store.bestScheme[k]); }).join(', ') });
+      ul.appendChild(li);
+    }
     $('store-warn').hidden = storeOk;
   }
 
@@ -3138,6 +4884,7 @@ pre {
   function openHelp() { lastFocus = document.activeElement; $('help').hidden = false; $('help-title').focus(); }
   function closeHelp() { $('help').hidden = true; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
   function onKey(e) {
+    if (e.key === 'Escape' && arena && arena.stats().intro) { skipIntro(); return; }
     if (e.key === 'Escape' && !$('help').hidden) { closeHelp(); return; }
     if (!$('help').hidden && e.key === 'Tab') {
       var f = $('help').querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -3150,9 +4897,8 @@ pre {
     if (e.key === ' ') { e.preventDefault(); onRun(); }
     else if (e.key === 'g' || e.key === 'G') onStep();
     else if (e.key === 'f' || e.key === 'F') onFinish();
-    else if (e.key === 's' || e.key === 'S') toggleScience();
+    else if (e.key === 's' || e.key === 'S') labui.showTab('lab', true);
   }
-  function toggleScience() { science = !science; $('panel-science').hidden = !science; renderControls(); drawCharts(); }
 
   /* ---------- boot ---------- */
 
@@ -3161,12 +4907,20 @@ pre {
     if (store.lang && I.supported.indexOf(store.lang) >= 0) lang = store.lang;
     else if (/^fr/i.test(navigator.language || '')) lang = 'fr';
     t = I.make(lang);
-    reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    try { arena = S.createArena($('arena'), { reduced: reduced }); } catch (e) { arena = null; showCanvasError(); }
+    sysReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    hc = !!store.hc; still = !!store.still;
+    document.documentElement.classList.toggle('hc', hc); document.documentElement.classList.toggle('still', still);
+    try { arena = S.createArena($('arena'), { reduced: reducedNow(), contrast: hc }); } catch (e) { arena = null; showCanvasError(); }
+    labui = LU.create({
+      $: $, t: function () { return t; }, hc: function () { return hc; }, doneHist: doneHist, contest: function () { return contest; }, readSettings: readSettings,
+      applySettings: applySettings, announce: announce, store: function () { return store; }, saveStore: saveStore, seedInfo: function () { return seedInfo; },
+      drawSci: drawSci, drawMeters: drawFit, onTab: function () { }
+    });
+    labui.init();
     if (arena) arena.setSpeed($('speed').value);
     if (window.matchMedia) {
       var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-      var onMq = function () { reduced = mq.matches; if (arena) arena.setReduced(reduced); };
+      var onMq = function () { sysReduced = mq.matches; applyMotion(); };
       if (mq.addEventListener) mq.addEventListener('change', onMq);
     }
     $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; t = I.make(lang); store.lang = lang; saveStore(); applyI18n(); });
@@ -3179,7 +4933,14 @@ pre {
     $('btn-step').addEventListener('click', onStep);
     $('btn-finish').addEventListener('click', onFinish);
     $('btn-again').addEventListener('click', function () { resetRun(); beginRun(); if (!arena) onFinish(); });
-    $('btn-science').addEventListener('click', toggleScience);
+    $('btn-motion').addEventListener('click', function () { still = !still; store.still = still; saveStore(); applyMotion(); renderControls(); announce(t(still ? 'btn.motion_off' : 'btn.motion_on')); });
+    $('btn-contrast').addEventListener('click', function () { hc = !hc; store.hc = hc; saveStore(); renderControls(); applyContrast(); announce(t(hc ? 'btn.contrast_on' : 'btn.contrast_off')); });
+    $('btn-intro').addEventListener('click', function () { if (!startIntro()) announce(t('btn.motion_off')); openTutorial(); });
+    $('btn-tut-next').addEventListener('click', nextTutorial);
+    $('btn-tut-skip').addEventListener('click', closeTutorial);
+    $('btn-replay-play').addEventListener('click', onReplayPlay);
+    $('replay-pos').addEventListener('input', function () { stopReplay(); setReplayIdx(Number($('replay-pos').value)); });
+    $('arena').addEventListener('click', skipIntro);
     $('speed').addEventListener('change', function () { if (arena) arena.setSpeed($('speed').value); });
     ['scheme', 'w', 'th', 'c', 'g', 'fcost', 't-shield', 't-amp', 't-stab', 't-evolve'].forEach(function (id) {
       $(id).addEventListener('input', onControlChange); $(id).addEventListener('change', onControlChange);
@@ -3190,15 +4951,20 @@ pre {
     $('btn-link').addEventListener('click', function () { copyText(challengeUrl()); });
     window.addEventListener('keydown', onKey);
     window.addEventListener('hashchange', function () { applyHash(); });
-    var rz = function () { if (arena) arena.resize(); drawCharts(); };
+    var rz = function () { if (arena) arena.resize(); drawCharts(); if (labui) labui.refresh(); };
     if (window.ResizeObserver) new ResizeObserver(rz).observe($('arena')); else window.addEventListener('resize', rz);
     document.addEventListener('visibilitychange', function () { lastTs = 0; });
     buildSchemeOptions();
     applyHash();
+    if (!store.tutorialSeen) openTutorial();
+    if (!store.introSeen && !reducedNow() && !window.location.hash) startIntro();
     window.__arena = {
       stats: function () { return arena ? arena.stats() : null; }, resetStats: function () { if (arena) arena.resetStats(); },
       contest: function () { return contest; }, mode: function () { return mode; }, lang: function () { return lang; },
-      result: function () { return lastResult; }, seed: function () { return seedInfo; }
+      result: function () { return lastResult; }, seed: function () { return seedInfo; },
+      labState: function () { var s = labui.state(); return { tab: labui.activeTab(), ensMs: s.ens.runMs, ensWallMs: s.ens.wallMs, abMs: s.ab.runMs, abWallMs: s.ab.wallMs, ensN: s.ens.summary ? s.ens.summary.n : 0, abN: s.ab.summary ? s.ab.summary.n : 0 }; },
+      replayTo: setReplayIdx, replayIdx: function () { return replayIdx; }, desc: function () { return $('arena-desc').textContent; }, skipIntro: skipIntro,
+      store: function () { return store; }, showTab: function (n) { labui.showTab(n, false); }, reduced: reducedNow, hc: function () { return hc; }
     };
     window.requestAnimationFrame(frame);
   }

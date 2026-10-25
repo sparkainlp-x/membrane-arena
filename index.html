@@ -19,6 +19,9 @@
   <div class="tools">
     <span class="tag" data-i18n="tag.synthetic"></span>
     <button id="btn-lang" class="btn small" type="button"></button>
+    <button id="btn-motion" class="btn small" type="button" aria-pressed="true"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false"></button>
+    <button id="btn-intro" class="btn small" type="button" data-i18n="btn.intro"></button>
     <button id="btn-help" class="btn small" type="button" aria-haspopup="dialog" data-i18n="btn.help"></button>
   </div>
 </header>
@@ -37,6 +40,16 @@
     </div>
   </section>
 
+  <section id="tutorial" class="card tour" aria-labelledby="tut-title" hidden>
+    <h2 id="tut-title" data-i18n="tut.title"></h2>
+    <p id="tut-step" class="muted small-text"></p>
+    <p id="tut-text"></p>
+    <div class="row">
+      <button id="btn-tut-next" class="btn primary small" type="button"></button>
+      <button id="btn-tut-skip" class="btn small" type="button" data-i18n="tut.skip"></button>
+    </div>
+  </section>
+
   <div class="layout">
     <div class="col-main">
     <section class="card stage" aria-labelledby="stage-title">
@@ -50,12 +63,13 @@
         <span class="hud-item"><span data-i18n="hud.score"></span> <b id="hud-score" class="c-gold">-</b></span>
       </div>
       <div class="canvas-wrap">
-        <canvas id="arena" role="img" aria-label=""></canvas>
+        <canvas id="arena" role="img" aria-label="" aria-describedby="arena-desc"></canvas>
         <p id="canvas-msg" class="canvas-msg" hidden></p>
       </div>
       <ol id="ribbon" class="ribbon" aria-label=""></ol>
       <p id="ticker" class="ticker" aria-hidden="true"></p>
       <div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <p id="arena-desc" class="sr-only"></p>
       <div class="controls">
         <button id="btn-run" class="btn primary" type="button"></button>
         <button id="btn-step" class="btn" type="button" data-i18n="btn.step"></button>
@@ -63,37 +77,202 @@
         <label class="inline" for="speed"><span data-i18n="speed.label"></span>
           <select id="speed"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option></select>
         </label>
-        <button id="btn-science" class="btn" type="button" aria-pressed="false"></button>
       </div>
       <p id="hud-pending" class="muted small-text" hidden data-i18n="hud.pending"></p>
-    </section>
-
-    <section id="panel-meters" class="card" aria-labelledby="meters-title">
-      <h2 id="meters-title" data-i18n="meters.title"></h2>
-      <div class="meters-grid">
-        <div>
-          <div class="meter-row"><span class="m-name">A</span><div id="m-gain-0" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-0" class="m-fill"></span><span id="m-eff-0" class="m-eff"></span></div><span id="m-val-0" class="m-val"></span></div>
-          <div class="meter-row"><span class="m-name">B</span><div id="m-gain-1" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-1" class="m-fill"></span><span id="m-eff-1" class="m-eff"></span></div><span id="m-val-1" class="m-val"></span></div>
-          <div class="meter-row"><span class="m-name">C</span><div id="m-gain-2" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-2" class="m-fill"></span><span id="m-eff-2" class="m-eff"></span></div><span id="m-val-2" class="m-val"></span></div>
-          <div class="meter-row"><span class="m-name">R</span><div id="m-rate" class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5"><span class="m-tick"></span><span id="m-rate-fill" class="m-fill rate"></span></div><span id="m-rate-val" class="m-val"></span></div>
-          <p id="m-state" class="muted small-text"></p>
-          <p class="hint" data-i18n="meters.help"></p>
+      <div id="replay" class="replay" hidden>
+        <h3 data-i18n="replay.title"></h3>
+        <div class="replay-row">
+          <button id="btn-replay-play" class="btn small" type="button"></button>
+          <input id="replay-pos" type="range" min="0" max="5760" step="1" value="5760" aria-label="">
         </div>
-        <div>
-          <h3 data-i18n="fit.title"></h3>
-          <canvas id="fit" class="chart" role="img" aria-label=""></canvas>
-          <p class="hint" data-i18n="fit.help"></p>
-        </div>
+        <canvas id="rail" class="rail" role="img" aria-label="" aria-describedby="replay-alt"></canvas>
+        <p id="replay-text" class="small-text muted" aria-hidden="true"></p>
+        <p id="replay-alt" class="small-text"></p>
+        <p class="hint" data-i18n="replay.help"></p>
       </div>
     </section>
 
-    <section id="panel-science" class="card" aria-labelledby="sci-title" hidden>
-      <h2 id="sci-title" data-i18n="sci.title"></h2>
-      <p class="small-text"><span class="key key-prec"></span><span data-i18n="sci.prec"></span> <span class="key key-base"></span><span data-i18n="sci.base"></span></p>
-      <canvas id="sci" class="chart tall" role="img" aria-label=""></canvas>
-      <p class="small-text" data-i18n="sci.events"></p>
-      <p id="sci-base" class="hint"></p>
-      <p class="hint" data-i18n="sci.help"></p>
+    <section id="panel-tabs" class="card tabs" aria-labelledby="tabs-title">
+      <h2 id="tabs-title" class="sr-only" data-i18n="tabs.aria"></h2>
+      <div id="tablist" class="tablist" role="tablist" aria-label="">
+        <button id="tab-meters" class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-meters" data-i18n="tab.meters"></button>
+        <button id="tab-lab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-lab" tabindex="-1" data-i18n="tab.lab"></button>
+        <button id="tab-ens" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-ens" tabindex="-1" data-i18n="tab.ens"></button>
+        <button id="tab-ab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-ab" tabindex="-1" data-i18n="tab.ab"></button>
+        <button id="tab-missions" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-missions" tabindex="-1" data-i18n="tab.missions"></button>
+        <button id="tab-method" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-method" tabindex="-1" data-i18n="tab.method"></button>
+      </div>
+
+      <div id="panel-meters" class="tabpanel" role="tabpanel" aria-labelledby="tab-meters" tabindex="0">
+<h2 id="meters-title" data-i18n="meters.title"></h2>
+        <div class="meters-grid">
+          <div>
+            <div class="meter-row"><span class="m-name">A</span><div id="m-gain-0" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-0" class="m-fill"></span><span id="m-eff-0" class="m-eff"></span></div><span id="m-val-0" class="m-val"></span></div>
+            <div class="meter-row"><span class="m-name">B</span><div id="m-gain-1" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-1" class="m-fill"></span><span id="m-eff-1" class="m-eff"></span></div><span id="m-val-1" class="m-val"></span></div>
+            <div class="meter-row"><span class="m-name">C</span><div id="m-gain-2" class="meter" role="meter" aria-valuemin="0" aria-valuemax="3.2" aria-valuenow="1"><span class="m-band"></span><span id="m-fill-2" class="m-fill"></span><span id="m-eff-2" class="m-eff"></span></div><span id="m-val-2" class="m-val"></span></div>
+            <div class="meter-row"><span class="m-name">R</span><div id="m-rate" class="meter" role="meter" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5"><span class="m-tick"></span><span id="m-rate-fill" class="m-fill rate"></span></div><span id="m-rate-val" class="m-val"></span></div>
+            <p id="m-state" class="muted small-text"></p>
+            <p class="hint" data-i18n="meters.help"></p>
+          </div>
+          <div>
+            <h3 data-i18n="fit.title"></h3>
+            <canvas id="fit" class="chart" role="img" aria-label=""></canvas>
+            <p class="hint" data-i18n="fit.help"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-lab" class="tabpanel" role="tabpanel" aria-labelledby="tab-lab" tabindex="0" hidden>
+        <h2 id="lab-title" data-i18n="lab.title"></h2>
+        <p class="small-text muted" data-i18n="lab.intro"></p>
+        <p id="lab-empty" class="beat" data-i18n="lab.empty"></p>
+        <div class="inst-grid">
+        <figure class="inst">
+          <h3 id="h-lab-rates" data-i18n="lab.rates.title"></h3>
+          <canvas id="lab-rates" class="chart" role="img" aria-label="" aria-describedby="alt-rates"></canvas>
+          <p id="alt-rates" class="alt"></p>
+          <p class="hint" data-i18n="lab.rates.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-align" data-i18n="lab.align.title"></h3>
+          <label class="inline small-text" for="lab-gen"><span data-i18n="lab.gen.label"></span> <select id="lab-gen"></select></label>
+          <canvas id="lab-align" class="chart" role="img" aria-label="" aria-describedby="alt-align"></canvas>
+          <p id="alt-align" class="alt"></p>
+          <p class="hint" data-i18n="lab.align.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-hist" data-i18n="lab.hist.title"></h3>
+          <canvas id="lab-hist" class="chart" role="img" aria-label="" aria-describedby="alt-hist"></canvas>
+          <p id="alt-hist" class="alt"></p>
+          <p class="hint" id="lab-hist-help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-sweep" data-i18n="lab.sweep.title"></h3>
+          <canvas id="lab-sweep" class="chart" role="img" aria-label="" aria-describedby="alt-sweep"></canvas>
+          <p id="alt-sweep" class="alt"></p>
+          <p class="hint" data-i18n="lab.sweep.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-shield" data-i18n="lab.shield.title"></h3>
+          <canvas id="lab-shield" class="chart" role="img" aria-label="" aria-describedby="alt-shield"></canvas>
+          <p id="alt-shield" class="alt"></p>
+          <p class="hint" data-i18n="lab.shield.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-gain" data-i18n="lab.gain.title"></h3>
+          <canvas id="lab-gain" class="chart tall" role="img" aria-label="" aria-describedby="alt-gain"></canvas>
+          <p id="alt-gain" class="alt"></p>
+          <p class="hint" data-i18n="lab.gain.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-land" data-i18n="lab.land.title"></h3>
+          <label class="inline small-text" for="lab-axes"><span data-i18n="lab.axes.label"></span> <select id="lab-axes"><option value="th-g"></option><option value="th-c"></option><option value="c-g"></option></select></label>
+          <canvas id="lab-land" class="chart" role="img" aria-label="" aria-describedby="alt-land"></canvas>
+          <p id="alt-land" class="alt"></p>
+          <p class="hint" data-i18n="lab.land.help"></p>
+        </figure>
+        <figure class="inst">
+          <h3 id="h-lab-amp" data-i18n="lab.amp.title"></h3>
+          <canvas id="lab-amp" class="chart" role="img" aria-label="" aria-describedby="alt-amp"></canvas>
+          <p id="alt-amp" class="alt"></p>
+          <p class="hint" id="lab-amp-help"></p>
+        </figure>
+        </div>
+        <figure class="inst wide">
+          <h3 id="h-sci" data-i18n="sci.title"></h3>
+          <p class="small-text"><span class="key key-prec"></span><span data-i18n="sci.prec"></span> <span class="key key-base"></span><span data-i18n="sci.base"></span></p>
+          <canvas id="sci" class="chart tall" role="img" aria-label="" aria-describedby="sci-base"></canvas>
+          <p class="small-text" data-i18n="sci.events"></p>
+          <p id="sci-base" class="hint"></p>
+          <p class="hint" data-i18n="sci.help"></p>
+        </figure>
+        <h3 data-i18n="lab.export.title"></h3>
+        <div class="row">
+          <button id="btn-exp-run-csv" class="btn small" type="button" data-i18n="lab.export.csv"></button>
+          <button id="btn-exp-run-json" class="btn small" type="button" data-i18n="lab.export.json"></button>
+        </div>
+        <p id="exp-status" class="hint" role="status"></p>
+        <textarea id="exp-text" class="exp" rows="6" readonly hidden aria-label="Export"></textarea>
+      </div>
+
+      <div id="panel-ens" class="tabpanel" role="tabpanel" aria-labelledby="tab-ens" tabindex="0" hidden>
+        <h2 data-i18n="ens.title"></h2>
+        <p class="small-text muted" data-i18n="ens.help"></p>
+        <div class="formrow">
+          <label class="inline" for="ens-n"><span data-i18n="ens.n.label"></span>
+            <select id="ens-n"><option value="10">10</option><option value="20" selected>20</option><option value="40">40</option><option value="80">80</option></select></label>
+          <label class="switch"><input id="ens-repo" type="checkbox" checked><span data-i18n="ens.repo.label"></span></label>
+        </div>
+        <div class="row">
+          <button id="btn-ens-match" class="btn small" type="button" data-i18n="ens.match"></button>
+          <button id="btn-ens-run" class="btn primary small" type="button" data-i18n="ens.run"></button>
+          <button id="btn-ens-cancel" class="btn small" type="button" data-i18n="ens.cancel" disabled></button>
+        </div>
+        <p class="small-text"><progress id="ens-progress" max="1" value="0" aria-label=""></progress> <span id="ens-status" role="status"></span></p>
+        <p id="ens-empty" class="hint" data-i18n="ens.empty"></p>
+        <div id="ens-out" hidden>
+          <canvas id="ens-chart" class="chart ens" role="img" aria-label="" aria-describedby="ens-alt"></canvas>
+          <p id="ens-alt" class="alt"></p>
+          <p id="ens-like" class="beat small-text"></p>
+          <div class="tablewrap"><table id="ens-table" class="scores"></table></div>
+          <p id="ens-note" class="hint"></p>
+          <div class="row">
+            <button id="btn-ens-csv" class="btn small" type="button" data-i18n="ens.csv"></button>
+            <button id="btn-ens-json" class="btn small" type="button" data-i18n="ens.json"></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-ab" class="tabpanel" role="tabpanel" aria-labelledby="tab-ab" tabindex="0" hidden>
+        <h2 data-i18n="ab.title"></h2>
+        <p class="small-text muted" data-i18n="ab.help"></p>
+        <div class="formrow">
+          <label class="inline" for="ab-factor"><span data-i18n="ab.factor.label"></span>
+            <select id="ab-factor"><option value="scheme"></option><option value="shield"></option><option value="amp"></option><option value="stab"></option><option value="evolve"></option><option value="w"></option></select></label>
+          <label class="inline" for="ab-a"><span data-i18n="ab.a.label"></span> <select id="ab-a"></select></label>
+          <label class="inline" for="ab-b"><span data-i18n="ab.b.label"></span> <select id="ab-b"></select></label>
+          <label class="inline" for="ab-n"><span data-i18n="ab.n.label"></span>
+            <select id="ab-n"><option value="10">10</option><option value="20" selected>20</option><option value="40">40</option><option value="80">80</option></select></label>
+        </div>
+        <label class="switch"><input id="ab-repo" type="checkbox" checked><span data-i18n="ab.repo.label"></span></label>
+        <p class="hint" data-i18n="ab.others"></p>
+        <div class="row">
+          <button id="btn-ab-run" class="btn primary small" type="button" data-i18n="ab.run"></button>
+          <button id="btn-ab-cancel" class="btn small" type="button" data-i18n="ab.cancel" disabled></button>
+        </div>
+        <p class="small-text"><progress id="ab-progress" max="1" value="0" aria-label=""></progress> <span id="ab-status" role="status"></span></p>
+        <p id="ab-empty" class="hint" data-i18n="ab.empty"></p>
+        <div id="ab-out" hidden>
+          <canvas id="ab-chart" class="chart ens" role="img" aria-label="" aria-describedby="ab-alt"></canvas>
+          <p class="hint" data-i18n="ab.legend"></p>
+          <p id="ab-alt" class="alt"></p>
+          <p id="ab-verdict" class="beat small-text"></p>
+          <div class="tablewrap"><table id="ab-table" class="scores"></table></div>
+          <div class="row">
+            <button id="btn-ab-csv" class="btn small" type="button" data-i18n="ab.csv"></button>
+            <button id="btn-ab-json" class="btn small" type="button" data-i18n="ab.json"></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-missions" class="tabpanel" role="tabpanel" aria-labelledby="tab-missions" tabindex="0" hidden>
+        <h2 data-i18n="mis.title"></h2>
+        <p class="small-text muted" data-i18n="mis.help"></p>
+        <ol id="missions-list" class="missions"></ol>
+        <p id="mis-note" class="hint" role="status"></p>
+      </div>
+
+      <div id="panel-method" class="tabpanel" role="tabpanel" aria-labelledby="tab-method" tabindex="0" hidden>
+        <h2 data-i18n="method.title"></h2>
+        <h3 data-i18n="method.measured"></h3>
+        <ul class="method"><li data-i18n="method.m1"></li><li data-i18n="method.m2"></li><li data-i18n="method.m3"></li><li data-i18n="method.m4"></li></ul>
+        <h3 data-i18n="method.design"></h3>
+        <ul class="method"><li data-i18n="method.d1"></li><li data-i18n="method.d2"></li><li data-i18n="method.d3"></li></ul>
+        <h3 data-i18n="method.unverified"></h3>
+        <ul class="method"><li data-i18n="method.u1"></li><li data-i18n="method.u2"></li><li data-i18n="method.u3"></li><li data-i18n="method.u4"></li><li data-i18n="method.u5"></li></ul>
+        <h3 data-i18n="method.visual"></h3>
+        <ul class="method"><li data-i18n="method.v1"></li><li data-i18n="method.v2"></li><li data-i18n="method.v3"></li><li data-i18n="method.v4"></li><li data-i18n="method.v5"></li><li data-i18n="method.v6"></li></ul>
+      </div>
     </section>
 
     </div>
@@ -203,8 +382,12 @@
 
 <script src="baselines.js"></script>
 <script src="game.js"></script>
+<script src="stats.js"></script>
+<script src="lab.js"></script>
 <script src="i18n.js"></script>
 <script src="scene.js"></script>
+<script src="charts.js"></script>
+<script src="labui.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
