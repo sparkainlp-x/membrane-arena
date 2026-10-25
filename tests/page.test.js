@@ -12,6 +12,9 @@ const SOURCES = ['index.html', 'style.css', 'game.js', 'i18n.js', 'scene.js', 'a
 const join = (parts) => new RegExp('\\b(' + parts.map((p) => p.join('')).join('|') + ')\\b', 'i');
 const BANNED = join([['pro', 'ven'], ['valid', 'ated'], ['production', '-ready'], ['quantum ', 'advantage'], ['real-world ', 'performance']]);
 const NAMES = join([['l', 'ee'], ['la', 'ha'], ['bel', 'kadi'], ['ti', 'su']]);
+// The README and CHANGELOG carry the lineage credit, so the credited name may appear there but no other collaborator name.
+const CREDIT_DOCS = new Set(['README.md', 'CHANGELOG.md']);
+const NAMES_IN_CREDIT_DOCS = join([['la', 'ha'], ['bel', 'kadi'], ['ti', 'su']]);
 const EMOJI = /\p{Extended_Pictographic}/u;
 
 test('built page is one self-contained file (no external files, no network APIs)', () => {
@@ -34,7 +37,7 @@ test('no banned wording, emoji or forbidden names anywhere in the shipped source
     const s = read(f);
     assert.ok(!BANNED.test(s), `banned word in ${f}`);
     assert.ok(!EMOJI.test(s), `emoji in ${f}`);
-    assert.ok(!NAMES.test(s), `forbidden name in ${f}`);
+    assert.ok(!(CREDIT_DOCS.has(f) ? NAMES_IN_CREDIT_DOCS : NAMES).test(s), `forbidden name in ${f}`);
   }
 });
 
