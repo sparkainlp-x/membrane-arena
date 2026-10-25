@@ -6,7 +6,7 @@
  */
 (function () {
   'use strict';
-  var G = ArenaGame, S = ArenaScene, I = ArenaI18n, B = ArenaBaselines;
+  var G = ArenaGame, S = ArenaScene, I = ArenaI18n, B = ArenaBaselines, C = ArenaCharts, LU = ArenaLabUI;
   var $ = function (id) { return document.getElementById(id); };
   var STORE_KEY = 'membrane-arena/v1';
 
@@ -16,7 +16,9 @@
   var contest = null, mode = 'idle';   // idle | running | paused | done
   var stepOnce = false, atBoundary = false, lessonIdx = 0, lastResult = null, counted = false;
   var doneT = 0, doneF = 0, curT = 0, curF = 0, curRec = null, shownEp = -1, pendingNote = false, tickerMsg = '';
-  var arena = null, lastTs = 0, reduced = false, science = false;
+  var arena = null, lastTs = 0, sysReduced = false, hc = false, still = false, labui = null, tutIdx = 0;
+  var replayIdx = 0, replaying = false, descKey = '', TOTAL = S.TOTAL_STEPS, REPLAY_RATE = 240;
+  function reducedNow() { return sysReduced || still; }
 
   /* ---------- storage, defensive ---------- */
 
@@ -40,11 +42,13 @@
     $('fit').setAttribute('aria-label', t('fit.aria'));
     $('sci').setAttribute('aria-label', t('sci.aria'));
     $('ribbon').setAttribute('aria-label', t('hud.ribbon'));
-    $('footer-version').textContent = t('footer.version', { v: G.VERSION });
+    $('footer-version').textContent = t('footer.version', { v: G.BUILD });
+    $('rail').setAttribute('aria-label', t('replay.rail_aria')); $('replay-pos').setAttribute('aria-label', t('replay.pos'));
     buildSchemeOptions();
     for (var i = 0; i < 3; i++) $('m-gain-' + i).setAttribute('aria-label', t('meters.gain', { m: 'ABC'.charAt(i) }));
     $('m-rate').setAttribute('aria-label', t('meters.rate'));
-    renderMode(); renderControls(); renderCfgNote(); renderStats(); renderHud(); renderMeters(curRec); renderRibbon();
+    renderMode(); renderControls(); renderCfgNote(); renderStats(); renderHud(); renderMeters(curRec); renderRibbon(); renderTutorial(); renderReplay();
+    if (labui) labui.relabel();
     if (!contest || mode === 'idle') setTicker(t('hud.idle'));
     if (lastResult && mode === 'done') renderResult();
     drawCharts();
@@ -127,9 +131,14 @@
     run.textContent = mode === 'running' ? t('btn.pause') : mode === 'paused' ? t('btn.resume') : mode === 'done' ? t('btn.again') : t('btn.run');
     $('btn-step').disabled = mode === 'done';
     $('btn-finish').disabled = mode === 'done';
-    $('btn-science').textContent = t(science ? 'btn.science_on' : 'btn.science_off');
-    $('btn-science').setAttribute('aria-pressed', science ? 'true' : 'false');
+    $('btn-motion').textContent = t(still ? 'btn.motion_off' : 'btn.motion_on'); $('btn-motion').setAttribute('aria-pressed', still ? 'false' : 'true');
+    $('btn-contrast').textContent = t(hc ? 'btn.contrast_on' : 'btn.contrast_off'); $('btn-contrast').setAttribute('aria-pressed', hc ? 'true' : 'false');
     $('hud-pending').hidden = !(pendingNote && locked);
+  }
+  function applySettings(o) {
+    $('scheme').value = o.scheme; setSlider('w', o.w); setSlider('fcost', o.fcost);
+    $('t-shield').checked = !!o.shield; $('t-amp').checked = !!o.amp; $('t-stab').checked = !!o.stab; $('t-evolve').checked = !!o.evolve;
+    onControlChange();
   }
   function renderCfgNote() {
     var s = readSettings(), b = G.baselineFor(s);
@@ -183,17 +192,99 @@
     $('m-rate-val').textContent = r2(rate);
     $('m-state').textContent = t(stab ? 'meters.stab_on' : 'meters.stab_off');
   }
-  function drawCharts() {
-    var hist = contest ? contest.hist : [], doneHist = curRec && mode !== 'done' ? hist.slice(0, -1) : hist;
-    try {
-      S.drawFitness($('fit'), doneHist, G.GENS);
-      if (science) {
-        var b = G.baselineFor(readSettings());
-        S.drawScience($('sci'), doneHist, G.GENS, b ? b.row : null);
-        $('sci-base').textContent = b ? t('cfg.measured', { tag: b.tag, w: b.w }) + ' ' + b.file : t('sci.nobase');
-      }
-    } catch (e) { /* charts are decoration; the numbers still work */ }
+  function doneHist() {
+    var hist = contest ? contest.hist : [];
+    return curRec && mode !== 'done' ? hist.slice(0, -1) : hist;
   }
+  function drawFit() { try { S.drawFitness($('fit'), doneHist(), G.GENS); } catch (e) { /* decoration */ } }
+  function drawSci() {
+    try {
+      var b = G.baselineFor(readSettings());
+      S.drawScience($('sci'), doneHist(), G.GENS, b ? b.row : null);
+      $('sci-base').textContent = b ? t('cfg.measured', { tag: b.tag, w: b.w }) + ' ' + b.file : t('sci.nobase');
+    } catch (e) { /* decoration */ }
+  }
+  function drawCharts() {
+    if (!labui) return;
+    if (labui.activeTab() === 'meters') drawFit(); else labui.refresh();
+    drawRail();
+  }
+
+  /* ---------- arena text equivalent, replay, motion and contrast ---------- */
+
+  function renderArenaDesc(snap) {
+    var el = $('arena-desc');
+    if (!snap) { if (descKey !== 'none') { el.textContent = t('stage.aria'); descKey = 'none'; } return; }
+    var key = snap.gen + ':' + snap.ep + ':' + snap.step + ':' + lang;
+    if (key === descKey) return;
+    descKey = key;
+    var parts = [0, 1, 2].map(function (i) {
+      var m = 'ABC'.charAt(i), en = Math.round(snap.energy[i] * 100);
+      if (snap.declared[i]) return t(snap.truth[i] ? 'arena.m_decl_true' : 'arena.m_decl_false', { m: m });
+      if (snap.align[i] === null && !snap.planted) return t('arena.m_run_noise', { m: m, en: en });
+      return t('arena.m_run', { m: m, en: en, al: snap.align[i] === null ? '-' : r2(snap.align[i]) });
+    });
+    el.textContent = t('arena.desc', { g: snap.gen, e: snap.ep, kind: t(snap.planted ? 'arena.kind_planted' : 'arena.kind_noise'), s: snap.step, a: parts[0], b: parts[1], c: parts[2] });
+  }
+  function drawRail() {
+    if ($('replay').hidden || !contest) return;
+    try { C.drawRail($('rail'), contest.hist, replayIdx, { hc: hc }); } catch (e) { /* decoration */ }
+  }
+  function renderReplay() {
+    $('btn-replay-play').textContent = t(replaying ? 'replay.pause' : 'replay.play');
+    $('btn-replay-play').setAttribute('aria-pressed', replaying ? 'true' : 'false');
+    var p = S.indexToPos(replayIdx);
+    $('replay-text').textContent = t('replay.value', { g: p.gen + 1, e: p.ep + 1, s: p.step });
+    $('replay-pos').setAttribute('aria-valuetext', t('replay.value', { g: p.gen + 1, e: p.ep + 1, s: p.step }));
+    if (contest && !$('replay').hidden) {
+      var d = 0, tr = 0, fl = 0, out = 0;
+      contest.hist.forEach(function (h) { h.episodes.forEach(function (ep) { for (var i = 0; i < 3; i++) if (ep.declStep[i] !== null) { d++; if (ep.truth[i]) tr++; else fl++; } out += ep.outs.length; }); });
+      $('replay-alt').textContent = t('replay.alt', { d: d, t: tr, f: fl, p: out });
+    }
+  }
+  function setReplayIdx(i) {
+    if (!contest || !contest.hist.length) return;
+    replayIdx = Math.max(0, Math.min(TOTAL, Math.round(i)));
+    var p = S.indexToPos(replayIdx), rec = contest.hist[Math.min(p.gen, contest.hist.length - 1)];
+    $('replay-pos').value = String(replayIdx);
+    if (arena && rec) { arena.showAt(rec, p.ep, p.step, rec.settings); renderArenaDesc(arena.snapshot()); }
+    renderReplay(); drawRail();
+  }
+  function stopReplay() { replaying = false; renderReplay(); }
+  function onReplayPlay() {
+    if (replaying) { stopReplay(); return; }
+    if (replayIdx >= TOTAL) replayIdx = 0;
+    replaying = true; renderReplay();
+  }
+  function applyMotion() {
+    document.documentElement.classList.toggle('still', still);
+    if (arena) arena.setReduced(reducedNow());
+  }
+  function applyContrast() {
+    document.documentElement.classList.toggle('hc', hc);
+    if (arena) arena.setContrast(hc);
+    drawCharts(); if (labui) labui.refresh();
+  }
+
+  /* ---------- intro and tutorial ---------- */
+
+  function startIntro() {
+    if (!arena) return false;
+    return arena.playIntro({ title: t('app.title'), sub: t('intro.sub'), done: function () { store.introSeen = true; saveStore(); } });
+  }
+  function skipIntro() { if (arena && arena.stats().intro) arena.skipIntro(); }
+  function renderTutorial() {
+    var open = !$('tutorial').hidden;
+    if (!open) return;
+    var max = 5;
+    $('tut-step').textContent = t('tut.step', { n: tutIdx + 1, max: max });
+    var key = 'tut.s' + (tutIdx + 1);
+    $('tut-text').textContent = t(key);
+    $('btn-tut-next').textContent = t(tutIdx + 1 >= max ? 'tut.done' : 'tut.next');
+  }
+  function openTutorial() { tutIdx = 0; $('tutorial').hidden = false; renderTutorial(); }
+  function closeTutorial() { $('tutorial').hidden = true; if (!store.tutorialSeen) { store.tutorialSeen = true; saveStore(); } }
+  function nextTutorial() { if (tutIdx + 1 >= 5) { closeTutorial(); $('btn-run').focus(); return; } tutIdx++; renderTutorial(); }
 
   /* ---------- the contest loop ---------- */
 
@@ -203,6 +294,7 @@
     if (arena) { arena.clearGeneration(); arena.setPlaying(false); }
     $('s-result').hidden = true;
     renderControls(); renderHud(); renderRibbon(); renderMeters(null); setTicker(t('hud.idle')); announce('');
+    stopReplay(); $('replay').hidden = true; if (arena) arena.leaveScrub(); descKey = ''; replayIdx = 0; renderArenaDesc(null);
     drawCharts();
   }
   function beginRun() {
@@ -254,13 +346,14 @@
     lastTs = ts;
     if (arena) {
       try {
+        if (replaying) { replayIdx += dt * REPLAY_RATE; if (replayIdx >= TOTAL) { replayIdx = TOTAL; replaying = false; } setReplayIdx(replayIdx); }
         var fired = arena.update(dt);
         for (var k = 0; k < fired.length; k++) {
           if (fired[k].type === 'out') onOut(fired[k]);
           else if (fired[k].type === 'gen') { onGenEnd(); break; }
         }
         var pos = arena.position();
-        if (pos && mode !== 'done' && pos.ep !== shownEp) { shownEp = pos.ep; renderRibbon(); renderHud(); }
+        if (pos && mode !== 'done' && pos.ep !== shownEp) { shownEp = pos.ep; renderRibbon(); renderHud(); renderArenaDesc(arena.snapshot()); }
         arena.draw();
       } catch (e) { arena = null; showCanvasError(); }
     }
@@ -275,6 +368,7 @@
     renderControls();
   }
   function onRun() {
+    skipIntro();
     if (mode === 'running') { mode = 'paused'; if (arena) arena.setPlaying(false); announce(t('say.paused')); renderControls(); return; }
     if (mode === 'paused') { resume(); return; }
     if (mode === 'done') resetRun();
@@ -314,15 +408,20 @@
       store.daily[seedInfo.date] = { score: sum.score, T: sum.T, F: sum.F, precision: sum.precision, tag: G.cfgTag(contest.hist[contest.hist.length - 1].settings) };
       if (store.bestDaily === null || sum.score > store.bestDaily) store.bestDaily = sum.score;
     } else if (seedInfo.mode !== 'daily' && (store.bestPractice === null || sum.score > store.bestPractice)) store.bestPractice = sum.score;
-    if (counted || seedInfo.mode !== 'daily') saveStore();
+    var lastSet = contest.hist[contest.hist.length - 1].settings;
+    if (store.bestScheme[lastSet.scheme] === undefined || sum.score > store.bestScheme[lastSet.scheme]) store.bestScheme[lastSet.scheme] = sum.score;
+    saveStore();
     lessonIdx = G.LESSON_IDS.indexOf(G.pickLesson(contest.hist[contest.hist.length - 1].settings, seedInfo.seed));
     renderControls(); renderHud(); renderMode(); renderStats(); renderRibbon(); drawCharts();
     renderResult();
     $('s-result').hidden = false;
+    $('replay').hidden = false; setReplayIdx(TOTAL);
+    var bl = G.baselineFor(lastSet);
+    if (labui) labui.onPlayFinished(sum, bl ? G.baselineScore(bl) : null);
     announce(t('say.final', { score: score }));
     setTicker(t('say.final', { score: score }));
     try { $('result-title').focus({ preventScroll: false }); } catch (e) { /* focus is a courtesy */ }
-    var el = $('s-result'); if (el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+    var el = $('s-result'); if (el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: reducedNow() ? 'auto' : 'smooth' });
   }
 
   /* ---------- result ---------- */
@@ -415,6 +514,12 @@
       li = document.createElement('li'); li.textContent = t('stats.streak', { cur: st.current, best: st.best }); ul.appendChild(li);
       li = document.createElement('li'); li.textContent = t('stats.best', { best: Math.round(store.bestDaily === null ? 0 : store.bestDaily) }); ul.appendChild(li);
     }
+    var sk = G.SCHEMES.filter(function (k) { return store.bestScheme[k] !== undefined; });
+    if (sk.length) {
+      li = document.createElement('li');
+      li.textContent = t('stats.byscheme', { list: sk.map(function (k) { return t('scheme.' + k + '.short') + ' ' + Math.round(store.bestScheme[k]); }).join(', ') });
+      ul.appendChild(li);
+    }
     $('store-warn').hidden = storeOk;
   }
 
@@ -424,6 +529,7 @@
   function openHelp() { lastFocus = document.activeElement; $('help').hidden = false; $('help-title').focus(); }
   function closeHelp() { $('help').hidden = true; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
   function onKey(e) {
+    if (e.key === 'Escape' && arena && arena.stats().intro) { skipIntro(); return; }
     if (e.key === 'Escape' && !$('help').hidden) { closeHelp(); return; }
     if (!$('help').hidden && e.key === 'Tab') {
       var f = $('help').querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -436,9 +542,8 @@
     if (e.key === ' ') { e.preventDefault(); onRun(); }
     else if (e.key === 'g' || e.key === 'G') onStep();
     else if (e.key === 'f' || e.key === 'F') onFinish();
-    else if (e.key === 's' || e.key === 'S') toggleScience();
+    else if (e.key === 's' || e.key === 'S') labui.showTab('lab', true);
   }
-  function toggleScience() { science = !science; $('panel-science').hidden = !science; renderControls(); drawCharts(); }
 
   /* ---------- boot ---------- */
 
@@ -447,12 +552,20 @@
     if (store.lang && I.supported.indexOf(store.lang) >= 0) lang = store.lang;
     else if (/^fr/i.test(navigator.language || '')) lang = 'fr';
     t = I.make(lang);
-    reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    try { arena = S.createArena($('arena'), { reduced: reduced }); } catch (e) { arena = null; showCanvasError(); }
+    sysReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    hc = !!store.hc; still = !!store.still;
+    document.documentElement.classList.toggle('hc', hc); document.documentElement.classList.toggle('still', still);
+    try { arena = S.createArena($('arena'), { reduced: reducedNow(), contrast: hc }); } catch (e) { arena = null; showCanvasError(); }
+    labui = LU.create({
+      $: $, t: function () { return t; }, hc: function () { return hc; }, doneHist: doneHist, contest: function () { return contest; }, readSettings: readSettings,
+      applySettings: applySettings, announce: announce, store: function () { return store; }, saveStore: saveStore, seedInfo: function () { return seedInfo; },
+      drawSci: drawSci, drawMeters: drawFit, onTab: function () { }
+    });
+    labui.init();
     if (arena) arena.setSpeed($('speed').value);
     if (window.matchMedia) {
       var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-      var onMq = function () { reduced = mq.matches; if (arena) arena.setReduced(reduced); };
+      var onMq = function () { sysReduced = mq.matches; applyMotion(); };
       if (mq.addEventListener) mq.addEventListener('change', onMq);
     }
     $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; t = I.make(lang); store.lang = lang; saveStore(); applyI18n(); });
@@ -465,7 +578,14 @@
     $('btn-step').addEventListener('click', onStep);
     $('btn-finish').addEventListener('click', onFinish);
     $('btn-again').addEventListener('click', function () { resetRun(); beginRun(); if (!arena) onFinish(); });
-    $('btn-science').addEventListener('click', toggleScience);
+    $('btn-motion').addEventListener('click', function () { still = !still; store.still = still; saveStore(); applyMotion(); renderControls(); announce(t(still ? 'btn.motion_off' : 'btn.motion_on')); });
+    $('btn-contrast').addEventListener('click', function () { hc = !hc; store.hc = hc; saveStore(); renderControls(); applyContrast(); announce(t(hc ? 'btn.contrast_on' : 'btn.contrast_off')); });
+    $('btn-intro').addEventListener('click', function () { if (!startIntro()) announce(t('btn.motion_off')); openTutorial(); });
+    $('btn-tut-next').addEventListener('click', nextTutorial);
+    $('btn-tut-skip').addEventListener('click', closeTutorial);
+    $('btn-replay-play').addEventListener('click', onReplayPlay);
+    $('replay-pos').addEventListener('input', function () { stopReplay(); setReplayIdx(Number($('replay-pos').value)); });
+    $('arena').addEventListener('click', skipIntro);
     $('speed').addEventListener('change', function () { if (arena) arena.setSpeed($('speed').value); });
     ['scheme', 'w', 'th', 'c', 'g', 'fcost', 't-shield', 't-amp', 't-stab', 't-evolve'].forEach(function (id) {
       $(id).addEventListener('input', onControlChange); $(id).addEventListener('change', onControlChange);
@@ -476,15 +596,20 @@
     $('btn-link').addEventListener('click', function () { copyText(challengeUrl()); });
     window.addEventListener('keydown', onKey);
     window.addEventListener('hashchange', function () { applyHash(); });
-    var rz = function () { if (arena) arena.resize(); drawCharts(); };
+    var rz = function () { if (arena) arena.resize(); drawCharts(); if (labui) labui.refresh(); };
     if (window.ResizeObserver) new ResizeObserver(rz).observe($('arena')); else window.addEventListener('resize', rz);
     document.addEventListener('visibilitychange', function () { lastTs = 0; });
     buildSchemeOptions();
     applyHash();
+    if (!store.tutorialSeen) openTutorial();
+    if (!store.introSeen && !reducedNow() && !window.location.hash) startIntro();
     window.__arena = {
       stats: function () { return arena ? arena.stats() : null; }, resetStats: function () { if (arena) arena.resetStats(); },
       contest: function () { return contest; }, mode: function () { return mode; }, lang: function () { return lang; },
-      result: function () { return lastResult; }, seed: function () { return seedInfo; }
+      result: function () { return lastResult; }, seed: function () { return seedInfo; },
+      labState: function () { var s = labui.state(); return { tab: labui.activeTab(), ensMs: s.ens.runMs, ensWallMs: s.ens.wallMs, abMs: s.ab.runMs, abWallMs: s.ab.wallMs, ensN: s.ens.summary ? s.ens.summary.n : 0, abN: s.ab.summary ? s.ab.summary.n : 0 }; },
+      replayTo: setReplayIdx, replayIdx: function () { return replayIdx; }, desc: function () { return $('arena-desc').textContent; }, skipIntro: skipIntro,
+      store: function () { return store; }, showTab: function (n) { labui.showTab(n, false); }, reduced: reducedNow, hc: function () { return hc; }
     };
     window.requestAnimationFrame(frame);
   }

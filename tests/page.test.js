@@ -7,7 +7,7 @@ const { build } = require('../build.js');
 
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
-const SOURCES = ['index.html', 'style.css', 'game.js', 'i18n.js', 'scene.js', 'app.js', 'build.js', 'scripts/make-baselines.js', 'scripts/port-check.js', 'scripts/scheme-check.js', 'scripts/evolve-check.js', 'scripts/e2e-check.js', 'scripts/serve.js'];
+const SOURCES = ['index.html', 'style.css', 'baselines.js', 'game.js', 'stats.js', 'lab.js', 'i18n.js', 'scene.js', 'charts.js', 'labui.js', 'app.js', 'build.js', 'scripts/make-baselines.js', 'scripts/port-check.js', 'scripts/scheme-check.js', 'scripts/evolve-check.js', 'scripts/e2e-check.js', 'scripts/serve.js'];
 // word lists are assembled from fragments so this file does not contain the words it forbids
 const join = (parts) => new RegExp('\\b(' + parts.map((p) => p.join('')).join('|') + ')\\b', 'i');
 const BANNED = join([['pro', 'ven'], ['valid', 'ated'], ['production', '-ready'], ['quantum ', 'advantage'], ['real-world ', 'performance']]);
@@ -24,7 +24,7 @@ test('built page is one self-contained file (no external files, no network APIs)
   assert.ok(!/(fetch\(|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|import\()/.test(html));
   assert.ok(!/https?:\/\/(?!www\.w3\.org\/2000\/svg)[^\s"')]+/.test(html.replace(/<title>[^<]*<\/title>/, '')), 'only the SVG namespace URL appears');
   assert.ok(!/googletagmanager|google-analytics|cdn\.|fonts\.googleapis/i.test(html));
-  assert.ok(html.length < 250000, 'small page');
+  assert.ok(html.length < 450000, 'one file, no dependencies, under 450 KB');
 });
 
 test('dist/index.html, when present, matches a fresh build', { skip: !fs.existsSync(path.join(root, 'dist', 'index.html')) }, () => {
@@ -42,27 +42,27 @@ test('no banned wording, emoji or forbidden names anywhere in the shipped source
 });
 
 test('every element id used by app.js exists in index.html', () => {
-  const html = read('index.html'), app = read('app.js');
+  const html = read('index.html'), app = read('app.js') + read('labui.js');
   const used = new Set();
   for (const m of app.matchAll(/\$\('([\w-]+)'\)/g)) used.add(m[1]);
-  assert.ok(used.size > 40);
+  assert.ok(used.size > 100);
   for (const id of used) assert.ok(html.includes(`id="${id}"`), `missing #${id}`);
   for (const i of [0, 1, 2]) for (const p of ['m-gain-', 'm-fill-', 'm-eff-', 'm-val-']) assert.ok(html.includes(`id="${p}${i}"`));
   for (const id of ['th', 'c', 'g', 'fcost', 'w']) assert.ok(html.includes(`id="${id}-val"`));
 });
 
-test('script load order in index.html: baselines, game, i18n, scene, app', () => {
+test('script load order in index.html: baselines, game, stats, lab, i18n, scene, charts, labui, app', () => {
   const html = read('index.html');
   const order = [...html.matchAll(/<script src="([\w.]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(order, ['baselines.js', 'game.js', 'i18n.js', 'scene.js', 'app.js']);
+  assert.deepEqual(order, ['baselines.js', 'game.js', 'stats.js', 'lab.js', 'i18n.js', 'scene.js', 'charts.js', 'labui.js', 'app.js']);
 });
 
 test('every data-i18n key in index.html and every literal key used by app.js exists in English', () => {
-  const en = require('../i18n.js').LANGS.en, html = read('index.html'), app = read('app.js');
+  const en = require('../i18n.js').LANGS.en, html = read('index.html'), app = read('app.js') + read('labui.js');
   const used = new Set();
   for (const m of html.matchAll(/data-i18n="([\w.]+)"/g)) used.add(m[1]);
   for (const m of app.matchAll(/\bt\('([a-z_]+\.[\w.]+)'/g)) used.add(m[1]);
-  assert.ok(used.size > 60);
+  assert.ok(used.size > 150);
   for (const k of used) assert.ok(k in en, `missing key ${k}`);
 });
 
@@ -144,4 +144,43 @@ test('pausing at a generation boundary resumes into the next generation (no stuc
   const app = read('app.js');
   assert.match(app, /atBoundary = true/);
   assert.match(app, /if \(atBoundary\) \{ atBoundary = false; nextGeneration\(\); \}/);
+});
+
+test('the Lab: six tabs with a tablist, one panel each, arrow-key handling, and every chart canvas has a text equivalent', () => {
+  const html = read('index.html'), ui = read('labui.js');
+  assert.match(html, /role="tablist"/);
+  for (const k of ['meters', 'lab', 'ens', 'ab', 'missions', 'method']) {
+    assert.match(html, new RegExp(`id="tab-${k}"[^>]*role="tab"[^>]*aria-controls="panel-${k}"`));
+    assert.match(html, new RegExp(`id="panel-${k}"[^>]*role="tabpanel"[^>]*aria-labelledby="tab-${k}"`));
+  }
+  for (const key of ['ArrowRight', 'ArrowLeft', 'Home', 'End']) assert.ok(ui.includes(`'${key}'`));
+  for (const m of html.matchAll(/<canvas id="([\w-]+)"[^>]*aria-describedby="([\w-]+)"/g)) assert.ok(html.includes(`id="${m[2]}"`), `description for ${m[1]}`);
+  const lab = html.match(/<canvas id="(lab-[\w]+|ens-chart|ab-chart|rail|sci)"/g) || [];
+  assert.ok(lab.length >= 11, 'all instruments are canvases');
+  for (const m of lab) assert.match(html, new RegExp(m.replace(/[<>"]/g, (c) => (c === '"' ? '"' : '\\' + c)) + '[^>]*aria-describedby='), `${m} is described`);
+  assert.ok(!/innerHTML\s*=\s*[^'"\s]/.test(ui.replace(/innerHTML = ''/g, '')), 'innerHTML only clears');
+  assert.ok(!/eval\(|new Function|document\.write/.test(ui));
+});
+
+test('motion and contrast: system setting plus a page switch, high-contrast stylesheet, intro skippable, no motion needed to use anything', () => {
+  const css = read('style.css'), app = read('app.js'), html = read('index.html');
+  assert.match(css, /html\.hc /);
+  assert.match(css, /html\.still /);
+  assert.match(css, /forced-colors: active/);
+  assert.match(app, /sysReduced \|\| still/);
+  assert.match(app, /Escape' && arena && arena\.stats\(\)\.intro/);
+  assert.match(app, /if \(!store\.introSeen && !reducedNow\(\)/);
+  assert.match(html, /id="btn-motion"/);
+  assert.match(html, /id="btn-contrast"/);
+  assert.match(html, /aria-describedby="arena-desc"/);
+});
+
+test('the method panel names what was measured, what is a design choice and what is not verified', () => {
+  const I = require('../i18n.js');
+  for (const l of Object.keys(I.LANGS)) {
+    const L = I.LANGS[l];
+    for (const k of ['method.measured', 'method.design', 'method.unverified']) assert.ok(L[k] && L[k].length > 4, `${l} ${k}`);
+  }
+  const html = read('index.html');
+  for (const k of ['method.measured', 'method.design', 'method.unverified']) assert.ok(html.includes(`data-i18n="${k}"`));
 });

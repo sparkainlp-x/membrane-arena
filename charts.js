@@ -199,7 +199,7 @@
       ctx.strokeStyle = rgba(P.white, 0.9); ctx.lineWidth = 1.2; ctx.setLineDash(i === 0 ? [] : [3, 3]);
       ctx.beginPath(); ctx.moveTo(fr.sx(t), box.y0); ctx.lineTo(fr.sx(t), box.y1); ctx.stroke(); ctx.setLineDash([]);
     });
-    legend(ctx, [{ c: 'cyan', label: L(o, 'recall', 'recall') }, { c: 'warn', label: L(o, 'falseRate', 'false per agent-episode'), dash: [6, 4] }, { c: 'gold', label: L(o, 'precision', 'precision'), dash: [2, 3] }], box.x0 + 8, box.y0 + 8, o);
+    legend(ctx, [{ c: 'cyan', label: L(o, 'recall', 'recall') }, { c: 'warn', label: L(o, 'falsePer', 'false per agent-episode'), dash: [6, 4] }, { c: 'gold', label: L(o, 'precision', 'precision'), dash: [2, 3] }], box.x0 + 8, box.y0 + 8, o);
   }
 
   /* ---------- 5. shield counts ---------- */
