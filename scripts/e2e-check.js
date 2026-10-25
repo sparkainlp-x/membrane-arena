@@ -253,6 +253,7 @@ async function robustness(browser) {
   await page.click('#btn-tut-next'); await page.click('#btn-tut-next');
   check('tour advances', /Step 3 of 5/.test(await page.textContent('#tut-step')), await page.textContent('#tut-step'));
   await page.click('#btn-tut-skip');
+  check('closing the tour moves the focus to Run', (await page.evaluate(() => document.activeElement.id)) === 'btn-run');
   await page.focus('#tab-meters'); await page.keyboard.press('ArrowRight');
   check('arrow key moves to the Lab tab', (await page.getAttribute('#tab-lab', 'aria-selected')) === 'true' && await page.isVisible('#panel-lab') && !(await page.isVisible('#panel-meters')));
   await page.keyboard.press('End');
