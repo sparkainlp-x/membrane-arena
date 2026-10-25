@@ -1,5 +1,5 @@
 {
-  "version": "0.3.3",
+  "version": "0.3.4",
   "chrome": "/usr/bin/google-chrome",
   "allOk": true,
   "servedOther": [],
@@ -7,7 +7,7 @@
     {
       "name": "reverse-en-desktop",
       "ok": true,
-      "wallMs": 2068,
+      "wallMs": 2321,
       "errors": [],
       "external": [],
       "opts": {
@@ -119,7 +119,7 @@
     {
       "name": "reverse-fr-phone",
       "ok": true,
-      "wallMs": 2267,
+      "wallMs": 2727,
       "errors": [],
       "external": [],
       "opts": {
@@ -231,7 +231,7 @@
     {
       "name": "reverse-en-phone",
       "ok": true,
-      "wallMs": 2228,
+      "wallMs": 2543,
       "errors": [],
       "external": [],
       "opts": {
@@ -342,7 +342,7 @@
     {
       "name": "reverse-en-desktop-contrast",
       "ok": true,
-      "wallMs": 1314,
+      "wallMs": 1491,
       "errors": [],
       "external": [],
       "opts": {
@@ -453,7 +453,7 @@
     {
       "name": "reverse-en-desktop-adaptive",
       "ok": true,
-      "wallMs": 2341,
+      "wallMs": 2620,
       "errors": [],
       "external": [],
       "opts": {

@@ -35,7 +35,7 @@
   else root.QuorumGame = factory(root.ArenaGame, root.ArenaBrain);
 })(typeof self !== 'undefined' ? self : this, function (G, B) {
   'use strict';
-  var VERSION = '0.3.3';
+  var VERSION = '0.3.4';
   var MODES = B.MODES;                         // collude, stuck, silent
   var GOALS = ['fool', 'silence'];
   var SIM_EPISODES = 60;                       // half planted

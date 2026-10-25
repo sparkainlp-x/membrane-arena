@@ -278,6 +278,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
     <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
     <a class="btn small" href="pair.html" data-i18n="page.pair"></a>
     <a class="btn small" href="watch.html" data-i18n="page.watch"></a>
+    <a class="btn small" href="pulse.html" data-i18n="page.pulse"></a>
   </div>
 </header>
 <noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
@@ -614,7 +615,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
 })(typeof self !== 'undefined' ? self : this, function (BASE) {
   'use strict';
 
-  var VERSION = '0.3.3';
+  var VERSION = '0.3.4';
   var BUILD = VERSION;   // shown in the page footer
   var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
   var EPOCH = '2026-10-24';              // day number 1
@@ -1292,7 +1293,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
   else root.ArenaBrain = factory(root.ArenaGame, root.ArenaStats);
 })(typeof self !== 'undefined' ? self : this, function (G, ST) {
   'use strict';
-  var VERSION = '0.3.3';
+  var VERSION = '0.3.4';
   var NS = 'membrane-arena/brain/v1/';      // generator namespace for brain runs
   var KINDS = ['sensory', 'gate', 'integrator', 'output', 'inhibitory', 'memory'];
   var MODES = ['collude', 'stuck', 'silent'];
@@ -1880,7 +1881,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
   else root.QuorumGame = factory(root.ArenaGame, root.ArenaBrain);
 })(typeof self !== 'undefined' ? self : this, function (G, B) {
   'use strict';
-  var VERSION = '0.3.3';
+  var VERSION = '0.3.4';
   var MODES = B.MODES;                         // collude, stuck, silent
   var GOALS = ['fool', 'silence'];
   var SIM_EPISODES = 60;                       // half planted
@@ -2253,6 +2254,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
     'page.reverse': 'Reverse Membranes',
     'page.pair': 'Reverse Pair',
     'page.watch': 'Pair Watch',
+    'page.pulse': 'Wave Pulse',
     'intro.p1': 'Every layer of the brain votes. A gate releases when a strict majority of its column agrees, an integrator when a strict majority of columns agree, and the output when a strict majority of integrators agree. Faulty units can lie together (collude), each say something random (stuck), or say nothing (silent).',
     'intro.p2': 'In Build levels you size the brain and an adversary tries every placement of faults the level allows. In Break levels you are the adversary. Membranes and microtubules are metaphors here: nothing on this page models real neurons, microtubules or a brain.',
     'sec.levels': 'Levels',
@@ -2424,6 +2426,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
     'page.reverse': 'Membranes inversées',
     'page.pair': 'Paire inversée',
     'page.watch': 'Veille à deux',
+    'page.pulse': 'Impulsion de vague',
     'intro.p1': 'Chaque couche du cerveau vote. Une porte libère quand une majorité stricte de sa colonne est d\'accord, un intégrateur quand une majorité stricte des colonnes l\'est, et la sortie quand une majorité stricte des intégrateurs l\'est. Les unités en panne peuvent mentir ensemble (collusion), dire chacune n\'importe quoi (bloquées) ou se taire (muettes).',
     'intro.p2': 'Aux niveaux Construire, vous dimensionnez le cerveau et un adversaire essaie chaque placement de pannes que le niveau permet. Aux niveaux Briser, l\'adversaire, c\'est vous. Membranes et microtubules sont ici des métaphores : rien sur cette page ne modélise de vrais neurones, de vrais microtubules ni un cerveau.',
     'sec.levels': 'Niveaux',

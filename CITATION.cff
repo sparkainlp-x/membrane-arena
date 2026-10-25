@@ -7,7 +7,7 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.3.3
+version: 0.3.4
 date-released: 2026-10-25
 license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
@@ -44,6 +44,11 @@ abstract: >-
   the player is the second vote of the shield, with a logistic coach fitted
   on calibration runs and frozen, evaluated under its own frozen protocol on
   200 held-out runs, and replay codes checked by replaying the seed.
+  Wave Pulse sends a ripple across a 40 x 26 damped wave grid and asks the
+  player to locate its start from edge-sensor arrival times, against a
+  least-squares locator calibrated on 200 pulses and evaluated under its
+  own frozen protocol on 200 held-out pulses in 16 settings (nothing
+  models a real floor, pressure waves or holography).
   Classical simulation only.
 keywords:
   - "scientific-reasoning"
@@ -59,6 +64,8 @@ keywords:
   - "reproducibility"
   - "calibration"
   - "probability-calibration"
+  - "wave-equation"
+  - "source-localization"
 references:
   - type: article
     title: "Simplified neuron model as a principal component analyzer"

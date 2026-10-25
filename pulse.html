@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Wave Pulse: a big win or a crowd cheer sends a ripple across the membrane grid. Listen to a few edge sensors, tap where you think it started, then watch the ripple replayed in a Great Wave colour style. A game on a synthetic classical simulation.">
+<title>Wave Pulse</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b2a4a'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23f4ecd8'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%235d8fb3' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='14' fill='none' stroke='%23c9a84c' stroke-width='1.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pulse.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Wave Pulse</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="watch.html" data-i18n="page.watch"></a>
+    <a class="btn small" href="pair.html" data-i18n="page.pair"></a>
+    <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section id="verify" class="card verify" aria-labelledby="verify-h" hidden>
+    <h2 id="verify-h" data-i18n="sec.verify"></h2>
+    <p id="verify-msg" class="verify-msg"></p>
+  </section>
+
+  <section class="card intro">
+    <p data-i18n="intro.p1"></p>
+    <p data-i18n="intro.p2"></p>
+    <p class="muted" data-i18n="intro.p3"></p>
+  </section>
+
+  <section class="card game" aria-labelledby="game-h">
+    <h2 id="game-h" class="sr-only" data-i18n="sec.game"></h2>
+    <div class="modes" role="group" aria-labelledby="game-h">
+      <button id="mode-play" class="btn small" type="button" aria-pressed="true" data-i18n="mode.play"></button>
+      <button id="mode-free" class="btn small" type="button" aria-pressed="false" data-i18n="mode.free"></button>
+    </div>
+    <div class="hud" role="group">
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.pulse"></span><span id="hud-pulse" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.stage"></span><span id="hud-stage" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.points"></span><span id="hud-points" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.locator"></span><span id="hud-locator" class="hud-v"></span></div>
+    </div>
+    <p id="banner" class="banner" aria-live="polite"></p>
+    <div class="scene-wrap">
+      <canvas id="scene" role="img" aria-label="" tabindex="0"></canvas>
+      <div id="pop" class="pop" aria-hidden="true"></div>
+    </div>
+    <p id="status" class="status" aria-live="polite"></p>
+    <p id="arrivals" class="arrivals muted"></p>
+    <div id="play-controls" class="controls">
+      <button id="btn-go" class="btn primary big" type="button"></button>
+      <button id="btn-confirm" class="btn big" type="button" data-i18n="btn.confirm"></button>
+      <label class="switch"><input id="hint" type="checkbox"> <span data-i18n="ctl.hint"></span></label>
+      <label class="speed"><span data-i18n="ctl.speed"></span>
+        <select id="speed">
+          <option value="1" data-i18n="ctl.speed.1"></option>
+          <option value="2" data-i18n="ctl.speed.2" selected></option>
+          <option value="4" data-i18n="ctl.speed.4"></option>
+        </select>
+      </label>
+    </div>
+    <div id="free-controls" class="controls" hidden>
+      <button id="free-win" class="btn primary" type="button" data-i18n="free.win"></button>
+      <button id="free-cheer" class="btn" type="button" data-i18n="free.cheer"></button>
+      <label class="switch"><input id="free-patchy" type="checkbox"> <span data-i18n="free.patchy"></span></label>
+      <p class="hint muted" data-i18n="free.hint"></p>
+    </div>
+    <p class="hint muted" data-i18n="keys.hint"></p>
+  </section>
+
+  <section class="card" aria-labelledby="legend-h">
+    <h2 id="legend-h" data-i18n="sec.legend"></h2>
+    <ul class="legend">
+      <li><span class="sw sw-sensor"></span><span data-i18n="legend.sensor"></span></li>
+      <li><span class="sw sw-guess"></span><span data-i18n="legend.guess"></span></li>
+      <li><span class="sw sw-loc"></span><span data-i18n="legend.locator"></span></li>
+      <li><span class="sw sw-region"></span><span data-i18n="legend.region"></span></li>
+      <li><span class="sw sw-target"></span><span data-i18n="legend.target"></span></li>
+      <li><span class="sw sw-patch"></span><span data-i18n="legend.patch"></span></li>
+      <li><span class="sw sw-wave"></span><span data-i18n="legend.wave"></span></li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="log-h">
+    <h2 id="log-h" data-i18n="sec.log"></h2>
+    <div class="tablewrap"><table class="rtable" id="log">
+      <thead><tr><th scope="col" data-i18n="log.n"></th><th scope="col" data-i18n="log.kind"></th><th scope="col" data-i18n="log.you"></th><th scope="col" data-i18n="log.pts"></th><th scope="col" data-i18n="log.loc"></th><th scope="col" data-i18n="log.locpts"></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p id="log-empty" class="muted" data-i18n="log.empty"></p>
+  </section>
+
+  <section id="end" class="card end" aria-labelledby="end-h" hidden>
+    <h2 id="end-h" data-i18n="sec.end"></h2>
+    <p id="end-rank" class="end-rank"></p>
+    <div class="tablewrap"><table class="rtable" id="end-table">
+      <thead><tr><th scope="col" data-i18n="end.who"></th><th scope="col" data-i18n="end.points"></th><th scope="col" data-i18n="end.hits"></th><th scope="col" data-i18n="end.err"></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p id="end-note" class="muted"></p>
+    <p><span data-i18n="end.code"></span> <code id="end-code"></code> <a id="end-link" href="#" data-i18n="end.link"></a></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+
+  <section class="card" aria-labelledby="runs-h">
+    <h2 id="runs-h" data-i18n="sec.runs"></h2>
+    <p id="seed-line"></p>
+    <div class="controls">
+      <button id="btn-again" class="btn" type="button" data-i18n="btn.again"></button>
+      <button id="btn-today" class="btn" type="button" data-i18n="btn.today"></button>
+      <button id="btn-new" class="btn" type="button" data-i18n="btn.new"></button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="how-h">
+    <h2 id="how-h" data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+  </section>
+
+  <section class="card" aria-labelledby="eval-h">
+    <h2 id="eval-h" data-i18n="sec.eval"></h2>
+    <p data-i18n="eval.p1"></p>
+    <p data-i18n="eval.p2"></p>
+    <p data-i18n="eval.p3"></p>
+    <p data-i18n="eval.p4"></p>
+    <p class="muted" data-i18n="eval.p5"></p>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license">Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.</p>
+  <p id="footer-version"></p>
+</footer>
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="pulse-calib.js"></script>
+<script src="pulse.js"></script>
+<script src="pulse-i18n.js"></script>
+<script src="pulseui.js"></script>
+</body>
+</html>

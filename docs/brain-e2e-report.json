@@ -1,5 +1,5 @@
 {
-  "version": "0.3.3",
+  "version": "0.3.4",
   "chrome": "/usr/bin/google-chrome",
   "allOk": true,
   "servedOther": [],
@@ -7,7 +7,7 @@
     {
       "name": "brain-en-desktop",
       "ok": true,
-      "wallMs": 407,
+      "wallMs": 376,
       "errors": [],
       "external": [],
       "opts": {
@@ -74,7 +74,7 @@
           "not applicable"
         ]
       ],
-      "status": "Done: 40 episodes in 258 ms in this browser.",
+      "status": "Done: 40 episodes in 230 ms in this browser.",
       "overflowX": false,
       "hc": false,
       "untranslated": []
@@ -82,7 +82,7 @@
     {
       "name": "brain-fr-desktop",
       "ok": true,
-      "wallMs": 557,
+      "wallMs": 677,
       "errors": [],
       "external": [],
       "opts": {
@@ -149,7 +149,7 @@
           "sans objet"
         ]
       ],
-      "status": "Terminé : 40 épisodes en 316 ms dans ce navigateur.",
+      "status": "Terminé : 40 épisodes en 432 ms dans ce navigateur.",
       "overflowX": false,
       "hc": false,
       "untranslated": []
@@ -157,7 +157,7 @@
     {
       "name": "brain-en-phone",
       "ok": true,
-      "wallMs": 536,
+      "wallMs": 672,
       "errors": [],
       "external": [],
       "opts": {
@@ -224,7 +224,7 @@
           "not applicable"
         ]
       ],
-      "status": "Done: 40 episodes in 296 ms in this browser.",
+      "status": "Done: 40 episodes in 411 ms in this browser.",
       "overflowX": false,
       "hc": false,
       "untranslated": []
@@ -232,7 +232,7 @@
     {
       "name": "brain-fr-phone",
       "ok": true,
-      "wallMs": 366,
+      "wallMs": 358,
       "errors": [],
       "external": [],
       "opts": {
@@ -299,7 +299,7 @@
           "sans objet"
         ]
       ],
-      "status": "Terminé : 40 épisodes en 102 ms dans ce navigateur.",
+      "status": "Terminé : 40 épisodes en 103 ms dans ce navigateur.",
       "overflowX": false,
       "hc": false,
       "untranslated": []
@@ -307,7 +307,7 @@
     {
       "name": "brain-en-desktop-contrast",
       "ok": true,
-      "wallMs": 531,
+      "wallMs": 710,
       "errors": [],
       "external": [],
       "opts": {
@@ -375,7 +375,7 @@
           "not applicable"
         ]
       ],
-      "status": "Done: 40 episodes in 406 ms in this browser.",
+      "status": "Done: 40 episodes in 573 ms in this browser.",
       "overflowX": false,
       "hc": true,
       "untranslated": []

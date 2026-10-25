@@ -26,7 +26,9 @@ jobs:
         run: node scripts/make-baselines.js --check
       - name: Reverse Pair evaluation reproduces (every number, SHA-256 checked)
         run: node scripts/pair-check.js --verify > /dev/null
-      - name: dist/index.html, dist/brain.html, dist/quorum.html, dist/reverse.html, dist/pair.html and dist/watch.html are up to date
+      - name: Wave Pulse evaluation reproduces (every number, SHA-256 checked)
+        run: node scripts/pulse-check.js --verify > /dev/null
+      - name: dist/index.html, dist/brain.html, dist/quorum.html, dist/reverse.html, dist/pair.html, dist/watch.html and dist/pulse.html are up to date
         run: |
           node build.js
-          git diff --exit-code dist/index.html dist/brain.html dist/quorum.html dist/reverse.html dist/pair.html dist/watch.html
+          git diff --exit-code dist/index.html dist/brain.html dist/quorum.html dist/reverse.html dist/pair.html dist/watch.html dist/pulse.html

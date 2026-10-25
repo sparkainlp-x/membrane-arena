@@ -1,6 +1,6 @@
 {
  "version": "0.3.2",
- "checkedWith": "0.3.3",
+ "checkedWith": "0.3.4",
  "generator": "membrane-arena/pair/v2/",
  "command": "node scripts/pair-check.js --write",
  "seeds": {
@@ -197,7 +197,7 @@
   "seed": "pair-bootstrap"
  },
  "inputs": {
-  "game.js": "a87dae505454a9234f0042f44f49fb121a07de97bb1301b5e8c5ee5fc6b73337",
+  "game.js": "3f629da89653febff50fc16355f5b60b4383ec3efeb7da5170911730c645626f",
   "reverse.js": "b8a8d1710b967df8d8b5f0bff4ced003a216e275fd95ee000242642b78ac4b34",
   "pair.js": "5a3f6c94a6754d38c266da0908a3c2ca31893749d206ce37e8d143a90af1cd45",
   "scripts/pair-check.js": "d2217a2060d7557f9463baa8dd28295568daee5bd55c9d7f79f53b2baf7818b4",

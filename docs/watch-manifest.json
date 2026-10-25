@@ -1,5 +1,6 @@
 {
  "version": "0.3.3",
+ "checkedWith": "0.3.4",
  "generator": "membrane-arena/watch/v1/",
  "command": "node scripts/watch-check.js --write",
  "seeds": {
@@ -433,11 +434,11 @@
  },
  "protocolSha256": "fcb3adfce65c9e0d22b881404f7ad7642d94a0949bc4cfc35c2732d434fd684c",
  "inputs": {
-  "game.js": "a87dae505454a9234f0042f44f49fb121a07de97bb1301b5e8c5ee5fc6b73337",
+  "game.js": "3f629da89653febff50fc16355f5b60b4383ec3efeb7da5170911730c645626f",
   "reverse.js": "b8a8d1710b967df8d8b5f0bff4ced003a216e275fd95ee000242642b78ac4b34",
   "pair.js": "5a3f6c94a6754d38c266da0908a3c2ca31893749d206ce37e8d143a90af1cd45",
   "watch.js": "3bc97c93223958fe74b161c36b42d98c65fee29fdf5b4019ab44e4660abc4d99",
-  "scripts/watch-check.js": "b824e3a60fc4063051e9e746da7ba2db05ca87c5c38026014c4f54615212cf53",
+  "scripts/watch-check.js": "d8381d49f92dfdb599dd05f6da04c717f15c1c2641cb8aa4693b3651896329ee",
   "docs/WATCH-PROTOCOL.md": "fcb3adfce65c9e0d22b881404f7ad7642d94a0949bc4cfc35c2732d434fd684c"
  },
  "outputs": {

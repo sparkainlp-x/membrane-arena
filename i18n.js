@@ -194,6 +194,7 @@
     'nav.reverse': 'Reverse Membranes',
     'nav.pair': 'Reverse Pair',
     'nav.watch': 'Pair Watch',
+    'nav.pulse': 'Wave Pulse',
     'footer.version': 'Version {v}',
 
     'help.title': 'How it works',
@@ -627,6 +628,7 @@
     'nav.reverse': 'Membranes inversées',
     'nav.pair': 'Paire inversée',
     'nav.watch': 'Veille à deux',
+    'nav.pulse': 'Impulsion de vague',
     'footer.version': 'Version {v}',
 
     'help.title': 'Comment ça marche',

@@ -6,7 +6,8 @@
  * script inlined.
  *   node build.js            write all five files
  * build() returns the arena HTML string, buildBrain() the brain page, buildQuorum() the game,
- * buildReverse() the reverse page, buildPair() the pair page and buildWatch() the Pair Watch game (used by the tests).
+ * buildReverse() the reverse page, buildPair() the pair page, buildWatch() the Pair Watch game and buildPulse() the Wave Pulse game
+ * (used by the tests).
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -25,13 +26,14 @@ function buildQuorum() { return inline('quorum.html'); }
 function buildReverse() { return inline('reverse.html'); }
 function buildPair() { return inline('pair.html'); }
 function buildWatch() { return inline('watch.html'); }
+function buildPulse() { return inline('pulse.html'); }
 
 if (require.main === module) {
   fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
-  for (const [name, fn] of [['index.html', build], ['brain.html', buildBrain], ['quorum.html', buildQuorum], ['reverse.html', buildReverse], ['pair.html', buildPair], ['watch.html', buildWatch]]) {
+  for (const [name, fn] of [['index.html', build], ['brain.html', buildBrain], ['quorum.html', buildQuorum], ['reverse.html', buildReverse], ['pair.html', buildPair], ['watch.html', buildWatch], ['pulse.html', buildPulse]]) {
     const html = fn();
     fs.writeFileSync(path.join(root, 'dist', name), html);
     console.log(`wrote dist/${name} (${html.length} bytes)`);
   }
 }
-module.exports = { build, buildBrain, buildQuorum, buildReverse, buildPair, buildWatch };
+module.exports = { build, buildBrain, buildQuorum, buildReverse, buildPair, buildWatch, buildPulse };

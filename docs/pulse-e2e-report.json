@@ -1,0 +1,2652 @@
+{
+  "version": "0.3.4",
+  "chrome": "/usr/bin/google-chrome",
+  "allOk": true,
+  "servedOther": [],
+  "cases": [
+    {
+      "name": "pulse-en-desktop",
+      "ok": true,
+      "wallMs": 38869,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p1",
+        "policy": "mix",
+        "keyboard": false,
+        "pulses": 12
+      },
+      "points": 612,
+      "locator": 1067,
+      "code": "b46beyb66boqdhzb66cbodllb66bdzczab66HF",
+      "checks": [
+        {
+          "what": "pulse 1: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 1: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            70,
+            45,
+            72,
+            45,
+            40,
+            42,
+            66,
+            35
+          ]
+        },
+        {
+          "what": "pulse 1: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              27,
+              12
+            ],
+            "aimed": [
+              27,
+              12
+            ]
+          }
+        },
+        {
+          "what": "pulse 1: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 91,
+              "err": 0.7105586969577928,
+              "locPoints": 90,
+              "kind": "win"
+            },
+            "node": {
+              "points": 91,
+              "loc": 90
+            }
+          }
+        },
+        {
+          "what": "pulse 1: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            27.461430328898132,
+            12.540347770787776
+          ]
+        },
+        {
+          "what": "pulse 2: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 2: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            76,
+            32,
+            84,
+            50,
+            40,
+            55,
+            76,
+            32
+          ]
+        },
+        {
+          "what": "pulse 2: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              35,
+              7
+            ],
+            "aimed": [
+              35,
+              7
+            ]
+          }
+        },
+        {
+          "what": "pulse 2: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 57,
+              "err": 3.6020714528450766,
+              "locPoints": 89,
+              "kind": "win"
+            },
+            "node": {
+              "points": 57,
+              "loc": 89
+            }
+          }
+        },
+        {
+          "what": "pulse 2: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            31.39816676126793,
+            6.958574503427371
+          ]
+        },
+        {
+          "what": "pulse 3: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 3: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            52,
+            51,
+            65,
+            67,
+            24,
+            50,
+            53,
+            54
+          ]
+        },
+        {
+          "what": "pulse 3: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 3: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 23,
+              "err": 6.385986710186503,
+              "locPoints": 95,
+              "kind": "win"
+            },
+            "node": {
+              "points": 23,
+              "loc": 95
+            }
+          }
+        },
+        {
+          "what": "pulse 3: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            19.087380448821932,
+            6.127357583492994
+          ]
+        },
+        {
+          "what": "pulse 4: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 4: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            80,
+            31,
+            86,
+            45,
+            46,
+            55,
+            80,
+            25
+          ]
+        },
+        {
+          "what": "pulse 4: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              33,
+              9
+            ],
+            "aimed": [
+              33,
+              9
+            ]
+          }
+        },
+        {
+          "what": "pulse 4: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 89,
+              "err": 0.8985307193721093,
+              "locPoints": 86,
+              "kind": "win"
+            },
+            "node": {
+              "points": 89,
+              "loc": 86
+            }
+          }
+        },
+        {
+          "what": "pulse 4: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            33.8930889563635,
+            9.098739909240976
+          ]
+        },
+        {
+          "what": "pulse 5: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 5: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            59,
+            95,
+            24,
+            86,
+            70,
+            51,
+            33,
+            92
+          ]
+        },
+        {
+          "what": "pulse 5: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              1.5,
+              21
+            ],
+            "aimed": [
+              1.5,
+              21
+            ]
+          }
+        },
+        {
+          "what": "pulse 5: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 59,
+              "err": 3.4279538649405747,
+              "locPoints": 92,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 59,
+              "loc": 92
+            }
+          }
+        },
+        {
+          "what": "pulse 5: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            4.895318687804349,
+            20.52811155088562
+          ]
+        },
+        {
+          "what": "pulse 6: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 6: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            99,
+            53,
+            87,
+            30,
+            67,
+            50,
+            91,
+            27
+          ]
+        },
+        {
+          "what": "pulse 6: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 6: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 0,
+              "err": 16.991255402470152,
+              "locPoints": 93,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 0,
+              "loc": 93
+            }
+          }
+        },
+        {
+          "what": "pulse 6: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            35.56370133880345,
+            18.03717070801465
+          ]
+        },
+        {
+          "what": "pulse 7: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 7: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            62,
+            56,
+            58,
+            59,
+            39,
+            38,
+            57,
+            58
+          ]
+        },
+        {
+          "what": "pulse 7: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              20,
+              13
+            ],
+            "aimed": [
+              20,
+              13
+            ]
+          }
+        },
+        {
+          "what": "pulse 7: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 92,
+              "err": 0.6864746070005698,
+              "locPoints": 89,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 92,
+              "loc": 89
+            }
+          }
+        },
+        {
+          "what": "pulse 7: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            19.72235364747943,
+            13.627821542310082
+          ]
+        },
+        {
+          "what": "pulse 8: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 8: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            67,
+            71,
+            55,
+            61,
+            51,
+            32,
+            57,
+            65
+          ]
+        },
+        {
+          "what": "pulse 8: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19,
+              21.5
+            ],
+            "aimed": [
+              19,
+              21.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 8: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 42,
+              "err": 4.798289813908321,
+              "locPoints": 95,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 42,
+              "loc": 95
+            }
+          }
+        },
+        {
+          "what": "pulse 8: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            17.680579632845774,
+            16.886680692495375
+          ]
+        },
+        {
+          "what": "pulse 9: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 9: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            53,
+            64,
+            52,
+            64
+          ]
+        },
+        {
+          "what": "pulse 9: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 9: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 61,
+              "err": 3.2429493065150528,
+              "locPoints": 98,
+              "kind": "win"
+            },
+            "node": {
+              "points": 61,
+              "loc": 98
+            }
+          }
+        },
+        {
+          "what": "pulse 9: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            16.260974418604746,
+            12.659478800138459
+          ]
+        },
+        {
+          "what": "pulse 10: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 10: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            55,
+            54,
+            65,
+            68
+          ]
+        },
+        {
+          "what": "pulse 10: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              7
+            ],
+            "aimed": [
+              19.5,
+              7
+            ]
+          }
+        },
+        {
+          "what": "pulse 10: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 73,
+              "err": 2.2638275747141723,
+              "locPoints": 73,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 73,
+              "loc": 73
+            }
+          }
+        },
+        {
+          "what": "pulse 10: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            20.369747111758688,
+            9.090084986220338
+          ]
+        },
+        {
+          "what": "pulse 11: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 11: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            49,
+            79,
+            41,
+            72
+          ]
+        },
+        {
+          "what": "pulse 11: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              2,
+              18
+            ],
+            "aimed": [
+              2,
+              18
+            ]
+          }
+        },
+        {
+          "what": "pulse 11: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 0,
+              "err": 8.870510699446902,
+              "locPoints": 90,
+              "kind": "win"
+            },
+            "node": {
+              "points": 0,
+              "loc": 90
+            }
+          }
+        },
+        {
+          "what": "pulse 11: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            10.358639365062118,
+            15.030301693128422
+          ]
+        },
+        {
+          "what": "pulse 12: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 12: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            61,
+            46,
+            66,
+            63
+          ]
+        },
+        {
+          "what": "pulse 12: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 12: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 25,
+              "err": 6.285039841878904,
+              "locPoints": 77,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 25,
+              "loc": 77
+            }
+          }
+        },
+        {
+          "what": "pulse 12: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            23.966363877734192,
+            8.078086440727681
+          ]
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              612,
+              1067
+            ],
+            "node": [
+              612,
+              1067
+            ]
+          }
+        },
+        {
+          "what": "run ends",
+          "ok": true,
+          "got": "end"
+        },
+        {
+          "what": "end table: you, locator, early-sensor average, centre",
+          "ok": true,
+          "got": [
+            [
+              "You",
+              "612",
+              "3 / 12",
+              "4.8"
+            ],
+            [
+              "Locator",
+              "1067",
+              "11 / 12",
+              "0.9"
+            ],
+            [
+              "Early-sensor average",
+              "564",
+              "2 / 12",
+              "4.5"
+            ],
+            [
+              "Always the centre",
+              "300",
+              "1 / 12",
+              "8.7"
+            ]
+          ]
+        },
+        {
+          "what": "end replay code equals the Node code",
+          "ok": true,
+          "got": "b46beyb66boqdhzb66cbodllb66bdzczab66HF"
+        },
+        {
+          "what": "score card names the seed and its code",
+          "ok": true,
+          "got": "Wave Pulse · seed e2e-p1"
+        },
+        {
+          "what": "end rank sentence matches Node",
+          "ok": true,
+          "got": "You beat the early-sensor average, but not the locator."
+        }
+      ],
+      "lang": "en",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        7,
+        26,
+        48
+      ],
+      "canvasW": 1064
+    },
+    {
+      "name": "pulse-fr-phone",
+      "ok": true,
+      "wallMs": 22847,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p2",
+        "policy": "locator",
+        "keyboard": true,
+        "pulses": 12
+      },
+      "points": 1048,
+      "locator": 1047,
+      "code": "cdubb5b5lcvvbzybvsc33csecq6cpzcpqaxuQG",
+      "checks": [
+        {
+          "what": "pulse 1: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 1: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            52,
+            66,
+            49,
+            65,
+            40,
+            37,
+            42,
+            60
+          ]
+        },
+        {
+          "what": "pulse 1: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              15.5,
+              13.5
+            ],
+            "aimed": [
+              15.5,
+              13.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 1: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 96,
+              "err": 0.3021692063585124,
+              "locPoints": 98,
+              "kind": "win"
+            },
+            "node": {
+              "points": 96,
+              "loc": 98
+            }
+          }
+        },
+        {
+          "what": "pulse 1: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            15.253176182042807,
+            13.32568926550448
+          ]
+        },
+        {
+          "what": "pulse 2: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 2: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            71,
+            34,
+            82,
+            54,
+            35,
+            54,
+            73,
+            36
+          ]
+        },
+        {
+          "what": "pulse 2: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              29,
+              6.5
+            ],
+            "aimed": [
+              29,
+              6.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 2: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 94,
+              "err": 0.49540711371527524,
+              "locPoints": 92,
+              "kind": "win"
+            },
+            "node": {
+              "points": 94,
+              "loc": 92
+            }
+          }
+        },
+        {
+          "what": "pulse 2: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            29.28793220454827,
+            6.096858270699158
+          ]
+        },
+        {
+          "what": "pulse 3: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 3: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            83,
+            36,
+            85,
+            38,
+            51,
+            52,
+            82,
+            21
+          ]
+        },
+        {
+          "what": "pulse 3: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              33.5,
+              12
+            ],
+            "aimed": [
+              33.5,
+              12
+            ]
+          }
+        },
+        {
+          "what": "pulse 3: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 89,
+              "err": 0.9563527712552009,
+              "locPoints": 90,
+              "kind": "win"
+            },
+            "node": {
+              "points": 89,
+              "loc": 90
+            }
+          }
+        },
+        {
+          "what": "pulse 3: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            34.443117721471936,
+            12.158554679946974
+          ]
+        },
+        {
+          "what": "pulse 4: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 4: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            77,
+            53,
+            67,
+            38,
+            49,
+            35,
+            69,
+            35
+          ]
+        },
+        {
+          "what": "pulse 4: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              27.5,
+              17
+            ],
+            "aimed": [
+              27.5,
+              17
+            ]
+          }
+        },
+        {
+          "what": "pulse 4: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 91,
+              "err": 0.7650066966565774,
+              "locPoints": 88,
+              "kind": "win"
+            },
+            "node": {
+              "points": 91,
+              "loc": 88
+            }
+          }
+        },
+        {
+          "what": "pulse 4: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            28.040906900307164,
+            17.54097594320774
+          ]
+        },
+        {
+          "what": "pulse 5: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 5: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            53,
+            67,
+            53,
+            70,
+            39,
+            45,
+            46,
+            60
+          ]
+        },
+        {
+          "what": "pulse 5: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              15.5,
+              11.5
+            ],
+            "aimed": [
+              15.5,
+              11.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 5: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 94,
+              "err": 0.4779186254007068,
+              "locPoints": 96,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 94,
+              "loc": 96
+            }
+          }
+        },
+        {
+          "what": "pulse 5: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            15.762511779432684,
+            11.100633278597243
+          ]
+        },
+        {
+          "what": "pulse 6: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 6: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            71,
+            48,
+            75,
+            54,
+            40,
+            46,
+            93,
+            44
+          ]
+        },
+        {
+          "what": "pulse 6: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              27.5,
+              10.5
+            ],
+            "aimed": [
+              27.5,
+              10.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 6: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 85,
+              "err": 1.2831656562000957,
+              "locPoints": 87,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 85,
+              "loc": 87
+            }
+          }
+        },
+        {
+          "what": "pulse 6: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            26.424572157541,
+            11.199977897447772
+          ]
+        },
+        {
+          "what": "pulse 7: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 7: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            57,
+            87,
+            34,
+            77,
+            59,
+            44,
+            35,
+            88
+          ]
+        },
+        {
+          "what": "pulse 7: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              8,
+              18.5
+            ],
+            "aimed": [
+              8,
+              18.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 7: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 91,
+              "err": 0.7185226911485136,
+              "locPoints": 93,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 91,
+              "loc": 93
+            }
+          }
+        },
+        {
+          "what": "pulse 7: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            8.704939332313664,
+            18.6390517725614
+          ]
+        },
+        {
+          "what": "pulse 8: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 8,
+            "noise": "loud",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 8: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            53,
+            86,
+            43,
+            74,
+            55,
+            41,
+            38,
+            78
+          ]
+        },
+        {
+          "what": "pulse 8: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              10.5,
+              16.5
+            ],
+            "aimed": [
+              10.5,
+              16.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 8: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 96,
+              "err": 0.36037982016653386,
+              "locPoints": 94,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 96,
+              "loc": 94
+            }
+          }
+        },
+        {
+          "what": "pulse 8: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            10.617572119669857,
+            16.159338274149267
+          ]
+        },
+        {
+          "what": "pulse 9: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 9: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            81,
+            52,
+            87,
+            35
+          ]
+        },
+        {
+          "what": "pulse 9: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              31,
+              16
+            ],
+            "aimed": [
+              31,
+              16
+            ]
+          }
+        },
+        {
+          "what": "pulse 9: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 67,
+              "err": 2.7148899276900615,
+              "locPoints": 65,
+              "kind": "win"
+            },
+            "node": {
+              "points": 67,
+              "loc": 65
+            }
+          }
+        },
+        {
+          "what": "pulse 9: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            28.854686330538243,
+            17.66380785522051
+          ]
+        },
+        {
+          "what": "pulse 10: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 10: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            51,
+            76,
+            41,
+            68
+          ]
+        },
+        {
+          "what": "pulse 10: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              12.5,
+              16
+            ],
+            "aimed": [
+              12.5,
+              16
+            ]
+          }
+        },
+        {
+          "what": "pulse 10: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 77,
+              "err": 1.8917996565454622,
+              "locPoints": 78,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 77,
+              "loc": 78
+            }
+          }
+        },
+        {
+          "what": "pulse 10: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            13.060740569659437,
+            17.806786084195785
+          ]
+        },
+        {
+          "what": "pulse 11: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 11: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            48,
+            86,
+            36,
+            81
+          ]
+        },
+        {
+          "what": "pulse 11: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              8,
+              16
+            ],
+            "aimed": [
+              8,
+              16
+            ]
+          }
+        },
+        {
+          "what": "pulse 11: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 92,
+              "err": 0.6800499308015082,
+              "locPoints": 88,
+              "kind": "win"
+            },
+            "node": {
+              "points": 92,
+              "loc": 88
+            }
+          }
+        },
+        {
+          "what": "pulse 11: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            8.648883418412879,
+            16.20351466210559
+          ]
+        },
+        {
+          "what": "pulse 12: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "cheer",
+            "sensors": 4,
+            "noise": "calm",
+            "floor": "patchy"
+          }
+        },
+        {
+          "what": "pulse 12: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            60,
+            54,
+            84,
+            67
+          ]
+        },
+        {
+          "what": "pulse 12: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              22.5,
+              4.5
+            ],
+            "aimed": [
+              22.5,
+              4.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 12: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 76,
+              "err": 1.9709636957976246,
+              "locPoints": 78,
+              "kind": "cheer"
+            },
+            "node": {
+              "points": 76,
+              "loc": 78
+            }
+          }
+        },
+        {
+          "what": "pulse 12: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            20.863311337801633,
+            5.5981566888124625
+          ]
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              1048,
+              1047
+            ],
+            "node": [
+              1048,
+              1047
+            ]
+          }
+        },
+        {
+          "what": "run ends",
+          "ok": true,
+          "got": "end"
+        },
+        {
+          "what": "end table: you, locator, early-sensor average, centre",
+          "ok": true,
+          "got": [
+            [
+              "Vous",
+              "1048",
+              "11 / 12",
+              "1,1"
+            ],
+            [
+              "Localisateur",
+              "1047",
+              "11 / 12",
+              "1,1"
+            ],
+            [
+              "Moyenne des premiers capteurs",
+              "572",
+              "2 / 12",
+              "4,7"
+            ],
+            [
+              "Toujours le centre",
+              "131",
+              "0 / 12",
+              "9,3"
+            ]
+          ]
+        },
+        {
+          "what": "end replay code equals the Node code",
+          "ok": true,
+          "got": "cdubb5b5lcvvbzybvsc33csecq6cpzcpqaxuQG"
+        },
+        {
+          "what": "score card names the seed and its code",
+          "ok": true,
+          "got": "Impulsion de vague · graine e2e-p2"
+        },
+        {
+          "what": "end rank sentence matches Node",
+          "ok": true,
+          "got": "Vous avez battu le localisateur sur ces impulsions."
+        }
+      ],
+      "lang": "fr",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        7,
+        26,
+        48
+      ],
+      "canvasW": 330
+    },
+    {
+      "name": "pulse-en-desktop-contrast",
+      "ok": true,
+      "wallMs": 8266,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p3",
+        "policy": "center",
+        "keyboard": false,
+        "pulses": 4
+      },
+      "points": 0,
+      "locator": 361,
+      "code": null,
+      "checks": [
+        {
+          "what": "pulse 1: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 1: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            73,
+            36,
+            80,
+            49,
+            39,
+            51,
+            72,
+            32
+          ]
+        },
+        {
+          "what": "pulse 1: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 1: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 0,
+              "err": 11.198415361020835,
+              "locPoints": 91,
+              "kind": "win"
+            },
+            "node": {
+              "points": 0,
+              "loc": 91
+            }
+          }
+        },
+        {
+          "what": "pulse 1: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            29.986603608122095,
+            8.571176847442985
+          ]
+        },
+        {
+          "what": "pulse 2: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 2: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            37,
+            77,
+            44,
+            80,
+            44,
+            51,
+            29,
+            74
+          ]
+        },
+        {
+          "what": "pulse 2: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 2: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 0,
+              "err": 11.89347576268438,
+              "locPoints": 88,
+              "kind": "win"
+            },
+            "node": {
+              "points": 0,
+              "loc": 88
+            }
+          }
+        },
+        {
+          "what": "pulse 2: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            7.78673124150373,
+            10.43745285901241
+          ]
+        },
+        {
+          "what": "pulse 3: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 3: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            47,
+            83,
+            34,
+            77,
+            55,
+            43,
+            28,
+            77
+          ]
+        },
+        {
+          "what": "pulse 3: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 3: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 0,
+              "err": 12.856156372191485,
+              "locPoints": 90,
+              "kind": "win"
+            },
+            "node": {
+              "points": 0,
+              "loc": 90
+            }
+          }
+        },
+        {
+          "what": "pulse 3: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            7.172902799677104,
+            16.150127570377663
+          ]
+        },
+        {
+          "what": "pulse 4: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 4: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            72,
+            30,
+            85,
+            56,
+            35,
+            59,
+            77,
+            37
+          ]
+        },
+        {
+          "what": "pulse 4: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              19.5,
+              12.5
+            ],
+            "aimed": [
+              19.5,
+              12.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 4: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 0,
+              "err": 13.62724561489389,
+              "locPoints": 92,
+              "kind": "win"
+            },
+            "node": {
+              "points": 0,
+              "loc": 92
+            }
+          }
+        },
+        {
+          "what": "pulse 4: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            30.32925514294766,
+            4.227814309531823
+          ]
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              0,
+              361
+            ],
+            "node": [
+              0,
+              361
+            ]
+          }
+        },
+        {
+          "what": "high contrast scene background is black",
+          "ok": true,
+          "got": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "lang": "en",
+      "hc": true,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        0,
+        0,
+        0
+      ],
+      "canvasW": 1060
+    },
+    {
+      "name": "pulse-fr-desktop-free",
+      "ok": true,
+      "wallMs": 6914,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p4",
+        "policy": "locator",
+        "keyboard": false,
+        "pulses": 1
+      },
+      "points": 95,
+      "locator": 96,
+      "code": null,
+      "checks": [
+        {
+          "what": "free mode shows its controls",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "a tap sends a free wave from the tapped cell",
+          "ok": true,
+          "got": {
+            "target": [
+              9.955212922173276,
+              7.9985315712187965
+            ],
+            "kind": "win"
+          }
+        },
+        {
+          "what": "the cheer button sends a crowd cheer",
+          "ok": true,
+          "got": {
+            "target": [
+              17.57781769414127,
+              18.866296781159775
+            ],
+            "kind": "cheer"
+          }
+        },
+        {
+          "what": "free waves do not score",
+          "ok": true,
+          "got": {
+            "points": 0,
+            "idx": 0
+          }
+        },
+        {
+          "what": "play mode returns to the run",
+          "ok": true,
+          "got": {
+            "mode": "play",
+            "phase": "idle"
+          }
+        },
+        {
+          "what": "pulse 1: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 1: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            44,
+            64,
+            53,
+            72,
+            34,
+            46,
+            41,
+            63
+          ]
+        },
+        {
+          "what": "pulse 1: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              14,
+              9.5
+            ],
+            "aimed": [
+              14,
+              9.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 1: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 95,
+              "err": 0.4213506572846654,
+              "locPoints": 96,
+              "kind": "win"
+            },
+            "node": {
+              "points": 95,
+              "loc": 96
+            }
+          }
+        },
+        {
+          "what": "pulse 1: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            13.861098441993818,
+            9.10220264759846
+          ]
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              95,
+              96
+            ],
+            "node": [
+              95,
+              96
+            ]
+          }
+        }
+      ],
+      "lang": "fr",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        7,
+        26,
+        48
+      ],
+      "canvasW": 1064
+    },
+    {
+      "name": "pulse-en-phone-reduced",
+      "ok": true,
+      "wallMs": 3605,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p5",
+        "policy": "early",
+        "keyboard": false,
+        "pulses": 3
+      },
+      "points": 169,
+      "locator": 280,
+      "code": null,
+      "checks": [
+        {
+          "what": "free mode shows its controls",
+          "ok": true,
+          "got": null
+        },
+        {
+          "what": "a tap sends a free wave from the tapped cell",
+          "ok": true,
+          "got": {
+            "target": [
+              9.951612903225806,
+              7.98991935483871
+            ],
+            "kind": "win"
+          }
+        },
+        {
+          "what": "the cheer button sends a crowd cheer",
+          "ok": true,
+          "got": {
+            "target": [
+              11.63183298701778,
+              17.120763189476097
+            ],
+            "kind": "cheer"
+          }
+        },
+        {
+          "what": "free waves do not score",
+          "ok": true,
+          "got": {
+            "points": 0,
+            "idx": 0
+          }
+        },
+        {
+          "what": "play mode returns to the run",
+          "ok": true,
+          "got": {
+            "mode": "play",
+            "phase": "idle"
+          }
+        },
+        {
+          "what": "pulse 1: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 1: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            75,
+            39,
+            77,
+            45,
+            42,
+            46,
+            73,
+            30
+          ]
+        },
+        {
+          "what": "pulse 1: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              34.5,
+              11
+            ],
+            "aimed": [
+              34.5,
+              11
+            ]
+          }
+        },
+        {
+          "what": "pulse 1: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 43,
+              "err": 4.7182691431805805,
+              "locPoints": 93,
+              "kind": "win"
+            },
+            "node": {
+              "points": 43,
+              "loc": 93
+            }
+          }
+        },
+        {
+          "what": "pulse 1: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            29.783491606125608,
+            10.87111137364991
+          ]
+        },
+        {
+          "what": "pulse 2: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 2: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            69,
+            60,
+            59,
+            49,
+            48,
+            27,
+            58,
+            46
+          ]
+        },
+        {
+          "what": "pulse 2: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              22,
+              21.5
+            ],
+            "aimed": [
+              22,
+              21.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 2: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 54,
+              "err": 3.841939554803437,
+              "locPoints": 95,
+              "kind": "win"
+            },
+            "node": {
+              "points": 54,
+              "loc": 95
+            }
+          }
+        },
+        {
+          "what": "pulse 2: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            22.239747927058488,
+            17.665548217250034
+          ]
+        },
+        {
+          "what": "pulse 3: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 3: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            67,
+            46,
+            71,
+            51,
+            36,
+            44,
+            64,
+            39
+          ]
+        },
+        {
+          "what": "pulse 3: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              27.5,
+              9
+            ],
+            "aimed": [
+              27.5,
+              9
+            ]
+          }
+        },
+        {
+          "what": "pulse 3: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 72,
+              "err": 2.337881036993308,
+              "locPoints": 92,
+              "kind": "win"
+            },
+            "node": {
+              "points": 72,
+              "loc": 92
+            }
+          }
+        },
+        {
+          "what": "pulse 3: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            25.888766592601314,
+            10.69399369833991
+          ]
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              169,
+              280
+            ],
+            "node": [
+              169,
+              280
+            ]
+          }
+        }
+      ],
+      "lang": "en",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        7,
+        26,
+        48
+      ],
+      "canvasW": 330
+    },
+    {
+      "name": "pulse-fr-phone-contrast",
+      "ok": true,
+      "wallMs": 5070,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p6",
+        "policy": "locator",
+        "keyboard": false,
+        "pulses": 2
+      },
+      "points": 183,
+      "locator": 184,
+      "code": null,
+      "checks": [
+        {
+          "what": "pulse 1: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 1: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            61,
+            55,
+            61,
+            55,
+            37,
+            35,
+            55,
+            47
+          ]
+        },
+        {
+          "what": "pulse 1: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              21.5,
+              13
+            ],
+            "aimed": [
+              21.5,
+              13
+            ]
+          }
+        },
+        {
+          "what": "pulse 1: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 92,
+              "err": 0.6886267945972566,
+              "locPoints": 95,
+              "kind": "win"
+            },
+            "node": {
+              "points": 92,
+              "loc": 95
+            }
+          }
+        },
+        {
+          "what": "pulse 1: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            21.337410328211263,
+            12.330842723371461
+          ]
+        },
+        {
+          "what": "pulse 2: page setting matches Node",
+          "ok": true,
+          "got": {
+            "kind": "win",
+            "sensors": 8,
+            "noise": "calm",
+            "floor": "even"
+          }
+        },
+        {
+          "what": "pulse 2: page arrival ticks match Node",
+          "ok": true,
+          "got": [
+            85,
+            54,
+            75,
+            30,
+            58,
+            37,
+            77,
+            33
+          ]
+        },
+        {
+          "what": "pulse 2: marker lands where aimed",
+          "ok": true,
+          "got": {
+            "marker": [
+              30.5,
+              19.5
+            ],
+            "aimed": [
+              30.5,
+              19.5
+            ]
+          }
+        },
+        {
+          "what": "pulse 2: points and locator points match Node",
+          "ok": true,
+          "got": {
+            "page": {
+              "points": 91,
+              "err": 0.7107202976502112,
+              "locPoints": 89,
+              "kind": "win"
+            },
+            "node": {
+              "points": 91,
+              "loc": 89
+            }
+          }
+        },
+        {
+          "what": "pulse 2: the true start is shown after the guess",
+          "ok": true,
+          "got": [
+            30.897742581786588,
+            20.08900269959122
+          ]
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              183,
+              184
+            ],
+            "node": [
+              183,
+              184
+            ]
+          }
+        },
+        {
+          "what": "high contrast scene background is black",
+          "ok": true,
+          "got": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "lang": "fr",
+      "hc": true,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        0,
+        0,
+        0
+      ],
+      "canvasW": 326
+    },
+    {
+      "name": "pulse-en-desktop-replay",
+      "ok": true,
+      "wallMs": 446,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p1",
+        "policy": "locator",
+        "keyboard": false,
+        "pulses": 0
+      },
+      "points": 0,
+      "locator": 0,
+      "code": null,
+      "checks": [
+        {
+          "what": "replay check shown",
+          "ok": true,
+          "got": "ok"
+        },
+        {
+          "what": "replay code verifies to the expected points",
+          "ok": true,
+          "got": {
+            "ok": true,
+            "error": null,
+            "points": 612
+          }
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              0,
+              0
+            ],
+            "node": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "lang": "en",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        7,
+        26,
+        48
+      ],
+      "canvasW": 1064
+    },
+    {
+      "name": "pulse-fr-desktop-replay-bad",
+      "ok": true,
+      "wallMs": 477,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-p1",
+        "policy": "locator",
+        "keyboard": false,
+        "pulses": 0
+      },
+      "points": 0,
+      "locator": 0,
+      "code": null,
+      "checks": [
+        {
+          "what": "replay check shown",
+          "ok": true,
+          "got": "check"
+        },
+        {
+          "what": "broken replay code is rejected",
+          "ok": true,
+          "got": {
+            "ok": false,
+            "error": "check",
+            "points": null
+          }
+        },
+        {
+          "what": "page totals match Node",
+          "ok": true,
+          "got": {
+            "page": [
+              0,
+              0
+            ],
+            "node": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "lang": "fr",
+      "hc": false,
+      "overflowX": false,
+      "untranslated": [],
+      "corner": [
+        7,
+        26,
+        48
+      ],
+      "canvasW": 1064
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+Membrane Arena 0.3.4: Wave Pulse evaluation (SYNTHETIC game on a classical simulation)
+Protocol docs/PULSE-PROTOCOL.md, SHA-256 50eec68a3043851ac308b113e3916eedc8c5522f8b08819763d7917ae4ba214e
+Regenerate: node scripts/pulse-check.js --write   Check: node scripts/pulse-check.js --verify
+Grid 40 x 26, r^2 0.25 (nominal speed 0.5 cells/tick), damping 0.004, 130 ticks, trigger at tick 20.
+Calibration pulses pcal-000 to pcal-199 (200); held-out pulses ptest-000 to ptest-199 (200, each in all 16 settings).
+Intervals: 95% percentile bootstrap over pulses (2000 resamples, seed pulse-bootstrap); proportions: Wilson 95%.
+
+1. Calibration (calibration pulses only)
+   Chosen: detector threshold k = 7, locator speed c = 0.46 cells/tick (mean calibration error 1.95 cells).
+   90% region: rho = 181.726 ticks^2 (90th percentile of cost at the target - minimum cost; 2 fallback pulses left out).
+   Mean calibration error by k (best c for each k):
+     k 4   best c 0.46  error 3.18
+     k 5   best c 0.46  error 2.09
+     k 6   best c 0.46  error 1.95
+     k 7   best c 0.46  error 1.95
+     k 8   best c 0.46  error 1.98
+     k 10  best c 0.46  error 2.30
+
+2. Confirmatory hypotheses (held-out; difference = predicted larger - predicted smaller, in cells)
+   H1 default: centre error - locator error                +8.72 [+8.20, +9.24], d_z 2.27, W/T/L 200/0/0, p 0.0001, Holm 0.0006: supported
+   H2 default: early-sensor average error - locator error  +2.43 [+2.29, +2.57], d_z 2.42, W/T/L 198/0/2, p 0.0001, Holm 0.0006: supported
+   H3 locator: patchy floor - even floor (win, 8, calm)    +0.65 [+0.53, +0.78], d_z 0.68, W/T/L 138/3/59, p 0.0001, Holm 0.0006: supported
+   H4 locator: loud - calm (win, 8, even)                  +0.90 [+0.69, +1.13], d_z 0.55, W/T/L 130/4/66, p 0.0001, Holm 0.0006: supported
+   H5 locator: 4 sensors - 8 sensors (win, calm, even)     +0.13 [+0.07, +0.18], d_z 0.35, W/T/L 152/8/40, p 0.0001, Holm 0.0006: supported
+   H6 locator: crowd cheer - big win (8, calm, even)       +0.33 [+0.27, +0.39], d_z 0.73, W/T/L 148/4/48, p 0.0001, Holm 0.0006: supported
+   Rule: supported when the interval is above zero and the Holm-adjusted p < 0.05.
+
+3. Default setting (win/8/calm/even): every method
+   method              error (cells)            median  hits (<= 2 cells)          game points
+   locator             0.62 [0.57, 0.68]        0.58    99.5% [97.2%, 99.9%]       92.6 [91.9, 93.2]
+   early-sensor avg    3.05 [2.89, 3.21]        3.14    16.0% [11.6%, 21.7%]       63.5 [61.7, 65.3]
+   nearest sensor      8.14 [7.84, 8.45]        8.18    0.0% [0.0%, 1.9%]          12.0 [9.8, 14.3]
+   centre              9.34 [8.79, 9.89]        9.29    3.0% [1.4%, 6.4%]          14.8 [11.9, 18.1]
+   random              12.47 [11.61, 13.40]     11.80   2.0% [0.8%, 5.0%]          11.6 [8.6, 14.6]
+   noise-free traces   0.44 [0.42, 0.47]        0.44    100.0% [98.1%, 100.0%]     94.7 [94.4, 95.0]
+
+4. The four game settings (stages 1, 2 and 3)
+   setting                locator error            early-sensor avg         centre                   locator points
+   win/8/calm/even        0.62 [0.57, 0.68]        3.05 [2.89, 3.21]        9.34 [8.79, 9.89]        92.6 [91.9, 93.2]
+   cheer/8/loud/even      2.01 [1.72, 2.32]        4.11 [3.87, 4.37]        9.39 [8.85, 9.94]        76.1 [72.5, 79.5]
+   win/4/calm/patchy      1.53 [1.37, 1.70]        7.72 [7.38, 8.04]        9.34 [8.79, 9.89]        81.7 [79.7, 83.6]
+   cheer/4/calm/patchy    1.63 [1.47, 1.79]        7.82 [7.47, 8.13]        9.39 [8.85, 9.94]        80.5 [78.6, 82.3]
+
+5. The locator's 90% region: coverage by setting (calibrated when the Wilson interval contains 90%)
+   setting                coverage                   calibrated  area (cells)            missed sensors          fallbacks
+   win/8/calm/even        99.5% [97.2%, 99.9%]       no          35.4 [35.0, 35.8]       0.0% [0.0%, 0.2%]       0
+   win/8/calm/patchy      98.0% [95.0%, 99.2%]       no          35.7 [35.2, 36.2]       0.0% [0.0%, 0.2%]       0
+   win/8/loud/even        87.0% [81.6%, 91.0%]       yes         38.7 [37.8, 39.5]       9.3% [7.9%, 10.8%]      0
+   win/8/loud/patchy      59.0% [52.1%, 65.6%]       no          39.1 [37.4, 40.7]       15.9% [14.2%, 17.7%]    0
+   win/4/calm/even        100.0% [98.1%, 100.0%]     no          69.2 [68.8, 69.6]       0.0% [0.0%, 0.5%]       0
+   win/4/calm/patchy      99.5% [97.2%, 99.9%]       no          67.6 [66.8, 68.5]       0.0% [0.0%, 0.5%]       0
+   win/4/loud/even        98.0% [95.0%, 99.2%]       no          70.5 [69.4, 71.8]       2.1% [1.3%, 3.4%]       0
+   win/4/loud/patchy      73.5% [67.0%, 79.1%]       no          65.0 [61.2, 68.8]       10.8% [8.8%, 13.1%]     13
+   cheer/8/calm/even      99.5% [97.2%, 99.9%]       no          35.4 [34.9, 35.8]       0.0% [0.0%, 0.2%]       0
+   cheer/8/calm/patchy    97.5% [94.3%, 98.9%]       no          35.8 [35.2, 36.3]       0.0% [0.0%, 0.2%]       0
+   cheer/8/loud/even      81.0% [75.0%, 85.8%]       no          40.9 [37.4, 46.0]       7.3% [6.1%, 8.7%]       0
+   cheer/8/loud/patchy    61.5% [54.6%, 68.0%]       no          40.8 [37.1, 46.2]       11.9% [10.4%, 13.6%]    0
+   cheer/4/calm/even      100.0% [98.1%, 100.0%]     no          69.1 [68.6, 69.5]       0.0% [0.0%, 0.5%]       0
+   cheer/4/calm/patchy    99.0% [96.4%, 99.7%]       no          67.3 [66.4, 68.2]       0.0% [0.0%, 0.5%]       0
+   cheer/4/loud/even      93.5% [89.2%, 96.2%]       yes         68.2 [66.1, 70.4]       2.9% [1.9%, 4.3%]       5
+   cheer/4/loud/patchy    75.5% [69.1%, 80.9%]       no          64.2 [60.9, 67.5]       6.6% [5.1%, 8.6%]       11
+
+6. Speed check (even floor, big win, noise-free arrivals, slope of distance against arrival tick)
+   axis      0.486 [0.485, 0.487] cells/tick from 753 arrivals
+   diagonal  0.490 [0.489, 0.490] cells/tick from 847 arrivals
+   all       0.488 [0.488, 0.488] cells/tick from 1600 arrivals
+   Locator speed c = 0.46; nominal speed 0.5.
+
+7. Every setting (exploratory; no correction for multiple comparisons)
+   setting                locator        noise-free     centre - locator               early - locator
+   win/8/calm/even        0.62           0.44           +8.72 [+8.20, +9.24]           +2.43 [+2.29, +2.57]
+   win/8/calm/patchy      1.27           1.48           +8.07 [+7.51, +8.63]           +2.21 [+2.03, +2.39]
+   win/8/loud/even        1.52           6.66           +7.82 [+7.25, +8.38]           +2.30 [+2.00, +2.59]
+   win/8/loud/patchy      3.35           6.39           +5.99 [+5.36, +6.59]           +1.05 [+0.70, +1.40]
+   win/4/calm/even        0.75           0.59           +8.59 [+8.09, +9.11]           +6.64 [+6.30, +6.95]
+   win/4/calm/patchy      1.53           1.61           +7.81 [+7.23, +8.39]           +6.19 [+5.82, +6.56]
+   win/4/loud/even        0.77           9.34           +8.57 [+8.03, +9.10]           +6.89 [+6.52, +7.26]
+   win/4/loud/patchy      3.55           8.41           +5.79 [+5.14, +6.45]           +4.86 [+4.26, +5.42]
+   cheer/8/calm/even      0.95           0.80           +8.45 [+7.91, +9.00]           +2.13 [+1.94, +2.31]
+   cheer/8/calm/patchy    1.39           1.51           +8.01 [+7.45, +8.58]           +2.08 [+1.89, +2.27]
+   cheer/8/loud/even      2.01           5.56           +7.38 [+6.74, +8.03]           +2.10 [+1.80, +2.39]
+   cheer/8/loud/patchy    3.36           6.59           +6.03 [+5.39, +6.63]           +1.15 [+0.84, +1.48]
+   cheer/4/calm/even      1.05           0.94           +8.34 [+7.82, +8.88]           +6.41 [+6.07, +6.73]
+   cheer/4/calm/patchy    1.63           1.71           +7.76 [+7.18, +8.35]           +6.19 [+5.86, +6.53]
+   cheer/4/loud/even      1.61           6.29           +7.78 [+7.18, +8.36]           +6.27 [+5.76, +6.74]
+   cheer/4/loud/patchy    3.62           8.23           +5.77 [+5.13, +6.42]           +4.75 [+4.16, +5.29]
+
+8. Notes
+   A flaw in the frozen protocol, found when it was run: the noise-free reference uses a threshold of k times
+   the noise sigma, but smoothing divides the noise SD by sqrt 3, so its threshold is sqrt 3 times higher than
+   the noisy detector's. In loud settings it then misses sensors, and it is not a fair reference there. It is
+   reported as frozen. An exploratory variant with k sigma / sqrt 3, added after the protocol, gives in the
+   default setting 0.55 [0.52, 0.59] and in win/8/loud/even 1.30 [1.08, 1.55] cells.
+   The region is the locator's own: a pulse whose locator falls back to the centre (fewer than 3 arrivals) counts as not covered.
+   Errors are distances in grid cells. Results apply to this simulation only.

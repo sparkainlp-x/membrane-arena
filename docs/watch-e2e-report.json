@@ -1,5 +1,5 @@
 {
-  "version": "0.3.3",
+  "version": "0.3.4",
   "chrome": "/usr/bin/google-chrome",
   "allOk": true,
   "servedOther": [],
@@ -7,7 +7,7 @@
     {
       "name": "watch-en-desktop",
       "ok": true,
-      "wallMs": 11587,
+      "wallMs": 14216,
       "errors": [],
       "external": [],
       "opts": {
@@ -174,7 +174,7 @@
     {
       "name": "watch-fr-phone",
       "ok": true,
-      "wallMs": 6879,
+      "wallMs": 8722,
       "errors": [],
       "external": [],
       "opts": {
@@ -328,7 +328,7 @@
     {
       "name": "watch-en-desktop-contrast",
       "ok": true,
-      "wallMs": 3395,
+      "wallMs": 4090,
       "errors": [],
       "external": [],
       "opts": {
@@ -410,7 +410,7 @@
     {
       "name": "watch-fr-desktop",
       "ok": true,
-      "wallMs": 6601,
+      "wallMs": 9117,
       "errors": [],
       "external": [],
       "opts": {
@@ -546,7 +546,7 @@
     {
       "name": "watch-en-phone-reduced",
       "ok": true,
-      "wallMs": 1402,
+      "wallMs": 1841,
       "errors": [],
       "external": [],
       "opts": {
@@ -632,7 +632,7 @@
     {
       "name": "watch-en-desktop-coach",
       "ok": true,
-      "wallMs": 6585,
+      "wallMs": 9001,
       "errors": [],
       "external": [],
       "opts": {
@@ -784,7 +784,7 @@
     {
       "name": "watch-fr-phone-contrast-coach",
       "ok": true,
-      "wallMs": 2413,
+      "wallMs": 3232,
       "errors": [],
       "external": [],
       "opts": {

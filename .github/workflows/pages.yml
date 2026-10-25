@@ -37,6 +37,7 @@ jobs:
           cp dist/reverse.html _site/reverse.html
           cp dist/pair.html _site/pair.html
           cp dist/watch.html _site/watch.html
+          cp dist/pulse.html _site/pulse.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

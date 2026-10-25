@@ -1,0 +1,2433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Wave Pulse: a big win or a crowd cheer sends a ripple across the membrane grid. Listen to a few edge sensors, tap where you think it started, then watch the ripple replayed in a Great Wave colour style. A game on a synthetic classical simulation.">
+<title>Wave Pulse</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b2a4a'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23f4ecd8'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%235d8fb3' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='14' fill='none' stroke='%23c9a84c' stroke-width='1.5'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #0a1330;
+  --bg2: #101c40;
+  --panel: #12204a;
+  --line: #2a3b6e;
+  --text: #eef2ff;
+  --muted: #b3bedb;
+  --gold: #c9a84c;
+  --gold-bright: #e0c36a;
+  --cyan: #40d0e0;
+  --blue: #7aa8ff;
+  --aqua: #5ee6b8;
+  --danger: #ff9a9a;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: radial-gradient(1400px 700px at 50% -10%, #16275a 0%, var(--bg) 60%) fixed;
+  color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 12px 28px;
+}
+.skip { position: absolute; left: -999px; top: 0; background: var(--gold); color: #0a1330; padding: 8px 12px; z-index: 30; }
+.skip:focus { left: 8px; top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.top, main, .foot { width: 100%; max-width: 1180px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 0 6px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 1.7rem; letter-spacing: 0.22em; color: var(--gold); font-weight: 700; }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { border: 1px solid var(--cyan); color: var(--cyan); border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; letter-spacing: 0.08em; }
+main { outline: none; }
+.card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 12px; min-width: 0; }
+[hidden] { display: none !important; }
+h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--gold-bright); }
+h3 { margin: 16px 0 6px; font-size: 1rem; color: var(--gold-bright); }
+h4 { margin: 0 0 4px; font-size: 1rem; color: var(--cyan); }
+h2:focus, h2[tabindex="-1"]:focus { outline: none; }
+p { margin: 8px 0; }
+.muted { color: var(--muted); }
+.small-text { font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.84rem; margin: 2px 0 10px; }
+.beat { color: var(--cyan); font-weight: 600; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: #1a2a5c; color: var(--text); padding: 12px 16px;
+  min-height: 44px; border-radius: 10px; font: inherit; cursor: pointer; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: var(--gold); color: #0a1330; border-color: var(--gold); font-weight: 700; }
+.btn.primary:hover { background: var(--gold-bright); }
+.btn.small { padding: 6px 12px; min-height: 40px; font-size: 0.9rem; }
+.btn[aria-pressed="true"] { border-color: var(--cyan); background: #12426a; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+.col-main { min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 14px; }
+@media (min-width: 980px) { .layout { grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); align-items: start; } }
+
+.hud { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.92rem; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.hud-item { color: var(--muted); } .hud-item b { color: var(--text); }
+.c-true { color: var(--cyan) !important; } .c-false { color: var(--danger) !important; } .c-gold { color: var(--gold-bright) !important; }
+.canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #070e26; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .canvas-wrap { aspect-ratio: 1 / 1.05; } }
+#arena { width: 100%; height: 100%; display: block; }
+.canvas-msg { position: absolute; left: 12px; right: 12px; bottom: 8px; margin: 0; font-size: 0.85rem; color: var(--muted); }
+.ribbon { list-style: none; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 10px 0 0; padding: 0; }
+.ribbon li { height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #0d1840; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: var(--muted); }
+.ribbon li.planted { border-style: solid; }
+.ribbon li.noise { border-style: dashed; }
+.ribbon li.t { background: #0f4b5a; border-color: var(--cyan); color: var(--text); }
+.ribbon li.f { background: #4b2a34; border-color: var(--danger); color: var(--text); }
+.ribbon li.h { background: #2a3350; border-color: var(--muted); color: var(--text); }
+.ribbon li.cur { box-shadow: 0 0 0 2px var(--gold); }
+.ticker { min-height: 1.5em; margin: 8px 0 0; color: var(--gold-bright); font-size: 0.92rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.inline { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
+select {
+  background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 44px; font: inherit; max-width: 100%;
+}
+.field { margin: 14px 0; }
+.field > label { display: block; margin: 0 0 4px; font-weight: 600; }
+.field select { width: 100%; }
+.sliderrow { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+.sliderrow label { flex: 0 0 9.5em; margin: 0; }
+.sliderrow .end { font-size: 0.8rem; color: var(--muted); }
+input[type=range] { flex: 1; min-width: 110px; min-height: 44px; accent-color: var(--gold); }
+output { min-width: 4ch; text-align: right; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.switch { display: flex; gap: 10px; align-items: center; min-height: 44px; margin: 6px 0 0; font-weight: 600; cursor: pointer; }
+.switch input { width: 22px; height: 22px; accent-color: var(--gold); flex: none; }
+.switches .hint { margin-left: 32px; }
+details summary { cursor: pointer; padding: 8px 0; color: var(--cyan); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+details[disabled] input { opacity: .5; }
+
+.meters-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .meters-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.meter-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.m-name { width: 1.4em; font-weight: 700; color: var(--gold-bright); }
+.meter { position: relative; flex: 1; height: 18px; background: #070e26; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.m-band { position: absolute; top: 0; bottom: 0; left: calc(0.33 / 3.2 * 100%); width: calc((3 - 0.33) / 3.2 * 100%); background: rgba(64, 208, 224, 0.12); border-left: 1px dashed var(--cyan); border-right: 1px dashed var(--cyan); }
+.meter.off .m-band { display: none; }
+.m-fill { position: absolute; left: 0; top: 3px; bottom: 3px; width: 0; background: var(--cyan); border-radius: 6px; }
+.m-fill.rate { background: var(--gold); }
+.m-eff { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--text); left: 0; }
+.m-tick { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--muted); }
+.meter.clamped { border-color: var(--danger); }
+.m-val { width: 9.5em; white-space: nowrap; text-align: right; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: 190px; background: #070e26; border: 1px solid var(--line); border-radius: 10px; display: block; }
+.chart.tall { height: 340px; }
+.chart.ens { height: 280px; }
+.rail { width: 100%; height: 44px; display: block; background: #070e26; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
+.key { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--cyan); vertical-align: middle; margin-right: 6px; }
+.key-base { border-top: 3px dashed var(--gold); margin-left: 14px; }
+
+.big { font-size: 1.6rem; font-weight: 700; color: var(--gold-bright); margin: 4px 0 8px; }
+.parts { display: grid; gap: 8px; }
+.part { display: grid; grid-template-columns: 9.5em 1fr 6.8em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.part .bar { height: 10px; background: #070e26; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.part .bar span { display: block; height: 100%; background: var(--cyan); }
+.part .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+.scores { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.scores th, .scores td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.scores th:first-child, .scores td:first-child { text-align: left; white-space: normal; }
+.scores th { color: var(--cyan); font-weight: 600; }
+.lesson { margin-top: 14px; padding: 12px; border: 1px solid var(--gold); border-radius: 10px; background: #0e1a3d; }
+.lesson h3 { margin-top: 0; }
+pre {
+  white-space: pre-wrap; word-break: break-word; background: #070e26; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
+}
+.stats { list-style: none; margin: 0; padding: 0; color: var(--muted); }
+.stats li { padding: 2px 0; }
+.modal { position: fixed; inset: 0; background: rgba(4, 8, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.modal-box { max-width: 560px; max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: var(--radius); padding: 18px; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 0.8rem; }
+.foot p { margin: 4px 0; }
+@media (max-width: 480px) { .sliderrow label { flex-basis: 100%; } .part { grid-template-columns: 7em 1fr 6.8em; } h1 { font-size: 1.35rem; } }
+@media (prefers-reduced-motion: no-preference) {
+  .m-fill { transition: width 0.25s ease; }
+  .m-eff { transition: left 0.25s ease; }
+  .card { animation: rise 0.25s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- v0.2: tabs, Lab, ensemble, A/B, missions, replay, tour ---------- */
+.tabs { padding-top: 8px; }
+.tablist { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 -4px 12px; padding: 0 4px; scrollbar-width: thin; }
+.tab {
+  appearance: none; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 3px solid transparent;
+  padding: 8px 14px; min-height: 44px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 8px 8px 0 0; touch-action: manipulation;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--gold-bright); border-bottom-color: var(--gold); background: rgba(201, 168, 76, 0.08); }
+.tabpanel { outline: none; }
+.tabpanel:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.inst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 6px 16px; }
+.inst { margin: 10px 0 14px; min-width: 0; }
+.inst.wide { grid-column: 1 / -1; }
+.inst h3 { margin-top: 4px; }
+.inst select { min-height: 40px; padding: 4px 8px; }
+.alt { margin: 6px 0 2px; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); font-size: 0.86rem; }
+.alt:empty { display: none; }
+.formrow { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 8px 0; }
+.formrow .switch { margin: 0; }
+progress { width: min(100%, 320px); height: 14px; accent-color: var(--gold); vertical-align: middle; }
+.exp { width: 100%; background: #070e26; color: var(--text); border: 1px solid var(--line); border-radius: 8px; font: 0.8rem/1.3 ui-monospace, Menlo, Consolas, monospace; padding: 8px; }
+.method { margin: 4px 0 8px; padding-left: 1.2em; color: var(--muted); font-size: 0.92rem; }
+.method li { margin: 3px 0; }
+.missions { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
+.mission { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #0e1a3d; }
+.mission h3 { margin: 0 0 2px; }
+.mission.done { border-color: var(--gold); }
+.mission .status { font-weight: 600; color: var(--cyan); margin: 4px 0; font-size: 0.9rem; }
+.mission.done .status { color: var(--gold-bright); }
+.replay { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.replay h3 { margin-top: 0; }
+.replay-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.replay-row input[type=range] { flex: 1; min-width: 140px; }
+.tour { border-color: var(--gold); }
+#help .modal-box h2:focus { outline: none; }
+.row-end { display: flex; justify-content: flex-end; }
+
+/* motion switched off in the page (in addition to the system setting) */
+html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+
+/* high-contrast mode: white on black, heavier outlines, no gradients */
+html.hc { --bg: #000; --bg2: #000; --panel: #000; --line: #fff; --text: #fff; --muted: #f0f0f0; --gold: #ffd400; --gold-bright: #ffd400; --cyan: #00ffff; --blue: #9ec0ff; --aqua: #00ff96; --danger: #ff8a8a; }
+html.hc body { background: #000; }
+html.hc .card { background: #000; border-width: 2px; }
+html.hc .btn { background: #000; border-width: 2px; }
+html.hc .btn.primary { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .btn[aria-pressed="true"] { background: #003a3a; border-color: #00ffff; }
+html.hc select, html.hc .exp, html.hc pre, html.hc .chart, html.hc .rail, html.hc .canvas-wrap, html.hc .meter { background: #000; border: 2px solid #fff; }
+html.hc .tab[aria-selected="true"] { background: #1a1a00; border-bottom-width: 4px; }
+html.hc .mission, html.hc .lesson { background: #000; border-width: 2px; }
+html.hc .ribbon li { background: #000; border-width: 2px; color: #fff; }
+html.hc .ribbon li.t { background: #003a3a; } html.hc .ribbon li.f { background: #3a0000; } html.hc .ribbon li.h { background: #222; }
+html.hc .alt { border-left-color: #fff; }
+html.hc .tag { border-width: 2px; }
+html.hc :focus-visible { outline: 4px solid #ffd400; outline-offset: 2px; }
+html.hc .hint, html.hc .muted { color: #f0f0f0; }
+@media (max-width: 480px) { .tab { padding: 8px 10px; } .formrow { gap: 6px 12px; } }
+@media (forced-colors: active) { .btn.primary { border: 2px solid ButtonText; } .m-fill, .m-eff { background: Highlight; forced-color-adjust: none; } }
+</style>
+<style>
+/* Membrane Arena: styles for Wave Pulse. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+main { max-width: 1100px; margin: 0 auto; }
+.intro p { margin: 0 0 8px; }
+.intro p:last-child { margin-bottom: 0; }
+/* mode switch */
+.modes { display: flex; gap: 8px; margin-bottom: 10px; }
+.modes .btn[aria-pressed="true"] { border-color: var(--gold-bright); background: #2a2a10; color: var(--gold-bright); }
+/* heads-up display */
+.hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.hud-item { background: #0d1838; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.hud-k { display: block; font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.hud-v { display: block; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.banner { margin: 0 0 10px; padding: 10px 12px; border-left: 4px solid var(--gold); background: #0d1838; border-radius: 6px; min-height: 1.4em; }
+.banner:empty { display: none; }
+/* the scene */
+.scene-wrap { position: relative; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #071a30; }
+#scene { display: block; width: 100%; height: auto; touch-action: manipulation; cursor: crosshair; }
+#scene:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: -3px; }
+.pop { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font-size: 2.2rem; font-weight: 800; pointer-events: none;
+  opacity: 0; text-shadow: 0 2px 10px #000; white-space: nowrap; }
+.pop.show { animation: pop 1.4s ease-out forwards; }
+.pop.good { color: var(--aqua); } .pop.meh { color: var(--gold-bright); } .pop.bad { color: var(--danger); }
+@keyframes pop { 0% { opacity: 0; transform: translate(-50%, -30%) scale(0.8); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -85%) scale(1); } }
+.status { margin: 10px 0 2px; min-height: 2.8em; font-weight: 600; }
+.arrivals { margin: 0 0 6px; font-variant-numeric: tabular-nums; min-height: 1.4em; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 8px; }
+.controls .switch { margin: 0; }
+.btn.big { min-height: 52px; font-size: 1.05rem; font-weight: 700; min-width: 9em; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.speed { display: flex; gap: 6px; align-items: center; }
+.speed select { min-height: 40px; background: #1a2a5c; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font: inherit; }
+.hint { margin: 8px 0 0; font-size: 0.9rem; }
+/* legend */
+.legend { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px 16px; }
+.legend li { display: flex; gap: 10px; align-items: flex-start; }
+.sw { flex: none; width: 22px; height: 22px; border-radius: 4px; margin-top: 1px; }
+.sw-sensor { border-radius: 50%; border: 3px solid var(--gold-bright); background: #0b2a4a; }
+.sw-guess { border-radius: 50%; border: 3px solid var(--aqua); }
+.sw-loc { background: linear-gradient(45deg, transparent 42%, var(--cyan) 42% 58%, transparent 58%), linear-gradient(-45deg, transparent 42%, var(--cyan) 42% 58%, transparent 58%); }
+.sw-region { background: rgba(224, 195, 106, 0.35); border: 1px solid var(--gold-bright); }
+.sw-target { background: radial-gradient(circle, #f4ecd8 0 35%, #c9302c 36% 60%, transparent 61%); }
+.sw-patch { border-radius: 50%; border: 2px dotted var(--text); }
+.sw-wave { background: linear-gradient(90deg, #04162b, #0b2a4a 25%, #1f5f8b 50%, #8fb6cf 75%, #f4ecd8); }
+/* end of run */
+.end-rank { font-size: 1.15rem; font-weight: 700; color: var(--gold-bright); margin: 0 0 8px; }
+.tablewrap { overflow-x: auto; }
+.rtable { border-collapse: collapse; width: 100%; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.rtable th, .rtable td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable th { color: var(--gold-bright); font-weight: 600; }
+.rtable tr.you td { background: #12204a; font-weight: 700; }
+.rtable td.good { color: var(--aqua); } .rtable td.bad { color: var(--danger); }
+#end-code { word-break: break-all; }
+.verify { border: 2px solid var(--aqua); }
+.verify.bad { border-color: var(--danger); }
+.verify-msg { font-weight: 600; }
+@media (max-width: 640px) {
+  .hud { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hud-v { font-size: 1.1rem; }
+  .controls .btn.big { flex: 1 1 40%; }
+  .rtable { font-size: 0.85rem; }
+}
+html.hc .hud-item, html.hc .banner { background: #000; border: 2px solid #fff; }
+html.hc .scene-wrap { background: #000; border: 2px solid #fff; }
+html.hc .rtable tr.you td { background: #1a1a00; }
+html.hc .modes .btn[aria-pressed="true"] { background: #1a1a00; border-color: #ffd400; color: #ffd400; }
+html.hc .verify { border-color: #00ff9c; }
+html.hc .verify.bad { border-color: #ff6b6b; }
+html.hc .sw-wave { background: linear-gradient(90deg, #000, #0044aa 40%, #00ffff 70%, #fff); }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Wave Pulse</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="watch.html" data-i18n="page.watch"></a>
+    <a class="btn small" href="pair.html" data-i18n="page.pair"></a>
+    <a class="btn small" href="reverse.html" data-i18n="page.reverse"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section id="verify" class="card verify" aria-labelledby="verify-h" hidden>
+    <h2 id="verify-h" data-i18n="sec.verify"></h2>
+    <p id="verify-msg" class="verify-msg"></p>
+  </section>
+
+  <section class="card intro">
+    <p data-i18n="intro.p1"></p>
+    <p data-i18n="intro.p2"></p>
+    <p class="muted" data-i18n="intro.p3"></p>
+  </section>
+
+  <section class="card game" aria-labelledby="game-h">
+    <h2 id="game-h" class="sr-only" data-i18n="sec.game"></h2>
+    <div class="modes" role="group" aria-labelledby="game-h">
+      <button id="mode-play" class="btn small" type="button" aria-pressed="true" data-i18n="mode.play"></button>
+      <button id="mode-free" class="btn small" type="button" aria-pressed="false" data-i18n="mode.free"></button>
+    </div>
+    <div class="hud" role="group">
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.pulse"></span><span id="hud-pulse" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.stage"></span><span id="hud-stage" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.points"></span><span id="hud-points" class="hud-v"></span></div>
+      <div class="hud-item"><span class="hud-k" data-i18n="hud.locator"></span><span id="hud-locator" class="hud-v"></span></div>
+    </div>
+    <p id="banner" class="banner" aria-live="polite"></p>
+    <div class="scene-wrap">
+      <canvas id="scene" role="img" aria-label="" tabindex="0"></canvas>
+      <div id="pop" class="pop" aria-hidden="true"></div>
+    </div>
+    <p id="status" class="status" aria-live="polite"></p>
+    <p id="arrivals" class="arrivals muted"></p>
+    <div id="play-controls" class="controls">
+      <button id="btn-go" class="btn primary big" type="button"></button>
+      <button id="btn-confirm" class="btn big" type="button" data-i18n="btn.confirm"></button>
+      <label class="switch"><input id="hint" type="checkbox"> <span data-i18n="ctl.hint"></span></label>
+      <label class="speed"><span data-i18n="ctl.speed"></span>
+        <select id="speed">
+          <option value="1" data-i18n="ctl.speed.1"></option>
+          <option value="2" data-i18n="ctl.speed.2" selected></option>
+          <option value="4" data-i18n="ctl.speed.4"></option>
+        </select>
+      </label>
+    </div>
+    <div id="free-controls" class="controls" hidden>
+      <button id="free-win" class="btn primary" type="button" data-i18n="free.win"></button>
+      <button id="free-cheer" class="btn" type="button" data-i18n="free.cheer"></button>
+      <label class="switch"><input id="free-patchy" type="checkbox"> <span data-i18n="free.patchy"></span></label>
+      <p class="hint muted" data-i18n="free.hint"></p>
+    </div>
+    <p class="hint muted" data-i18n="keys.hint"></p>
+  </section>
+
+  <section class="card" aria-labelledby="legend-h">
+    <h2 id="legend-h" data-i18n="sec.legend"></h2>
+    <ul class="legend">
+      <li><span class="sw sw-sensor"></span><span data-i18n="legend.sensor"></span></li>
+      <li><span class="sw sw-guess"></span><span data-i18n="legend.guess"></span></li>
+      <li><span class="sw sw-loc"></span><span data-i18n="legend.locator"></span></li>
+      <li><span class="sw sw-region"></span><span data-i18n="legend.region"></span></li>
+      <li><span class="sw sw-target"></span><span data-i18n="legend.target"></span></li>
+      <li><span class="sw sw-patch"></span><span data-i18n="legend.patch"></span></li>
+      <li><span class="sw sw-wave"></span><span data-i18n="legend.wave"></span></li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="log-h">
+    <h2 id="log-h" data-i18n="sec.log"></h2>
+    <div class="tablewrap"><table class="rtable" id="log">
+      <thead><tr><th scope="col" data-i18n="log.n"></th><th scope="col" data-i18n="log.kind"></th><th scope="col" data-i18n="log.you"></th><th scope="col" data-i18n="log.pts"></th><th scope="col" data-i18n="log.loc"></th><th scope="col" data-i18n="log.locpts"></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p id="log-empty" class="muted" data-i18n="log.empty"></p>
+  </section>
+
+  <section id="end" class="card end" aria-labelledby="end-h" hidden>
+    <h2 id="end-h" data-i18n="sec.end"></h2>
+    <p id="end-rank" class="end-rank"></p>
+    <div class="tablewrap"><table class="rtable" id="end-table">
+      <thead><tr><th scope="col" data-i18n="end.who"></th><th scope="col" data-i18n="end.points"></th><th scope="col" data-i18n="end.hits"></th><th scope="col" data-i18n="end.err"></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p id="end-note" class="muted"></p>
+    <p><span data-i18n="end.code"></span> <code id="end-code"></code> <a id="end-link" href="#" data-i18n="end.link"></a></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+
+  <section class="card" aria-labelledby="runs-h">
+    <h2 id="runs-h" data-i18n="sec.runs"></h2>
+    <p id="seed-line"></p>
+    <div class="controls">
+      <button id="btn-again" class="btn" type="button" data-i18n="btn.again"></button>
+      <button id="btn-today" class="btn" type="button" data-i18n="btn.today"></button>
+      <button id="btn-new" class="btn" type="button" data-i18n="btn.new"></button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="how-h">
+    <h2 id="how-h" data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+  </section>
+
+  <section class="card" aria-labelledby="eval-h">
+    <h2 id="eval-h" data-i18n="sec.eval"></h2>
+    <p data-i18n="eval.p1"></p>
+    <p data-i18n="eval.p2"></p>
+    <p data-i18n="eval.p3"></p>
+    <p data-i18n="eval.p4"></p>
+    <p class="muted" data-i18n="eval.p5"></p>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license">Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.</p>
+  <p id="footer-version"></p>
+</footer>
+<script>
+/* GENERATED by scripts/make-baselines.js from data/*.csv. Do not edit by hand. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaBaselines = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {
+   "SOURCE": {
+    "commit": "c74c60beeb9706ea6d30fd6973b2a821a5b23926",
+    "repo": "sparkainlp-x/crystallization-contest",
+    "contest": "results/contest_w32-128_summary.csv",
+    "contest256": "results/contest_256_summary.csv",
+    "sweep": "results/sweep_summary.csv",
+    "stress": "results/stress_summary.csv"
+   },
+   "CONTEST32": [
+    {
+     "w": 0,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 113.8,
+     "Tsd": 10.4,
+     "F": 13,
+     "Fsd": 8.111,
+     "P": 0.901,
+     "Psd": 0.059,
+     "rv": 0.04,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 41.5,
+     "Tsd": 2.819,
+     "F": 3.75,
+     "Fsd": 2.845,
+     "P": 0.919,
+     "Psd": 0.061,
+     "rv": 0.005,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 41.25,
+     "Tsd": 4.908,
+     "F": 3.9,
+     "Fsd": 4.756,
+     "P": 0.915,
+     "Psd": 0.104,
+     "rv": 0.006,
+     "mg": 1.398,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.8,
+     "Tsd": 6.856,
+     "F": 5.65,
+     "Fsd": 6.368,
+     "P": 0.877,
+     "Psd": 0.141,
+     "rv": 0.002,
+     "mg": 1.397,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.9,
+     "Tsd": 5.92,
+     "F": 10.2,
+     "Fsd": 6.005,
+     "P": 0.922,
+     "Psd": 0.044,
+     "rv": 0.041,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.528,
+     "F": 3.95,
+     "Fsd": 3.913,
+     "P": 0.915,
+     "Psd": 0.083,
+     "rv": 0.004,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.117,
+     "F": 4.05,
+     "Fsd": 3.3,
+     "P": 0.913,
+     "Psd": 0.071,
+     "rv": 0.004,
+     "mg": 1.362,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.2,
+     "Tsd": 6.204,
+     "F": 10,
+     "Fsd": 6.481,
+     "P": 0.923,
+     "Psd": 0.048,
+     "rv": 0.043,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.675,
+     "F": 3.75,
+     "Fsd": 4.025,
+     "P": 0.92,
+     "Psd": 0.086,
+     "rv": 0.004,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.297,
+     "F": 3.75,
+     "Fsd": 3.552,
+     "P": 0.919,
+     "Psd": 0.076,
+     "rv": 0.004,
+     "mg": 1.319,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    }
+   ],
+   "SCHEMES32": [
+    {
+     "scheme": "individual",
+     "seeds": 20,
+     "T": 6.75,
+     "F": 0.5,
+     "P": 0.937
+    },
+    {
+     "scheme": "team",
+     "seeds": 20,
+     "T": 12.35,
+     "F": 0.5,
+     "P": 0.959
+    },
+    {
+     "scheme": "difference",
+     "seeds": 20,
+     "T": 12.75,
+     "F": 0.45,
+     "P": 0.965
+    },
+    {
+     "scheme": "consensus",
+     "seeds": 20,
+     "T": 13.15,
+     "F": 0.2,
+     "P": 0.985
+    },
+    {
+     "scheme": "random",
+     "seeds": 20,
+     "T": 11.5,
+     "F": 0.4,
+     "P": 0.966
+    }
+   ],
+   "LESSON": {
+    "shieldFpMin": 2.3,
+    "shieldFpMax": 3.2,
+    "shieldVarMin": 8,
+    "shieldVarMax": 17,
+    "ampMaxDeltaP": 0.004,
+    "stabCostMin": 0.3,
+    "stabCostMax": 4.8,
+    "indLowest": 10,
+    "indCells": 15,
+    "runawayNoZMin": 20,
+    "runawayNoZMax": 35,
+    "runawayZMax": 0,
+    "seeds": 20
+   }
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: pure game logic (SYNTHETIC classical simulation).
+ *
+ * A JavaScript port of the three-membrane crystallization contest of
+ * sparkainlp-x/crystallization-contest at width n = 32, with seeded
+ * determinism, lazy per-generation stepping (so the player can steer between
+ * generations), reward schemes, scoring, baseline comparison, lessons, daily
+ * seeds, hash links, a store sanitizer and the plain-text share card.
+ * No DOM, no network, no storage.
+ *
+ * The port is statistically comparable to the Python original, not
+ * bit-identical: the random number generators differ. See DESIGN.md.
+ * Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./baselines.js'));
+  else root.ArenaGame = factory(root.ArenaBaselines);
+})(typeof self !== 'undefined' ? self : this, function (BASE) {
+  'use strict';
+
+  var VERSION = '0.3.4';
+  var BUILD = VERSION;   // shown in the page footer
+  var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
+  var EPOCH = '2026-10-24';              // day number 1
+  var N = 32;                            // width of the measured baselines used here
+  var EP = 8, GENS = 12, STEPS = 60;     // as in the repository contest
+  var CHECK = 10, WINDOW = 5, ETA = 0.5;
+  var AGREE = 0.4, TRUTH = 0.5, SIGMA_SCALE = 1.5;
+  var AMP_CAP = 0.5, TARGET = 0.5, LEAK = 0.3, KSTAB = 1.5;
+  var GAIN_MIN = 0.33, GAIN_MAX = 3.0, FACTOR_MIN = 0.2;
+  var TH_MIN = 0.02, TH_MAX = 1.5, C_MAX = 0.5;
+  var SCHEMES = ['individual', 'team', 'difference', 'consensus', 'random'];
+  var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
+  var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
+  var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
+  var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
+
+  /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
+
+  function hashStr(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seedStr) { return mulberry32(hashStr(String(seedStr))); }
+  function gauss(rng) {
+    var u = 0;
+    while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+
+  /* ---------- complex vectors in C^n: {r, i} Float64Array pairs ---------- */
+
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function normalize(v) {
+    var s = 0, k, n = v.r.length;
+    for (k = 0; k < n; k++) s += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    s = Math.sqrt(s);
+    if (!(s > 0) || !isFinite(s)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= s; v.i[k] /= s; }
+    return v;
+  }
+  function rvec(n, rng) {
+    var v = zeros(n);
+    for (var k = 0; k < n; k++) { v.r[k] = gauss(rng); v.i[k] = gauss(rng); }
+    return normalize(v);
+  }
+  function noisy(state, sigma, rng) {
+    var n = state.r.length, v = zeros(n);
+    for (var k = 0; k < n; k++) {
+      v.r[k] = state.r[k] + sigma * gauss(rng);
+      v.i[k] = state.i[k] + sigma * gauss(rng);
+    }
+    return normalize(v);
+  }
+  // <a|b> = sum conj(a) b
+  function inner(a, b) {
+    var re = 0, im = 0, n = a.r.length;
+    for (var k = 0; k < n; k++) {
+      re += a.r[k] * b.r[k] + a.i[k] * b.i[k];
+      im += a.r[k] * b.i[k] - a.i[k] * b.r[k];
+    }
+    return { re: re, im: im };
+  }
+  function fidelity(a, b) { var z = inner(a, b); return z.re * z.re + z.im * z.im; }
+  function copyVec(v) { return { r: Float64Array.from(v.r), i: Float64Array.from(v.i) }; }
+
+  /* ---------- the contest, as in crystallization_contest/{events,rewards,contest}.py ---------- */
+
+  function sigmaFor(n) { return SIGMA_SCALE / Math.sqrt(n); }
+  function scaledThreshold(q, n, sigma) { return 1 + q * n / (1 + 2 * sigma * sigma * n); }
+  function energyRatio(win, n) {
+    var s = 0;
+    for (var k = 0; k < win.length; k++) s += win[k];
+    return n * s / win.length;
+  }
+  function agreeing(vec, decls, thresh) {
+    var c = 0;
+    for (var k = 0; k < decls.length; k++) if (decls[k] && fidelity(vec, decls[k]) >= thresh) c++;
+    return c;
+  }
+  function systemEvent(decls, thresh) {            // need ceil(3/2) = 2 of 3
+    for (var k = 0; k < decls.length; k++) if (decls[k] && agreeing(decls[k], decls, thresh) >= 2) return k;
+    return null;
+  }
+  function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
+
+  function reward(scheme, i, decls) {              // rewards.py, for 3 agents
+    var without, team;
+    if (scheme === 'individual') return decls[i] ? 1 : 0;
+    if (scheme === 'team' || scheme === 'difference') team = systemEvent(decls, AGREE) !== null ? 1 : 0;
+    if (scheme === 'team') return team;
+    if (scheme === 'difference') {
+      without = decls.slice(); without[i] = null;
+      return team - (systemEvent(without, AGREE) !== null ? 1 : 0);
+    }
+    if (scheme === 'consensus') return decls[i] && agreeing(decls[i], decls, AGREE) >= 2 ? 1 : 0;
+    return 0;                                      // random
+  }
+
+  function warmStart(v, warm, amp) {
+    amp = Math.min(Math.max(amp, 0), AMP_CAP);
+    if (!warm || amp === 0) return v;
+    var o = zeros(v.r.length);
+    for (var k = 0; k < o.r.length; k++) { o.r[k] = (1 - amp) * v.r[k] + amp * warm.r[k]; o.i[k] = (1 - amp) * v.i[k] + amp * warm.i[k]; }
+    return normalize(o);
+  }
+  function stabilizerFactor(rateEma) { return Math.max(FACTOR_MIN, 1 - KSTAB * (rateEma - TARGET)); }
+  function leakyUpdate(rateEma, evRate) { return (1 - LEAK) * rateEma + LEAK * evRate; }
+  function clampGain(g) { return Math.min(GAIN_MAX, Math.max(GAIN_MIN, g)); }
+
+  // One episode of 3 coupled Oja membranes. `trace` (Float32Array STEPS*3) records geff * energy ratio.
+  // `ix` is optional instrumentation that draws no random numbers, so it never changes a result:
+  //   ix.fid   Float32Array STEPS*3, |<v|pattern>| of each membrane after each step (-1 in a noise episode)
+  //   ix.noDecl  when true nobody declares or freezes (used by the Lab probe)
+  //   ix.chk   when set to [[],[],[]], each check step pushes [geff * energy ratio, fidelity to the pattern] per membrane
+  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix) {
+    ix = ix || {};
+    var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
+    var lastFid = [-1, -1, -1];
+    if (ix.fid) for (k = 0; k < ix.fid.length; k++) ix.fid[k] = -1;
+    for (i = 0; i < 3; i++) vs.push(warmStart(rvec(n, rng), warm, amp));
+    var thr = [];
+    for (i = 0; i < 3; i++) thr.push(scaledThreshold(Math.min(TH_MAX, P[i].th * (2 - P[i].sp)), n, sigma));
+    var last = [0, 0, 0];
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i]; continue; }
+        var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+        var y = inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im);
+        if (win[i].length > WINDOW) win[i].shift();
+        var v = zeros(n), c = P[i].c;
+        for (k = 0; k < n; k++) {
+          v.r[k] = vs[i].r[k] + ETA * (x.r[k] * y.re - x.i[k] * y.im);
+          v.i[k] = vs[i].i[k] + ETA * (x.r[k] * y.im + x.i[k] * y.re);
+        }
+        if (c > 0) {
+          for (j = 0; j < 3; j++) {
+            if (j === i) continue;
+            var ph = inner(vs[j], v), m = Math.sqrt(ph.re * ph.re + ph.im * ph.im), pr = 1, pi = 0;
+            if (m > 0) { pr = ph.re / m; pi = ph.im / m; }
+            for (k = 0; k < n; k++) {
+              v.r[k] += c * (pr * vs[j].r[k] - pi * vs[j].i[k]);
+              v.i[k] += c * (pr * vs[j].i[k] + pi * vs[j].r[k]);
+            }
+          }
+        }
+        vs[i] = normalize(v);
+        last[i] = P[i].geff * energyRatio(win[i], n);
+        trace[(t - 1) * 3 + i] = last[i];
+        if (pat) lastFid[i] = Math.sqrt(fidelity(vs[i], pat));
+        if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pat ? fidelity(vs[i], pat) : 0]);
+          if (!ix.noDecl && !decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, thr: thr };
+  }
+
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      scheme: SCHEMES.indexOf(s.scheme) >= 0 ? s.scheme : d.scheme,
+      w: num(s.w, 0, 1, d.w),
+      shield: s.shield === undefined ? d.shield : !!s.shield,
+      amp: s.amp === undefined ? d.amp : !!s.amp,
+      stab: s.stab === undefined ? d.stab : !!s.stab,
+      evolve: s.evolve === undefined ? d.evolve : !!s.evolve,
+      fcost: num(s.fcost, 0, 2, d.fcost),
+      th: num(s.th, 0.1, 1.2, d.th), c: num(s.c, 0, C_MAX, d.c), g: num(s.g, 0.5, 2, d.g)
+    };
+  }
+
+  function createContest(seed, init) {
+    var o = sanitizeSettings(init), sigma = sigmaFor(N), par = [];
+    for (var i = 0; i < 3; i++) par.push({ th: o.th, c: o.c, g: o.g, sp: 0.5, geff: 1 });
+    return {
+      seed: String(seed), n: N, sigma: sigma, par: par, best: [-1, -1, -1], rateEma: TARGET, warm: null, hist: [], gen: 0,
+      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut')
+    };
+  }
+  function done(c) { return c.gen >= GENS; }
+
+  // Starting parameters of a contest are set by its seed, so every player of a daily contest begins in the same place.
+  // The repository baselines all began at DEFAULTS (th 0.5, c 0.05, g 1.0).
+  function startFor(seed) {
+    var r = makeRng(GEN + seed + '/start'), r2 = function (x) { return Math.round(x * 100) / 100; };
+    return { th: r2(0.3 + 0.5 * r()), c: r2(0.3 * r()), g: r2(0.7 + 0.8 * r()) };
+  }
+
+  // Run generation c.gen with `settings`; returns the generation record (also appended to c.hist).
+  function stepGeneration(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), n = c.n, i, e, cand = [];
+    for (i = 0; i < 3; i++) cand.push({ th: c.par[i].th, c: c.par[i].c, g: c.par[i].g, sp: c.par[i].sp, geff: 1 });
+    var clamped = [false, false, false], mutated = false;
+    if (c.gen > 0 && o.evolve) {
+      mutated = true;
+      cand.forEach(function (p, k) {
+        p.th = Math.min(TH_MAX, Math.max(TH_MIN, p.th * Math.exp(0.2 * gauss(c.mrng))));
+        p.c = Math.min(C_MAX, Math.max(0, p.c + 0.05 * gauss(c.mrng)));
+        p.g = p.g * Math.exp(0.2 * gauss(c.mrng));
+      });
+    }
+    if (o.stab) cand.forEach(function (p, k) { var g = clampGain(p.g); clamped[k] = g !== p.g; p.g = g; });
+    var fp = [0, 0, 0], tp = [0, 0, 0], bonus = [0, 0, 0], joint = 0, outT = 0, outF = 0, episodes = [];
+    var paramsStart = cand.map(function (p) { return { th: p.th, c: p.c, g: p.g }; });
+    for (e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? rvec(n, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      cand.forEach(function (p) { p.geff = p.g * (o.stab ? stabilizerFactor(c.rateEma) : 1); });
+      var geffs = cand.map(function (p) { return p.geff; });
+      var fidTrace = new Float32Array(STEPS * 3);
+      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace, { fid: fidTrace });
+      var d = ep.decl, truth = d.map(function (di) { return isTrueEvent(di, pat); }), agree = [];
+      for (i = 0; i < 3; i++) {
+        if (truth[i]) tp[i]++;
+        if (d[i] && !truth[i]) fp[i]++;
+        bonus[i] += reward(o.scheme, i, d);
+        if (d[i]) {
+          var conf = false;
+          for (var j = 0; j < 3; j++) if (j !== i && d[j] && fidelity(d[i], d[j]) >= AGREE) { conf = true; if (j > i) agree.push([i, j]); }
+          cand[i].sp = 0.8 * cand[i].sp + 0.2 * (conf ? 1 : 0);
+        }
+      }
+      if (truth[0] && truth[1] && truth[2]) joint++;
+      var outs, passed = null;
+      if (o.shield) {
+        passed = null;
+        for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        outs = passed === null ? [] : [passed];
+      } else {
+        outs = [];
+        for (i = 0; i < 3; i++) if (d[i]) outs.push(i);
+      }
+      var evT = 0, evF = 0;
+      outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+      outT += evT; outF += evF;
+      c.warm = outs.length ? d[outs[0]] : null;
+      c.rateEma = leakyUpdate(c.rateEma, outs.length / (o.shield ? 1 : 3));
+      episodes.push({
+        planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
+        dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
+        agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
+      });
+    }
+    var m = Math.max(tp[0], tp[1], tp[2]), top = [];
+    for (i = 0; i < 3; i++) if (tp[i] === m) top.push(i);
+    var scores = [], accepted = [], contest = [];
+    for (i = 0; i < 3; i++) {
+      var rank = top.indexOf(i) >= 0 && m > 0 ? 1 / top.length : 0;
+      var base = o.w * joint + (1 - o.w) * rank;
+      var s = base + SCHEME_SCALE * bonus[i] - o.fcost * fp[i] / EP;
+      scores.push(s); contest.push(base);
+      if (s >= c.best[i]) { c.best[i] = s; c.par[i] = cand[i]; accepted.push(true); } else accepted.push(false);
+    }
+    var rec = {
+      gen: c.gen, settings: o, episodes: episodes, outT: outT, outF: outF, shield: o.shield, mutated: mutated,
+      params: paramsStart, geff: episodes[EP - 1].geff, clamped: clamped,
+      maxG: Math.max(c.par[0].g, c.par[1].g, c.par[2].g), gains: c.par.map(function (p) { return p.g; }),
+      scores: scores, contest: contest, bonus: bonus.map(function (b) { return SCHEME_SCALE * b; }), accepted: accepted,
+      best: c.best.slice(), joint: joint, tp: tp, fp: fp, rateEma: c.rateEma,
+      parAfter: c.par.map(function (p) { return { th: p.th, c: p.c, g: p.g, sp: p.sp }; })
+    };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+
+  /* ---------- scoring (the game's own weights; the repository has no game score) ---------- */
+
+  function pvariance(xs) {
+    if (!xs.length) return 0;
+    var m = 0, v = 0, k;
+    for (k = 0; k < xs.length; k++) m += xs[k];
+    m /= xs.length;
+    for (k = 0; k < xs.length; k++) v += (xs[k] - m) * (xs[k] - m);
+    return v / xs.length;
+  }
+  function clamp01(x) { return Math.min(1, Math.max(0, x)); }
+
+  function summarize(hist) {
+    var T = 0, F = 0, teq = 0, feq = 0, rates = [], maxG = 0, k;
+    hist.forEach(function (h) {
+      var w = h.shield ? 1 : 1 / 3;
+      T += h.outT; F += h.outF; teq += h.outT * w; feq += h.outF * w;
+      rates.push((h.outT + h.outF) / EP);
+      if (h.maxG > maxG) maxG = h.maxG;
+    });
+    var gens = hist.length, planted = gens * EP / 2;
+    var precision = T + F > 0 ? T / (T + F) : 0;
+    var rateVar = pvariance(rates);
+    var net = planted > 0 ? (teq - feq) / planted : 0;
+    var steadiness = T + F > 0 ? 1 - clamp01(rateVar / STEADY_REF) : 0;
+    var score = 100 * (0.5 * clamp01(net) + 0.25 * precision + 0.25 * steadiness);
+    return {
+      gens: gens, T: T, F: F, precision: precision, rateVar: rateVar, maxG: maxG, finalG: gens ? hist[gens - 1].maxG : 0,
+      net: net, steadiness: steadiness, score: score,
+      parts: { net: 50 * clamp01(net), precision: 25 * precision, steadiness: 25 * steadiness }
+    };
+  }
+
+  /* ---------- baselines from the repository's results ---------- */
+
+  function cfgTag(s) { return (s.shield ? 'S' : '-') + (s.amp ? 'A' : '-') + (s.stab ? 'Z' : '-'); }
+  function nearestW(w) {
+    var best = W_STEPS[0];
+    W_STEPS.forEach(function (x) { if (Math.abs(x - w) < Math.abs(best - w)) best = x; });
+    return best;
+  }
+  // measured width-32 row for the player's configuration, or null when the repository did not measure it
+  function baselineFor(settings) {
+    var s = sanitizeSettings(settings), tag = cfgTag(s), wm = [0, 0.5, 1], w = wm[0];
+    wm.forEach(function (x) { if (Math.abs(x - s.w) < Math.abs(w - s.w) - 1e-9) w = x; });
+    for (var k = 0; k < BASE.CONTEST32.length; k++) {
+      var r = BASE.CONTEST32[k];
+      if (r.cfg === tag && r.w === w) return { row: r, w: w, exactW: Math.abs(w - s.w) < 1e-9, tag: tag, file: BASE.SOURCE.contest };
+    }
+    return null;
+  }
+  // The same game score applied to the repository's mean counts (an approximation, labelled as such).
+  function baselineScore(b) {
+    if (!b) return null;
+    var shielded = b.tag.charAt(0) === 'S', r = b.row, planted = GENS * EP / 2;
+    var wgt = shielded ? 1 : 1 / 3;
+    var net = (r.T - r.F) * wgt / planted;
+    var steady = 1 - clamp01(r.rv / STEADY_REF);
+    return 100 * (0.5 * clamp01(net) + 0.25 * r.P + 0.25 * steady);
+  }
+
+  /* ---------- lessons (numbers come from baselines.js, which comes from the CSV copies) ---------- */
+
+  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'evolve', 'handpicked', 'synthetic'];
+  function lessonVars() {
+    var L = BASE.LESSON;
+    return {
+      fpmin: L.shieldFpMin, fpmax: L.shieldFpMax, vmin: L.shieldVarMin, vmax: L.shieldVarMax, ampd: L.ampMaxDeltaP.toFixed(3),
+      cmin: L.stabCostMin, cmax: L.stabCostMax, low: L.indLowest, cells: L.indCells,
+      rmin: L.runawayNoZMin, rmax: L.runawayNoZMax, seeds: L.seeds
+    };
+  }
+  // Which lesson fits this run: the one about the thing the player just did, otherwise a rotation by seed.
+  function pickLesson(settings, seed) {
+    var s = sanitizeSettings(settings);
+    if (!s.shield) return 'shield';
+    if (s.amp) return 'amp';
+    if (s.stab) return 'stab';
+    if (s.scheme === 'individual') return 'individual';
+    return LESSON_IDS[hashStr(String(seed || '')) % LESSON_IDS.length];
+  }
+
+  /* ---------- dates, daily seeds, streaks ---------- */
+
+  function dateIndex(str) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str));
+    if (!m) return NaN;
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var ms = Date.UTC(y, mo - 1, d), dt = new Date(ms);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return NaN;
+    return Math.round(ms / 86400000);
+  }
+  function dayNumber(dateStr) { return dateIndex(dateStr) - dateIndex(EPOCH) + 1; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function localDateString(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function dailySeed(dateStr) { return 'd' + dateStr; }
+  function seedDate(seed) { return seed.charAt(0) === 'd' && !isNaN(dateIndex(seed.slice(1))) ? seed.slice(1) : null; }
+  function computeStreak(dates, today) {
+    var idx = {};
+    dates.forEach(function (d) { var i = dateIndex(d); if (!isNaN(i)) idx[i] = true; });
+    var days = Object.keys(idx).map(Number).sort(function (a, b) { return a - b; });
+    var best = 0, run = 0, prev = null;
+    days.forEach(function (d) { run = prev !== null && d === prev + 1 ? run + 1 : 1; prev = d; if (run > best) best = run; });
+    var t = dateIndex(today), cur = 0;
+    var d0 = idx[t] ? t : (idx[t - 1] ? t - 1 : null);
+    if (d0 !== null) { for (var d = d0; idx[d]; d--) cur++; }
+    return { current: cur, best: best };
+  }
+
+  /* ---------- hash links, checked field by field ---------- */
+
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  var CFG_RE = /^([itdcr])-(0|25|50|75|100)-([S-])([A-])([Z-])$/;
+  var SCHEME_CODE = { i: 'individual', t: 'team', d: 'difference', c: 'consensus', r: 'random' };
+  function parseHash(hash) {
+    var out = { mode: 'daily', seed: null, date: null, best: null, lang: null, preset: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1), m;
+      if (k === 'd' && dateIndex(v) >= dateIndex(EPOCH)) { out.date = v; out.seed = dailySeed(v); out.mode = 'challenge'; }
+      else if (k === 's' && SEED_RE.test(v)) { out.seed = v; out.mode = 'challenge'; }
+      else if (k === 'b' && /^\d{1,3}$/.test(v) && +v <= 100) out.best = parseInt(v, 10);
+      else if (k === 'l' && /^[a-z]{2}$/.test(v)) out.lang = v;
+      else if (k === 'c' && (m = CFG_RE.exec(v))) {
+        out.preset = { scheme: SCHEME_CODE[m[1]], w: +m[2] / 100, shield: m[3] === 'S', amp: m[4] === 'A', stab: m[5] === 'Z' };
+      }
+    });
+    if (out.seed === null) { out.best = null; out.preset = null; }
+    return out;
+  }
+  function presetCode(s) {
+    var o = sanitizeSettings(s), code = 'itdcr'.charAt(SCHEMES.indexOf(o.scheme));
+    return code + '-' + Math.round(nearestW(o.w) * 100) + '-' + cfgTag(o);
+  }
+  function buildChallengeHash(o) {
+    var parts = [];
+    if (o.date) parts.push('d=' + o.date); else parts.push('s=' + o.seed);
+    if (typeof o.best === 'number' && isFinite(o.best)) parts.push('b=' + Math.max(0, Math.min(100, Math.round(o.best))));
+    if (o.settings) parts.push('c=' + presetCode(o.settings));
+    if (o.lang) parts.push('l=' + o.lang);
+    return '#' + parts.join('&');
+  }
+
+  /* ---------- share card (plain text, no emoji) ---------- */
+
+  function fmt(str, vars) {
+    return String(str).replace(/\{(\w+)\}/g, function (m, k) { return vars && k in vars ? vars[k] : m; });
+  }
+  function bar(value, max, width) {
+    width = width || 10;
+    var f = Math.round(Math.min(1, Math.max(0, value / max)) * width);
+    return new Array(f + 1).join('\u2588') + new Array(width - f + 1).join('\u2591');
+  }
+  function buildShare(o) {
+    var L = o.labels, r = o.result, lines = [];
+    lines.push(o.seed ? fmt(L['share.title_seed'], { seed: o.seed }) : fmt(L['share.title'], { day: o.day, date: o.date }));
+    lines.push(fmt(L['share.score'], { score: Math.round(r.score) }) + (o.ref === null || o.ref === undefined ? '' : ' ' + fmt(L['share.ref'], { ref: Math.round(o.ref) })));
+    lines.push(fmt(L['share.events'], { t: r.T, f: r.F, p: Math.round(r.precision * 100) }));
+    lines.push(fmt(L['share.setup'], { tag: cfgTag(o.settings), scheme: L['scheme.' + o.settings.scheme + '.short'], w: Math.round(o.settings.w * 100) }));
+    lines.push(L['share.steady'] + ' ' + bar(r.steadiness, 1, 10));
+    lines.push(L['share.synthetic']);
+    if (o.url) lines.push(o.url);
+    return lines.join('\n');
+  }
+
+  /* ---------- defensive store ---------- */
+
+  function sanitizeStore(raw) {
+    var out = { daily: {}, bestDaily: null, bestPractice: null, bestScheme: {}, missions: {}, hc: false, still: false, introSeen: false, tutorialSeen: false }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (raw.hc === true) out.hc = true;
+    if (raw.still === true) out.still = true;
+    if (raw.introSeen === true) out.introSeen = true;
+    if (raw.tutorialSeen === true) out.tutorialSeen = true;
+    var bs = raw.bestScheme;
+    if (bs && typeof bs === 'object' && !Array.isArray(bs)) SCHEMES.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(bs, k) && num(bs[k]) && bs[k] >= 0 && bs[k] <= 100) out.bestScheme[k] = bs[k]; });
+    var ms = raw.missions;
+    if (ms && typeof ms === 'object' && !Array.isArray(ms)) {
+      MISSION_IDS.forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(ms, id)) return;
+        var m = ms[id];
+        if (!m || typeof m !== 'object' || OUTCOMES.indexOf(m.outcome) < 0) return;
+        var n = num(m.n) && m.n >= 0 && m.n <= 200 && Math.floor(m.n) === m.n ? m.n : 0;
+        var metrics = Array.isArray(m.metrics) ? m.metrics.filter(function (x) { return METRIC_IDS.indexOf(x) >= 0; }).slice(0, 5) : [];
+        out.missions[id] = { outcome: m.outcome, n: n, metrics: metrics };
+      });
+    }
+    if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
+    if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
+    if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
+    var d = raw.daily;
+    if (d && typeof d === 'object' && !Array.isArray(d)) {
+      Object.keys(d).forEach(function (k) {
+        var e = d[k];
+        if (isNaN(dateIndex(k)) || dateIndex(k) < dateIndex(EPOCH) || !e || typeof e !== 'object') return;
+        if (!num(e.score) || !num(e.T) || !num(e.F) || !num(e.precision)) return;
+        if (e.score < 0 || e.score > 100 || e.precision < 0 || e.precision > 1) return;
+        if (e.T < 0 || e.F < 0 || e.T > 1000 || e.F > 1000 || Math.floor(e.T) !== e.T || Math.floor(e.F) !== e.F) return;
+        var st = typeof e.tag === 'string' && /^[S-][A-][Z-]$/.test(e.tag) ? e.tag : '---';
+        out.daily[k] = { score: e.score, T: e.T, F: e.F, precision: e.precision, tag: st };
+      });
+    }
+    return out;
+  }
+
+  return {
+    VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
+    AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
+    MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
+    sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
+    sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
+    summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
+    pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
+    dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
+    computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
+    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE,
+    episode: episode, copyVec: copyVec, pvariance: pvariance, clamp01: clamp01, SIGMA_SCALE: SIGMA_SCALE, STEADY_REF: STEADY_REF
+  };
+});
+</script>
+<script>
+/* Membrane Arena: the Wave Pulse calibration, chosen by scripts/pulse-check.js on calibration pulses only.
+ * Generated file: do not edit by hand (node scripts/pulse-check.js --write). SYNTHETIC game data;
+ * see docs/PULSE-PROTOCOL.md. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaPulseCalib = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {"version":"0.3.4","generator":"membrane-arena/pulse/v1/","k":7,"c":0.46,"rho":181.726,"calibrated":true,"fittedOn":"pcal-000..pcal-199"};
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Wave Pulse, find where the ripple started (SYNTHETIC classical simulation).
+ * Pure logic: no DOM, no network, no storage.
+ *
+ * A trigger (a big win or a crowd cheer) starts a ripple somewhere on a 40 x 26 grid of membranes.
+ * The ripple is a damped wave equation solved with the textbook leapfrog scheme and reflecting
+ * walls. A few listening membranes (sensors) at the edge record the height under them, with noise.
+ * The player, and the locator it can compare itself with, must say from those recordings alone
+ * where the ripple started. Then the whole ripple is replayed, drawn in a Great Wave colour style.
+ *
+ * The locator is least-squares time-difference-of-arrival (TDOA) on detected arrival ticks. It
+ * assumes an even floor. Some pulses run on a floor with a hidden slow patch, which breaks that
+ * assumption on purpose. The detector threshold k, the locator speed c and the size rho of the
+ * locator's 90% region were chosen on calibration seeds only (docs/PULSE-PROTOCOL.md) and are
+ * loaded from pulse-calib.js.
+ *
+ * This is a game on a small simulation. It does not model a real arena floor, a pressure wave in a
+ * real material, holography, light fields, smart materials or any physical system. "Membrane" names
+ * a grid cell, as on the other pages; the Great Wave look is a colour style only.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) {
+    // the frozen calibration is optional: scripts/pulse-check.js writes it and the game runs without it
+    var calib = null;
+    try { calib = require('./pulse-calib.js'); } catch (e) { calib = null; }
+    module.exports = factory(require('./game.js'), calib);
+  } else root.ArenaPulse = factory(root.ArenaGame, root.ArenaPulseCalib || null);
+})(typeof self !== 'undefined' ? self : this, function (G, CALIB) {
+  'use strict';
+  var VERSION = G.VERSION;
+  var GEN = 'membrane-arena/pulse/v1/';
+
+  /* ---------- the simulation (docs/PULSE-PROTOCOL.md section 2) ---------- */
+  var W = 40, H = 26, NC = W * H;
+  var R2 = 0.25;                 // (c dt / dx)^2: nominal speed 0.5 cells per tick
+  var C_NOMINAL = 0.5;
+  var GAMMA = 0.004;             // damping
+  var PRE = 20;                  // quiet listening ticks before the trigger
+  var TICKS = 130;
+  var BUMP_SIGMA = 1.2, BUMP_CUT2 = 36;
+  var BOX = { x0: 4, x1: 35, y0: 4, y1: 21 };   // where a trigger can be
+  var CENTER = [(W - 1) / 2, (H - 1) / 2];
+  var SENSORS = [[1, 1], [38, 1], [1, 24], [38, 24], [20, 1], [20, 24], [1, 13], [38, 13]];
+  var SENSOR_SETS = { 8: [0, 1, 2, 3, 4, 5, 6, 7], 4: [0, 1, 2, 3] };
+  var NOISE = { calm: 0.004, loud: 0.025 };
+  var CHEER = { mMin: 3, mMax: 5, rMin: 1, rMax: 4, aMin: 0.35, aMax: 0.55, delayMax: 7 };
+  var PATCH = { cx0: 6, cx1: 34, cy0: 5, cy1: 21, ax0: 4, ax1: 10, ay0: 3, ay1: 8, f0: 0.45, f1: 0.65, edge: 6 };
+  var AVG_TAU = 8;               // early-sensor average: weight exp(-(arrival - earliest) / 8)
+  var HIT = 2;                   // a hit is within 2 cells
+  var KINDS = ['win', 'cheer'], SENS = [8, 4], NOISES = ['calm', 'loud'], FLOORS = ['even', 'patchy'];
+  // the 16 settings in the protocol's order: trigger x sensors x noise x floor
+  var SETTINGS = [];
+  KINDS.forEach(function (kind) { SENS.forEach(function (s) { NOISES.forEach(function (n) { FLOORS.forEach(function (f) {
+    SETTINGS.push({ kind: kind, sensors: s, noise: n, floor: f });
+  }); }); }); });
+  var DEFAULT_SETTING = { kind: 'win', sensors: 8, noise: 'calm', floor: 'even' };
+  function settingId(s) { return s.kind + '/' + s.sensors + '/' + s.noise + '/' + s.floor; }
+  function settingIndex(s) {
+    return ((KINDS.indexOf(s.kind) * 2 + SENS.indexOf(s.sensors)) * 2 + NOISES.indexOf(s.noise)) * 2 + FLOORS.indexOf(s.floor);
+  }
+
+  // Used until pulse-calib.js exists (the page says so); never used for reported results.
+  var FALLBACK_CALIB = { k: 6, c: 0.5, rho: 4, calibrated: false };
+  function calib() { return CALIB && CALIB.k ? CALIB : FALLBACK_CALIB; }
+
+  function lerp(a, b, u) { return a + (b - a) * u; }
+
+  // Everything random about a pulse comes from its seed, independently of the setting, so one seed
+  // under two settings differs only in that setting.
+  function spec(seed) {
+    var rng = G.makeRng(GEN + seed + '/spec');
+    var sx = lerp(BOX.x0, BOX.x1, rng()), sy = lerp(BOX.y0, BOX.y1, rng());
+    var m = CHEER.mMin + Math.floor(rng() * (CHEER.mMax - CHEER.mMin + 1)), bumps = [];
+    for (var j = 0; j < CHEER.mMax; j++) {   // always draw 5, use m: the draws stay aligned
+      var ang = rng() * 2 * Math.PI, r = lerp(CHEER.rMin, CHEER.rMax, rng());
+      var a = lerp(CHEER.aMin, CHEER.aMax, rng()), d = Math.floor(rng() * (CHEER.delayMax + 1));
+      if (j < m) bumps.push({ x: sx + r * Math.cos(ang), y: sy + r * Math.sin(ang), a: a, t: PRE + d });
+    }
+    var patch = {
+      cx: lerp(PATCH.cx0, PATCH.cx1, rng()), cy: lerp(PATCH.cy0, PATCH.cy1, rng()),
+      ax: lerp(PATCH.ax0, PATCH.ax1, rng()), ay: lerp(PATCH.ay0, PATCH.ay1, rng()), f: lerp(PATCH.f0, PATCH.f1, rng())
+    };
+    return { seed: String(seed), x: sx, y: sy, bumps: bumps, patch: patch };
+  }
+  function sources(sp, kind) { return kind === 'cheer' ? sp.bumps : [{ x: sp.x, y: sp.y, a: 1, t: PRE }]; }
+  function target(sp, kind) {
+    if (kind !== 'cheer') return [sp.x, sp.y];
+    var x = 0, y = 0, a = 0;
+    sp.bumps.forEach(function (b) { x += b.a * b.x; y += b.a * b.y; a += b.a; });
+    return [x / a, y / a];
+  }
+  function patchWeight(p, x, y) {
+    var q = Math.pow((x - p.cx) / p.ax, 2) + Math.pow((y - p.cy) / p.ay, 2);
+    return 1 / (1 + Math.exp((q - 1) * PATCH.edge));
+  }
+  function speedField(sp, floor) {
+    var r2 = new Float64Array(NC);
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+      r2[y * W + x] = floor === 'patchy' ? R2 * (1 - (1 - sp.patch.f * sp.patch.f) * patchWeight(sp.patch, x, y)) : R2;
+    }
+    return r2;
+  }
+  // Runs the grid. Returns the clean height under all 8 sensors at every tick and, if asked, every
+  // frame (Float32Array of TICKS * W * H) for drawing.
+  function simulate(sp, kind, floor, wantFrames) {
+    var up = new Float64Array(NC), u = new Float64Array(NC), un = new Float64Array(NC), tmp;
+    var r2 = speedField(sp, floor), src = sources(sp, kind);
+    var clean = SENSORS.map(function () { return new Float64Array(TICKS); });
+    var frames = wantFrames ? new Float32Array(TICKS * NC) : null;
+    for (var t = 0; t < TICKS; t++) {
+      for (var s = 0; s < src.length; s++) {
+        if (src[s].t !== t) continue;
+        var b = src[s];
+        for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+          var d2 = (x - b.x) * (x - b.x) + (y - b.y) * (y - b.y);
+          if (d2 > BUMP_CUT2) continue;
+          var v = b.a * Math.exp(-d2 / (2 * BUMP_SIGMA * BUMP_SIGMA));
+          u[y * W + x] += v; up[y * W + x] += v;
+        }
+      }
+      for (var k = 0; k < SENSORS.length; k++) clean[k][t] = u[SENSORS[k][1] * W + SENSORS[k][0]];
+      if (frames) frames.set(u, t * NC);
+      for (var yy = 0; yy < H; yy++) for (var xx = 0; xx < W; xx++) {
+        var i = yy * W + xx;
+        var l = xx > 0 ? u[i - 1] : u[i + 1], r = xx < W - 1 ? u[i + 1] : u[i - 1];
+        var dn = yy > 0 ? u[i - W] : u[i + W], dw = yy < H - 1 ? u[i + W] : u[i - W];
+        un[i] = (2 * u[i] - (1 - GAMMA) * up[i] + r2[i] * (l + r + dn + dw - 4 * u[i])) / (1 + GAMMA);
+      }
+      tmp = up; up = u; u = un; un = tmp;
+    }
+    return { clean: clean, frames: frames, r2: r2 };
+  }
+  // Standard normal noise for each of the 8 sensors, from the pulse seed only.
+  function noiseStreams(seed) {
+    return SENSORS.map(function (p, k) {
+      var rng = G.makeRng(GEN + seed + '/noise/' + k), z = new Float64Array(TICKS);
+      for (var t = 0; t < TICKS; t++) z[t] = G.gauss(rng);
+      return z;
+    });
+  }
+  function noisy(clean, z, sigma) { return Float64Array.from(clean, function (v, t) { return v + sigma * z[t]; }); }
+
+  /* ---------- detector and methods (section 3) ---------- */
+  function smooth(x) {
+    var s = new Float64Array(x.length);
+    for (var t = 1; t < x.length - 1; t++) s[t] = (x[t - 1] + x[t] + x[t + 1]) / 3;
+    return s;
+  }
+  function baseline(s) {
+    var m = 0, v = 0, t;
+    for (t = 1; t < PRE; t++) m += s[t];
+    m /= PRE - 1;
+    for (t = 1; t < PRE; t++) v += (s[t] - m) * (s[t] - m);
+    return { mean: m, sd: Math.sqrt(v / (PRE - 2)) };
+  }
+  function crossing(s, m, thr) {
+    for (var t = PRE; t < s.length - 1; t++) if (Math.abs(s[t] - m) > thr) return t;
+    return -1;
+  }
+  // arrival tick of a noisy trace with threshold k baseline standard deviations, or -1
+  function detect(trace, k) { var s = smooth(trace), b = baseline(s); return b.sd > 0 ? crossing(s, b.mean, k * b.sd) : -1; }
+  // the same rule on a clean trace, with the threshold fixed at k times the setting's noise sigma
+  function detectClean(trace, thr) { return crossing(smooth(trace), 0, thr); }
+
+  function costAt(pos, arr, c, x, y) {
+    var n = pos.length, res = new Array(n), m = 0, i;
+    for (i = 0; i < n; i++) { res[i] = arr[i] - Math.sqrt((x - pos[i][0]) * (x - pos[i][0]) + (y - pos[i][1]) * (y - pos[i][1])) / c; m += res[i]; }
+    m /= n;
+    var ss = 0;
+    for (i = 0; i < n; i++) ss += (res[i] - m) * (res[i] - m);
+    return ss;
+  }
+  function used(sensorIdx, arrivals) {
+    var pos = [], arr = [];
+    sensorIdx.forEach(function (k, j) { if (arrivals[j] >= 0) { pos.push(SENSORS[k]); arr.push(arrivals[j]); } });
+    return { pos: pos, arr: arr };
+  }
+  // TDOA least squares with an unknown start time: every cell, then 1/8 cell within one cell of the best
+  function locate(sensorIdx, arrivals, c) {
+    var u = used(sensorIdx, arrivals);
+    if (u.pos.length < 3) return { x: CENTER[0], y: CENTER[1], cost: NaN, n: u.pos.length, fallback: true };
+    var bx = 0, by = 0, bc = Infinity, x, y, q;
+    for (y = 0; y < H; y++) for (x = 0; x < W; x++) { q = costAt(u.pos, u.arr, c, x, y); if (q < bc) { bc = q; bx = x; by = y; } }
+    var cx = bx, cy = by;
+    for (var j = -8; j <= 8; j++) for (var i = -8; i <= 8; i++) {
+      x = cx + i / 8; y = cy + j / 8;
+      if (x < 0 || y < 0 || x > W - 1 || y > H - 1) continue;
+      q = costAt(u.pos, u.arr, c, x, y);
+      if (q < bc) { bc = q; bx = x; by = y; }
+    }
+    return { x: bx, y: by, cost: bc, n: u.pos.length, fallback: false };
+  }
+  // the locator's 90% region: half-cell points whose cost is within rho of the minimum
+  function region(sensorIdx, arrivals, c, rho, loc) {
+    if (loc.fallback) return { cells: [], area: 0 };
+    var u = used(sensorIdx, arrivals), cells = [];
+    for (var gy = 0; gy <= 2 * (H - 1); gy++) for (var gx = 0; gx <= 2 * (W - 1); gx++) {
+      if (costAt(u.pos, u.arr, c, gx / 2, gy / 2) <= loc.cost + rho) cells.push(gy * (2 * W - 1) + gx);
+    }
+    return { cells: cells, area: cells.length * 0.25 };
+  }
+  function covers(sensorIdx, arrivals, c, rho, loc, tgt) {
+    if (loc.fallback) return false;
+    var u = used(sensorIdx, arrivals);
+    return costAt(u.pos, u.arr, c, tgt[0], tgt[1]) <= loc.cost + rho;
+  }
+  function earlyAverage(sensorIdx, arrivals) {
+    var first = Infinity, x = 0, y = 0, w = 0;
+    arrivals.forEach(function (a) { if (a >= 0 && a < first) first = a; });
+    if (first === Infinity) return CENTER.slice();
+    sensorIdx.forEach(function (k, j) {
+      if (arrivals[j] < 0) return;
+      var wt = Math.exp(-(arrivals[j] - first) / AVG_TAU);
+      x += wt * SENSORS[k][0]; y += wt * SENSORS[k][1]; w += wt;
+    });
+    return [x / w, y / w];
+  }
+  function nearestSensor(sensorIdx, arrivals) {
+    var best = -1;
+    arrivals.forEach(function (a, j) { if (a >= 0 && (best < 0 || a < arrivals[best])) best = j; });
+    return best < 0 ? CENTER.slice() : SENSORS[sensorIdx[best]].slice();
+  }
+  function randomGuess(seed) {
+    var rng = G.makeRng(GEN + seed + '/random');
+    return [lerp(BOX.x0, BOX.x1, rng()), lerp(BOX.y0, BOX.y1, rng())];
+  }
+  function dist(a, b) { return Math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1])); }
+  function points(err) { return Math.max(0, Math.round(100 - 12 * err)); }
+
+  // Everything a method can know about one pulse in one setting, and how each method does.
+  // sim and z may be passed in to reuse one simulation across settings.
+  function analyze(seed, setting, cal, sim, z) {
+    cal = cal || calib();
+    var sp = spec(seed);
+    sim = sim || simulate(sp, setting.kind, setting.floor, false);
+    z = z || noiseStreams(seed);
+    var idx = SENSOR_SETS[setting.sensors], sigma = NOISE[setting.noise], tgt = target(sp, setting.kind);
+    var traces = idx.map(function (k) { return noisy(sim.clean[k], z[k], sigma); });
+    var arrivals = traces.map(function (tr) { return detect(tr, cal.k); });
+    var loc = locate(idx, arrivals, cal.c);
+    var cleanArr = idx.map(function (k) { return detectClean(sim.clean[k], cal.k * sigma); });
+    var nf = locate(idx, cleanArr, cal.c);
+    var answers = {
+      locator: [loc.x, loc.y], early: earlyAverage(idx, arrivals), nearest: nearestSensor(idx, arrivals),
+      center: CENTER.slice(), random: randomGuess(seed), noiseFree: [nf.x, nf.y]
+    };
+    var err = {};
+    Object.keys(answers).forEach(function (m) { err[m] = dist(answers[m], tgt); });
+    return {
+      seed: String(seed), setting: setting, spec: sp, target: tgt, sensors: idx, traces: traces, arrivals: arrivals,
+      loc: loc, answers: answers, err: err, covered: covers(idx, arrivals, cal.c, cal.rho, loc, tgt),
+      missed: arrivals.filter(function (a) { return a < 0; }).length, sim: sim
+    };
+  }
+
+  /* ---------- the game (section 9) ---------- */
+  var PER_STAGE = 4;
+  var STAGES = [
+    { id: 1, key: 'wins', setting: function () { return { kind: 'win', sensors: 8, noise: 'calm', floor: 'even' }; } },
+    { id: 2, key: 'cheers', setting: function () { return { kind: 'cheer', sensors: 8, noise: 'loud', floor: 'even' }; } },
+    { id: 3, key: 'patchy', setting: function (j) { return { kind: j % 2 === 0 ? 'win' : 'cheer', sensors: 4, noise: 'calm', floor: 'patchy' }; } }
+  ];
+  var TOTAL = PER_STAGE * STAGES.length;
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  function pulseSeed(runSeed, i) { return runSeed + '.' + i; }
+  function createRun(seed) {
+    seed = SEED_RE.test(String(seed)) ? String(seed) : 'pulse';
+    var pulses = [];
+    STAGES.forEach(function (st, si) {
+      for (var j = 0; j < PER_STAGE; j++) pulses.push({ seed: pulseSeed(seed, pulses.length), stage: si, setting: st.setting(j) });
+    });
+    return { seed: seed, pulses: pulses, log: [] };
+  }
+  function done(run) { return run.log.length >= TOTAL; }
+  // a pulse ready to play: what the player may see (traces, arrivals, the locator's hint) and the
+  // full frames for the reveal
+  function preparePulse(run, i, cal) {
+    var p = run.pulses[i], sp = spec(p.seed), sim = simulate(sp, p.setting.kind, p.setting.floor, true);
+    var a = analyze(p.seed, p.setting, cal, sim, noiseStreams(p.seed));
+    cal = cal || calib();
+    a.region = region(a.sensors, a.arrivals, cal.c, cal.rho, a.loc);
+    a.stage = p.stage; a.index = i;
+    return a;
+  }
+  function snap(v, max) { return Math.max(0, Math.min(max, Math.round(v * 2) / 2)); }
+  // the player's guess for pulse i, snapped to the half-cell grid
+  function guess(run, a, x, y) {
+    var g = [snap(x, W - 1), snap(y, H - 1)], e = dist(g, a.target);
+    var entry = {
+      i: a.index, stage: a.stage, setting: a.setting, guess: g, target: a.target, err: e, points: points(e),
+      locator: { err: a.err.locator, points: points(a.err.locator) },
+      early: { err: a.err.early, points: points(a.err.early) },
+      center: { err: a.err.center, points: points(a.err.center) },
+      covered: a.covered, fallback: a.loc.fallback
+    };
+    run.log.push(entry);
+    return entry;
+  }
+  function summarize(log) {
+    var s = { pulses: log.length, points: 0, locator: 0, early: 0, center: 0, hits: 0, locHits: 0, err: 0, locErr: 0 };
+    log.forEach(function (e) {
+      s.points += e.points; s.locator += e.locator.points; s.early += e.early.points; s.center += e.center.points;
+      if (e.err <= HIT) s.hits++;
+      if (e.locator.err <= HIT) s.locHits++;
+      s.err += e.err; s.locErr += e.locator.err;
+    });
+    s.meanErr = log.length ? s.err / log.length : 0;
+    s.meanLocErr = log.length ? s.locErr / log.length : 0;
+    return s;
+  }
+  function rank(s) {
+    if (!s.pulses) return 'none';
+    if (s.points > s.locator) return 'beatLocator';
+    if (s.points === s.locator) return 'tieLocator';
+    if (s.points > s.early) return 'beatIntuition';
+    if (s.points > s.center) return 'learning';
+    return 'lost';
+  }
+  function dailySeed(dateStr) { return 'p' + dateStr; }
+
+  /* ---------- replay codes: a run's guesses, checked by replaying it ---------- */
+  // Three letters per guess (its half-cell position), then two check letters over the seed and the
+  // body. The check catches typing and copying errors, not forgery: the replay recomputes every point
+  // from the seed, so a code can only ever show the score its guesses really earn.
+  var CODE_ABC = 'abcdefghijklmnopqrstuvwxyz234567', CHECK_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  var GX = 2 * W - 1, GY = 2 * H - 1;
+  var CODE_RE = /^(?:[a-z2-7]{3}){1,12}[A-HJ-NP-Z]{2}$/;
+  function fnv(str) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return h >>> 0;
+  }
+  function checkChars(seed, body) { var h = fnv(String(seed) + ':' + body) % 576; return CHECK_ABC[Math.floor(h / 24)] + CHECK_ABC[h % 24]; }
+  function encodeRun(seed, log) {
+    var body = log.map(function (e) {
+      var v = Math.round(e.guess[1] * 2) * GX + Math.round(e.guess[0] * 2);
+      return CODE_ABC[v >> 10] + CODE_ABC[(v >> 5) & 31] + CODE_ABC[v & 31];
+    }).join('');
+    return body ? body + checkChars(seed, body) : '';
+  }
+  function decodeRun(seed, code) {
+    code = String(code || '');
+    if (!CODE_RE.test(code)) return { ok: false, error: 'format' };
+    var body = code.slice(0, -2);
+    if (checkChars(seed, body) !== code.slice(-2)) return { ok: false, error: 'check' };
+    var guesses = [];
+    for (var i = 0; i < body.length; i += 3) {
+      var v = (CODE_ABC.indexOf(body[i]) << 10) + (CODE_ABC.indexOf(body[i + 1]) << 5) + CODE_ABC.indexOf(body[i + 2]);
+      if (v >= GX * GY) return { ok: false, error: 'range', at: i / 3 };
+      guesses.push([(v % GX) / 2, Math.floor(v / GX) / 2]);
+    }
+    return { ok: true, guesses: guesses };
+  }
+  function replayRun(seed, code, cal) {
+    if (!SEED_RE.test(String(seed))) return { ok: false, error: 'seed' };
+    var dec = decodeRun(seed, code);
+    if (!dec.ok) return dec;
+    var run = createRun(seed);
+    dec.guesses.forEach(function (g, i) {
+      var p = run.pulses[i], a = analyze(p.seed, p.setting, cal);
+      a.stage = p.stage; a.index = i;
+      guess(run, a, g[0], g[1]);
+    });
+    return { ok: true, run: run, summary: summarize(run.log), complete: done(run) };
+  }
+
+  /* ---------- links and share card ---------- */
+  function parseHash(hash) {
+    var out = { seed: null, lang: null, replay: null }, h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1);
+      if (k === 's' && SEED_RE.test(v)) out.seed = v;
+      else if (k === 'l' && (v === 'en' || v === 'fr')) out.lang = v;
+      else if (k === 'r' && CODE_RE.test(v)) out.replay = v;
+    });
+    return out;
+  }
+  function buildHash(o) {
+    var parts = [];
+    if (o && o.seed && SEED_RE.test(o.seed)) {
+      parts.push('s=' + o.seed);
+      if (o.replay && CODE_RE.test(o.replay)) parts.push('r=' + o.replay);
+    }
+    if (o && o.lang === 'fr') parts.push('l=fr');
+    return parts.length ? '#' + parts.join('&') : '';
+  }
+  var GLYPH = ['\u00B7', '\u25CB', '\u25C7', '\u25C6'];   // 0, 1-49, 50-79, 80+ points
+  function glyph(p) { return p >= 80 ? GLYPH[3] : p >= 50 ? GLYPH[2] : p > 0 ? GLYPH[1] : GLYPH[0]; }
+  function strip(log, stage) { return log.filter(function (e) { return e.stage === stage; }).map(function (e) { return glyph(e.points); }).join(''); }
+  function shareText(o, t) {
+    var s = o.summary, lines = [];
+    lines.push(t('share.title', { seed: o.seed }));
+    lines.push(t('share.points', { p: s.points, l: s.locator, h: s.hits, n: s.pulses }));
+    STAGES.forEach(function (st, i) { lines.push(t('share.stage', { n: st.id }) + ' ' + strip(o.log, i)); });
+    if (o.code) lines.push(t('share.code', { code: o.code }));
+    lines.push(t('share.tag'));
+    return lines.join('\n');
+  }
+
+  return {
+    VERSION: VERSION, GEN: GEN, W: W, H: H, NC: NC, R2: R2, C_NOMINAL: C_NOMINAL, GAMMA: GAMMA, PRE: PRE, TICKS: TICKS,
+    BOX: BOX, CENTER: CENTER, SENSORS: SENSORS, SENSOR_SETS: SENSOR_SETS, NOISE: NOISE, CHEER: CHEER, PATCH: PATCH,
+    AVG_TAU: AVG_TAU, HIT: HIT, SETTINGS: SETTINGS, DEFAULT_SETTING: DEFAULT_SETTING, settingId: settingId,
+    settingIndex: settingIndex, FALLBACK_CALIB: FALLBACK_CALIB, CALIB: CALIB, calib: calib,
+    spec: spec, sources: sources, target: target, patchWeight: patchWeight, speedField: speedField, simulate: simulate,
+    noiseStreams: noiseStreams, noisy: noisy, smooth: smooth, baseline: baseline, detect: detect, detectClean: detectClean,
+    costAt: costAt, locate: locate, region: region, covers: covers, earlyAverage: earlyAverage, nearestSensor: nearestSensor,
+    randomGuess: randomGuess, dist: dist, points: points, analyze: analyze,
+    PER_STAGE: PER_STAGE, STAGES: STAGES, TOTAL: TOTAL, SEED_RE: SEED_RE, pulseSeed: pulseSeed, createRun: createRun,
+    done: done, preparePulse: preparePulse, guess: guess, summarize: summarize, rank: rank, dailySeed: dailySeed,
+    CODE_RE: CODE_RE, encodeRun: encodeRun, decodeRun: decodeRun, replayRun: replayRun,
+    parseHash: parseHash, buildHash: buildHash, GLYPH: GLYPH, glyph: glyph, strip: strip, shareText: shareText
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: strings for Wave Pulse, English and French (SYNTHETIC classical simulation).
+ * A test checks both languages have the same keys and the same {placeholders}, and that the
+ * evaluation paragraphs quote docs/pulse-results.json.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.PulseI18n = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var en = {
+    'page.title': 'Wave Pulse',
+    'page.tagline': 'A big win or a crowd cheer sends a ripple across the membrane grid. Find where it started.',
+    'page.tag': 'SYNTHETIC',
+    'page.lang': 'Français',
+    'page.hc': 'High contrast',
+    'page.watch': 'Pair Watch',
+    'page.pair': 'Reverse Pair',
+    'page.reverse': 'Reverse Membranes',
+    'page.brain': 'Brain architecture',
+    'page.quorum': 'Quorum Keeper',
+    'page.arena': 'Arena',
+
+    'intro.p1': 'A big win or a crowd cheer sends a ripple across the membrane grid. You do not see it at first: the floor is covered, and you only hear the sensors at its edge.',
+    'intro.p2': 'Listen, tap where you think the ripple started, then watch it replayed in a Great Wave colour style, with the true start, your guess and the locator\u2019s answer. 12 pulses in 3 stages.',
+    'intro.p3': 'SYNTHETIC: a game on a small classical simulation. It is not a model of a real arena floor, real pressure waves, holography or any physical system. The Great Wave look is a colour style only.',
+
+    'sec.game': 'Game',
+    'mode.play': 'Play',
+    'mode.free': 'Free waves',
+    'hud.pulse': 'Pulse',
+    'hud.stage': 'Stage',
+    'hud.points': 'Your points',
+    'hud.locator': 'Locator',
+    'hud.pulse.v': '{i} / {n}',
+    'stage.1': '1 \u00B7 Big wins',
+    'stage.2': '2 \u00B7 Loud cheers',
+    'stage.3': '3 \u00B7 Patchy floor',
+    'stage.free': 'Free',
+    'banner.1': 'Stage 1: big wins, 8 sensors, calm. Closer sensors hear the ripple first.',
+    'banner.2': 'Stage 2: crowd cheers with loud noise. A cheer is several small bumps; its start is their centre.',
+    'banner.3': 'Stage 3: a patchy floor with only the 4 corner sensors. A hidden slow patch delays some arrivals.',
+    'banner.free': 'Free waves: nothing is scored. Tap anywhere on the grid to send a ripple from there.',
+    'banner.nocalib': 'pulse-calib.js is missing: the hint uses default values, not the calibrated ones.',
+    'btn.listen': 'Listen',
+    'btn.listening': 'Listening\u2026',
+    'btn.next': 'Next pulse',
+    'btn.finish': 'See the results',
+    'btn.confirm': 'Confirm guess',
+    'ctl.hint': 'Locator hint',
+    'ctl.speed': 'Speed',
+    'ctl.speed.1': 'Slow',
+    'ctl.speed.2': 'Normal',
+    'ctl.speed.4': 'Fast',
+    'free.win': 'Big win wave',
+    'free.cheer': 'Crowd cheer wave',
+    'free.patchy': 'Patchy floor',
+    'free.hint': 'The slow patch is drawn as a dotted outline in free waves.',
+    'keys.hint': 'Keys: Space listen or next, arrows move your marker (Shift for 2 cells), Enter confirm, H hint.',
+
+    'status.idle': 'Pulse {i} of {n}: press Listen.',
+    'status.listen': 'Listening\u2026 tick {t} of {T}. The ripple is hidden: watch which sensors light up first.',
+    'status.guess': 'Tap the grid where you think it started, then confirm. Arrow keys move the marker.',
+    'status.guessed': 'Your marker: ({x}, {y}). Confirm when ready.',
+    'status.reveal': 'Off by {e} cells: {p} points. The locator was off by {le} cells ({lp} points).',
+    'status.fallback': 'The locator heard fewer than 3 sensors and guessed the centre.',
+    'status.done': 'Run complete: {p} points against the locator\u2019s {l}.',
+    'status.free': 'Free waves: tap anywhere on the grid, or use the buttons.',
+    'status.freeplay': 'Ripple from ({x}, {y}), tick {t} of {T}.',
+    'arr.label': 'Arrival ticks:',
+    'arr.miss': 'none',
+    'arr.none': 'No sensor has heard anything yet.',
+    'scene.aria': 'Membrane grid. {s}',
+    'scene.covered': 'Floor covered: listening',
+    'scene.tap': 'Tap where it started',
+    'scene.traces': 'Sensor recordings',
+    'scene.tick': 'tick {t}',
+    'scene.you': 'you',
+    'scene.loc': 'locator',
+    'scene.start': 'start',
+    'kind.win': 'Big win',
+    'kind.cheer': 'Crowd cheer',
+
+    'sec.legend': 'What you see',
+    'legend.sensor': 'Sensor: lights up when it hears the ripple; the number is the order of arrival',
+    'legend.guess': 'Your guess',
+    'legend.locator': 'The locator\u2019s answer (with the hint on, or after the reveal)',
+    'legend.region': 'The locator\u2019s 90% region',
+    'legend.target': 'The true start (after the reveal)',
+    'legend.patch': 'The hidden slow patch (after the reveal, on a patchy floor)',
+    'legend.wave': 'Ripple height: deep blue troughs, foam-white crests',
+
+    'sec.log': 'Pulse log',
+    'log.n': '#',
+    'log.kind': 'Trigger',
+    'log.you': 'Your error (cells)',
+    'log.pts': 'Points',
+    'log.loc': 'Locator error',
+    'log.locpts': 'Locator points',
+    'log.empty': 'No pulse played yet.',
+
+    'sec.end': 'End of the run',
+    'end.who': 'Who',
+    'end.points': 'Points',
+    'end.hits': 'Within 2 cells',
+    'end.err': 'Mean error (cells)',
+    'who.you': 'You',
+    'who.locator': 'Locator',
+    'who.early': 'Early-sensor average',
+    'who.center': 'Always the centre',
+    'end.rank.beatLocator': 'You beat the locator on these pulses.',
+    'end.rank.tieLocator': 'You tied the locator.',
+    'end.rank.beatIntuition': 'You beat the early-sensor average, but not the locator.',
+    'end.rank.learning': 'You beat guessing the centre. Try timing the first arrivals.',
+    'end.rank.lost': 'Guessing the centre would have scored more. Watch which sensors hear it first.',
+    'end.rank.none': '',
+    'end.note': 'Same pulses for everyone: the locator, the early-sensor average and the centre use the same recordings you heard.',
+    'end.code': 'Replay code:',
+    'end.link': 'Link with this code',
+    'sec.card': 'Score card (plain text)',
+    'share.title': 'Wave Pulse \u00B7 seed {seed}',
+    'share.points': '{p} points (locator {l}) \u00B7 {h}/{n} within 2 cells',
+    'share.stage': 'Stage {n}',
+    'share.code': 'Replay code {code}',
+    'share.tag': 'SYNTHETIC game on a classical simulation, offline',
+
+    'sec.verify': 'Replay check',
+    'verify.ok': 'The code on this link replays seed {seed} to {p} points over {n} pulses. Every point is recomputed from the seed.',
+    'verify.bad': 'This code does not fit seed {seed}: {why}.',
+    'verify.why.format': 'it is not a valid code',
+    'verify.why.check': 'it has a typing or copying error',
+    'verify.why.seed': 'the seed is not valid',
+    'verify.why.range': 'a guess is off the grid',
+
+    'sec.runs': 'Runs',
+    'seed.line': 'Seed {seed}. The same seed always gives the same 12 pulses.',
+    'btn.again': 'Replay this seed',
+    'btn.today': 'Today\u2019s run',
+    'btn.new': 'New random run',
+
+    'sec.how': 'How it works',
+    'how.p1': 'The membrane grid is 40 \u00D7 26 cells. A ripple follows a damped wave equation, solved with a standard finite-difference step at a nominal 0.5 cells per tick, and bounces off the walls. A big win is one bump; a crowd cheer is 3 to 5 smaller bumps a few ticks apart, and its start is their weighted centre.',
+    'how.p2': 'Sensors only hear the height under them, with noise. A sensor\u2019s arrival is the first tick where its smoothed recording leaves the quiet level by more than {k} times its quiet wobble. Closer sensors hear it first: the differences between arrival ticks point to the start.',
+    'how.p3': 'The locator tries every point of the grid and keeps the one whose distances best explain those differences (time difference of arrival), assuming one speed everywhere. Its region marks the points almost as good. On a patchy floor a hidden slow patch delays some arrivals, and the locator does not know about it.',
+    'how.p4': 'Points: 100 minus 12 per cell of error, never below 0. A hit is within 2 cells. Stage 1: big wins, 8 sensors, calm. Stage 2: crowd cheers with loud noise. Stage 3: a patchy floor with only the 4 corner sensors. The hint is advice, not the answer.',
+
+    'sec.eval': 'How good is the locator? (held-out evaluation)',
+    'eval.p1': 'These numbers come from 200 held-out pulses never used for tuning, each played in all 16 settings (trigger \u00D7 sensors \u00D7 noise \u00D7 floor). The detector threshold (k = 7), the locator speed (c = 0.46 cells per tick) and the region size were chosen beforehand on 200 separate calibration pulses, under a protocol written and frozen before any run. Brackets are 95% bootstrap intervals.',
+    'eval.p2': 'Default setting (big win, 8 sensors, calm, even floor): the locator is off by 0.62 [0.57, 0.68] cells on average and within 2 cells on 99.5% of pulses. The early-sensor average, an intuitive strategy, is off by 3.05 [2.89, 3.21]; always guessing the centre, by 9.34 [8.79, 9.89].',
+    'eval.p3': 'All six hypotheses written into the frozen protocol held, with paired intervals above zero: the locator gets worse on a patchy floor (+0.65 [+0.53, +0.78] cells), with loud noise (+0.90 [+0.69, +1.13]), with 4 sensors instead of 8 (+0.13 [+0.07, +0.18]) and for crowd cheers (+0.33 [+0.27, +0.39]). The cost of having 4 sensors is real but small.',
+    'eval.p4': 'A negative result: the locator\u2019s 90% region is calibrated in only 2 of 16 settings. On a calm, even floor it holds the start 99.5% of the time (too wide); with loud noise on a patchy floor, only 59.0% (too narrow). One fixed region size cannot fit every setting. In clean recordings arrivals advance at 0.488 cells per tick, while the best locator speed was 0.46; the report does not test why they differ.',
+    'eval.p5': 'All of this is about a small synthetic simulation and its own game, not a real floor, real pressure waves, holography or any physical system. One command regenerates every number: node scripts/pulse-check.js --write (and --verify to check). Details: docs/PULSE.md and docs/pulse-check.txt.',
+
+    'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.'
+  };
+  var fr = {
+    'page.title': 'Impulsion de vague',
+    'page.tagline': 'Une grande victoire ou une clameur de la foule envoie une onde sur la grille de membranes. Trouvez d\u2019o\u00F9 elle est partie.',
+    'page.tag': 'SYNTH\u00C9TIQUE',
+    'page.lang': 'English',
+    'page.hc': 'Contraste \u00E9lev\u00E9',
+    'page.watch': 'Veille \u00E0 deux',
+    'page.pair': 'Paire invers\u00E9e',
+    'page.reverse': 'Membranes invers\u00E9es',
+    'page.brain': 'Architecture c\u00E9r\u00E9brale',
+    'page.quorum': 'Gardien du quorum',
+    'page.arena': 'L\'ar\u00E8ne',
+
+    'intro.p1': 'Une grande victoire ou une clameur de la foule envoie une onde sur la grille de membranes. Vous ne la voyez pas tout de suite\u00A0: le sol est couvert, et vous n\u2019entendez que les capteurs sur son bord.',
+    'intro.p2': '\u00C9coutez, touchez l\u2019endroit d\u2019o\u00F9 l\u2019onde est partie selon vous, puis regardez-la rejou\u00E9e dans le style de couleurs de La Grande Vague, avec le vrai d\u00E9part, votre choix et la r\u00E9ponse du localisateur. 12 impulsions en 3 \u00E9tapes.',
+    'intro.p3': 'SYNTH\u00C9TIQUE\u00A0: un jeu sur une petite simulation classique. Ce n\u2019est pas un mod\u00E8le d\u2019un vrai sol d\u2019ar\u00E8ne, de vraies ondes de pression, d\u2019holographie ni d\u2019aucun syst\u00E8me physique. L\u2019aspect Grande Vague n\u2019est qu\u2019un style de couleurs.',
+
+    'sec.game': 'Jeu',
+    'mode.play': 'Jouer',
+    'mode.free': 'Vagues libres',
+    'hud.pulse': 'Impulsion',
+    'hud.stage': '\u00C9tape',
+    'hud.points': 'Vos points',
+    'hud.locator': 'Localisateur',
+    'hud.pulse.v': '{i} / {n}',
+    'stage.1': '1 \u00B7 Grandes victoires',
+    'stage.2': '2 \u00B7 Clameurs bruyantes',
+    'stage.3': '3 \u00B7 Sol in\u00E9gal',
+    'stage.free': 'Libre',
+    'banner.1': '\u00C9tape 1\u00A0: grandes victoires, 8 capteurs, calme. Les capteurs les plus proches entendent l\u2019onde en premier.',
+    'banner.2': '\u00C9tape 2\u00A0: clameurs de la foule avec bruit fort. Une clameur est faite de plusieurs petites bosses\u00A0; son d\u00E9part est leur centre.',
+    'banner.3': '\u00C9tape 3\u00A0: un sol in\u00E9gal avec seulement les 4 capteurs des coins. Une zone lente cach\u00E9e retarde certaines arriv\u00E9es.',
+    'banner.free': 'Vagues libres\u00A0: rien n\u2019est compt\u00E9. Touchez la grille n\u2019importe o\u00F9 pour envoyer une onde depuis cet endroit.',
+    'banner.nocalib': 'pulse-calib.js manque\u00A0: l\u2019indice utilise des valeurs par d\u00E9faut, pas les valeurs calibr\u00E9es.',
+    'btn.listen': '\u00C9couter',
+    'btn.listening': '\u00C0 l\u2019\u00E9coute\u2026',
+    'btn.next': 'Impulsion suivante',
+    'btn.finish': 'Voir les r\u00E9sultats',
+    'btn.confirm': 'Confirmer',
+    'ctl.hint': 'Indice du localisateur',
+    'ctl.speed': 'Vitesse',
+    'ctl.speed.1': 'Lente',
+    'ctl.speed.2': 'Normale',
+    'ctl.speed.4': 'Rapide',
+    'free.win': 'Vague de victoire',
+    'free.cheer': 'Vague de clameur',
+    'free.patchy': 'Sol in\u00E9gal',
+    'free.hint': 'En vagues libres, la zone lente est dessin\u00E9e en pointill\u00E9.',
+    'keys.hint': 'Touches\u00A0: Espace \u00E9couter ou suivante, fl\u00E8ches pour d\u00E9placer le rep\u00E8re (Maj pour 2 cases), Entr\u00E9e confirmer, H indice.',
+
+    'status.idle': 'Impulsion {i} sur {n}\u00A0: appuyez sur \u00C9couter.',
+    'status.listen': '\u00C0 l\u2019\u00E9coute\u2026 tic {t} sur {T}. L\u2019onde est cach\u00E9e\u00A0: regardez quels capteurs s\u2019allument en premier.',
+    'status.guess': 'Touchez la grille l\u00E0 o\u00F9 l\u2019onde est partie selon vous, puis confirmez. Les fl\u00E8ches d\u00E9placent le rep\u00E8re.',
+    'status.guessed': 'Votre rep\u00E8re\u00A0: ({x}, {y}). Confirmez quand vous \u00EAtes pr\u00EAt.',
+    'status.reveal': '\u00C0 {e} cases du d\u00E9part\u00A0: {p} points. Le localisateur \u00E9tait \u00E0 {le} cases ({lp} points).',
+    'status.fallback': 'Le localisateur a entendu moins de 3 capteurs et a r\u00E9pondu le centre.',
+    'status.done': 'Partie termin\u00E9e\u00A0: {p} points contre {l} pour le localisateur.',
+    'status.free': 'Vagues libres\u00A0: touchez la grille n\u2019importe o\u00F9, ou utilisez les boutons.',
+    'status.freeplay': 'Onde partie de ({x}, {y}), tic {t} sur {T}.',
+    'arr.label': 'Tics d\u2019arriv\u00E9e\u00A0:',
+    'arr.miss': 'aucun',
+    'arr.none': 'Aucun capteur n\u2019a encore rien entendu.',
+    'scene.aria': 'Grille de membranes. {s}',
+    'scene.covered': 'Sol couvert\u00A0: \u00E0 l\u2019\u00E9coute',
+    'scene.tap': 'Touchez le point de d\u00E9part',
+    'scene.traces': 'Enregistrements des capteurs',
+    'scene.tick': 'tic {t}',
+    'scene.you': 'vous',
+    'scene.loc': 'localisateur',
+    'scene.start': 'd\u00E9part',
+    'kind.win': 'Grande victoire',
+    'kind.cheer': 'Clameur',
+
+    'sec.legend': 'Ce que vous voyez',
+    'legend.sensor': 'Capteur\u00A0: s\u2019allume quand il entend l\u2019onde\u00A0; le num\u00E9ro est l\u2019ordre d\u2019arriv\u00E9e',
+    'legend.guess': 'Votre choix',
+    'legend.locator': 'La r\u00E9ponse du localisateur (avec l\u2019indice, ou apr\u00E8s la r\u00E9v\u00E9lation)',
+    'legend.region': 'La zone \u00E0 90\u00A0% du localisateur',
+    'legend.target': 'Le vrai d\u00E9part (apr\u00E8s la r\u00E9v\u00E9lation)',
+    'legend.patch': 'La zone lente cach\u00E9e (apr\u00E8s la r\u00E9v\u00E9lation, sur sol in\u00E9gal)',
+    'legend.wave': 'Hauteur de l\u2019onde\u00A0: creux bleu profond, cr\u00EAtes blanc d\u2019\u00E9cume',
+
+    'sec.log': 'Journal des impulsions',
+    'log.n': 'N\u00B0',
+    'log.kind': 'D\u00E9clencheur',
+    'log.you': 'Votre \u00E9cart (cases)',
+    'log.pts': 'Points',
+    'log.loc': '\u00C9cart du localisateur',
+    'log.locpts': 'Points du localisateur',
+    'log.empty': 'Aucune impulsion jou\u00E9e pour l\u2019instant.',
+
+    'sec.end': 'Fin de la partie',
+    'end.who': 'Qui',
+    'end.points': 'Points',
+    'end.hits': '\u00C0 2 cases ou moins',
+    'end.err': '\u00C9cart moyen (cases)',
+    'who.you': 'Vous',
+    'who.locator': 'Localisateur',
+    'who.early': 'Moyenne des premiers capteurs',
+    'who.center': 'Toujours le centre',
+    'end.rank.beatLocator': 'Vous avez battu le localisateur sur ces impulsions.',
+    'end.rank.tieLocator': '\u00C9galit\u00E9 avec le localisateur.',
+    'end.rank.beatIntuition': 'Vous avez battu la moyenne des premiers capteurs, mais pas le localisateur.',
+    'end.rank.learning': 'Vous avez battu le choix du centre. Essayez de suivre l\u2019ordre des premi\u00E8res arriv\u00E9es.',
+    'end.rank.lost': 'R\u00E9pondre le centre aurait rapport\u00E9 plus. Regardez quels capteurs entendent l\u2019onde en premier.',
+    'end.rank.none': '',
+    'end.note': 'Les m\u00EAmes impulsions pour tous\u00A0: le localisateur, la moyenne des premiers capteurs et le centre utilisent les enregistrements que vous avez entendus.',
+    'end.code': 'Code de rejeu\u00A0:',
+    'end.link': 'Lien avec ce code',
+    'sec.card': 'Carte de score (texte brut)',
+    'share.title': 'Impulsion de vague \u00B7 graine {seed}',
+    'share.points': '{p} points (localisateur {l}) \u00B7 {h}/{n} \u00E0 2 cases ou moins',
+    'share.stage': '\u00C9tape {n}',
+    'share.code': 'Code de rejeu {code}',
+    'share.tag': 'Jeu SYNTH\u00C9TIQUE sur une simulation classique, hors ligne',
+
+    'sec.verify': 'V\u00E9rification du rejeu',
+    'verify.ok': 'Le code de ce lien rejoue la graine {seed} \u00E0 {p} points sur {n} impulsions. Chaque point est recalcul\u00E9 \u00E0 partir de la graine.',
+    'verify.bad': 'Ce code ne correspond pas \u00E0 la graine {seed}\u00A0: {why}.',
+    'verify.why.format': 'ce n\u2019est pas un code valide',
+    'verify.why.check': 'il contient une faute de frappe ou de copie',
+    'verify.why.seed': 'la graine n\u2019est pas valide',
+    'verify.why.range': 'un choix est hors de la grille',
+
+    'sec.runs': 'Parties',
+    'seed.line': 'Graine {seed}. La m\u00EAme graine donne toujours les m\u00EAmes 12 impulsions.',
+    'btn.again': 'Rejouer cette graine',
+    'btn.today': 'Partie du jour',
+    'btn.new': 'Nouvelle partie au hasard',
+
+    'sec.how': 'Comment \u00E7a marche',
+    'how.p1': 'La grille de membranes fait 40 \u00D7 26 cases. Une onde suit une \u00E9quation d\u2019onde amortie, r\u00E9solue par un pas de diff\u00E9rences finies classique \u00E0 une vitesse nominale de 0,5 case par tic, et rebondit sur les bords. Une grande victoire est une seule bosse\u00A0; une clameur est faite de 3 \u00E0 5 bosses plus petites \u00E0 quelques tics d\u2019\u00E9cart, et son d\u00E9part est leur centre pond\u00E9r\u00E9.',
+    'how.p2': 'Les capteurs n\u2019entendent que la hauteur sous eux, avec du bruit. L\u2019arriv\u00E9e \u00E0 un capteur est le premier tic o\u00F9 son enregistrement liss\u00E9 s\u2019\u00E9carte du niveau calme de plus de {k} fois son agitation au calme. Les capteurs proches entendent en premier\u00A0: les \u00E9carts entre les tics d\u2019arriv\u00E9e indiquent le d\u00E9part.',
+    'how.p3': 'Le localisateur essaie chaque point de la grille et garde celui dont les distances expliquent le mieux ces \u00E9carts (diff\u00E9rence des temps d\u2019arriv\u00E9e), en supposant une seule vitesse partout. Sa zone marque les points presque aussi bons. Sur un sol in\u00E9gal, une zone lente cach\u00E9e retarde certaines arriv\u00E9es, et le localisateur ne le sait pas.',
+    'how.p4': 'Points\u00A0: 100 moins 12 par case d\u2019\u00E9cart, jamais moins de 0. Un coup r\u00E9ussi est \u00E0 2 cases ou moins. \u00C9tape 1\u00A0: grandes victoires, 8 capteurs, calme. \u00C9tape 2\u00A0: clameurs avec bruit fort. \u00C9tape 3\u00A0: sol in\u00E9gal avec seulement les 4 capteurs des coins. L\u2019indice est un conseil, pas la r\u00E9ponse.',
+
+    'sec.eval': 'Le localisateur est-il bon\u00A0? (\u00E9valuation sur graines r\u00E9serv\u00E9es)',
+    'eval.p1': 'Ces chiffres viennent de 200 impulsions r\u00E9serv\u00E9es, jamais utilis\u00E9es pour le r\u00E9glage, chacune jou\u00E9e dans les 16 r\u00E9glages (d\u00E9clencheur \u00D7 capteurs \u00D7 bruit \u00D7 sol). Le seuil du d\u00E9tecteur (k = 7), la vitesse du localisateur (c = 0,46 case par tic) et la taille de la zone ont \u00E9t\u00E9 choisis avant, sur 200 autres impulsions de calibration, selon un protocole \u00E9crit et fig\u00E9 avant tout calcul. Les crochets sont des intervalles bootstrap \u00E0 95\u00A0%.',
+    'eval.p2': 'R\u00E9glage par d\u00E9faut (grande victoire, 8 capteurs, calme, sol uniforme)\u00A0: le localisateur se trompe de 0,62 [0,57, 0,68] case en moyenne et tombe \u00E0 2 cases ou moins sur 99,5\u00A0% des impulsions. La moyenne des premiers capteurs, une strat\u00E9gie intuitive, se trompe de 3,05 [2,89, 3,21]\u00A0; r\u00E9pondre toujours le centre, de 9,34 [8,79, 9,89].',
+    'eval.p3': 'Les six hypoth\u00E8ses inscrites dans le protocole fig\u00E9 se v\u00E9rifient, avec des intervalles appari\u00E9s au-dessus de z\u00E9ro\u00A0: le localisateur se d\u00E9grade sur sol in\u00E9gal (+0,65 [+0,53, +0,78] case), avec bruit fort (+0,90 [+0,69, +1,13]), avec 4 capteurs au lieu de 8 (+0,13 [+0,07, +0,18]) et pour les clameurs (+0,33 [+0,27, +0,39]). Le co\u00FBt de n\u2019avoir que 4 capteurs est r\u00E9el mais faible.',
+    'eval.p4': 'Un r\u00E9sultat n\u00E9gatif\u00A0: la zone \u00E0 90\u00A0% du localisateur n\u2019est calibr\u00E9e que dans 2 r\u00E9glages sur 16. Sur sol calme et uniforme, elle contient le d\u00E9part 99,5\u00A0% du temps (trop large)\u00A0; avec bruit fort sur sol in\u00E9gal, seulement 59,0\u00A0% (trop \u00E9troite). Une seule taille de zone ne convient pas \u00E0 tous les r\u00E9glages. Sans bruit, les arriv\u00E9es avancent de 0,488 case par tic, alors que la meilleure vitesse du localisateur \u00E9tait 0,46\u00A0; le rapport ne teste pas la cause de cet \u00E9cart.',
+    'eval.p5': 'Tout ceci concerne une petite simulation synth\u00E9tique et son propre jeu, pas un vrai sol, de vraies ondes de pression, l\u2019holographie ni aucun syst\u00E8me physique. Une seule commande r\u00E9g\u00E9n\u00E8re tous les chiffres\u00A0: node scripts/pulse-check.js --write (et --verify pour v\u00E9rifier). D\u00E9tails\u00A0: docs/PULSE.md et docs/pulse-check.txt.',
+
+    'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Hors ligne, aucune requ\u00EAte r\u00E9seau, rien n\'est stock\u00E9.'
+  };
+  return { LANGS: { en: en, fr: fr } };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Wave Pulse page (SYNTHETIC classical simulation).
+ *
+ * One canvas scene: the membrane grid with its edge sensors, and the sensors' recordings. While a
+ * pulse is being heard the grid is covered: only the sensors light up, in the order the ripple
+ * reaches them. The player taps where they think it started (or moves a marker with the arrow
+ * keys), optionally with the locator's hint and 90% region, and confirms. Then the ripple is replayed
+ * on the grid in a Great Wave colour style (deep blue troughs, foam-white crests), with the true
+ * start, the guess and the locator's answer. "Free waves" lets the player tap anywhere to send an
+ * unscored ripple. Also the heads-up display, the pulse log, the end-of-run comparison, the
+ * plain-text score card with its replay code, and the replay check for links that carry a code.
+ * No network, no storage.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function () {
+  'use strict';
+  var PU = window.ArenaPulse, G = window.ArenaGame, LANGS = window.PulseI18n.LANGS;
+  var $ = function (id) { return document.getElementById(id); };
+  var hash = PU.parseHash(location.hash);
+  var lang = hash.lang === 'fr' ? 'fr' : 'en', hc = false;
+  var today = PU.dailySeed(G.localDateString(new Date()));
+  var seed = hash.seed || today;
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var BASE_TPS = 26;                       // ticks per second at normal speed while listening
+  var REVEAL_TPS = 11;                     // slower while the ripple is replayed, so the rings can be followed
+  var REVEAL_END = 92;                     // the reveal stops here: the first pass across the grid, before the walls' echoes pile up
+  var CAL = PU.calib();
+  var mode = 'play', phase = 'idle', run = null, A = null, entry = null, tick = 0, speed = 2, hintOn = false;
+  var marker = null, raf = 0, lastTs = 0, freeSim = null, freeN = 0, freePatchy = false;
+  var FREE_PATCH = PU.spec('free-patch').patch;
+  var replayCode = hash.replay || null;
+  var verifyRes = hash.replay && hash.seed ? PU.replayRun(hash.seed, hash.replay) : null;
+  var canvas = $('scene'), ctx = canvas.getContext('2d'), cssW = 0, cssH = 0, phone = false, L = null;
+  function t(k, vars) { var s = (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; return G.fmt(s, vars); }
+  function text(el, s) { el.textContent = s; }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function num(x, d) { var s = x.toFixed(d === undefined ? 1 : d); return lang === 'fr' ? s.replace('.', ',') : s; }
+  function setHash() {
+    var h = PU.buildHash({ seed: seed, lang: lang, replay: replayCode });
+    if (history.replaceState) history.replaceState(null, '', h || location.pathname);
+  }
+  /* ---------- colours: a Great Wave style palette ---------- */
+  var C = {}, PAL = [];
+  function hex(h) { var n = parseInt(h.replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function readColors() {
+    var cs = getComputedStyle(document.documentElement), v = function (n, d) { return (cs.getPropertyValue(n) || '').trim() || d; };
+    C = { bg: hc ? '#000000' : '#071a30', cover: hc ? '#000000' : '#0b1f38', line: v('--line', '#2a3b6e'), text: v('--text', '#eef2ff'),
+      muted: v('--muted', '#b3bedb'), gold: v('--gold', '#c9a84c'), goldB: v('--gold-bright', '#e0c36a'), cyan: v('--cyan', '#40d0e0'),
+      aqua: v('--aqua', '#5ee6b8'), danger: v('--danger', '#ff9a9a'), foam: hc ? '#ffffff' : '#f4ecd8', seal: hc ? '#ff6b6b' : '#c9302c', lw: hc ? 2 : 1 };
+    var stops = hc ? [[-1, '#000000'], [-0.3, '#001a66'], [0, '#0044aa'], [0.45, '#00ffff'], [1, '#ffffff']]
+      : [[-1, '#04162b'], [-0.4, '#0b2a4a'], [0, '#1f4f78'], [0.4, '#5d8fb3'], [0.75, '#b9d3e0'], [1, '#f4ecd8']];
+    PAL = []; PALRGB = [];
+    for (var i = 0; i <= 64; i++) {
+      var x = -1 + i / 32, j = 0;
+      while (j < stops.length - 2 && x > stops[j + 1][0]) j++;
+      var a = hex(stops[j][1]), b = hex(stops[j + 1][1]), u = Math.max(0, Math.min(1, (x - stops[j][0]) / (stops[j + 1][0] - stops[j][0])));
+      var rgb = [Math.round(a[0] + (b[0] - a[0]) * u), Math.round(a[1] + (b[1] - a[1]) * u), Math.round(a[2] + (b[2] - a[2]) * u)];
+      PALRGB.push(rgb); PAL.push('rgb(' + rgb.join(',') + ')');
+    }
+  }
+  function rgba(h, a) { var c = hex(h); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+  /* ---------- layout ---------- */
+  function layout() {
+    var pad = 10, n = mode === 'play' && A ? A.sensors.length : 8;
+    if (phone) {
+      var gw = cssW - 2 * pad, cs = gw / PU.W, gh = cs * PU.H, rowH = 26;
+      return { gx: pad, gy: pad + 18, cs: cs, gw: gw, gh: gh, tr: { x: pad, y: pad + 18 + gh + 26, w: gw, h: n * rowH + 6, rowH: rowH } };
+    }
+    var gw2 = Math.round(cssW * 0.64), cs2 = gw2 / PU.W, gh2 = cs2 * PU.H, tx = pad + gw2 + 16;
+    return { gx: pad, gy: pad + 18, cs: cs2, gw: gw2, gh: gh2, tr: { x: tx, y: pad + 18, w: cssW - tx - pad, h: gh2, rowH: gh2 / n } };
+  }
+  function resize() {
+    var dpr = Math.min(3, window.devicePixelRatio || 1);
+    cssW = Math.max(280, Math.floor(canvas.parentNode.clientWidth));
+    phone = cssW < 620;
+    var n = mode === 'play' && A ? A.sensors.length : 8;
+    var gh = (phone ? cssW - 20 : Math.round(cssW * 0.64)) * PU.H / PU.W;
+    cssH = Math.round(phone ? 28 + gh + 26 + n * 26 + 18 : 28 + gh + 12);
+    canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+    canvas.style.height = cssH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    L = layout();
+    draw();
+  }
+  function cellX(x) { return L.gx + (x + 0.5) * L.cs; }
+  function cellY(y) { return L.gy + (y + 0.5) * L.cs; }
+  /* ---------- drawing ---------- */
+  var off = document.createElement('canvas'), offCtx, offImg, PALRGB = [];
+  off.width = PU.W; off.height = PU.H; offCtx = off.getContext('2d'); offImg = offCtx.createImageData(PU.W, PU.H);
+  function drawField(frames, tk) {
+    var base = tk * PU.NC, cs = L.cs, foam = [], m = 0, i;
+    for (i = 0; i < PU.NC; i++) m = Math.max(m, Math.abs(frames[base + i]));
+    // each frame is scaled to its own peak (with a floor), so a spreading ring keeps its foam
+    var scale = Math.max(0.02, 0.8 * m), d = offImg.data;
+    for (i = 0; i < PU.NC; i++) {
+      var v = frames[base + i] / scale, k = Math.max(0, Math.min(64, Math.round((v + 1) * 32))), c = PALRGB[k];
+      d[4 * i] = c[0]; d[4 * i + 1] = c[1]; d[4 * i + 2] = c[2]; d[4 * i + 3] = 255;
+      if (v > 0.72 && ((i % PU.W) + Math.floor(i / PU.W)) % 2 === 0) foam.push([i % PU.W, Math.floor(i / PU.W)]);
+    }
+    offCtx.putImageData(offImg, 0, 0);
+    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(off, L.gx, L.gy, L.gw, L.gh); ctx.restore();
+    // foam curls on the crests: a colour style only
+    ctx.strokeStyle = C.foam; ctx.lineWidth = Math.max(1, cs * 0.12); ctx.lineCap = 'round';
+    foam.forEach(function (p) {
+      ctx.beginPath(); ctx.arc(cellX(p[0]) + cs * 0.15, cellY(p[1]) + cs * 0.1, cs * 0.34, Math.PI * 1.05, Math.PI * 1.85); ctx.stroke();
+    });
+    ctx.lineCap = 'butt';
+  }
+  function drawCover() {
+    ctx.fillStyle = C.cover; ctx.fillRect(L.gx, L.gy, L.gw, L.gh);
+    ctx.strokeStyle = rgba(hc ? '#ffffff' : '#5d8fb3', hc ? 0.35 : 0.14); ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var x = 0; x <= PU.W; x += 2) { ctx.moveTo(L.gx + x * L.cs, L.gy); ctx.lineTo(L.gx + x * L.cs, L.gy + L.gh); }
+    for (var y = 0; y <= PU.H; y += 2) { ctx.moveTo(L.gx, L.gy + y * L.cs); ctx.lineTo(L.gx + L.gw, L.gy + y * L.cs); }
+    ctx.stroke();
+  }
+  function arrivalOrder() {
+    var order = {}, list = [];
+    A.arrivals.forEach(function (a, j) { if (a >= 0 && a <= tick) list.push([a, j]); });
+    list.sort(function (p, q) { return p[0] - q[0] || p[1] - q[1]; });
+    list.forEach(function (p, r) { order[p[1]] = r + 1; });
+    return order;
+  }
+  function drawSensors(idx, arrivals, tk, order) {
+    var r = Math.max(6, L.cs * 0.55);
+    idx.forEach(function (k, j) {
+      var s = PU.SENSORS[k], x = cellX(s[0]), y = cellY(s[1]), a = arrivals ? arrivals[j] : -1, heard = a >= 0 && tk >= a;
+      if (heard && tk - a < 10 && !reduce) {
+        ctx.strokeStyle = rgba(C.goldB, 1 - (tk - a) / 10); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, y, r + (tk - a) * 1.6, 0, 2 * Math.PI); ctx.stroke();
+      }
+      ctx.fillStyle = heard ? C.goldB : (hc ? '#000' : '#0b2a4a');
+      ctx.strokeStyle = C.goldB; ctx.lineWidth = 2.5;
+      if (arrivals && a < 0 && tk >= PU.TICKS - 1) ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+      if (order && order[j]) {
+        ctx.fillStyle = '#000'; ctx.font = '700 ' + Math.round(r * 1.2) + 'px system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(order[j]), x, y + 1);
+      }
+    });
+  }
+  function drawRegion(faint) {
+    var hs = L.cs / 2, gw = 2 * PU.W - 1;
+    ctx.fillStyle = rgba(C.goldB, faint ? (hc ? 0.3 : 0.18) : (hc ? 0.45 : 0.3));
+    A.region.cells.forEach(function (c) { var gx = c % gw, gy = Math.floor(c / gw); ctx.fillRect(cellX(gx / 2) - hs / 2, cellY(gy / 2) - hs / 2, hs, hs); });
+  }
+  function drawX(p, col, label) {
+    var x = cellX(p[0]), y = cellY(p[1]), r = Math.max(6, L.cs * 0.6);
+    ctx.strokeStyle = hc ? '#000' : '#04162b'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r); ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r); ctx.stroke();
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke();
+    if (label) tag(label, x - r - 6, y + 8, col, 'right');
+  }
+  function drawRing(p, col, label) {
+    var x = cellX(p[0]), y = cellY(p[1]), r = Math.max(7, L.cs * 0.75);
+    ctx.lineWidth = 6; ctx.strokeStyle = hc ? '#000' : '#04162b';
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.stroke();
+    ctx.lineWidth = 3; ctx.strokeStyle = col; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.5, y); ctx.lineTo(x + r * 0.5, y); ctx.moveTo(x, y - r * 0.5); ctx.lineTo(x, y + r * 0.5); ctx.lineWidth = 2; ctx.stroke();
+    if (label) tag(label, x, y + r + 14, col);
+  }
+  function drawTarget(p) {
+    var x = cellX(p[0]), y = cellY(p[1]), r = Math.max(7, L.cs * 0.7);
+    ctx.fillStyle = C.seal; ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = C.foam; ctx.beginPath();
+    for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.42 : r * 0.9; ctx[i ? 'lineTo' : 'moveTo'](x + rr * Math.cos(a), y + rr * Math.sin(a)); }
+    ctx.closePath(); ctx.fill();
+    tag(t('scene.start'), x, y - r - 4, C.foam);
+  }
+  function tag(s, x, y, col, side) {
+    ctx.font = '600 12px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    var w = ctx.measureText(s).width + 8;
+    if (side === 'right') x -= w / 2;
+    x = Math.max(L.gx + w / 2, Math.min(L.gx + L.gw - w / 2, x)); y = Math.max(L.gy + 16, Math.min(L.gy + L.gh, y));
+    ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(x - w / 2, y - 15, w, 16);
+    ctx.fillStyle = col; ctx.fillText(s, x, y);
+  }
+  function drawPatch(p) {
+    ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = C.text; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(cellX(p.cx), cellY(p.cy), p.ax * L.cs, p.ay * L.cs, 0, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+  }
+  function drawTraces(idx, traces, arrivals, tk, order, cursor) {
+    var tr = L.tr;
+    if (cursor >= 0) {
+      var cx = tr.x + 28 + (tr.w - 30) * cursor / (PU.TICKS - 1);
+      ctx.strokeStyle = rgba(C.foam, 0.7); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(cx, tr.y); ctx.lineTo(cx, tr.y + idx.length * tr.rowH); ctx.stroke();
+    }
+    ctx.fillStyle = C.muted; ctx.font = '600 12px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText(t('scene.traces'), tr.x, tr.y - 4);
+    idx.forEach(function (k, j) {
+      var y0 = tr.y + j * tr.rowH, mid = y0 + tr.rowH / 2, lx = tr.x + 28, w = tr.w - 30, x;
+      ctx.strokeStyle = rgba(C.line, 1); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(lx, mid); ctx.lineTo(lx + w, mid); ctx.stroke();
+      ctx.fillStyle = order && order[j] ? C.goldB : C.muted; ctx.font = '700 12px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+      ctx.fillText('S' + (k + 1), tr.x, mid);
+      if (!traces) return;
+      var tr0 = traces[j], sc = 0.04;
+      for (var i = 0; i < tr0.length; i++) sc = Math.max(sc, Math.abs(tr0[i]));
+      var amp = tr.rowH * 0.45 / sc;
+      ctx.strokeStyle = C.cyan; ctx.lineWidth = C.lw * 1.2; ctx.beginPath();
+      for (var s = 0; s <= tk && s < tr0.length; s++) { x = lx + w * s / (PU.TICKS - 1); ctx[s ? 'lineTo' : 'moveTo'](x, mid - tr0[s] * amp); }
+      ctx.stroke();
+      var a = arrivals[j];
+      if (a >= 0 && tk >= a) {
+        x = lx + w * a / (PU.TICKS - 1);
+        ctx.strokeStyle = C.goldB; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y0 + 2); ctx.lineTo(x, y0 + tr.rowH - 2); ctx.stroke();
+      }
+    });
+  }
+  function draw() {
+    if (!L) return;
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.fillStyle = C.bg; ctx.fillRect(0, 0, cssW, cssH);
+    ctx.font = '600 12px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillStyle = C.muted;
+    if (mode === 'free') {
+      if (freeSim) drawField(freeSim.frames, Math.floor(tick)); else drawCover();
+      if (freePatchy) drawPatch(FREE_PATCH);
+      drawSensors(PU.SENSOR_SETS[8], freeSim ? freeSim.arrivals : null, tick, null);
+      if (freeSim) { drawTarget(freeSim.target); ctx.fillStyle = C.muted; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(t('scene.tick', { t: Math.floor(tick) }), L.gx, L.gy - 3); }
+      drawTraces(PU.SENSOR_SETS[8], freeSim ? freeSim.traces : null, freeSim ? freeSim.arrivals : [], tick, null, -1);
+      return;
+    }
+    if (!A) return;
+    var tk = Math.floor(tick), order = arrivalOrder(), revealed = phase === 'reveal' || phase === 'revealed' || phase === 'end';
+    if (revealed) drawField(A.sim.frames, tk); else drawCover();
+    if (revealed && A.setting.floor === 'patchy') drawPatch(A.spec.patch);
+    if ((hintOn && phase === 'guess') || revealed) drawRegion(revealed);
+    drawSensors(A.sensors, A.arrivals, phase === 'guess' ? PU.TICKS : tk, order);
+    if ((hintOn && phase === 'guess') || revealed) drawX(A.answers.locator, C.cyan, t('scene.loc'));
+    if (revealed && entry) {
+      ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C.foam; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cellX(entry.guess[0]), cellY(entry.guess[1])); ctx.lineTo(cellX(A.target[0]), cellY(A.target[1])); ctx.stroke(); ctx.restore();
+      drawRing(entry.guess, C.aqua, t('scene.you'));
+      drawTarget(A.target);
+    } else if (marker) drawRing(marker, C.aqua, t('scene.you'));
+    ctx.fillStyle = C.muted; ctx.font = '600 12px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText(t('scene.tick', { t: revealed ? tk : Math.min(tk, PU.TICKS - 1) }) + ' \u00B7 ' + t('kind.' + A.setting.kind), L.gx, L.gy - 3);
+    if (phase === 'listen' || phase === 'idle' || (phase === 'guess' && !marker)) {
+      var msg = phase === 'guess' ? t('scene.tap') : t('scene.covered');
+      ctx.font = '700 ' + (phone ? 15 : 18) + 'px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      var w = ctx.measureText(msg).width + 20;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(L.gx + L.gw / 2 - w / 2, L.gy + L.gh / 2 - 16, w, 32);
+      ctx.fillStyle = C.text; ctx.fillText(msg, L.gx + L.gw / 2, L.gy + L.gh / 2);
+    }
+    drawTraces(A.sensors, phase === 'idle' ? null : A.traces, A.arrivals, revealed ? PU.TICKS : tk, order, revealed ? tk : -1);
+  }
+  /* ---------- animation ---------- */
+  function loop(ts) {
+    raf = 0;
+    var dt = lastTs ? Math.min(0.1, (ts - lastTs) / 1000) : 0;
+    lastTs = ts;
+    var running = (mode === 'play' && (phase === 'listen' || phase === 'reveal')) || (mode === 'free' && !!freeSim && tick < PU.TICKS - 1);
+    if (!running) { lastTs = 0; return; }
+    var listening = mode === 'play' && phase === 'listen', stop = listening ? PU.TICKS - 1 : mode === 'play' ? REVEAL_END : PU.TICKS - 1;
+    tick = Math.min(stop, tick + dt * (listening ? BASE_TPS : REVEAL_TPS) * speed);
+    if (tick >= stop) {
+      if (listening) { phase = 'guess'; renderAll(); }
+      else if (mode === 'play' && phase === 'reveal') { phase = 'revealed'; renderAll(); }
+    }
+    draw(); renderStatus();
+    if (tick < stop) raf = requestAnimationFrame(loop); else lastTs = 0;
+  }
+  function kick() { if (!raf) { lastTs = 0; raf = requestAnimationFrame(loop); } }
+  /* ---------- game flow ---------- */
+  function startRun(s, keepReplay) {
+    seed = s; run = PU.createRun(seed); entry = null; marker = null;
+    if (!keepReplay) replayCode = null;
+    $('end').hidden = true;
+    loadPulse(); setHash(); renderAll();
+  }
+  function loadPulse() { A = PU.preparePulse(run, run.log.length, CAL); phase = 'idle'; tick = 0; marker = null; entry = null; resize(); }
+  function listen() {
+    if (mode !== 'play' || phase !== 'idle') return;
+    phase = 'listen'; tick = 0;
+    if (reduce) { tick = PU.TICKS - 1; phase = 'guess'; }
+    renderAll(); draw(); kick();
+  }
+  function setMarker(x, y) {
+    if (mode !== 'play' || phase !== 'guess') return;
+    marker = [Math.max(0, Math.min(PU.W - 1, Math.round(x * 2) / 2)), Math.max(0, Math.min(PU.H - 1, Math.round(y * 2) / 2))];
+    renderAll(); draw();
+  }
+  function confirm() {
+    if (mode !== 'play' || phase !== 'guess' || !marker) return;
+    entry = PU.guess(run, A, marker[0], marker[1]);
+    replayCode = PU.encodeRun(seed, run.log);
+    phase = 'reveal'; tick = PU.PRE;
+    if (reduce) { tick = PU.PRE + 45; phase = 'revealed'; }
+    pop(entry.points);
+    setHash(); renderAll(); draw(); kick();
+  }
+  function next() {
+    if (mode !== 'play' || (phase !== 'revealed' && phase !== 'reveal')) return;
+    if (PU.done(run)) { phase = 'end'; tick = REVEAL_END; renderAll(); draw(); $('end').hidden = false; return; }
+    loadPulse(); renderAll();
+  }
+  function pop(p) {
+    var el = $('pop');
+    el.className = 'pop'; void el.offsetWidth;
+    text(el, '+' + p);
+    el.className = 'pop show ' + (p >= 80 ? 'good' : p >= 40 ? 'meh' : 'bad');
+  }
+  /* ---------- free waves ---------- */
+  function freeWave(sp, kind) {
+    var floor = freePatchy ? 'patchy' : 'even';
+    sp.patch = FREE_PATCH;
+    var sim = PU.simulate(sp, kind, floor, true), idx = PU.SENSOR_SETS[8];
+    freeSim = { frames: sim.frames, target: PU.target(sp, kind), kind: kind,
+      traces: idx.map(function (k) { return sim.clean[k]; }), arrivals: idx.map(function (k) { return PU.detectClean(sim.clean[k], CAL.k * PU.NOISE.calm); }) };
+    tick = reduce ? PU.PRE + 45 : PU.PRE;
+    renderStatus(); draw(); kick();
+  }
+  function freeAt(x, y) { freeWave({ x: Math.max(1, Math.min(PU.W - 2, x)), y: Math.max(1, Math.min(PU.H - 2, y)), bumps: [] }, 'win'); }
+  function setMode(m) {
+    mode = m;
+    $('mode-play').setAttribute('aria-pressed', m === 'play' ? 'true' : 'false');
+    $('mode-free').setAttribute('aria-pressed', m === 'free' ? 'true' : 'false');
+    $('play-controls').hidden = m !== 'play'; $('free-controls').hidden = m !== 'free';
+    if (m === 'free') { freeSim = null; tick = 0; } else tick = phase === 'listen' ? tick : phase === 'idle' ? 0 : phase === 'guess' ? PU.TICKS - 1 : REVEAL_END;
+    resize(); renderAll();
+    if (m === 'play' && phase === 'listen') kick();
+  }
+  /* ---------- rendering of the text parts ---------- */
+  function statusText() {
+    if (mode === 'free') return freeSim ? t('status.freeplay', { x: num(freeSim.target[0]), y: num(freeSim.target[1]), t: Math.floor(tick), T: PU.TICKS - 1 }) : t('status.free');
+    if (phase === 'end') { var s = PU.summarize(run.log); return t('status.done', { p: s.points, l: s.locator }); }
+    if (phase === 'idle') return t('status.idle', { i: run.log.length + 1, n: PU.TOTAL });
+    if (phase === 'listen') return t('status.listen', { t: Math.floor(tick), T: PU.TICKS - 1 });
+    if (phase === 'guess') return marker ? t('status.guessed', { x: num(marker[0]), y: num(marker[1]) }) : t('status.guess');
+    var msg = t('status.reveal', { e: num(entry.err), p: entry.points, le: num(entry.locator.err), lp: entry.locator.points });
+    return entry.fallback ? msg + ' ' + t('status.fallback') : msg;
+  }
+  function renderStatus() {
+    var s = statusText();
+    if ($('status').textContent !== s) text($('status'), s);
+    canvas.setAttribute('aria-label', t('scene.aria', { s: s }));
+    var el = $('arrivals');
+    if (mode === 'free' || !A || phase === 'idle') { text(el, ''); return; }
+    var lim = phase === 'listen' ? Math.floor(tick) : PU.TICKS, parts = [];
+    A.sensors.forEach(function (k, j) {
+      var a = A.arrivals[j];
+      if (a >= 0 && a <= lim) parts.push('S' + (k + 1) + ' ' + a);
+      else if (phase !== 'listen') parts.push('S' + (k + 1) + ' ' + t('arr.miss'));
+    });
+    text(el, parts.length ? t('arr.label') + ' ' + parts.join(' \u00B7 ') : t('arr.none'));
+  }
+  function renderHud() {
+    var s = PU.summarize(run.log), stage = A ? PU.STAGES[A.stage] : null;
+    text($('hud-pulse'), mode === 'free' ? '\u2013' : t('hud.pulse.v', { i: Math.min(PU.TOTAL, run.log.length + (phase === 'idle' || phase === 'listen' || phase === 'guess' ? 1 : 0)), n: PU.TOTAL }));
+    text($('hud-stage'), mode === 'free' ? t('stage.free') : stage ? t('stage.' + stage.id) : '');
+    text($('hud-points'), String(s.points));
+    text($('hud-locator'), String(s.locator));
+    var b = mode === 'free' ? t('banner.free') : stage ? t('banner.' + stage.id) : '';
+    if (!CAL.calibrated) b += ' ' + t('banner.nocalib');
+    text($('banner'), b);
+  }
+  function renderControls() {
+    var go = $('btn-go');
+    if (phase === 'idle') { text(go, t('btn.listen')); go.disabled = false; }
+    else if (phase === 'listen') { text(go, t('btn.listening')); go.disabled = true; }
+    else if (phase === 'guess') { text(go, t('btn.listening')); go.disabled = true; }
+    else if (phase === 'reveal' || phase === 'revealed') { text(go, PU.done(run) ? t('btn.finish') : t('btn.next')); go.disabled = false; }
+    else { text(go, t('btn.next')); go.disabled = true; }
+    $('btn-confirm').disabled = !(phase === 'guess' && marker);
+    $('hint').checked = hintOn;
+  }
+  function renderLog() {
+    var tb = $('log').querySelector('tbody');
+    clear(tb);
+    run.log.forEach(function (e) {
+      var tr = document.createElement('tr');
+      [String(e.i + 1), t('kind.' + e.setting.kind), num(e.err), String(e.points), num(e.locator.err), String(e.locator.points)].forEach(function (v, c) {
+        var td = document.createElement('td'); td.textContent = v;
+        if (c === 3) td.className = e.points >= e.locator.points ? 'good' : '';
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    $('log-empty').hidden = run.log.length > 0;
+  }
+  function renderEnd() {
+    if (phase !== 'end') { $('end').hidden = true; return; }
+    $('end').hidden = false;
+    var s = PU.summarize(run.log), log = run.log, tb = $('end-table').querySelector('tbody');
+    var hits = function (k) { return log.filter(function (e) { return e[k].err <= PU.HIT; }).length; };
+    var merr = function (k) { return log.reduce(function (a, e) { return a + e[k].err; }, 0) / log.length; };
+    clear(tb);
+    [['who.you', s.points, s.hits, s.meanErr, true], ['who.locator', s.locator, s.locHits, s.meanLocErr],
+      ['who.early', s.early, hits('early'), merr('early')], ['who.center', s.center, hits('center'), merr('center')]].forEach(function (r) {
+      var tr = document.createElement('tr'); if (r[4]) tr.className = 'you';
+      [t(r[0]), String(r[1]), r[2] + ' / ' + log.length, num(r[3])].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    text($('end-rank'), t('end.rank.' + PU.rank(s)));
+    text($('end-note'), t('end.note'));
+    var code = PU.encodeRun(seed, log);
+    text($('end-code'), code);
+    $('end-link').setAttribute('href', location.pathname + PU.buildHash({ seed: seed, lang: lang, replay: code }));
+    text($('share'), PU.shareText({ seed: seed, summary: s, log: log, code: code }, t));
+  }
+  function renderVerify() {
+    var sec = $('verify');
+    if (!verifyRes) { sec.hidden = true; return; }
+    sec.hidden = false;
+    sec.classList.toggle('bad', !verifyRes.ok);
+    text($('verify-msg'), verifyRes.ok ? t('verify.ok', { seed: hash.seed, p: verifyRes.summary.points, n: verifyRes.summary.pulses })
+      : t('verify.bad', { seed: hash.seed, why: t('verify.why.' + verifyRes.error) }));
+  }
+  function renderAll() {
+    renderHud(); renderControls(); renderStatus(); renderLog(); renderEnd(); renderVerify();
+    text($('seed-line'), t('seed.line', { seed: seed }));
+  }
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    text(document.querySelector('[data-i18n="how.p2"]'), t('how.p2', { k: CAL.k }));
+    document.title = t('page.title');
+    document.querySelector('.hud').setAttribute('aria-label', t('sec.game'));
+    text($('footer-version'), 'pulse ' + PU.VERSION + ' / arena ' + G.BUILD);
+    setHash(); renderAll(); draw();
+  }
+  /* ---------- input ---------- */
+  function gridPoint(ev) {
+    var r = canvas.getBoundingClientRect(), px = ev.clientX - r.left, py = ev.clientY - r.top;
+    if (px < L.gx || py < L.gy || px > L.gx + L.gw || py > L.gy + L.gh) return null;
+    return [(px - L.gx) / L.cs - 0.5, (py - L.gy) / L.cs - 0.5];
+  }
+  canvas.addEventListener('click', function (ev) {
+    var p = gridPoint(ev);
+    if (!p) return;
+    if (mode === 'free') freeAt(p[0], p[1]);
+    else setMarker(p[0], p[1]);
+  });
+  $('btn-go').addEventListener('click', function () { if (phase === 'idle') listen(); else next(); });
+  $('btn-confirm').addEventListener('click', confirm);
+  $('hint').addEventListener('change', function () { hintOn = this.checked; draw(); });
+  $('speed').addEventListener('change', function () { speed = +this.value || 2; });
+  $('mode-play').addEventListener('click', function () { setMode('play'); });
+  $('mode-free').addEventListener('click', function () { setMode('free'); });
+  $('free-win').addEventListener('click', function () {
+    var sp = PU.spec('free-' + (++freeN) + '-' + seed); freeWave({ x: sp.x, y: sp.y, bumps: [] }, 'win');
+  });
+  $('free-cheer').addEventListener('click', function () { freeWave(PU.spec('free-' + (++freeN) + '-' + seed), 'cheer'); });
+  $('free-patchy').addEventListener('change', function () { freePatchy = this.checked; draw(); });
+  $('btn-again').addEventListener('click', function () { setMode('play'); startRun(seed); });
+  $('btn-today').addEventListener('click', function () { setMode('play'); startRun(today); });
+  $('btn-new').addEventListener('click', function () { setMode('play'); startRun('p' + Math.floor(Math.random() * 1e9).toString(36)); });
+  $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; applyLang(); });
+  $('btn-contrast').addEventListener('click', function () {
+    hc = !hc;
+    document.documentElement.classList.toggle('hc', hc);
+    this.setAttribute('aria-pressed', hc ? 'true' : 'false');
+    readColors(); draw();
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    var tag = ev.target && ev.target.tagName, key = ev.key;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if ((key === ' ' || key === 'Enter') && (tag === 'BUTTON' || tag === 'A' || tag === 'SUMMARY')) return;
+    if (mode !== 'play') return;
+    var step = ev.shiftKey ? 2 : 0.5, m = marker || [PU.CENTER[0], PU.CENTER[1]];
+    if (phase === 'guess' && /^Arrow/.test(key)) {
+      if (key === 'ArrowLeft') setMarker(m[0] - step, m[1]);
+      else if (key === 'ArrowRight') setMarker(m[0] + step, m[1]);
+      else if (key === 'ArrowUp') setMarker(m[0], m[1] - step);
+      else setMarker(m[0], m[1] + step);
+      ev.preventDefault();
+    } else if (key === 'Enter' && phase === 'guess') { confirm(); ev.preventDefault(); }
+    else if (key === ' ') { if (phase === 'idle') listen(); else if (phase === 'reveal' || phase === 'revealed') next(); ev.preventDefault(); }
+    else if (key === 'h' || key === 'H') { hintOn = !hintOn; renderControls(); draw(); }
+  });
+  window.addEventListener('resize', resize);
+  if (reduce) { speed = 4; $('speed').value = '4'; }
+  // read-only state for the headless-browser check
+  window.WavePulseState = function () {
+    return { mode: mode, phase: phase, tick: tick, idx: run.log.length, marker: marker, hint: hintOn, calibrated: !!CAL.calibrated,
+      points: PU.summarize(run.log).points, locatorPoints: PU.summarize(run.log).locator,
+      log: run.log.map(function (e) { return { points: e.points, err: e.err, locPoints: e.locator.points, kind: e.setting.kind }; }),
+      grid: L ? { x: L.gx, y: L.gy, cs: L.cs } : null, setting: A ? A.setting : null, arrivals: A ? A.arrivals.slice() : null,
+      target: A && (phase === 'reveal' || phase === 'revealed' || phase === 'end') ? A.target : null, region: A ? A.region.cells.length : 0,
+      free: freeSim ? { target: freeSim.target, kind: freeSim.kind } : null, replay: replayCode,
+      verify: verifyRes ? { ok: verifyRes.ok, error: verifyRes.error || null, points: verifyRes.ok ? verifyRes.summary.points : null } : null };
+  };
+  readColors();
+  startRun(seed, true);
+  applyLang();
+  resize();
+})();
+</script>
+</body>
+</html>

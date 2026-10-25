@@ -22,6 +22,9 @@ const crypto = require('crypto');
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const ROOT = path.join(__dirname, '..');
 const W = require('../watch.js');
+// The evaluation is the one frozen and published with v0.3.3. Later releases re-verify it unchanged, so
+// its outputs keep that version; watch.js, the coach and the protocol are not changed after it.
+const EVAL_VERSION = '0.3.3';
 const G = require('../game.js');
 // WATCH_SMOKE=1 runs a few smoke seeds (neither calibration nor held-out) to check the script; it cannot write.
 const SMOKE = !!process.env.WATCH_SMOKE;
@@ -153,7 +156,7 @@ async function main() {
   const X = calDecl.map(W.features), y = calDecl.map((e) => (e.truth ? 1 : 0));
   const fit = fitLogistic(X, y), baseRate = mean(y);
   const model = {
-    version: W.VERSION, generator: W.GEN, features: W.FEATURES, lambda: LAMBDA, breakEven: W.BREAK_EVEN,
+    version: EVAL_VERSION, generator: W.GEN, features: W.FEATURES, lambda: LAMBDA, breakEven: W.BREAK_EVEN,
     fittedOn: { seeds: CAL[0] + ' to ' + CAL[CAL.length - 1], runs: CAL.length, declarations: calDecl.length, baseRate: r9(baseRate) },
     iterations: fit.iterations, converged: fit.converged,
     beta: fit.beta.map(r9), cov: fit.cov.map((row) => row.map(r9))
@@ -249,7 +252,7 @@ async function main() {
   const sgn = (x, f) => (x > 0 ? '+' : '') + f(x);
   const mci = (m, f) => f(m.mean) + ' [' + f(m.ci[0]) + ', ' + f(m.ci[1]) + ']';
   const dci = (c) => sgn(c.mean, f1) + ' [' + sgn(c.ci[0], f1) + ', ' + sgn(c.ci[1], f1) + '], d_z ' + f2(c.dz) + ', W/T/L ' + c.wins + '/' + c.ties + '/' + c.losses;
-  o('Pair Watch evaluation report, v' + W.VERSION + '. SYNTHETIC game on a classical simulation; no physical claims.');
+  o('Pair Watch evaluation report, v' + EVAL_VERSION + '. SYNTHETIC game on a classical simulation; no physical claims.');
   o('Protocol: docs/WATCH-PROTOCOL.md, SHA-256 ' + protocolSha);
   o('Regenerate: node scripts/watch-check.js --write   Check: node scripts/watch-check.js --verify');
   o('Coach fitted on ' + CAL.length + ' calibration runs (' + CAL[0] + ' to ' + CAL[CAL.length - 1] + '); every number below is from ' + TEST.length + ' held-out runs');
@@ -306,7 +309,7 @@ async function main() {
   /* ---------------- files ---------------- */
   const round = (x) => (typeof x === 'number' ? Math.round(x * 1e6) / 1e6 + 0 : x);
   const tidy = (v) => JSON.parse(JSON.stringify(v, (k, x) => round(x)));
-  const results = tidy({ version: W.VERSION, generator: W.GEN, protocolSha256: protocolSha, breakEven: W.BREAK_EVEN, mainProfile: MAIN,
+  const results = tidy({ version: EVAL_VERSION, generator: W.GEN, protocolSha256: protocolSha, breakEven: W.BREAK_EVEN, mainProfile: MAIN,
     bootstrap: { resamples: BOOT, seed: BOOT_SEED, interval: '95% percentile' }, coach: { iterations: fit.iterations, converged: fit.converged, declarations: calDecl.length, baseRate },
     calibration, summary, comparisons, disagreement: dis });
   const coachJs = '/* Membrane Arena: the Pair Watch coach, fitted by scripts/watch-check.js on calibration seeds only.\n' +
@@ -316,7 +319,7 @@ async function main() {
     '})(typeof self !== \'undefined\' ? self : this, function () {\n  \'use strict\';\n  return ' + JSON.stringify(model) + ';\n});\n';
   const files = { 'docs/watch-check.txt': report, 'docs/watch-results.json': JSON.stringify(results, null, 1) + '\n', 'docs/watch-results.csv': csv.join('\n') + '\n', 'watch-coach.js': coachJs };
   const inputs = ['game.js', 'reverse.js', 'pair.js', 'watch.js', 'scripts/watch-check.js', 'docs/WATCH-PROTOCOL.md'];
-  const manifest = { version: W.VERSION, generator: W.GEN, command: 'node scripts/watch-check.js --write',
+  const manifest = { version: EVAL_VERSION, checkedWith: W.VERSION, generator: W.GEN, command: 'node scripts/watch-check.js --write',
     seeds: { calibration: CAL, heldOut: TEST }, profiles: PROFILES.map((p) => p.key), mainProfile: MAIN, policies: POLICY_KEYS,
     bootstrap: { resamples: BOOT, seed: BOOT_SEED }, protocolSha256: protocolSha,
     inputs: Object.fromEntries(inputs.map((f) => [f, sha(fs.readFileSync(path.join(ROOT, f)))])),

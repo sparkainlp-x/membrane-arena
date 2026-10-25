@@ -170,7 +170,8 @@ test('links carry a replay code only with a seed, and bad codes are dropped', ()
 
 test('the evaluation is reproducible: the manifest names the seeds, versions and SHA-256 hashes of its files', () => {
   const m = JSON.parse(read('docs/watch-manifest.json')), pkg = JSON.parse(read('package.json'));
-  assert.equal(m.version, pkg.version);
+  assert.equal(m.version, '0.3.3'); // the evaluation published with v0.3.3
+  assert.equal(m.checkedWith, pkg.version);
   assert.equal(m.command, 'node scripts/watch-check.js --write');
   assert.equal(m.seeds.calibration.length, 200);
   assert.equal(m.seeds.heldOut.length, 200);

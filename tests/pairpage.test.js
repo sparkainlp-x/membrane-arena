@@ -154,8 +154,8 @@ test('the frozen protocol states hypotheses, metrics, grid, seeds and the analys
   for (const w of [/held-out/i, /calibration seeds/i, /bootstrap/i, /paired/i, /d_z|effect size/i, /off-grid/i, /oracle/i, /random/i]) assert.match(pr, w);
   assert.match(pr, /SYNTHETIC/);
 });
-test('all six pages connect: every page links to the other five', () => {
-  const pages = ['index.html', 'brain.html', 'quorum.html', 'reverse.html', 'pair.html', 'watch.html'];
+test('all seven pages connect: every page links to the other six', () => {
+  const pages = ['index.html', 'brain.html', 'quorum.html', 'reverse.html', 'pair.html', 'watch.html', 'pulse.html'];
   for (const p of pages) {
     const html = read(p);
     for (const q of pages) if (q !== p) assert.ok(html.includes(`href="${q}"`), `${p} links to ${q}`);
