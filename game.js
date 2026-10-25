@@ -21,6 +21,7 @@
   'use strict';
 
   var VERSION = '0.1.0';
+  var BUILD = '0.2.0-preview (unreleased)';   // shown in the page footer; VERSION stays the released engine version
   var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
   var EPOCH = '2026-10-24';              // day number 1
   var N = 32;                            // width of the measured baselines used here
@@ -496,7 +497,7 @@
   }
 
   return {
-    VERSION: VERSION, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
+    VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
     AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
     SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
     hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
@@ -507,6 +508,7 @@
     pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
     dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
     computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
-    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE
+    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE,
+    episode: episode, copyVec: copyVec, pvariance: pvariance, clamp01: clamp01, SIGMA_SCALE: SIGMA_SCALE, STEADY_REF: STEADY_REF
   };
 });
