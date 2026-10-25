@@ -34,6 +34,7 @@ jobs:
           cp dist/index.html _site/index.html
           cp dist/brain.html _site/brain.html
           cp dist/quorum.html _site/quorum.html
+          cp dist/reverse.html _site/reverse.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,0 +1,505 @@
+{
+  "version": "0.3.1",
+  "chrome": "/usr/bin/google-chrome",
+  "allOk": true,
+  "servedOther": [],
+  "cases": [
+    {
+      "name": "reverse-en-desktop",
+      "ok": true,
+      "wallMs": 2327,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-1",
+        "th": 0.6,
+        "oneMore": true,
+        "shotForward": true,
+        "shotRound": true
+      },
+      "finalScore": 75,
+      "checks": [
+        {
+          "what": "starts at the seeded forward setup",
+          "ok": true,
+          "got": {
+            "pol": false,
+            "echo": "0",
+            "th": "0.45",
+            "shield": true
+          }
+        },
+        {
+          "what": "round 1 forward: no true output",
+          "ok": true,
+          "got": "True 0, false 0, missed 4 of 4 hidden patterns"
+        },
+        {
+          "what": "round 1 draws 8 episode charts, 24 traces",
+          "ok": true,
+          "got": [
+            8,
+            24
+          ]
+        },
+        {
+          "what": "round 1 explains the forward miss",
+          "ok": true,
+          "got": "Round 1: 0 true, 0 false, 4 of 4 hidden patterns missed.Forward membranes cannot see a gap. They climb towards extra ene"
+        },
+        {
+          "what": "forward round: threshold above chance, every dot at or above it",
+          "ok": true,
+          "got": {
+            "n": 14,
+            "bad": []
+          }
+        },
+        {
+          "what": "controls now reverse, echo 1, threshold 0.6",
+          "ok": true,
+          "got": {
+            "pol": true,
+            "echo": "1",
+            "th": "0.60"
+          }
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            50,
+            50
+          ]
+        },
+        {
+          "what": "round 2 reverse declares (dots drawn)",
+          "ok": true,
+          "got": 12
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            75,
+            75
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": ", steadiness 14.0 of 25.Reference on this seed (reverse, threshold 0.60, echo 1, shield): 80.Below the reference this time. Set the membranes before round 1, and let the threshold follow the darkness."
+        },
+        {
+          "what": "mirror: only matching polarity finds patterns",
+          "ok": true,
+          "got": [
+            "dark/reverse: 8 true, 0 false of 8 patterns",
+            "dark/forward: 0 true, 0 false of 8 patterns",
+            "bright/reverse: 0 true, 0 false of 8 patterns",
+            "bright/forward: 6 true, 0 false of 8 patterns"
+          ]
+        }
+      ],
+      "lang": "en",
+      "title": "Reverse Membranes",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Reverse Membranes, seed e2e-1\nScore 75/100\nTrue 36, false 1, missed 12, precision 97%\nLast setup: reverse, threshold 0.60, echo 1, shield on\nDarkness by round ▇▆▄▃▂▂▂▃▄▆▇▇\nSYNTHETIC classical simulation"
+    },
+    {
+      "name": "reverse-fr-phone",
+      "ok": true,
+      "wallMs": 2406,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-2",
+        "th": 0.6,
+        "keyboard": true,
+        "oneMore": true,
+        "shotRound": true
+      },
+      "finalScore": 78,
+      "checks": [
+        {
+          "what": "starts at the seeded forward setup",
+          "ok": true,
+          "got": {
+            "pol": false,
+            "echo": "0",
+            "th": "0.85",
+            "shield": true
+          }
+        },
+        {
+          "what": "round 1 forward: no true output",
+          "ok": true,
+          "got": "Vrais 0, faux 0, manqués 4 sur 4 motifs cachés"
+        },
+        {
+          "what": "round 1 draws 8 episode charts, 24 traces",
+          "ok": true,
+          "got": [
+            8,
+            24
+          ]
+        },
+        {
+          "what": "round 1 explains the forward miss",
+          "ok": true,
+          "got": "Manche 1 : 0 vrais, 0 faux, 4 motifs cachés manqués sur 4.Des membranes à l'endroit ne voient pas un creux. Elles monten"
+        },
+        {
+          "what": "forward round: threshold above chance, every dot at or above it",
+          "ok": true,
+          "got": {
+            "n": 3,
+            "bad": []
+          }
+        },
+        {
+          "what": "controls now reverse, echo 1, threshold 0.6",
+          "ok": true,
+          "got": {
+            "pol": true,
+            "echo": "1",
+            "th": "0,60"
+          }
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            50,
+            50
+          ]
+        },
+        {
+          "what": "round 2 reverse declares (dots drawn)",
+          "ok": true,
+          "got": 12
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            78,
+            78
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "re final 78 sur 100.Sorties vraies nettes 38,5 sur 50, précision 25,0 sur 25, régularité 14,0 sur 25.Référence sur cette graine (inversées, seuil 0,60, écho 1, bouclier) : 69.Vous battez la référence."
+        },
+        {
+          "what": "mirror: only matching polarity finds patterns",
+          "ok": true,
+          "got": [
+            "dark/reverse: 8 vrais, 0 faux sur 8 motifs",
+            "dark/forward: 0 vrais, 0 faux sur 8 motifs",
+            "bright/reverse: 0 vrais, 0 faux sur 8 motifs",
+            "bright/forward: 7 vrais, 1 faux sur 8 motifs"
+          ]
+        }
+      ],
+      "lang": "fr",
+      "title": "Membranes inversées",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Membranes inversées, graine e2e-2\nScore 78/100\nVrais 37, faux 0, manqués 11, précision 100 %\nDernier réglage : inversées, seuil 0.60, écho 1, bouclier oui\nObscurité par manche ▆▅▄▃▂▂▂▂▄▄▆▆\nsimulation classique SYNTHÉTIQUE"
+    },
+    {
+      "name": "reverse-en-phone",
+      "ok": true,
+      "wallMs": 2421,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-3",
+        "th": 0.7,
+        "oneMore": true,
+        "shotRound": true
+      },
+      "finalScore": 53,
+      "checks": [
+        {
+          "what": "starts at the seeded forward setup",
+          "ok": true,
+          "got": {
+            "pol": false,
+            "echo": "0",
+            "th": "0.7",
+            "shield": true
+          }
+        },
+        {
+          "what": "round 1 forward: no true output",
+          "ok": true,
+          "got": "True 0, false 0, missed 4 of 4 hidden patterns"
+        },
+        {
+          "what": "round 1 draws 8 episode charts, 24 traces",
+          "ok": true,
+          "got": [
+            8,
+            24
+          ]
+        },
+        {
+          "what": "round 1 explains the forward miss",
+          "ok": true,
+          "got": "Round 1: 0 true, 0 false, 4 of 4 hidden patterns missed.Forward membranes cannot see a gap. They climb towards extra ene"
+        },
+        {
+          "what": "forward round: threshold above chance, every dot at or above it",
+          "ok": true,
+          "got": {
+            "n": 1,
+            "bad": []
+          }
+        },
+        {
+          "what": "controls now reverse, echo 1, threshold 0.7",
+          "ok": true,
+          "got": {
+            "pol": true,
+            "echo": "1",
+            "th": "0.70"
+          }
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            50,
+            50
+          ]
+        },
+        {
+          "what": "round 2 reverse declares (dots drawn)",
+          "ok": true,
+          "got": 10
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            53,
+            53
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": "5, steadiness 0.5 of 25.Reference on this seed (reverse, threshold 0.60, echo 1, shield): 71.Below the reference this time. Set the membranes before round 1, and let the threshold follow the darkness."
+        },
+        {
+          "what": "mirror: only matching polarity finds patterns",
+          "ok": true,
+          "got": [
+            "dark/reverse: 8 true, 0 false of 8 patterns",
+            "dark/forward: 0 true, 0 false of 8 patterns",
+            "bright/reverse: 0 true, 0 false of 8 patterns",
+            "bright/forward: 8 true, 0 false of 8 patterns"
+          ]
+        }
+      ],
+      "lang": "en",
+      "title": "Reverse Membranes",
+      "overflowX": false,
+      "hc": false,
+      "untranslated": [],
+      "share": "Reverse Membranes, seed e2e-3\nScore 53/100\nTrue 26, false 0, missed 22, precision 100%\nLast setup: reverse, threshold 0.70, echo 1, shield on\nDarkness by round ▆▅▃▃▂▁▁▂▂▄▄▆\nSYNTHETIC classical simulation"
+    },
+    {
+      "name": "reverse-en-desktop-contrast",
+      "ok": true,
+      "wallMs": 1404,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-4",
+        "th": 0.5,
+        "hc": true,
+        "oneMore": true
+      },
+      "finalScore": 78,
+      "checks": [
+        {
+          "what": "starts at the seeded forward setup",
+          "ok": true,
+          "got": {
+            "pol": false,
+            "echo": "0",
+            "th": "0.55",
+            "shield": true
+          }
+        },
+        {
+          "what": "round 1 forward: no true output",
+          "ok": true,
+          "got": "True 0, false 0, missed 4 of 4 hidden patterns"
+        },
+        {
+          "what": "round 1 draws 8 episode charts, 24 traces",
+          "ok": true,
+          "got": [
+            8,
+            24
+          ]
+        },
+        {
+          "what": "round 1 explains the forward miss",
+          "ok": true,
+          "got": "Round 1: 0 true, 0 false, 4 of 4 hidden patterns missed.Forward membranes cannot see a gap. They climb towards extra ene"
+        },
+        {
+          "what": "forward round: threshold above chance, every dot at or above it",
+          "ok": true,
+          "got": {
+            "n": 6,
+            "bad": []
+          }
+        },
+        {
+          "what": "controls now reverse, echo 1, threshold 0.5",
+          "ok": true,
+          "got": {
+            "pol": true,
+            "echo": "1",
+            "th": "0.50"
+          }
+        },
+        {
+          "what": "round 2 score matches Node",
+          "ok": true,
+          "got": [
+            50,
+            50
+          ]
+        },
+        {
+          "what": "round 2 reverse declares (dots drawn)",
+          "ok": true,
+          "got": 13
+        },
+        {
+          "what": "contest over: 12 rows, run disabled",
+          "ok": true,
+          "got": [
+            12,
+            true
+          ]
+        },
+        {
+          "what": "final score matches Node replay",
+          "ok": true,
+          "got": [
+            78,
+            78
+          ]
+        },
+        {
+          "what": "final text shows score and reference",
+          "ok": true,
+          "got": ", steadiness 14.1 of 25.Reference on this seed (reverse, threshold 0.60, echo 1, shield): 89.Below the reference this time. Set the membranes before round 1, and let the threshold follow the darkness."
+        },
+        {
+          "what": "mirror: only matching polarity finds patterns",
+          "ok": true,
+          "got": [
+            "dark/reverse: 8 true, 0 false of 8 patterns",
+            "dark/forward: 0 true, 0 false of 8 patterns",
+            "bright/reverse: 0 true, 0 false of 8 patterns",
+            "bright/forward: 7 true, 1 false of 8 patterns"
+          ]
+        }
+      ],
+      "lang": "en",
+      "title": "Reverse Membranes",
+      "overflowX": false,
+      "hc": true,
+      "untranslated": [],
+      "share": "Reverse Membranes, seed e2e-4\nScore 78/100\nTrue 39, false 1, missed 9, precision 98%\nLast setup: reverse, threshold 0.50, echo 1, shield on\nDarkness by round ▄▆▇▇▇▅▃▂▂▃▅▇\nSYNTHETIC classical simulation"
+    },
+    {
+      "name": "reverse-en-desktop-adaptive",
+      "ok": true,
+      "wallMs": 2272,
+      "errors": [],
+      "external": [],
+      "opts": {
+        "seed": "e2e-a1",
+        "adaptive": true
+      },
+      "finalScore": 92,
+      "reference": 85,
+      "checks": [
+        {
+          "what": "forecast shows round 1 darkness",
+          "ok": true,
+          "got": "Round 1 of 12. Darkness of the hidden pattern: 0.88 (deep)."
+        },
+        {
+          "what": "reverse round: threshold below chance, every dot at or below it",
+          "ok": true,
+          "got": {
+            "n": 11,
+            "bad": []
+          }
+        },
+        {
+          "what": "adaptive score matches Node",
+          "ok": true,
+          "got": [
+            92,
+            92
+          ]
+        },
+        {
+          "what": "page reports the reference and the comparison",
+          "ok": true,
+          "got": "rue outputs 44.8 of 50, precision 25.0 of 25, steadiness 21.8 of 25.Reference on this seed (reverse, threshold 0.60, echo 1, shield): 85.You beat the reference."
+        },
+        {
+          "what": "adaptive play beats the reference on this seed",
+          "ok": true,
+          "got": [
+            92,
+            85
+          ]
+        }
+      ],
+      "overflowX": false,
+      "untranslated": []
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-Quorum Keeper level check (SYNTHETIC classical simulation, quorum.js 0.3.0)
+Quorum Keeper level check (SYNTHETIC classical simulation, quorum.js 0.3.1)
 Every design: members per column 1-9, columns 1-7, integrators 1-5, inhibitory on/off.
 Recall is measured over 60 episodes (half planted) with the level seed, under the most fragile placement.
 

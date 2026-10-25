@@ -1,4 +1,11 @@
 # Changelog
+## 0.3.1 (2026-10-25)
+The arena, brain and Quorum Keeper mechanics and their seeds are unchanged; their built pages change only in the version string, and the Quorum Keeper header gains a link to the new page.
+- Reverse Membranes: `reverse.js` (anti-Hebbian membranes that learn away from energy, dark patterns with part of a direction's energy removed, opposite energy `1 - ratio`, echo replay, seeded darkness tide, contest, mirror test, score card), `reverse.html`, `reverse-i18n.js` (English and French), `reverseui.js`, `reverse.css`, built to `dist/reverse.html`. The page runs at width 16; see `docs/REVERSE.md`.
+- `scripts/reverse-check.js` (writes `docs/reverse-check.txt`), `scripts/reverse-e2e-check.js` (headless Chrome playthrough, writes `docs/reverse-e2e-report.json` and `docs/screenshots/reverse-*.png`).
+- `build.js` builds the page; the workflows check and deploy `dist/reverse.html`; the Quorum Keeper page links to it.
+- `VERSION` in `game.js` (which `reverse.js` reuses), `brain.js` and `quorum.js`, `package.json`, `CITATION.cff` and `.zenodo.json` now say 0.3.1; the check reports were re-run for 0.3.1.
+- Tests grew from 184 to 208 (`tests/reverse.test.js`, `tests/reversepage.test.js`).
 ## 0.3.0 (2026-10-25)
 Archived on Zenodo as 10.5281/zenodo.23639631 (all versions: 10.5281/zenodo.23633126). The arena's mechanics and seeds are unchanged: a seed, a daily seed or a challenge link from 0.1.0 or 0.2.0 plays exactly as before, and `dist/index.html` changes only in its version string.
 - Brain architecture: `brain.js` plans the necessary membranes of each kind (sensory columns, gates, integrators, output, optional inhibitory and memory) from the faults each layer must tolerate (2f + 1 voters, strict-majority quorum). It builds the microtubule links with delays and transport noise, checks wiring and timing, runs seeded simulations with colluding, stuck or silent faults, and draws an SVG diagram.

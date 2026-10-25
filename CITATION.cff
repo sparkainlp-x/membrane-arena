@@ -7,7 +7,7 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.3.0
+version: 0.3.1
 date-released: 2026-10-25
 license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
@@ -30,7 +30,11 @@ abstract: >-
   2f + 1 rule and joins them with delayed links called microtubules (a
   metaphor only; nothing models real neurons, microtubules or a brain), and
   the Quorum Keeper logic game builds and breaks such fault-tolerant brains
-  against an exhaustive adversary. Classical simulation only.
+  against an exhaustive adversary. Reverse Membranes runs the arena backwards
+  at width 16: membranes with the learning sign flipped find a dark direction
+  whose energy was removed ("opposite energy" is only the name of a score;
+  nothing models negative energy, antimatter, physics or biology).
+  Classical simulation only.
 keywords:
   - "scientific-reasoning"
   - "oja-rule"
@@ -41,6 +45,7 @@ keywords:
   - "javascript"
   - "fault-tolerance"
   - "logic-game"
+  - "anti-hebbian-learning"
 references:
   - type: article
     title: "Simplified neuron model as a principal component analyzer"

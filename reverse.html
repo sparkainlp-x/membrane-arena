@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Reverse Membranes: the Membrane Arena run backwards. Anti-Hebbian membranes hunt a pattern made of missing energy. A game on a synthetic classical simulation.">
+<title>Reverse Membranes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23c9a84c' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23070e26' stroke='%2340d0e0' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="reverse.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Reverse Membranes</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+  <div class="playgrid">
+    <section class="card" aria-labelledby="ctl-h">
+      <h2 id="ctl-h" data-i18n="sec.controls"></h2>
+      <p id="forecast" class="forecast"></p>
+      <ol id="tide" class="tide" aria-hidden="true"></ol>
+      <label class="switch"><input id="pol" type="checkbox"><span data-i18n="ctl.pol"></span></label>
+      <p class="hint indent" data-i18n="ctl.pol.hint"></p>
+      <div class="sliderrow"><label id="th-label" for="th" data-i18n="ctl.th"></label><input id="th" type="range" min="0.2" max="0.95" step="0.05" value="0.6"><output id="th-val" for="th">0.60</output></div>
+      <p class="hint" data-i18n="ctl.th.hint"></p>
+      <div class="stepper"><span id="e-label" class="slabel" data-i18n="ctl.echo"></span><button id="e-dec" class="btn step" type="button">&minus;</button><output id="e-val" aria-labelledby="e-label">0</output><button id="e-inc" class="btn step" type="button">+</button></div>
+      <p class="hint" data-i18n="ctl.echo.hint"></p>
+      <label class="switch"><input id="shield" type="checkbox" checked><span data-i18n="ctl.shield"></span></label>
+      <div class="controls">
+        <button id="btn-run" class="btn primary" type="button" data-i18n="btn.run"></button>
+        <button id="btn-rest" class="btn" type="button" data-i18n="btn.rest"></button>
+      </div>
+      <div class="controls">
+        <button id="btn-again" class="btn small" type="button" data-i18n="btn.again"></button>
+        <button id="btn-today" class="btn small" type="button" data-i18n="btn.today"></button>
+        <button id="btn-new" class="btn small" type="button" data-i18n="btn.new"></button>
+      </div>
+      <p id="seed" class="hint"></p>
+    </section>
+    <section class="card result" aria-labelledby="res-h">
+      <h2 id="res-h" data-i18n="sec.result"></h2>
+      <p id="score" class="bigscore">0</p>
+      <p id="tally" class="tally"></p>
+      <div id="res-text" aria-live="polite"></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="chart-h">
+    <h2 id="chart-h" data-i18n="sec.chart"></h2>
+    <p class="hint" data-i18n="chart.note"></p>
+    <div id="episodes" class="episodes"></div>
+    <ul class="legend">
+      <li><span class="key k1"></span><span data-i18n="legend.m1"></span></li>
+      <li><span class="key k2"></span><span data-i18n="legend.m2"></span></li>
+      <li><span class="key k3"></span><span data-i18n="legend.m3"></span></li>
+      <li><span class="key kc"></span><span data-i18n="legend.chance"></span></li>
+      <li><span class="key kt"></span><span data-i18n="legend.th"></span></li>
+    </ul>
+  </section>
+  <section class="card" aria-labelledby="rounds-h">
+    <h2 id="rounds-h" data-i18n="sec.rounds"></h2>
+    <div class="tablewrap">
+      <table id="rounds" class="rtable">
+        <thead><tr><th scope="col" class="n" data-i18n="col.round"></th><th scope="col" class="n" data-i18n="col.dark"></th><th scope="col" data-i18n="col.setup"></th><th scope="col" class="n" data-i18n="col.t"></th><th scope="col" class="n" data-i18n="col.f"></th><th scope="col" class="n" data-i18n="col.m"></th></tr></thead>
+        <tbody id="rounds-body"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" aria-labelledby="mirror-h">
+    <h2 id="mirror-h" data-i18n="sec.mirror"></h2>
+    <p data-i18n="mirror.p"></p>
+    <div class="controls"><button id="btn-mirror" class="btn" type="button" data-i18n="btn.mirror"></button></div>
+    <div class="tablewrap">
+      <table id="mirror" class="rtable mirror">
+        <thead><tr><th scope="col" data-i18n="mirror.head"></th><th scope="col" data-i18n="mirror.reverse"></th><th scope="col" data-i18n="mirror.forward"></th></tr></thead>
+        <tbody id="mirror-body"></tbody>
+      </table>
+    </div>
+    <p id="mirror-text" class="hint" aria-live="polite"></p>
+  </section>
+  <section class="card">
+    <h2 data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script src="baselines.js"></script>
+<script src="game.js"></script>
+<script src="reverse.js"></script>
+<script src="reverse-i18n.js"></script>
+<script src="reverseui.js"></script>
+</body>
+</html>

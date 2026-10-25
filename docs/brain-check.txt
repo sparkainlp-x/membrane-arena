@@ -1,5 +1,5 @@
 Brain architecture check (SYNTHETIC classical simulation)
-brain 0.3.0; Node v24.19.0; seeds chk1, chk2, chk3, chk4, chk5; 200 episodes per seed (half planted).
+brain 0.3.1; Node v24.19.0; seeds chk1, chk2, chk3, chk4, chk5; 200 episodes per seed (half planted).
 Counts are pooled over seeds. Wilson 95 percent intervals treat episodes as independent; the stabilizer links
 consecutive episodes, so the intervals are approximate. Nothing here measures a physical or biological system.
 
@@ -65,7 +65,7 @@ F. Size of the plan as requirements grow (membranes / microtubules), and work in
    f=2 g=1 h=0: 21   membranes (15 sensory, 3 gates, 1 integrators, 1 output, 1 inhibitory), 23 microtubules
    f=2 g=2 h=1: 35   membranes (25 sensory, 5 gates, 3 integrators, 1 output, 1 inhibitory), 49 microtubules
    f=3 g=2 h=2: 47   membranes (35 sensory, 5 gates, 5 integrators, 1 output, 1 inhibitory), 71 microtubules
-   No-fault run of B: 453440 Oja updates for 1000 episodes, 5951 ms of wall time in Node on this
+   No-fault run of B: 453440 Oja updates for 1000 episodes, 6318 ms of wall time in Node on this
    machine (single thread). This is a software timing, not a hardware measurement.
 
-Total run time 139 s.
+Total run time 165 s.

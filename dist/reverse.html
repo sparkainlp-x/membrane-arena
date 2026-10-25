@@ -1,0 +1,1863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Reverse Membranes: the Membrane Arena run backwards. Anti-Hebbian membranes hunt a pattern made of missing energy. A game on a synthetic classical simulation.">
+<title>Reverse Membranes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a1330'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23c9a84c' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23070e26' stroke='%2340d0e0' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #0a1330;
+  --bg2: #101c40;
+  --panel: #12204a;
+  --line: #2a3b6e;
+  --text: #eef2ff;
+  --muted: #b3bedb;
+  --gold: #c9a84c;
+  --gold-bright: #e0c36a;
+  --cyan: #40d0e0;
+  --blue: #7aa8ff;
+  --aqua: #5ee6b8;
+  --danger: #ff9a9a;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: radial-gradient(1400px 700px at 50% -10%, #16275a 0%, var(--bg) 60%) fixed;
+  color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 12px 28px;
+}
+.skip { position: absolute; left: -999px; top: 0; background: var(--gold); color: #0a1330; padding: 8px 12px; z-index: 30; }
+.skip:focus { left: 8px; top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.top, main, .foot { width: 100%; max-width: 1180px; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 0 6px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 1.7rem; letter-spacing: 0.22em; color: var(--gold); font-weight: 700; }
+.tagline { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+.tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { border: 1px solid var(--cyan); color: var(--cyan); border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; letter-spacing: 0.08em; }
+main { outline: none; }
+.card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 12px; min-width: 0; }
+[hidden] { display: none !important; }
+h2 { margin: 0 0 6px; font-size: 1.2rem; color: var(--gold-bright); }
+h3 { margin: 16px 0 6px; font-size: 1rem; color: var(--gold-bright); }
+h4 { margin: 0 0 4px; font-size: 1rem; color: var(--cyan); }
+h2:focus, h2[tabindex="-1"]:focus { outline: none; }
+p { margin: 8px 0; }
+.muted { color: var(--muted); }
+.small-text { font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.84rem; margin: 2px 0 10px; }
+.beat { color: var(--cyan); font-weight: 600; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: #1a2a5c; color: var(--text); padding: 12px 16px;
+  min-height: 44px; border-radius: 10px; font: inherit; cursor: pointer; touch-action: manipulation;
+}
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: var(--gold); color: #0a1330; border-color: var(--gold); font-weight: 700; }
+.btn.primary:hover { background: var(--gold-bright); }
+.btn.small { padding: 6px 12px; min-height: 40px; font-size: 0.9rem; }
+.btn[aria-pressed="true"] { border-color: var(--cyan); background: #12426a; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+.col-main { min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 14px; }
+@media (min-width: 980px) { .layout { grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); align-items: start; } }
+
+.hud { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.92rem; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.hud-item { color: var(--muted); } .hud-item b { color: var(--text); }
+.c-true { color: var(--cyan) !important; } .c-false { color: var(--danger) !important; } .c-gold { color: var(--gold-bright) !important; }
+.canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #070e26; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .canvas-wrap { aspect-ratio: 1 / 1.05; } }
+#arena { width: 100%; height: 100%; display: block; }
+.canvas-msg { position: absolute; left: 12px; right: 12px; bottom: 8px; margin: 0; font-size: 0.85rem; color: var(--muted); }
+.ribbon { list-style: none; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 10px 0 0; padding: 0; }
+.ribbon li { height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #0d1840; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: var(--muted); }
+.ribbon li.planted { border-style: solid; }
+.ribbon li.noise { border-style: dashed; }
+.ribbon li.t { background: #0f4b5a; border-color: var(--cyan); color: var(--text); }
+.ribbon li.f { background: #4b2a34; border-color: var(--danger); color: var(--text); }
+.ribbon li.h { background: #2a3350; border-color: var(--muted); color: var(--text); }
+.ribbon li.cur { box-shadow: 0 0 0 2px var(--gold); }
+.ticker { min-height: 1.5em; margin: 8px 0 0; color: var(--gold-bright); font-size: 0.92rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.inline { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); }
+select {
+  background: #0d1840; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 44px; font: inherit; max-width: 100%;
+}
+.field { margin: 14px 0; }
+.field > label { display: block; margin: 0 0 4px; font-weight: 600; }
+.field select { width: 100%; }
+.sliderrow { display: flex; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+.sliderrow label { flex: 0 0 9.5em; margin: 0; }
+.sliderrow .end { font-size: 0.8rem; color: var(--muted); }
+input[type=range] { flex: 1; min-width: 110px; min-height: 44px; accent-color: var(--gold); }
+output { min-width: 4ch; text-align: right; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.switch { display: flex; gap: 10px; align-items: center; min-height: 44px; margin: 6px 0 0; font-weight: 600; cursor: pointer; }
+.switch input { width: 22px; height: 22px; accent-color: var(--gold); flex: none; }
+.switches .hint { margin-left: 32px; }
+details summary { cursor: pointer; padding: 8px 0; color: var(--cyan); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+details[disabled] input { opacity: .5; }
+
+.meters-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .meters-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.meter-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.m-name { width: 1.4em; font-weight: 700; color: var(--gold-bright); }
+.meter { position: relative; flex: 1; height: 18px; background: #070e26; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.m-band { position: absolute; top: 0; bottom: 0; left: calc(0.33 / 3.2 * 100%); width: calc((3 - 0.33) / 3.2 * 100%); background: rgba(64, 208, 224, 0.12); border-left: 1px dashed var(--cyan); border-right: 1px dashed var(--cyan); }
+.meter.off .m-band { display: none; }
+.m-fill { position: absolute; left: 0; top: 3px; bottom: 3px; width: 0; background: var(--cyan); border-radius: 6px; }
+.m-fill.rate { background: var(--gold); }
+.m-eff { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--text); left: 0; }
+.m-tick { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--muted); }
+.meter.clamped { border-color: var(--danger); }
+.m-val { width: 9.5em; white-space: nowrap; text-align: right; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: 190px; background: #070e26; border: 1px solid var(--line); border-radius: 10px; display: block; }
+.chart.tall { height: 340px; }
+.chart.ens { height: 280px; }
+.rail { width: 100%; height: 44px; display: block; background: #070e26; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
+.key { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--cyan); vertical-align: middle; margin-right: 6px; }
+.key-base { border-top: 3px dashed var(--gold); margin-left: 14px; }
+
+.big { font-size: 1.6rem; font-weight: 700; color: var(--gold-bright); margin: 4px 0 8px; }
+.parts { display: grid; gap: 8px; }
+.part { display: grid; grid-template-columns: 9.5em 1fr 6.8em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.part .bar { height: 10px; background: #070e26; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.part .bar span { display: block; height: 100%; background: var(--cyan); }
+.part .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+.scores { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.scores th, .scores td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.scores th:first-child, .scores td:first-child { text-align: left; white-space: normal; }
+.scores th { color: var(--cyan); font-weight: 600; }
+.lesson { margin-top: 14px; padding: 12px; border: 1px solid var(--gold); border-radius: 10px; background: #0e1a3d; }
+.lesson h3 { margin-top: 0; }
+pre {
+  white-space: pre-wrap; word-break: break-word; background: #070e26; border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px; font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text);
+}
+.stats { list-style: none; margin: 0; padding: 0; color: var(--muted); }
+.stats li { padding: 2px 0; }
+.modal { position: fixed; inset: 0; background: rgba(4, 8, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.modal-box { max-width: 560px; max-height: 90vh; overflow: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: var(--radius); padding: 18px; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 0.8rem; }
+.foot p { margin: 4px 0; }
+@media (max-width: 480px) { .sliderrow label { flex-basis: 100%; } .part { grid-template-columns: 7em 1fr 6.8em; } h1 { font-size: 1.35rem; } }
+@media (prefers-reduced-motion: no-preference) {
+  .m-fill { transition: width 0.25s ease; }
+  .m-eff { transition: left 0.25s ease; }
+  .card { animation: rise 0.25s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- v0.2: tabs, Lab, ensemble, A/B, missions, replay, tour ---------- */
+.tabs { padding-top: 8px; }
+.tablist { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 -4px 12px; padding: 0 4px; scrollbar-width: thin; }
+.tab {
+  appearance: none; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: 3px solid transparent;
+  padding: 8px 14px; min-height: 44px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 8px 8px 0 0; touch-action: manipulation;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--gold-bright); border-bottom-color: var(--gold); background: rgba(201, 168, 76, 0.08); }
+.tabpanel { outline: none; }
+.tabpanel:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.inst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 6px 16px; }
+.inst { margin: 10px 0 14px; min-width: 0; }
+.inst.wide { grid-column: 1 / -1; }
+.inst h3 { margin-top: 4px; }
+.inst select { min-height: 40px; padding: 4px 8px; }
+.alt { margin: 6px 0 2px; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); font-size: 0.86rem; }
+.alt:empty { display: none; }
+.formrow { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 8px 0; }
+.formrow .switch { margin: 0; }
+progress { width: min(100%, 320px); height: 14px; accent-color: var(--gold); vertical-align: middle; }
+.exp { width: 100%; background: #070e26; color: var(--text); border: 1px solid var(--line); border-radius: 8px; font: 0.8rem/1.3 ui-monospace, Menlo, Consolas, monospace; padding: 8px; }
+.method { margin: 4px 0 8px; padding-left: 1.2em; color: var(--muted); font-size: 0.92rem; }
+.method li { margin: 3px 0; }
+.missions { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
+.mission { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #0e1a3d; }
+.mission h3 { margin: 0 0 2px; }
+.mission.done { border-color: var(--gold); }
+.mission .status { font-weight: 600; color: var(--cyan); margin: 4px 0; font-size: 0.9rem; }
+.mission.done .status { color: var(--gold-bright); }
+.replay { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.replay h3 { margin-top: 0; }
+.replay-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.replay-row input[type=range] { flex: 1; min-width: 140px; }
+.tour { border-color: var(--gold); }
+#help .modal-box h2:focus { outline: none; }
+.row-end { display: flex; justify-content: flex-end; }
+
+/* motion switched off in the page (in addition to the system setting) */
+html.still *, html.still *::before, html.still *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+
+/* high-contrast mode: white on black, heavier outlines, no gradients */
+html.hc { --bg: #000; --bg2: #000; --panel: #000; --line: #fff; --text: #fff; --muted: #f0f0f0; --gold: #ffd400; --gold-bright: #ffd400; --cyan: #00ffff; --blue: #9ec0ff; --aqua: #00ff96; --danger: #ff8a8a; }
+html.hc body { background: #000; }
+html.hc .card { background: #000; border-width: 2px; }
+html.hc .btn { background: #000; border-width: 2px; }
+html.hc .btn.primary { background: #ffd400; color: #000; border-color: #ffd400; }
+html.hc .btn[aria-pressed="true"] { background: #003a3a; border-color: #00ffff; }
+html.hc select, html.hc .exp, html.hc pre, html.hc .chart, html.hc .rail, html.hc .canvas-wrap, html.hc .meter { background: #000; border: 2px solid #fff; }
+html.hc .tab[aria-selected="true"] { background: #1a1a00; border-bottom-width: 4px; }
+html.hc .mission, html.hc .lesson { background: #000; border-width: 2px; }
+html.hc .ribbon li { background: #000; border-width: 2px; color: #fff; }
+html.hc .ribbon li.t { background: #003a3a; } html.hc .ribbon li.f { background: #3a0000; } html.hc .ribbon li.h { background: #222; }
+html.hc .alt { border-left-color: #fff; }
+html.hc .tag { border-width: 2px; }
+html.hc :focus-visible { outline: 4px solid #ffd400; outline-offset: 2px; }
+html.hc .hint, html.hc .muted { color: #f0f0f0; }
+@media (max-width: 480px) { .tab { padding: 8px 10px; } .formrow { gap: 6px 12px; } }
+@media (forced-colors: active) { .btn.primary { border: 2px solid ButtonText; } .m-fill, .m-eff { background: Highlight; forced-color-adjust: none; } }
+</style>
+<style>
+/* Membrane Arena: extra styles for Reverse Membranes. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+.playgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; }
+@media (min-width: 900px) { .playgrid { grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr); align-items: start; } }
+.forecast { font-weight: 600; color: var(--gold-bright); margin: 4px 0 6px; }
+.tide { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; height: 46px; }
+.tide li { background: #1b2a5a; border: 1px solid var(--line); border-radius: 4px 4px 0 0; min-height: 6px; }
+.tide li.played { background: #23406e; }
+.tide li.cur { background: var(--gold); border-color: var(--gold); }
+.indent { margin-left: 32px; }
+.stepper { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; flex-wrap: wrap; }
+.stepper .slabel { flex: 0 0 9.5em; font-weight: 600; }
+.stepper output { min-width: 2.2em; text-align: center; font-size: 1.25rem; }
+.btn.step { min-width: 48px; min-height: 48px; padding: 0; font-size: 1.4rem; line-height: 1; }
+.bigscore { font-size: 2.6rem; font-weight: 700; margin: 0; color: var(--gold-bright); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tally { margin: 2px 0 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#res-text p { margin: 6px 0; }
+#res-text .good { color: var(--aqua); font-weight: 600; }
+#res-text .warn { color: var(--danger); font-weight: 600; }
+.episodes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 760px) { .episodes { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.episodes .empty { grid-column: 1 / -1; color: var(--muted); margin: 8px 0; }
+.ep { background: #070e26; border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 4px; min-width: 0; }
+.ep.t { border-color: var(--cyan); } .ep.f { border-color: var(--danger); }
+.ep h3 { margin: 0 0 2px; font-size: 0.8rem; color: var(--text); font-weight: 600; }
+.ep .out { margin: 0; font-size: 0.75rem; color: var(--muted); }
+.ep.t .out { color: var(--cyan); } .ep.f .out { color: var(--danger); }
+.ep svg { display: block; width: 100%; height: auto; }
+.ep .chance { stroke: #6f7fae; stroke-width: 1; }
+.ep .thr { stroke: var(--gold); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.ep .m1 { stroke: #40d0e0; } .ep .m2 { stroke: #f0a050; } .ep .m3 { stroke: #b48cff; }
+.ep .tr { fill: none; stroke-width: 1.6; stroke-linejoin: round; }
+.ep .dot { stroke: #fff; stroke-width: 1; }
+.ep .dot.m1 { fill: #40d0e0; } .ep .dot.m2 { fill: #f0a050; } .ep .dot.m3 { fill: #b48cff; }
+.legend { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.88rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.key.k1 { border-top-color: #40d0e0; } .key.k2 { border-top-color: #f0a050; } .key.k3 { border-top-color: #b48cff; }
+.key.kc { border-top: 1px solid #6f7fae; } .key.kt { border-top: 2px dashed var(--gold); }
+.tablewrap { overflow-x: auto; }
+.rtable { border-collapse: collapse; width: 100%; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.rtable th, .rtable td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable th { color: var(--gold-bright); font-weight: 600; }
+.rtable td.n, .rtable th.n { text-align: right; }
+.rtable tr.cur td { background: #12204a; }
+.mirror td { white-space: normal; }
+.mirror td.hit { color: var(--aqua); font-weight: 600; }
+.mirror td.miss { color: var(--muted); }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; color: var(--text); }
+html.hc .tide li { background: #000; border-color: #fff; } html.hc .tide li.played { background: #444; } html.hc .tide li.cur { background: #ffd400; }
+html.hc .ep { background: #000; border: 2px solid #fff; } html.hc .ep.t { border-color: #00ff96; } html.hc .ep.f { border-color: #ff8a8a; border-style: dashed; }
+html.hc .ep .m1, html.hc .key.k1 { stroke: #fff; border-top-color: #fff; } html.hc .ep .m2, html.hc .key.k2 { stroke: #ff6ad5; border-top-color: #ff6ad5; } html.hc .ep .m3, html.hc .key.k3 { stroke: #00ffff; border-top-color: #00ffff; }
+html.hc .ep .dot.m1 { fill: #fff; } html.hc .ep .dot.m2 { fill: #ff6ad5; } html.hc .ep .dot.m3 { fill: #00ffff; }
+html.hc .ep .chance { stroke: #9a9a9a; stroke-dasharray: 1 3; } html.hc .key.kc { border-top: 1px dotted #9a9a9a; }
+html.hc .ep .thr { stroke: #ffd400; } html.hc .rtable tr.cur td { background: #222; }
+html.hc .ep .dot { stroke: #000; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div>
+    <h1 data-i18n="page.title">Reverse Membranes</h1>
+    <p class="tagline" data-i18n="page.tagline"></p>
+  </div>
+  <div class="tools">
+    <span class="tag" data-i18n="page.tag">SYNTHETIC</span>
+    <button id="btn-lang" class="btn small" type="button" data-i18n="page.lang"></button>
+    <button id="btn-contrast" class="btn small" type="button" aria-pressed="false" data-i18n="page.hc"></button>
+    <a class="btn small" href="index.html" data-i18n="page.arena"></a>
+    <a class="btn small" href="brain.html" data-i18n="page.brain"></a>
+    <a class="btn small" href="quorum.html" data-i18n="page.quorum"></a>
+  </div>
+</header>
+<noscript><p class="card">This game needs JavaScript. It makes no network requests.</p></noscript>
+<main id="main" tabindex="-1">
+  <section class="card">
+    <p data-i18n="intro.p1"></p>
+    <p class="muted" data-i18n="intro.p2"></p>
+  </section>
+  <div class="playgrid">
+    <section class="card" aria-labelledby="ctl-h">
+      <h2 id="ctl-h" data-i18n="sec.controls"></h2>
+      <p id="forecast" class="forecast"></p>
+      <ol id="tide" class="tide" aria-hidden="true"></ol>
+      <label class="switch"><input id="pol" type="checkbox"><span data-i18n="ctl.pol"></span></label>
+      <p class="hint indent" data-i18n="ctl.pol.hint"></p>
+      <div class="sliderrow"><label id="th-label" for="th" data-i18n="ctl.th"></label><input id="th" type="range" min="0.2" max="0.95" step="0.05" value="0.6"><output id="th-val" for="th">0.60</output></div>
+      <p class="hint" data-i18n="ctl.th.hint"></p>
+      <div class="stepper"><span id="e-label" class="slabel" data-i18n="ctl.echo"></span><button id="e-dec" class="btn step" type="button">&minus;</button><output id="e-val" aria-labelledby="e-label">0</output><button id="e-inc" class="btn step" type="button">+</button></div>
+      <p class="hint" data-i18n="ctl.echo.hint"></p>
+      <label class="switch"><input id="shield" type="checkbox" checked><span data-i18n="ctl.shield"></span></label>
+      <div class="controls">
+        <button id="btn-run" class="btn primary" type="button" data-i18n="btn.run"></button>
+        <button id="btn-rest" class="btn" type="button" data-i18n="btn.rest"></button>
+      </div>
+      <div class="controls">
+        <button id="btn-again" class="btn small" type="button" data-i18n="btn.again"></button>
+        <button id="btn-today" class="btn small" type="button" data-i18n="btn.today"></button>
+        <button id="btn-new" class="btn small" type="button" data-i18n="btn.new"></button>
+      </div>
+      <p id="seed" class="hint"></p>
+    </section>
+    <section class="card result" aria-labelledby="res-h">
+      <h2 id="res-h" data-i18n="sec.result"></h2>
+      <p id="score" class="bigscore">0</p>
+      <p id="tally" class="tally"></p>
+      <div id="res-text" aria-live="polite"></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="chart-h">
+    <h2 id="chart-h" data-i18n="sec.chart"></h2>
+    <p class="hint" data-i18n="chart.note"></p>
+    <div id="episodes" class="episodes"></div>
+    <ul class="legend">
+      <li><span class="key k1"></span><span data-i18n="legend.m1"></span></li>
+      <li><span class="key k2"></span><span data-i18n="legend.m2"></span></li>
+      <li><span class="key k3"></span><span data-i18n="legend.m3"></span></li>
+      <li><span class="key kc"></span><span data-i18n="legend.chance"></span></li>
+      <li><span class="key kt"></span><span data-i18n="legend.th"></span></li>
+    </ul>
+  </section>
+  <section class="card" aria-labelledby="rounds-h">
+    <h2 id="rounds-h" data-i18n="sec.rounds"></h2>
+    <div class="tablewrap">
+      <table id="rounds" class="rtable">
+        <thead><tr><th scope="col" class="n" data-i18n="col.round"></th><th scope="col" class="n" data-i18n="col.dark"></th><th scope="col" data-i18n="col.setup"></th><th scope="col" class="n" data-i18n="col.t"></th><th scope="col" class="n" data-i18n="col.f"></th><th scope="col" class="n" data-i18n="col.m"></th></tr></thead>
+        <tbody id="rounds-body"></tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" aria-labelledby="mirror-h">
+    <h2 id="mirror-h" data-i18n="sec.mirror"></h2>
+    <p data-i18n="mirror.p"></p>
+    <div class="controls"><button id="btn-mirror" class="btn" type="button" data-i18n="btn.mirror"></button></div>
+    <div class="tablewrap">
+      <table id="mirror" class="rtable mirror">
+        <thead><tr><th scope="col" data-i18n="mirror.head"></th><th scope="col" data-i18n="mirror.reverse"></th><th scope="col" data-i18n="mirror.forward"></th></tr></thead>
+        <tbody id="mirror-body"></tbody>
+      </table>
+    </div>
+    <p id="mirror-text" class="hint" aria-live="polite"></p>
+  </section>
+  <section class="card">
+    <h2 data-i18n="sec.how"></h2>
+    <p data-i18n="how.p1"></p>
+    <p data-i18n="how.p2"></p>
+    <p data-i18n="how.p3"></p>
+    <p data-i18n="how.p4"></p>
+    <details><summary data-i18n="sec.card"></summary><pre id="share" class="exp"></pre></details>
+  </section>
+</main>
+<footer class="foot">
+  <p data-i18n="foot.license"></p>
+  <p id="footer-version"></p>
+</footer>
+<script>
+/* GENERATED by scripts/make-baselines.js from data/*.csv. Do not edit by hand. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ArenaBaselines = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  return {
+   "SOURCE": {
+    "commit": "c74c60beeb9706ea6d30fd6973b2a821a5b23926",
+    "repo": "sparkainlp-x/crystallization-contest",
+    "contest": "results/contest_w32-128_summary.csv",
+    "contest256": "results/contest_256_summary.csv",
+    "sweep": "results/sweep_summary.csv",
+    "stress": "results/stress_summary.csv"
+   },
+   "CONTEST32": [
+    {
+     "w": 0,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 113.8,
+     "Tsd": 10.4,
+     "F": 13,
+     "Fsd": 8.111,
+     "P": 0.901,
+     "Psd": 0.059,
+     "rv": 0.04,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 41.5,
+     "Tsd": 2.819,
+     "F": 3.75,
+     "Fsd": 2.845,
+     "P": 0.919,
+     "Psd": 0.061,
+     "rv": 0.005,
+     "mg": 1.431,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 41.25,
+     "Tsd": 4.908,
+     "F": 3.9,
+     "Fsd": 4.756,
+     "P": 0.915,
+     "Psd": 0.104,
+     "rv": 0.006,
+     "mg": 1.398,
+     "run": 0
+    },
+    {
+     "w": 0,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.8,
+     "Tsd": 6.856,
+     "F": 5.65,
+     "Fsd": 6.368,
+     "P": 0.877,
+     "Psd": 0.141,
+     "rv": 0.002,
+     "mg": 1.397,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.9,
+     "Tsd": 5.92,
+     "F": 10.2,
+     "Fsd": 6.005,
+     "P": 0.922,
+     "Psd": 0.044,
+     "rv": 0.041,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.528,
+     "F": 3.95,
+     "Fsd": 3.913,
+     "P": 0.915,
+     "Psd": 0.083,
+     "rv": 0.004,
+     "mg": 1.363,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.15,
+     "Tsd": 3.117,
+     "F": 4.05,
+     "Fsd": 3.3,
+     "P": 0.913,
+     "Psd": 0.071,
+     "rv": 0.004,
+     "mg": 1.362,
+     "run": 0
+    },
+    {
+     "w": 0.5,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "---",
+     "seeds": 20,
+     "T": 119.2,
+     "Tsd": 6.204,
+     "F": 10,
+     "Fsd": 6.481,
+     "P": 0.923,
+     "Psd": 0.048,
+     "rv": 0.043,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "S--",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.675,
+     "F": 3.75,
+     "Fsd": 4.025,
+     "P": 0.92,
+     "Psd": 0.086,
+     "rv": 0.004,
+     "mg": 1.315,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SA-",
+     "seeds": 20,
+     "T": 42.35,
+     "Tsd": 3.297,
+     "F": 3.75,
+     "Fsd": 3.552,
+     "P": 0.919,
+     "Psd": 0.076,
+     "rv": 0.004,
+     "mg": 1.319,
+     "run": 0
+    },
+    {
+     "w": 1,
+     "cfg": "SAZ",
+     "seeds": 20,
+     "T": 40.65,
+     "Tsd": 4.475,
+     "F": 6.35,
+     "Fsd": 4.44,
+     "P": 0.865,
+     "Psd": 0.094,
+     "rv": 0.001,
+     "mg": 1.226,
+     "run": 0
+    }
+   ],
+   "SCHEMES32": [
+    {
+     "scheme": "individual",
+     "seeds": 20,
+     "T": 6.75,
+     "F": 0.5,
+     "P": 0.937
+    },
+    {
+     "scheme": "team",
+     "seeds": 20,
+     "T": 12.35,
+     "F": 0.5,
+     "P": 0.959
+    },
+    {
+     "scheme": "difference",
+     "seeds": 20,
+     "T": 12.75,
+     "F": 0.45,
+     "P": 0.965
+    },
+    {
+     "scheme": "consensus",
+     "seeds": 20,
+     "T": 13.15,
+     "F": 0.2,
+     "P": 0.985
+    },
+    {
+     "scheme": "random",
+     "seeds": 20,
+     "T": 11.5,
+     "F": 0.4,
+     "P": 0.966
+    }
+   ],
+   "LESSON": {
+    "shieldFpMin": 2.3,
+    "shieldFpMax": 3.2,
+    "shieldVarMin": 8,
+    "shieldVarMax": 17,
+    "ampMaxDeltaP": 0.004,
+    "stabCostMin": 0.3,
+    "stabCostMax": 4.8,
+    "indLowest": 10,
+    "indCells": 15,
+    "runawayNoZMin": 20,
+    "runawayNoZMax": 35,
+    "runawayZMax": 0,
+    "seeds": 20
+   }
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: pure game logic (SYNTHETIC classical simulation).
+ *
+ * A JavaScript port of the three-membrane crystallization contest of
+ * sparkainlp-x/crystallization-contest at width n = 32, with seeded
+ * determinism, lazy per-generation stepping (so the player can steer between
+ * generations), reward schemes, scoring, baseline comparison, lessons, daily
+ * seeds, hash links, a store sanitizer and the plain-text share card.
+ * No DOM, no network, no storage.
+ *
+ * The port is statistically comparable to the Python original, not
+ * bit-identical: the random number generators differ. See DESIGN.md.
+ * Oja, E. (1982), J. Math. Biol. 15, 267-273, doi:10.1007/BF00275687.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./baselines.js'));
+  else root.ArenaGame = factory(root.ArenaBaselines);
+})(typeof self !== 'undefined' ? self : this, function (BASE) {
+  'use strict';
+
+  var VERSION = '0.3.1';
+  var BUILD = VERSION;   // shown in the page footer
+  var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
+  var EPOCH = '2026-10-24';              // day number 1
+  var N = 32;                            // width of the measured baselines used here
+  var EP = 8, GENS = 12, STEPS = 60;     // as in the repository contest
+  var CHECK = 10, WINDOW = 5, ETA = 0.5;
+  var AGREE = 0.4, TRUTH = 0.5, SIGMA_SCALE = 1.5;
+  var AMP_CAP = 0.5, TARGET = 0.5, LEAK = 0.3, KSTAB = 1.5;
+  var GAIN_MIN = 0.33, GAIN_MAX = 3.0, FACTOR_MIN = 0.2;
+  var TH_MIN = 0.02, TH_MAX = 1.5, C_MAX = 0.5;
+  var SCHEMES = ['individual', 'team', 'difference', 'consensus', 'random'];
+  var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
+  var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
+  var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
+  var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
+
+  /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
+
+  function hashStr(str) {
+    var h = 1779033703 ^ str.length;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function makeRng(seedStr) { return mulberry32(hashStr(String(seedStr))); }
+  function gauss(rng) {
+    var u = 0;
+    while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+
+  /* ---------- complex vectors in C^n: {r, i} Float64Array pairs ---------- */
+
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function normalize(v) {
+    var s = 0, k, n = v.r.length;
+    for (k = 0; k < n; k++) s += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    s = Math.sqrt(s);
+    if (!(s > 0) || !isFinite(s)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= s; v.i[k] /= s; }
+    return v;
+  }
+  function rvec(n, rng) {
+    var v = zeros(n);
+    for (var k = 0; k < n; k++) { v.r[k] = gauss(rng); v.i[k] = gauss(rng); }
+    return normalize(v);
+  }
+  function noisy(state, sigma, rng) {
+    var n = state.r.length, v = zeros(n);
+    for (var k = 0; k < n; k++) {
+      v.r[k] = state.r[k] + sigma * gauss(rng);
+      v.i[k] = state.i[k] + sigma * gauss(rng);
+    }
+    return normalize(v);
+  }
+  // <a|b> = sum conj(a) b
+  function inner(a, b) {
+    var re = 0, im = 0, n = a.r.length;
+    for (var k = 0; k < n; k++) {
+      re += a.r[k] * b.r[k] + a.i[k] * b.i[k];
+      im += a.r[k] * b.i[k] - a.i[k] * b.r[k];
+    }
+    return { re: re, im: im };
+  }
+  function fidelity(a, b) { var z = inner(a, b); return z.re * z.re + z.im * z.im; }
+  function copyVec(v) { return { r: Float64Array.from(v.r), i: Float64Array.from(v.i) }; }
+
+  /* ---------- the contest, as in crystallization_contest/{events,rewards,contest}.py ---------- */
+
+  function sigmaFor(n) { return SIGMA_SCALE / Math.sqrt(n); }
+  function scaledThreshold(q, n, sigma) { return 1 + q * n / (1 + 2 * sigma * sigma * n); }
+  function energyRatio(win, n) {
+    var s = 0;
+    for (var k = 0; k < win.length; k++) s += win[k];
+    return n * s / win.length;
+  }
+  function agreeing(vec, decls, thresh) {
+    var c = 0;
+    for (var k = 0; k < decls.length; k++) if (decls[k] && fidelity(vec, decls[k]) >= thresh) c++;
+    return c;
+  }
+  function systemEvent(decls, thresh) {            // need ceil(3/2) = 2 of 3
+    for (var k = 0; k < decls.length; k++) if (decls[k] && agreeing(decls[k], decls, thresh) >= 2) return k;
+    return null;
+  }
+  function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
+
+  function reward(scheme, i, decls) {              // rewards.py, for 3 agents
+    var without, team;
+    if (scheme === 'individual') return decls[i] ? 1 : 0;
+    if (scheme === 'team' || scheme === 'difference') team = systemEvent(decls, AGREE) !== null ? 1 : 0;
+    if (scheme === 'team') return team;
+    if (scheme === 'difference') {
+      without = decls.slice(); without[i] = null;
+      return team - (systemEvent(without, AGREE) !== null ? 1 : 0);
+    }
+    if (scheme === 'consensus') return decls[i] && agreeing(decls[i], decls, AGREE) >= 2 ? 1 : 0;
+    return 0;                                      // random
+  }
+
+  function warmStart(v, warm, amp) {
+    amp = Math.min(Math.max(amp, 0), AMP_CAP);
+    if (!warm || amp === 0) return v;
+    var o = zeros(v.r.length);
+    for (var k = 0; k < o.r.length; k++) { o.r[k] = (1 - amp) * v.r[k] + amp * warm.r[k]; o.i[k] = (1 - amp) * v.i[k] + amp * warm.i[k]; }
+    return normalize(o);
+  }
+  function stabilizerFactor(rateEma) { return Math.max(FACTOR_MIN, 1 - KSTAB * (rateEma - TARGET)); }
+  function leakyUpdate(rateEma, evRate) { return (1 - LEAK) * rateEma + LEAK * evRate; }
+  function clampGain(g) { return Math.min(GAIN_MAX, Math.max(GAIN_MIN, g)); }
+
+  // One episode of 3 coupled Oja membranes. `trace` (Float32Array STEPS*3) records geff * energy ratio.
+  // `ix` is optional instrumentation that draws no random numbers, so it never changes a result:
+  //   ix.fid   Float32Array STEPS*3, |<v|pattern>| of each membrane after each step (-1 in a noise episode)
+  //   ix.noDecl  when true nobody declares or freezes (used by the Lab probe)
+  //   ix.chk   when set to [[],[],[]], each check step pushes [geff * energy ratio, fidelity to the pattern] per membrane
+  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix) {
+    ix = ix || {};
+    var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
+    var lastFid = [-1, -1, -1];
+    if (ix.fid) for (k = 0; k < ix.fid.length; k++) ix.fid[k] = -1;
+    for (i = 0; i < 3; i++) vs.push(warmStart(rvec(n, rng), warm, amp));
+    var thr = [];
+    for (i = 0; i < 3; i++) thr.push(scaledThreshold(Math.min(TH_MAX, P[i].th * (2 - P[i].sp)), n, sigma));
+    var last = [0, 0, 0];
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i]; continue; }
+        var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+        var y = inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im);
+        if (win[i].length > WINDOW) win[i].shift();
+        var v = zeros(n), c = P[i].c;
+        for (k = 0; k < n; k++) {
+          v.r[k] = vs[i].r[k] + ETA * (x.r[k] * y.re - x.i[k] * y.im);
+          v.i[k] = vs[i].i[k] + ETA * (x.r[k] * y.im + x.i[k] * y.re);
+        }
+        if (c > 0) {
+          for (j = 0; j < 3; j++) {
+            if (j === i) continue;
+            var ph = inner(vs[j], v), m = Math.sqrt(ph.re * ph.re + ph.im * ph.im), pr = 1, pi = 0;
+            if (m > 0) { pr = ph.re / m; pi = ph.im / m; }
+            for (k = 0; k < n; k++) {
+              v.r[k] += c * (pr * vs[j].r[k] - pi * vs[j].i[k]);
+              v.i[k] += c * (pr * vs[j].i[k] + pi * vs[j].r[k]);
+            }
+          }
+        }
+        vs[i] = normalize(v);
+        last[i] = P[i].geff * energyRatio(win[i], n);
+        trace[(t - 1) * 3 + i] = last[i];
+        if (pat) lastFid[i] = Math.sqrt(fidelity(vs[i], pat));
+        if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pat ? fidelity(vs[i], pat) : 0]);
+          if (!ix.noDecl && !decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, thr: thr };
+  }
+
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      scheme: SCHEMES.indexOf(s.scheme) >= 0 ? s.scheme : d.scheme,
+      w: num(s.w, 0, 1, d.w),
+      shield: s.shield === undefined ? d.shield : !!s.shield,
+      amp: s.amp === undefined ? d.amp : !!s.amp,
+      stab: s.stab === undefined ? d.stab : !!s.stab,
+      evolve: s.evolve === undefined ? d.evolve : !!s.evolve,
+      fcost: num(s.fcost, 0, 2, d.fcost),
+      th: num(s.th, 0.1, 1.2, d.th), c: num(s.c, 0, C_MAX, d.c), g: num(s.g, 0.5, 2, d.g)
+    };
+  }
+
+  function createContest(seed, init) {
+    var o = sanitizeSettings(init), sigma = sigmaFor(N), par = [];
+    for (var i = 0; i < 3; i++) par.push({ th: o.th, c: o.c, g: o.g, sp: 0.5, geff: 1 });
+    return {
+      seed: String(seed), n: N, sigma: sigma, par: par, best: [-1, -1, -1], rateEma: TARGET, warm: null, hist: [], gen: 0,
+      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut')
+    };
+  }
+  function done(c) { return c.gen >= GENS; }
+
+  // Starting parameters of a contest are set by its seed, so every player of a daily contest begins in the same place.
+  // The repository baselines all began at DEFAULTS (th 0.5, c 0.05, g 1.0).
+  function startFor(seed) {
+    var r = makeRng(GEN + seed + '/start'), r2 = function (x) { return Math.round(x * 100) / 100; };
+    return { th: r2(0.3 + 0.5 * r()), c: r2(0.3 * r()), g: r2(0.7 + 0.8 * r()) };
+  }
+
+  // Run generation c.gen with `settings`; returns the generation record (also appended to c.hist).
+  function stepGeneration(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), n = c.n, i, e, cand = [];
+    for (i = 0; i < 3; i++) cand.push({ th: c.par[i].th, c: c.par[i].c, g: c.par[i].g, sp: c.par[i].sp, geff: 1 });
+    var clamped = [false, false, false], mutated = false;
+    if (c.gen > 0 && o.evolve) {
+      mutated = true;
+      cand.forEach(function (p, k) {
+        p.th = Math.min(TH_MAX, Math.max(TH_MIN, p.th * Math.exp(0.2 * gauss(c.mrng))));
+        p.c = Math.min(C_MAX, Math.max(0, p.c + 0.05 * gauss(c.mrng)));
+        p.g = p.g * Math.exp(0.2 * gauss(c.mrng));
+      });
+    }
+    if (o.stab) cand.forEach(function (p, k) { var g = clampGain(p.g); clamped[k] = g !== p.g; p.g = g; });
+    var fp = [0, 0, 0], tp = [0, 0, 0], bonus = [0, 0, 0], joint = 0, outT = 0, outF = 0, episodes = [];
+    var paramsStart = cand.map(function (p) { return { th: p.th, c: p.c, g: p.g }; });
+    for (e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? rvec(n, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      cand.forEach(function (p) { p.geff = p.g * (o.stab ? stabilizerFactor(c.rateEma) : 1); });
+      var geffs = cand.map(function (p) { return p.geff; });
+      var fidTrace = new Float32Array(STEPS * 3);
+      var ep = episode(n, pat, c.sigma, cand, c.warm, o.amp ? AMP_CAP : 0, c.rng, trace, { fid: fidTrace });
+      var d = ep.decl, truth = d.map(function (di) { return isTrueEvent(di, pat); }), agree = [];
+      for (i = 0; i < 3; i++) {
+        if (truth[i]) tp[i]++;
+        if (d[i] && !truth[i]) fp[i]++;
+        bonus[i] += reward(o.scheme, i, d);
+        if (d[i]) {
+          var conf = false;
+          for (var j = 0; j < 3; j++) if (j !== i && d[j] && fidelity(d[i], d[j]) >= AGREE) { conf = true; if (j > i) agree.push([i, j]); }
+          cand[i].sp = 0.8 * cand[i].sp + 0.2 * (conf ? 1 : 0);
+        }
+      }
+      if (truth[0] && truth[1] && truth[2]) joint++;
+      var outs, passed = null;
+      if (o.shield) {
+        passed = null;
+        for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        outs = passed === null ? [] : [passed];
+      } else {
+        outs = [];
+        for (i = 0; i < 3; i++) if (d[i]) outs.push(i);
+      }
+      var evT = 0, evF = 0;
+      outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+      outT += evT; outF += evF;
+      c.warm = outs.length ? d[outs[0]] : null;
+      c.rateEma = leakyUpdate(c.rateEma, outs.length / (o.shield ? 1 : 3));
+      episodes.push({
+        planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
+        dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
+        agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
+      });
+    }
+    var m = Math.max(tp[0], tp[1], tp[2]), top = [];
+    for (i = 0; i < 3; i++) if (tp[i] === m) top.push(i);
+    var scores = [], accepted = [], contest = [];
+    for (i = 0; i < 3; i++) {
+      var rank = top.indexOf(i) >= 0 && m > 0 ? 1 / top.length : 0;
+      var base = o.w * joint + (1 - o.w) * rank;
+      var s = base + SCHEME_SCALE * bonus[i] - o.fcost * fp[i] / EP;
+      scores.push(s); contest.push(base);
+      if (s >= c.best[i]) { c.best[i] = s; c.par[i] = cand[i]; accepted.push(true); } else accepted.push(false);
+    }
+    var rec = {
+      gen: c.gen, settings: o, episodes: episodes, outT: outT, outF: outF, shield: o.shield, mutated: mutated,
+      params: paramsStart, geff: episodes[EP - 1].geff, clamped: clamped,
+      maxG: Math.max(c.par[0].g, c.par[1].g, c.par[2].g), gains: c.par.map(function (p) { return p.g; }),
+      scores: scores, contest: contest, bonus: bonus.map(function (b) { return SCHEME_SCALE * b; }), accepted: accepted,
+      best: c.best.slice(), joint: joint, tp: tp, fp: fp, rateEma: c.rateEma,
+      parAfter: c.par.map(function (p) { return { th: p.th, c: p.c, g: p.g, sp: p.sp }; })
+    };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+
+  /* ---------- scoring (the game's own weights; the repository has no game score) ---------- */
+
+  function pvariance(xs) {
+    if (!xs.length) return 0;
+    var m = 0, v = 0, k;
+    for (k = 0; k < xs.length; k++) m += xs[k];
+    m /= xs.length;
+    for (k = 0; k < xs.length; k++) v += (xs[k] - m) * (xs[k] - m);
+    return v / xs.length;
+  }
+  function clamp01(x) { return Math.min(1, Math.max(0, x)); }
+
+  function summarize(hist) {
+    var T = 0, F = 0, teq = 0, feq = 0, rates = [], maxG = 0, k;
+    hist.forEach(function (h) {
+      var w = h.shield ? 1 : 1 / 3;
+      T += h.outT; F += h.outF; teq += h.outT * w; feq += h.outF * w;
+      rates.push((h.outT + h.outF) / EP);
+      if (h.maxG > maxG) maxG = h.maxG;
+    });
+    var gens = hist.length, planted = gens * EP / 2;
+    var precision = T + F > 0 ? T / (T + F) : 0;
+    var rateVar = pvariance(rates);
+    var net = planted > 0 ? (teq - feq) / planted : 0;
+    var steadiness = T + F > 0 ? 1 - clamp01(rateVar / STEADY_REF) : 0;
+    var score = 100 * (0.5 * clamp01(net) + 0.25 * precision + 0.25 * steadiness);
+    return {
+      gens: gens, T: T, F: F, precision: precision, rateVar: rateVar, maxG: maxG, finalG: gens ? hist[gens - 1].maxG : 0,
+      net: net, steadiness: steadiness, score: score,
+      parts: { net: 50 * clamp01(net), precision: 25 * precision, steadiness: 25 * steadiness }
+    };
+  }
+
+  /* ---------- baselines from the repository's results ---------- */
+
+  function cfgTag(s) { return (s.shield ? 'S' : '-') + (s.amp ? 'A' : '-') + (s.stab ? 'Z' : '-'); }
+  function nearestW(w) {
+    var best = W_STEPS[0];
+    W_STEPS.forEach(function (x) { if (Math.abs(x - w) < Math.abs(best - w)) best = x; });
+    return best;
+  }
+  // measured width-32 row for the player's configuration, or null when the repository did not measure it
+  function baselineFor(settings) {
+    var s = sanitizeSettings(settings), tag = cfgTag(s), wm = [0, 0.5, 1], w = wm[0];
+    wm.forEach(function (x) { if (Math.abs(x - s.w) < Math.abs(w - s.w) - 1e-9) w = x; });
+    for (var k = 0; k < BASE.CONTEST32.length; k++) {
+      var r = BASE.CONTEST32[k];
+      if (r.cfg === tag && r.w === w) return { row: r, w: w, exactW: Math.abs(w - s.w) < 1e-9, tag: tag, file: BASE.SOURCE.contest };
+    }
+    return null;
+  }
+  // The same game score applied to the repository's mean counts (an approximation, labelled as such).
+  function baselineScore(b) {
+    if (!b) return null;
+    var shielded = b.tag.charAt(0) === 'S', r = b.row, planted = GENS * EP / 2;
+    var wgt = shielded ? 1 : 1 / 3;
+    var net = (r.T - r.F) * wgt / planted;
+    var steady = 1 - clamp01(r.rv / STEADY_REF);
+    return 100 * (0.5 * clamp01(net) + 0.25 * r.P + 0.25 * steady);
+  }
+
+  /* ---------- lessons (numbers come from baselines.js, which comes from the CSV copies) ---------- */
+
+  var LESSON_IDS = ['shield', 'amp', 'stab', 'individual', 'evolve', 'handpicked', 'synthetic'];
+  function lessonVars() {
+    var L = BASE.LESSON;
+    return {
+      fpmin: L.shieldFpMin, fpmax: L.shieldFpMax, vmin: L.shieldVarMin, vmax: L.shieldVarMax, ampd: L.ampMaxDeltaP.toFixed(3),
+      cmin: L.stabCostMin, cmax: L.stabCostMax, low: L.indLowest, cells: L.indCells,
+      rmin: L.runawayNoZMin, rmax: L.runawayNoZMax, seeds: L.seeds
+    };
+  }
+  // Which lesson fits this run: the one about the thing the player just did, otherwise a rotation by seed.
+  function pickLesson(settings, seed) {
+    var s = sanitizeSettings(settings);
+    if (!s.shield) return 'shield';
+    if (s.amp) return 'amp';
+    if (s.stab) return 'stab';
+    if (s.scheme === 'individual') return 'individual';
+    return LESSON_IDS[hashStr(String(seed || '')) % LESSON_IDS.length];
+  }
+
+  /* ---------- dates, daily seeds, streaks ---------- */
+
+  function dateIndex(str) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str));
+    if (!m) return NaN;
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var ms = Date.UTC(y, mo - 1, d), dt = new Date(ms);
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return NaN;
+    return Math.round(ms / 86400000);
+  }
+  function dayNumber(dateStr) { return dateIndex(dateStr) - dateIndex(EPOCH) + 1; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function localDateString(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function dailySeed(dateStr) { return 'd' + dateStr; }
+  function seedDate(seed) { return seed.charAt(0) === 'd' && !isNaN(dateIndex(seed.slice(1))) ? seed.slice(1) : null; }
+  function computeStreak(dates, today) {
+    var idx = {};
+    dates.forEach(function (d) { var i = dateIndex(d); if (!isNaN(i)) idx[i] = true; });
+    var days = Object.keys(idx).map(Number).sort(function (a, b) { return a - b; });
+    var best = 0, run = 0, prev = null;
+    days.forEach(function (d) { run = prev !== null && d === prev + 1 ? run + 1 : 1; prev = d; if (run > best) best = run; });
+    var t = dateIndex(today), cur = 0;
+    var d0 = idx[t] ? t : (idx[t - 1] ? t - 1 : null);
+    if (d0 !== null) { for (var d = d0; idx[d]; d--) cur++; }
+    return { current: cur, best: best };
+  }
+
+  /* ---------- hash links, checked field by field ---------- */
+
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  var CFG_RE = /^([itdcr])-(0|25|50|75|100)-([S-])([A-])([Z-])$/;
+  var SCHEME_CODE = { i: 'individual', t: 'team', d: 'difference', c: 'consensus', r: 'random' };
+  function parseHash(hash) {
+    var out = { mode: 'daily', seed: null, date: null, best: null, lang: null, preset: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1), m;
+      if (k === 'd' && dateIndex(v) >= dateIndex(EPOCH)) { out.date = v; out.seed = dailySeed(v); out.mode = 'challenge'; }
+      else if (k === 's' && SEED_RE.test(v)) { out.seed = v; out.mode = 'challenge'; }
+      else if (k === 'b' && /^\d{1,3}$/.test(v) && +v <= 100) out.best = parseInt(v, 10);
+      else if (k === 'l' && /^[a-z]{2}$/.test(v)) out.lang = v;
+      else if (k === 'c' && (m = CFG_RE.exec(v))) {
+        out.preset = { scheme: SCHEME_CODE[m[1]], w: +m[2] / 100, shield: m[3] === 'S', amp: m[4] === 'A', stab: m[5] === 'Z' };
+      }
+    });
+    if (out.seed === null) { out.best = null; out.preset = null; }
+    return out;
+  }
+  function presetCode(s) {
+    var o = sanitizeSettings(s), code = 'itdcr'.charAt(SCHEMES.indexOf(o.scheme));
+    return code + '-' + Math.round(nearestW(o.w) * 100) + '-' + cfgTag(o);
+  }
+  function buildChallengeHash(o) {
+    var parts = [];
+    if (o.date) parts.push('d=' + o.date); else parts.push('s=' + o.seed);
+    if (typeof o.best === 'number' && isFinite(o.best)) parts.push('b=' + Math.max(0, Math.min(100, Math.round(o.best))));
+    if (o.settings) parts.push('c=' + presetCode(o.settings));
+    if (o.lang) parts.push('l=' + o.lang);
+    return '#' + parts.join('&');
+  }
+
+  /* ---------- share card (plain text, no emoji) ---------- */
+
+  function fmt(str, vars) {
+    return String(str).replace(/\{(\w+)\}/g, function (m, k) { return vars && k in vars ? vars[k] : m; });
+  }
+  function bar(value, max, width) {
+    width = width || 10;
+    var f = Math.round(Math.min(1, Math.max(0, value / max)) * width);
+    return new Array(f + 1).join('\u2588') + new Array(width - f + 1).join('\u2591');
+  }
+  function buildShare(o) {
+    var L = o.labels, r = o.result, lines = [];
+    lines.push(o.seed ? fmt(L['share.title_seed'], { seed: o.seed }) : fmt(L['share.title'], { day: o.day, date: o.date }));
+    lines.push(fmt(L['share.score'], { score: Math.round(r.score) }) + (o.ref === null || o.ref === undefined ? '' : ' ' + fmt(L['share.ref'], { ref: Math.round(o.ref) })));
+    lines.push(fmt(L['share.events'], { t: r.T, f: r.F, p: Math.round(r.precision * 100) }));
+    lines.push(fmt(L['share.setup'], { tag: cfgTag(o.settings), scheme: L['scheme.' + o.settings.scheme + '.short'], w: Math.round(o.settings.w * 100) }));
+    lines.push(L['share.steady'] + ' ' + bar(r.steadiness, 1, 10));
+    lines.push(L['share.synthetic']);
+    if (o.url) lines.push(o.url);
+    return lines.join('\n');
+  }
+
+  /* ---------- defensive store ---------- */
+
+  function sanitizeStore(raw) {
+    var out = { daily: {}, bestDaily: null, bestPractice: null, bestScheme: {}, missions: {}, hc: false, still: false, introSeen: false, tutorialSeen: false }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (raw.hc === true) out.hc = true;
+    if (raw.still === true) out.still = true;
+    if (raw.introSeen === true) out.introSeen = true;
+    if (raw.tutorialSeen === true) out.tutorialSeen = true;
+    var bs = raw.bestScheme;
+    if (bs && typeof bs === 'object' && !Array.isArray(bs)) SCHEMES.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(bs, k) && num(bs[k]) && bs[k] >= 0 && bs[k] <= 100) out.bestScheme[k] = bs[k]; });
+    var ms = raw.missions;
+    if (ms && typeof ms === 'object' && !Array.isArray(ms)) {
+      MISSION_IDS.forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(ms, id)) return;
+        var m = ms[id];
+        if (!m || typeof m !== 'object' || OUTCOMES.indexOf(m.outcome) < 0) return;
+        var n = num(m.n) && m.n >= 0 && m.n <= 200 && Math.floor(m.n) === m.n ? m.n : 0;
+        var metrics = Array.isArray(m.metrics) ? m.metrics.filter(function (x) { return METRIC_IDS.indexOf(x) >= 0; }).slice(0, 5) : [];
+        out.missions[id] = { outcome: m.outcome, n: n, metrics: metrics };
+      });
+    }
+    if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
+    if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
+    if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
+    var d = raw.daily;
+    if (d && typeof d === 'object' && !Array.isArray(d)) {
+      Object.keys(d).forEach(function (k) {
+        var e = d[k];
+        if (isNaN(dateIndex(k)) || dateIndex(k) < dateIndex(EPOCH) || !e || typeof e !== 'object') return;
+        if (!num(e.score) || !num(e.T) || !num(e.F) || !num(e.precision)) return;
+        if (e.score < 0 || e.score > 100 || e.precision < 0 || e.precision > 1) return;
+        if (e.T < 0 || e.F < 0 || e.T > 1000 || e.F > 1000 || Math.floor(e.T) !== e.T || Math.floor(e.F) !== e.F) return;
+        var st = typeof e.tag === 'string' && /^[S-][A-][Z-]$/.test(e.tag) ? e.tag : '---';
+        out.daily[k] = { score: e.score, T: e.T, F: e.F, precision: e.precision, tag: st };
+      });
+    }
+    return out;
+  }
+
+  return {
+    VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
+    AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
+    MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
+    sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
+    sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
+    summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
+    pickLesson: pickLesson, lessonVars: lessonVars, fmt: fmt, bar: bar,
+    dateIndex: dateIndex, dayNumber: dayNumber, localDateString: localDateString, dailySeed: dailySeed, seedDate: seedDate,
+    computeStreak: computeStreak, parseHash: parseHash, buildChallengeHash: buildChallengeHash, presetCode: presetCode,
+    buildShare: buildShare, sanitizeStore: sanitizeStore, baselines: BASE,
+    episode: episode, copyVec: copyVec, pvariance: pvariance, clamp01: clamp01, SIGMA_SCALE: SIGMA_SCALE, STEADY_REF: STEADY_REF
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Reverse Membranes, the opposite-energy arena (SYNTHETIC classical simulation).
+ * Pure logic: no DOM, no network, no storage.
+ *
+ * The arena's membranes are Hebbian (Oja's rule): each one climbs towards the direction where its
+ * noisy observations carry the most energy, and declares when its windowed energy ratio rises
+ * far enough above 1 (the level a random direction would see). This page runs the mirror image:
+ *
+ *   dark pattern     every observation is random except that a hidden direction, the hole, has
+ *                    had part of its energy removed (`depth` of its amplitude). It is a pattern
+ *                    made of missing energy, the opposite of the arena's bright pattern.
+ *   reverse membrane the same update with the sign flipped (anti-Hebbian): v <- v - eta x <x|v>,
+ *                    then normalize. With eta = 1 each step removes the part of v along the latest
+ *                    observation, so v drifts towards the direction the observations lack.
+ *   echo             the membrane keeps its last WINDOW observations and replays the update over
+ *                    them `echo` more times per step. It is what makes absence learnable in 60
+ *                    steps: without it the descent is too slow (see docs/REVERSE.md).
+ *   opposite energy  E- = 1 - ratio: how far the membrane's windowed energy sits BELOW chance (1 means
+ *                    the observations carry no energy at all along it). A reverse membrane declares
+ *                    when E- reaches its threshold. Forward membranes use the mirrored rule
+ *                    ratio - 1 >= threshold.
+ *
+ * "Opposite energy" is a name for that signed score, nothing more. Nothing here models negative
+ * energy, antimatter, real membranes, neurons or any physical system.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./game.js'));
+  else root.ArenaReverse = factory(root.ArenaGame);
+})(typeof self !== 'undefined' ? self : this, function (G) {
+  'use strict';
+  var VERSION = G.VERSION;
+  var GEN = 'membrane-arena/reverse/v1/';  // generator namespace: changing it changes every contest
+  var N = 16;                              // half the arena width: see docs/REVERSE.md
+  var EP = G.EP, ROUNDS = G.GENS, STEPS = G.STEPS, CHECK = G.CHECK;   // 8 episodes, 12 rounds, 60 steps, check every 10
+  var WINDOW = 10;                         // energy window and echo buffer
+  var ETA = { forward: 0.5, reverse: 1.0 };// forward = the arena's rate; reverse = one exact removal per sample
+  var TRUTH = G.TRUTH, AGREE = G.AGREE;    // 0.5 fidelity to count as the pattern, 0.4 to agree
+  var DEPTH_MIN = 0.6, DEPTH_MAX = 1.0;
+  var POLARITIES = ['reverse', 'forward'];
+  var WORLDS = ['dark', 'bright'];
+  var ECHO_MAX = 2;
+  var LIMITS = { th: [0.2, 0.95] };
+  var DEFAULTS = { polarity: 'reverse', th: 0.6, echo: 1, shield: true };
+  var SIGN = { forward: 1, reverse: -1 };
+  function zeros(n) { return { r: new Float64Array(n), i: new Float64Array(n) }; }
+  function round2(x) { return Math.round(x * 100) / 100; }
+  /* ---------- settings ---------- */
+  function sanitizeSettings(s) {
+    s = s && typeof s === 'object' ? s : {};
+    var d = DEFAULTS, num = function (v, lo, hi, dv) { v = Number(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dv; };
+    return {
+      polarity: POLARITIES.indexOf(s.polarity) >= 0 ? s.polarity : d.polarity,
+      th: num(s.th, LIMITS.th[0], LIMITS.th[1], d.th),
+      echo: Math.round(num(s.echo, 0, ECHO_MAX, d.echo)),
+      shield: s.shield === undefined ? d.shield : !!s.shield
+    };
+  }
+  /* ---------- observations ---------- */
+  // a random observation with `depth` of the hole's amplitude removed (depth 1 removes it all)
+  function darkSample(hole, depth, rng) {
+    var n = hole.r.length, g = zeros(n), k;
+    for (k = 0; k < n; k++) { g.r[k] = G.gauss(rng); g.i[k] = G.gauss(rng); }
+    var z = G.inner(hole, g);
+    for (k = 0; k < n; k++) {
+      g.r[k] -= depth * (z.re * hole.r[k] - z.im * hole.i[k]);
+      g.i[k] -= depth * (z.re * hole.i[k] + z.im * hole.r[k]);
+    }
+    return G.normalize(g);
+  }
+  function sample(world, pat, depth, sigma, n, rng) {
+    if (!pat) return G.rvec(n, rng);
+    return world === 'dark' ? darkSample(pat, depth, rng) : G.noisy(pat, sigma, rng);
+  }
+  // v <- v + s * eta * x <x|v>, normalized in place (s = +1 Hebbian, -1 anti-Hebbian)
+  function update(v, x, s, eta) {
+    var y = G.inner(x, v), n = v.r.length, a = s * eta, k, xr, xi, q = 0;
+    var yr = a * y.re, yi = a * y.im;
+    for (k = 0; k < n; k++) {
+      xr = x.r[k]; xi = x.i[k];
+      v.r[k] += xr * yr - xi * yi;
+      v.i[k] += xr * yi + xi * yr;
+      q += v.r[k] * v.r[k] + v.i[k] * v.i[k];
+    }
+    q = Math.sqrt(q);
+    if (!(q > 0) || !isFinite(q)) throw new Error('cannot normalize');
+    for (k = 0; k < n; k++) { v.r[k] /= q; v.i[k] /= q; }
+    return v;
+  }
+  // signed energy: forward measures energy above chance (ratio - 1), reverse the opposite energy below it (1 - ratio)
+  function signedEnergy(polarity, ratio) { return SIGN[polarity] * (ratio - 1); }
+  /* ---------- one episode of three membranes ---------- */
+  // o: { world, pat (null for a noise episode), depth, P: settings }. trace (Float32Array STEPS*3)
+  // records each membrane's signed energy; it freezes at the declaration, as in the arena.
+  function episode(o, rng, trace) {
+    var n = N, P = o.P, s = SIGN[P.polarity], eta = ETA[P.polarity], sigma = G.sigmaFor(n);
+    var vs = [], win = [[], [], []], buf = [[], [], []], decl = [null, null, null], declStep = [null, null, null];
+    var last = [0, 0, 0], i, t, r, b;
+    for (i = 0; i < 3; i++) vs.push(G.rvec(n, rng));
+    for (t = 1; t <= STEPS; t++) {
+      for (i = 0; i < 3; i++) {
+        if (decl[i]) { if (trace) trace[(t - 1) * 3 + i] = last[i]; continue; }
+        var x = sample(o.world, o.pat, o.depth, sigma, n, rng), y = G.inner(x, vs[i]);
+        win[i].push(y.re * y.re + y.im * y.im); if (win[i].length > WINDOW) win[i].shift();
+        buf[i].push(x); if (buf[i].length > WINDOW) buf[i].shift();
+        vs[i] = update(vs[i], x, s, eta);
+        for (r = 0; r < P.echo; r++) for (b = 0; b < buf[i].length; b++) vs[i] = update(vs[i], buf[i][b], s, eta);
+        last[i] = signedEnergy(P.polarity, G.energyRatio(win[i], n));
+        if (trace) trace[(t - 1) * 3 + i] = last[i];
+      }
+      if (t % CHECK === 0) {
+        for (i = 0; i < 3; i++) {
+          if (decl[i]) continue;
+          if (last[i] >= P.th) { decl[i] = G.copyVec(vs[i]); declStep[i] = t; }
+        }
+      }
+    }
+    return { decl: decl, declStep: declStep, last: last };
+  }
+  // what the three declarations add up to: with the shield only a declaration that 2 of 3 agree on passes
+  function judge(decl, pat, shield) {
+    var truth = decl.map(function (d) { return isTrue(d, pat); });
+    var outs = [], passed = null, i, j;
+    if (shield) {
+      for (i = 0; i < 3; i++) {
+        if (!decl[i]) continue;
+        var c = 0;
+        for (j = 0; j < 3; j++) if (decl[j] && G.fidelity(decl[i], decl[j]) >= AGREE) c++;
+        if (c >= 2) { passed = i; break; }
+      }
+      if (passed !== null) outs.push(passed);
+    } else for (i = 0; i < 3; i++) if (decl[i]) outs.push(i);
+    var evT = 0, evF = 0;
+    outs.forEach(function (k) { if (truth[k]) evT++; else evF++; });
+    return { truth: truth, outs: outs, passed: passed, evT: evT, evF: evF,
+      dropped: shield && passed === null && (decl[0] || decl[1] || decl[2]) ? true : false };
+  }
+  function isTrue(d, pat) { return !!d && !!pat && G.fidelity(d, pat) >= TRUTH; }
+  /* ---------- the contest: 12 rounds of 8 episodes in the dark world ---------- */
+  // How dark the hidden pattern is in each round: a seeded tide between DEPTH_MIN and DEPTH_MAX.
+  function depthsFor(seed) {
+    var r = G.makeRng(GEN + seed + '/tide'), ph = 2 * Math.PI * r(), f = 0.35 + 0.4 * r(), out = [];
+    for (var k = 0; k < ROUNDS; k++) {
+      var d = 0.8 + 0.17 * Math.sin(ph + f * k) + 0.06 * (r() - 0.5);
+      out.push(round2(Math.min(DEPTH_MAX, Math.max(DEPTH_MIN, d))));
+    }
+    return out;
+  }
+  function createContest(seed) {
+    seed = String(seed);
+    return { seed: seed, depths: depthsFor(seed), hist: [], gen: 0, rng: G.makeRng(GEN + seed + '/main') };
+  }
+  function done(c) { return c.gen >= ROUNDS; }
+  // Where a contest's controls begin: the arena's way round (forward), no echo, a seeded threshold.
+  // Finding the reverse polarity and the echo is the first part of the game.
+  function startFor(seed) {
+    var r = G.makeRng(GEN + seed + '/start');
+    return { polarity: 'forward', th: round2(Math.round(20 * (0.3 + 0.6 * r())) / 20), echo: 0, shield: true };   // on the slider's 0.05 grid
+  }
+  function stepRound(c, settings) {
+    if (done(c)) throw new Error('contest finished');
+    var o = sanitizeSettings(settings), depth = c.depths[c.gen], episodes = [], outT = 0, outF = 0, tp = 0, fp = 0, missed = 0;
+    for (var e = 0; e < EP; e++) {
+      var planted = e % 2 === 0, pat = planted ? G.rvec(N, c.rng) : null, trace = new Float32Array(STEPS * 3);
+      var ep = episode({ world: 'dark', pat: pat, depth: depth, P: o }, c.rng, trace);
+      var j = judge(ep.decl, pat, o.shield);
+      outT += j.evT; outF += j.evF;
+      j.truth.forEach(function (x, i) { if (x) tp++; else if (ep.decl[i]) fp++; });
+      if (planted && j.evT === 0) missed++;
+      episodes.push({ planted: planted, declStep: ep.declStep, truth: j.truth, outs: j.outs, passed: j.passed, dropped: j.dropped,
+        evT: j.evT, evF: j.evF, trace: trace });
+    }
+    var rec = { gen: c.gen, settings: o, depth: depth, episodes: episodes, outT: outT, outF: outF, shield: o.shield,
+      maxG: 1, tp: tp, fp: fp, missed: missed };
+    c.hist.push(rec);
+    c.gen++;
+    return rec;
+  }
+  // The arena's game score (net true outputs, precision, steadiness), applied to this contest.
+  function summarize(hist) {
+    var s = G.summarize(hist);
+    s.missed = hist.reduce(function (a, h) { return a + h.missed; }, 0);
+    s.planted = hist.length * EP / 2;
+    return s;
+  }
+  /* ---------- the mirror test: both worlds, both polarities, the player's settings ---------- */
+  // Returns 4 cells { world, polarity, T, F, planted, noise } over `episodes` episodes each (half planted).
+  function mirrorTest(settings, seed, episodes) {
+    var o = sanitizeSettings(settings), ep = episodes || 2 * EP, cells = [];
+    WORLDS.forEach(function (world) {
+      POLARITIES.forEach(function (pol) {
+        var P = Object.assign({}, o, { polarity: pol }), rng = G.makeRng(GEN + seed + '/mirror/' + world);
+        var cell = { world: world, polarity: pol, T: 0, F: 0, planted: 0, noise: 0 };
+        for (var e = 0; e < ep; e++) {
+          var planted = e % 2 === 0, pat = planted ? G.rvec(N, rng) : null;
+          var r = episode({ world: world, pat: pat, depth: 0.8, P: P }, rng, null);
+          var j = judge(r.decl, pat, P.shield);
+          if (planted) cell.planted++; else cell.noise++;
+          cell.T += j.evT; cell.F += j.evF;
+        }
+        cells.push(cell);
+      });
+    });
+    return cells;
+  }
+  /* ---------- seeds, hash links, share card ---------- */
+  var SEED_RE = /^[A-Za-z0-9_-]{1,24}$/;
+  function dailySeed(dateStr) { return 'r' + dateStr; }
+  function parseHash(hash) {
+    var out = { seed: null, lang: null };
+    var h = String(hash || '').replace(/^#/, '');
+    if (!h || h.length > 200) return out;
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('='), k = i < 0 ? kv : kv.slice(0, i), v = i < 0 ? '' : kv.slice(i + 1);
+      if (k === 's' && SEED_RE.test(v)) out.seed = v;
+      else if (k === 'l' && (v === 'en' || v === 'fr')) out.lang = v;
+    });
+    return out;
+  }
+  function buildHash(o) {
+    var parts = [];
+    if (o.seed && SEED_RE.test(o.seed)) parts.push('s=' + o.seed);
+    if (o.lang === 'fr') parts.push('l=fr');
+    return parts.length ? '#' + parts.join('&') : '';
+  }
+  // one of 8 block heights for a darkness between DEPTH_MIN and DEPTH_MAX
+  function darkGlyph(d) {
+    var k = Math.round(7 * Math.min(1, Math.max(0, (d - DEPTH_MIN) / (DEPTH_MAX - DEPTH_MIN))));
+    return String.fromCharCode(0x2581 + k);
+  }
+  function shareText(o, t) {
+    var r = o.result, lines = [];
+    lines.push(t('share.title', { seed: o.seed }));
+    lines.push(t('share.score', { score: Math.round(r.score) }));
+    lines.push(t('share.events', { t: r.T, f: r.F, m: r.missed, p: Math.round(r.precision * 100) }));
+    lines.push(t('share.setup', { pol: t('pol.' + o.settings.polarity), th: o.settings.th.toFixed(2), e: o.settings.echo, sh: t(o.settings.shield ? 'share.on' : 'share.off') }));
+    lines.push(t('share.depth') + ' ' + o.depths.map(darkGlyph).join(''));
+    lines.push(t('share.tag'));
+    return lines.join('\n');
+  }
+  return {
+    VERSION: VERSION, N: N, EP: EP, ROUNDS: ROUNDS, STEPS: STEPS, CHECK: CHECK, WINDOW: WINDOW, ETA: ETA,
+    TRUTH: TRUTH, AGREE: AGREE, DEPTH_MIN: DEPTH_MIN, DEPTH_MAX: DEPTH_MAX, POLARITIES: POLARITIES, WORLDS: WORLDS,
+    ECHO_MAX: ECHO_MAX, LIMITS: LIMITS, DEFAULTS: DEFAULTS, SIGN: SIGN,
+    sanitizeSettings: sanitizeSettings, darkSample: darkSample, sample: sample, update: update, signedEnergy: signedEnergy,
+    episode: episode, judge: judge, isTrue: isTrue, depthsFor: depthsFor, createContest: createContest, done: done, startFor: startFor,
+    stepRound: stepRound, summarize: summarize, mirrorTest: mirrorTest,
+    darkGlyph: darkGlyph, dailySeed: dailySeed, parseHash: parseHash, buildHash: buildHash, shareText: shareText
+  };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: strings for Reverse Membranes, English and French (SYNTHETIC classical simulation).
+ * A test checks both languages have the same keys and the same {placeholders}.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.ReverseI18n = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var en = {
+    'page.title': 'Reverse Membranes',
+    'page.tagline': 'The arena run backwards: membranes that learn away from energy and hunt a pattern made of missing energy.',
+    'page.tag': 'SYNTHETIC',
+    'page.lang': 'Français',
+    'page.hc': 'High contrast',
+    'page.arena': 'The arena',
+    'page.brain': 'Brain architecture',
+    'page.quorum': 'Quorum Keeper',
+    'intro.p1': 'In the arena, a hidden pattern adds energy to the noise and the membranes climb towards it. Here everything is reversed. The hidden pattern is dark: one direction has had its energy taken out. Reverse membranes run the same learning rule with the sign flipped, so they slide away from wherever the observations carry energy and settle in the gap. Their opposite energy is how far below chance their energy falls. When it crosses the threshold, they declare.',
+    'intro.p2': '"Opposite energy" is only the name of that score, and a reverse membrane is a learning rule with a minus sign. The membranes are a metaphor: nothing on this page models negative energy, antimatter, real membranes, neurons or any physical system. It is a game on a SYNTHETIC classical simulation.',
+    'sec.controls': 'Your membranes',
+    'ctl.pol': 'Reverse the membranes (learn away from energy)',
+    'ctl.pol.hint': 'Off, they learn the arena\'s way round and look for extra energy.',
+    'ctl.th': 'Opposite-energy threshold',
+    'ctl.th.hint': 'Declare when the energy falls this far below chance (1 would mean no energy at all). Lower finds more, and is fooled more.',
+    'ctl.echo': 'Echo',
+    'ctl.echo.hint': 'How many times each step replays the last 10 observations. Absence is slow to learn without it.',
+    'ctl.echo.dec': 'Less echo',
+    'ctl.echo.inc': 'More echo',
+    'ctl.shield': 'Shield: 2 of 3 membranes must agree',
+    'forecast.round': 'Round {r} of {n}. Darkness of the hidden pattern: {d} ({word}).',
+    'forecast.done': 'All {n} rounds played.',
+    'dark.faint': 'faint',
+    'dark.clear': 'clear',
+    'dark.deep': 'deep',
+    'btn.run': 'Run round',
+    'btn.rest': 'Run the rest',
+    'btn.again': 'Play this seed again',
+    'btn.today': 'Today\'s contest',
+    'btn.new': 'New contest',
+    'seed.daily': 'Seed {seed} (today\'s contest). The same seed gives the same contest.',
+    'seed.other': 'Seed {seed}. The same seed gives the same contest.',
+    'sec.result': 'Score',
+    'tally': 'True {t}, false {f}, missed {m} of {p} hidden patterns',
+    'res.start': 'Set the membranes, then run round 1. The pattern hides in 4 of each round\'s 8 episodes; the other 4 are plain noise.',
+    'res.round': 'Round {r}: {t} true, {f} false, {m} of 4 hidden patterns missed.',
+    'res.zero.forward': 'Forward membranes cannot see a gap. They climb towards extra energy, and there is none here. Try reversing them.',
+    'res.zero.echo': 'Nothing declared. Without echo a reverse membrane learns absence slowly: try echo 1, or a lower threshold.',
+    'res.zero.deep': 'Nothing declared. The threshold may be deeper than this round\'s darkness allows.',
+    'res.false': 'False outputs: the threshold is shallow enough for plain noise to dip under it.',
+    'res.noshield': 'Without the shield every declaration is output, so false ones count too.',
+    'res.final': 'Final score {score} of 100.',
+    'res.parts': 'Net true outputs {net} of 50, precision {prec} of 25, steadiness {st} of 25.',
+    'res.ref': 'Reference on this seed (reverse, threshold 0.60, echo 1, shield): {ref}.',
+    'res.beat': 'You beat the reference.',
+    'res.below': 'Below the reference this time. Set the membranes before round 1, and let the threshold follow the darkness.',
+    'res.running': 'Running round {r}...',
+    'sec.chart': 'Last round, episode by episode',
+    'chart.note': 'Up is more energy than chance, down is less. Reverse membranes dive towards the gap; forward membranes climb. A membrane freezes once it declares, so its line goes flat.',
+    'chart.empty': 'Run a round to see the membranes.',
+    'ep.dark': 'Episode {e}: dark pattern',
+    'ep.noise': 'Episode {e}: noise only',
+    'out.true': 'true output',
+    'out.false': 'false output',
+    'out.none': 'no output',
+    'out.held': 'no output (held by the shield)',
+    'ep.decl': 'membrane {i} declared at step {s}',
+    'ep.nodecl': 'no membrane declared',
+    'legend.m1': 'membrane 1',
+    'legend.m2': 'membrane 2',
+    'legend.m3': 'membrane 3',
+    'legend.chance': 'chance',
+    'legend.th': 'threshold',
+    'sec.rounds': 'Rounds',
+    'col.round': 'Round',
+    'col.dark': 'Darkness',
+    'col.setup': 'Setup',
+    'col.t': 'True',
+    'col.f': 'False',
+    'col.m': 'Missed',
+    'setup.row': '{pol}, threshold {th}, echo {e}',
+    'setup.shield': ', shield',
+    'pol.reverse': 'reverse',
+    'pol.forward': 'forward',
+    'sec.mirror': 'The mirror test',
+    'mirror.p': 'Your threshold, echo and shield, on 16 episodes in each world (darkness or brightness 0.8, half with a pattern). Only the matching polarity finds anything.',
+    'btn.mirror': 'Run the mirror test',
+    'mirror.head': 'World',
+    'mirror.reverse': 'Reverse membranes',
+    'mirror.forward': 'Forward membranes',
+    'mirror.dark': 'Dark pattern (missing energy)',
+    'mirror.bright': 'Bright pattern (extra energy, as in the arena)',
+    'mirror.cell': '{t} true, {f} false of {p} patterns',
+    'mirror.running': 'Running the mirror test...',
+    'mirror.done': 'Each world is found only by the membranes that learn its way round.',
+    'sec.how': 'How it works',
+    'how.p1': 'Each membrane is a unit vector in 16 complex dimensions. At every step it sees one observation x and moves v to v + s eta x <x|v>, then rescales it to length 1. Forward (s = +1, eta = 0.5) is the arena\'s Oja rule. Reverse (s = -1, eta = 1) removes the part of v along x, so v drifts towards the direction the observations lack. Echo replays that update over the last 10 observations.',
+    'how.p2': 'The energy ratio is 16 times the mean of |<x|v>|^2 over the last 10 observations: about 1 for a random direction, 0 along a fully dark pattern. Opposite energy is 1 minus that ratio. Every 10 steps, a membrane whose opposite energy reaches the threshold declares its vector. A declaration is true when its fidelity to the hidden pattern is at least 0.5.',
+    'how.p3': 'The page runs at half the arena\'s width because finding a missing direction takes about as many observations as there are dimensions: after 60 steps with echo 1, a reverse membrane reaches a fidelity of 0.99 to the hidden pattern at width 16, but only 0.30 at width 32. The score is the arena\'s game score (net true outputs, precision, steadiness), not an estimate of anything outside this simulation.',
+    'how.p4': 'Measured by scripts/reverse-check.js (docs/reverse-check.txt), over 20 seeds: reverse membranes with threshold 0.6 and echo 1 scored 83.8 on average, a threshold that follows the darkness (darkness minus 0.1) scored 86.3, no echo scored 55.3, and forward membranes scored 0.',
+    'sec.card': 'Score card (plain text)',
+    'share.title': 'Reverse Membranes, seed {seed}',
+    'share.score': 'Score {score}/100',
+    'share.events': 'True {t}, false {f}, missed {m}, precision {p}%',
+    'share.setup': 'Last setup: {pol}, threshold {th}, echo {e}, shield {sh}',
+    'share.on': 'on',
+    'share.off': 'off',
+    'share.depth': 'Darkness by round',
+    'share.tag': 'SYNTHETIC classical simulation',
+    'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.'
+  };
+  var fr = {
+    'page.title': 'Membranes inversées',
+    'page.tagline': 'L\'arène à rebours : des membranes qui apprennent à fuir l\'énergie et traquent un motif fait d\'énergie manquante.',
+    'page.tag': 'SYNTHÉTIQUE',
+    'page.lang': 'English',
+    'page.hc': 'Contraste élevé',
+    'page.arena': 'L\'arène',
+    'page.brain': 'Architecture cérébrale',
+    'page.quorum': 'Gardien du quorum',
+    'intro.p1': 'Dans l\'arène, un motif caché ajoute de l\'énergie au bruit et les membranes montent vers lui. Ici, tout est inversé. Le motif caché est sombre : une direction a perdu son énergie. Les membranes inversées appliquent la même règle d\'apprentissage avec le signe opposé : elles s\'éloignent de là où les observations portent de l\'énergie et se posent dans le creux. Leur énergie opposée mesure de combien leur énergie tombe sous le hasard. Quand elle franchit le seuil, elles déclarent.',
+    'intro.p2': '« Énergie opposée » n\'est que le nom de ce score, et une membrane inversée est une règle d\'apprentissage avec un signe moins. Les membranes sont une métaphore : rien sur cette page ne modélise une énergie négative, de l\'antimatière, de vraies membranes, des neurones ou un système physique. C\'est un jeu sur une simulation classique SYNTHÉTIQUE.',
+    'sec.controls': 'Vos membranes',
+    'ctl.pol': 'Inverser les membranes (fuir l\'énergie)',
+    'ctl.pol.hint': 'Désactivé, elles apprennent comme dans l\'arène et cherchent un surplus d\'énergie.',
+    'ctl.th': 'Seuil d\'énergie opposée',
+    'ctl.th.hint': 'Déclarer quand l\'énergie tombe à ce point sous le hasard (1 voudrait dire aucune énergie). Plus bas trouve plus, et se trompe plus.',
+    'ctl.echo': 'Écho',
+    'ctl.echo.hint': 'Nombre de fois où chaque pas rejoue les 10 dernières observations. Sans lui, l\'absence s\'apprend lentement.',
+    'ctl.echo.dec': 'Moins d\'écho',
+    'ctl.echo.inc': 'Plus d\'écho',
+    'ctl.shield': 'Bouclier : 2 membranes sur 3 doivent s\'accorder',
+    'forecast.round': 'Manche {r} sur {n}. Obscurité du motif caché : {d} ({word}).',
+    'forecast.done': 'Les {n} manches sont jouées.',
+    'dark.faint': 'faible',
+    'dark.clear': 'nette',
+    'dark.deep': 'profonde',
+    'btn.run': 'Jouer la manche',
+    'btn.rest': 'Jouer le reste',
+    'btn.again': 'Rejouer cette graine',
+    'btn.today': 'Partie du jour',
+    'btn.new': 'Nouvelle partie',
+    'seed.daily': 'Graine {seed} (partie du jour). La même graine donne la même partie.',
+    'seed.other': 'Graine {seed}. La même graine donne la même partie.',
+    'sec.result': 'Score',
+    'tally': 'Vrais {t}, faux {f}, manqués {m} sur {p} motifs cachés',
+    'res.start': 'Réglez les membranes, puis jouez la manche 1. Le motif se cache dans 4 des 8 épisodes de chaque manche ; les 4 autres ne sont que du bruit.',
+    'res.round': 'Manche {r} : {t} vrais, {f} faux, {m} motifs cachés manqués sur 4.',
+    'res.zero.forward': 'Des membranes à l\'endroit ne voient pas un creux. Elles montent vers un surplus d\'énergie, et il n\'y en a pas ici. Essayez de les inverser.',
+    'res.zero.echo': 'Aucune déclaration. Sans écho, une membrane inversée apprend l\'absence lentement : essayez l\'écho 1, ou un seuil plus bas.',
+    'res.zero.deep': 'Aucune déclaration. Le seuil est peut-être plus profond que ce que permet l\'obscurité de cette manche.',
+    'res.false': 'Sorties fausses : le seuil est assez bas pour que le simple bruit passe dessous.',
+    'res.noshield': 'Sans bouclier, chaque déclaration sort, les fausses comprises.',
+    'res.final': 'Score final {score} sur 100.',
+    'res.parts': 'Sorties vraies nettes {net} sur 50, précision {prec} sur 25, régularité {st} sur 25.',
+    'res.ref': 'Référence sur cette graine (inversées, seuil 0,60, écho 1, bouclier) : {ref}.',
+    'res.beat': 'Vous battez la référence.',
+    'res.below': 'Sous la référence cette fois. Réglez les membranes avant la manche 1, et laissez le seuil suivre l\'obscurité.',
+    'res.running': 'Manche {r} en cours...',
+    'sec.chart': 'Dernière manche, épisode par épisode',
+    'chart.note': 'Vers le haut, plus d\'énergie que le hasard ; vers le bas, moins. Les membranes inversées plongent vers le creux ; les membranes à l\'endroit montent. Une membrane se fige dès qu\'elle déclare : sa ligne devient plate.',
+    'chart.empty': 'Jouez une manche pour voir les membranes.',
+    'ep.dark': 'Épisode {e} : motif sombre',
+    'ep.noise': 'Épisode {e} : bruit seul',
+    'out.true': 'sortie vraie',
+    'out.false': 'sortie fausse',
+    'out.none': 'aucune sortie',
+    'out.held': 'aucune sortie (retenue par le bouclier)',
+    'ep.decl': 'la membrane {i} a déclaré au pas {s}',
+    'ep.nodecl': 'aucune membrane n\'a déclaré',
+    'legend.m1': 'membrane 1',
+    'legend.m2': 'membrane 2',
+    'legend.m3': 'membrane 3',
+    'legend.chance': 'hasard',
+    'legend.th': 'seuil',
+    'sec.rounds': 'Manches',
+    'col.round': 'Manche',
+    'col.dark': 'Obscurité',
+    'col.setup': 'Réglage',
+    'col.t': 'Vrais',
+    'col.f': 'Faux',
+    'col.m': 'Manqués',
+    'setup.row': '{pol}, seuil {th}, écho {e}',
+    'setup.shield': ', bouclier',
+    'pol.reverse': 'inversées',
+    'pol.forward': 'à l\'endroit',
+    'sec.mirror': 'Le test du miroir',
+    'mirror.p': 'Votre seuil, votre écho et votre bouclier, sur 16 épisodes dans chaque monde (obscurité ou éclat 0,8, la moitié avec un motif). Seule la polarité assortie trouve quelque chose.',
+    'btn.mirror': 'Lancer le test du miroir',
+    'mirror.head': 'Monde',
+    'mirror.reverse': 'Membranes inversées',
+    'mirror.forward': 'Membranes à l\'endroit',
+    'mirror.dark': 'Motif sombre (énergie manquante)',
+    'mirror.bright': 'Motif brillant (surplus d\'énergie, comme dans l\'arène)',
+    'mirror.cell': '{t} vrais, {f} faux sur {p} motifs',
+    'mirror.running': 'Test du miroir en cours...',
+    'mirror.done': 'Chaque monde n\'est trouvé que par les membranes qui apprennent dans son sens.',
+    'sec.how': 'Comment ça marche',
+    'how.p1': 'Chaque membrane est un vecteur unitaire en 16 dimensions complexes. À chaque pas, elle voit une observation x et passe de v à v + s eta x <x|v>, puis revient à la longueur 1. À l\'endroit (s = +1, eta = 0,5), c\'est la règle d\'Oja de l\'arène. Inversée (s = -1, eta = 1), elle retire de v sa part le long de x, si bien que v dérive vers la direction qui manque aux observations. L\'écho rejoue cette mise à jour sur les 10 dernières observations.',
+    'how.p2': 'Le rapport d\'énergie vaut 16 fois la moyenne de |<x|v>|^2 sur les 10 dernières observations : environ 1 pour une direction au hasard, 0 le long d\'un motif entièrement sombre. L\'énergie opposée vaut 1 moins ce rapport. Tous les 10 pas, une membrane dont l\'énergie opposée atteint le seuil déclare son vecteur. Une déclaration est vraie si sa fidélité au motif caché vaut au moins 0,5.',
+    'how.p3': 'La page tourne à la moitié de la largeur de l\'arène, car trouver une direction manquante demande à peu près autant d\'observations qu\'il y a de dimensions : après 60 pas avec l\'écho 1, une membrane inversée atteint une fidélité de 0,99 au motif caché en largeur 16, mais seulement 0,30 en largeur 32. Le score est le score de jeu de l\'arène (sorties vraies nettes, précision, régularité), pas une estimation de quoi que ce soit hors de cette simulation.',
+    'how.p4': 'Mesuré par scripts/reverse-check.js (docs/reverse-check.txt), sur 20 graines : des membranes inversées avec seuil 0,6 et écho 1 ont obtenu 83,8 en moyenne, un seuil qui suit l\'obscurité (obscurité moins 0,1) 86,3, sans écho 55,3, et des membranes à l\'endroit 0.',
+    'sec.card': 'Carte de score (texte brut)',
+    'share.title': 'Membranes inversées, graine {seed}',
+    'share.score': 'Score {score}/100',
+    'share.events': 'Vrais {t}, faux {f}, manqués {m}, précision {p} %',
+    'share.setup': 'Dernier réglage : {pol}, seuil {th}, écho {e}, bouclier {sh}',
+    'share.on': 'oui',
+    'share.off': 'non',
+    'share.depth': 'Obscurité par manche',
+    'share.tag': 'simulation classique SYNTHÉTIQUE',
+    'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Hors ligne, aucune requête réseau, rien n\'est stocké.'
+  };
+  return { LANGS: { en: en, fr: fr } };
+});
+</script>
+<script>
+/*
+ * Membrane Arena: Reverse Membranes page (SYNTHETIC classical simulation).
+ *
+ * Controls (polarity, opposite-energy threshold, echo, shield), the round-by-round contest, the
+ * eight episode charts of the last round with a text line each, the rounds table, the mirror test
+ * and the plain-text score card. A round takes a few milliseconds, so it runs in one go after the
+ * page has painted the "running" message. No network, no storage: everything lives in this page.
+ *
+ * Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
+ */
+(function () {
+  'use strict';
+  var R = window.ArenaReverse, G = window.ArenaGame, LANGS = window.ReverseI18n.LANGS;
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var $ = function (id) { return document.getElementById(id); };
+  var hash = R.parseHash(location.hash);
+  var lang = hash.lang === 'fr' ? 'fr' : 'en', hc = false, busy = false;
+  var today = R.dailySeed(G.localDateString(new Date()));
+  var seed = hash.seed || today, contest = null, settings = null, last = null, refs = {}, mirror = null;
+  function t(k, vars) { var s = (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; return G.fmt(s, vars); }
+  function text(el, s) { el.textContent = s; }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function para(parent, s, cls) { var p = document.createElement('p'); if (cls) p.className = cls; p.textContent = s; parent.appendChild(p); return p; }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function num(x, d) { var s = x.toFixed(d === undefined ? 2 : d); return lang === 'fr' ? s.replace('.', ',') : s; }
+  function svg(tag, attrs, parent) {
+    var el = document.createElementNS(SVGNS, tag);
+    Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function setHash() {
+    var h = R.buildHash({ seed: seed, lang: lang });
+    if (history.replaceState) history.replaceState(null, '', h || location.pathname);
+  }
+  function darkWord(d) { return t(d < 0.73 ? 'dark.faint' : d < 0.87 ? 'dark.clear' : 'dark.deep'); }
+  /* ---------- controls ---------- */
+  function readControls() {
+    settings = R.sanitizeSettings({ polarity: $('pol').checked ? 'reverse' : 'forward', th: +$('th').value, echo: +$('e-val').value, shield: $('shield').checked });
+    return settings;
+  }
+  function writeControls(s) {
+    $('pol').checked = s.polarity === 'reverse';
+    $('th').value = String(s.th);
+    $('shield').checked = s.shield;
+    text($('e-val'), String(s.echo));
+    settings = R.sanitizeSettings(s);
+    renderControls();
+  }
+  function renderControls() {
+    var s = readControls();
+    text($('th-val'), num(s.th));
+    $('e-dec').disabled = busy || s.echo <= 0;
+    $('e-inc').disabled = busy || s.echo >= R.ECHO_MAX;
+  }
+  function setBusy(b) {
+    busy = b;
+    var over = R.done(contest);
+    $('btn-run').disabled = b || over;
+    $('btn-rest').disabled = b || over;
+    ['btn-again', 'btn-today', 'btn-new', 'btn-mirror'].forEach(function (id) { $(id).disabled = b; });
+    renderControls();
+  }
+  /* ---------- contest ---------- */
+  function start(newSeed) {
+    seed = newSeed; contest = R.createContest(seed); last = null; mirror = null;
+    writeControls(R.startFor(seed));
+    setHash(); renderAll(); setBusy(false);
+  }
+  function refScore() {
+    if (refs[seed] === undefined) {
+      var c = R.createContest(seed);
+      while (!R.done(c)) R.stepRound(c, R.DEFAULTS);
+      refs[seed] = R.summarize(c.hist).score;
+    }
+    return refs[seed];
+  }
+  function runRounds(all) {
+    if (busy || R.done(contest)) return;
+    setBusy(true);
+    var box = $('res-text');
+    clear(box); para(box, t('res.running', { r: contest.gen + 1 }));
+    var step = function () {
+      last = R.stepRound(contest, readControls());
+      if (all && !R.done(contest)) { renderAll(); clear(box); para(box, t('res.running', { r: contest.gen + 1 })); setTimeout(step, 30); return; }
+      if (R.done(contest)) refScore();
+      setBusy(false); renderAll();
+    };
+    setTimeout(step, 30);
+  }
+  /* ---------- rendering ---------- */
+  function renderForecast() {
+    var n = R.ROUNDS, tide = $('tide');
+    text($('forecast'), R.done(contest) ? t('forecast.done', { n: n }) :
+      t('forecast.round', { r: contest.gen + 1, n: n, d: num(contest.depths[contest.gen]), word: darkWord(contest.depths[contest.gen]) }));
+    clear(tide);
+    contest.depths.forEach(function (d, k) {
+      var li = document.createElement('li');
+      li.style.height = Math.round(20 + 80 * (d - R.DEPTH_MIN) / (R.DEPTH_MAX - R.DEPTH_MIN)) + '%';
+      if (k < contest.gen) li.className = 'played';
+      if (k === contest.gen) li.className = 'cur';
+      tide.appendChild(li);
+    });
+    text($('seed'), t(seed === today ? 'seed.daily' : 'seed.other', { seed: seed }));
+  }
+  function renderScore() {
+    var s = R.summarize(contest.hist), box = $('res-text');
+    text($('score'), contest.hist.length ? String(Math.round(s.score)) : '0');
+    text($('tally'), t('tally', { t: s.T, f: s.F, m: s.missed, p: s.planted }));
+    if (busy) return;
+    clear(box);
+    if (!last) { para(box, t('res.start')); return; }
+    para(box, t('res.round', { r: last.gen + 1, t: last.outT, f: last.outF, m: last.missed }));
+    var declared = last.episodes.some(function (e) { return e.declStep.some(function (x) { return x !== null; }); });
+    if (!declared) para(box, t(last.settings.polarity === 'forward' ? 'res.zero.forward' : last.settings.echo === 0 ? 'res.zero.echo' : 'res.zero.deep'), 'warn');
+    else if (last.settings.polarity === 'forward' && last.outT === 0) para(box, t('res.zero.forward'), 'warn');
+    if (last.outF > 0) { para(box, t('res.false'), 'warn'); if (!last.settings.shield) para(box, t('res.noshield')); }
+    if (R.done(contest)) {
+      var ref = refScore();
+      para(box, t('res.final', { score: Math.round(s.score) }), 'good');
+      para(box, t('res.parts', { net: num(s.parts.net, 1), prec: num(s.parts.precision, 1), st: num(s.parts.steadiness, 1) }));
+      para(box, t('res.ref', { ref: Math.round(ref) }));
+      para(box, t(s.score > ref ? 'res.beat' : 'res.below'), s.score > ref ? 'good' : null);
+    }
+  }
+  function epChart(ep, k, s) {
+    var div = document.createElement('div'), h = document.createElement('h3');
+    var W = 200, H = 110, L = 4, Rm = 4, T0 = 6, B = 6, lo = -1, hi = 1.5, sign = R.SIGN[s.polarity];
+    var x = function (step) { return L + (W - L - Rm) * (step - 1) / (R.STEPS - 1); };
+    var y = function (v) { v = Math.min(hi, Math.max(lo, v)); return T0 + (H - T0 - B) * (hi - v) / (hi - lo); };
+    var cls = ep.evT > 0 ? 't' : ep.evF > 0 ? 'f' : 'n';
+    div.className = 'ep ' + cls;
+    h.textContent = t(ep.planted ? 'ep.dark' : 'ep.noise', { e: k + 1 });
+    div.appendChild(h);
+    var root = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, 'aria-hidden': 'true', focusable: 'false' }, div);
+    svg('line', { x1: L, x2: W - Rm, y1: y(0), y2: y(0), 'class': 'chance' }, root);
+    var thv = sign * s.th;   // ratio - 1 at the threshold: below chance for reverse (1 - ratio = th), above for forward
+    svg('line', { x1: L, x2: W - Rm, y1: y(thv), y2: y(thv), 'class': 'thr' }, root);
+    var decls = [];
+    for (var i = 0; i < 3; i++) {
+      var pts = [];
+      for (var st = 1; st <= R.STEPS; st++) pts.push(x(st).toFixed(1) + ',' + y(sign * ep.trace[(st - 1) * 3 + i]).toFixed(1));
+      svg('polyline', { points: pts.join(' '), 'class': 'tr m' + (i + 1) }, root);
+      var d = ep.declStep[i];
+      if (d !== null) {
+        svg('circle', { cx: x(d), cy: y(sign * ep.trace[(d - 1) * 3 + i]), r: 3.6, 'class': 'dot m' + (i + 1) }, root);
+        decls.push(t('ep.decl', { i: i + 1, s: d }));
+      }
+    }
+    var out = cls === 't' ? 'out.true' : cls === 'f' ? 'out.false' : ep.dropped ? 'out.held' : 'out.none';
+    para(div, cap(t(out)) + '. ' + cap(decls.length ? decls.join(', ') : t('ep.nodecl')) + '.', 'out');
+    return div;
+  }
+  function renderEpisodes() {
+    var box = $('episodes');
+    clear(box);
+    if (!last) { para(box, t('chart.empty'), 'empty'); return; }
+    last.episodes.forEach(function (ep, k) { box.appendChild(epChart(ep, k, last.settings)); });
+  }
+  function renderRounds() {
+    var body = $('rounds-body');
+    clear(body);
+    contest.hist.forEach(function (h) {
+      var tr = document.createElement('tr'), s = h.settings;
+      if (last && h.gen === last.gen) tr.className = 'cur';
+      [String(h.gen + 1), num(h.depth), t('setup.row', { pol: t('pol.' + s.polarity), th: num(s.th), e: s.echo }) + (s.shield ? t('setup.shield') : ''),
+        String(h.outT), String(h.outF), String(h.missed)].forEach(function (v, j) {
+        var td = document.createElement('td'); td.textContent = v; if (j !== 2) td.className = 'n'; tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+  function renderMirror() {
+    var body = $('mirror-body');
+    clear(body);
+    if (!mirror) return;
+    R.WORLDS.forEach(function (w) {
+      var tr = document.createElement('tr'), th = document.createElement('th');
+      th.scope = 'row'; th.textContent = t('mirror.' + w); tr.appendChild(th);
+      R.POLARITIES.forEach(function (p) {
+        var c = mirror.filter(function (x) { return x.world === w && x.polarity === p; })[0], td = document.createElement('td');
+        td.textContent = t('mirror.cell', { t: c.T, f: c.F, p: c.planted });
+        td.className = c.T > 0 ? 'hit' : 'miss';
+        td.setAttribute('data-world', w); td.setAttribute('data-polarity', p);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+  function runMirror() {
+    if (busy) return;
+    setBusy(true);
+    text($('mirror-text'), t('mirror.running'));
+    setTimeout(function () {
+      mirror = R.mirrorTest(readControls(), seed, 2 * R.EP);
+      setBusy(false);
+      renderMirror();
+      text($('mirror-text'), t('mirror.done'));
+    }, 30);
+  }
+  function renderShare() {
+    if (!contest.hist.length) { text($('share'), t('chart.empty')); return; }
+    text($('share'), R.shareText({ seed: seed, result: R.summarize(contest.hist), settings: contest.hist[contest.hist.length - 1].settings, depths: contest.depths }, t));
+  }
+  function renderAll() { renderForecast(); renderScore(); renderEpisodes(); renderRounds(); renderMirror(); renderShare(); }
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.title = t('page.title');
+    $('e-dec').setAttribute('aria-label', t('ctl.echo.dec'));
+    $('e-inc').setAttribute('aria-label', t('ctl.echo.inc'));
+    text($('footer-version'), 'reverse ' + R.VERSION + ' / arena ' + G.BUILD);
+    if (mirror) text($('mirror-text'), t('mirror.done'));
+    renderControls(); setHash(); renderAll();
+  }
+  /* ---------- wiring ---------- */
+  $('pol').addEventListener('change', renderControls);
+  $('shield').addEventListener('change', renderControls);
+  $('th').addEventListener('input', renderControls);
+  $('e-dec').addEventListener('click', function () { text($('e-val'), String(Math.max(0, +$('e-val').textContent - 1))); renderControls(); });
+  $('e-inc').addEventListener('click', function () { text($('e-val'), String(Math.min(R.ECHO_MAX, +$('e-val').textContent + 1))); renderControls(); });
+  $('btn-run').addEventListener('click', function () { runRounds(false); });
+  $('btn-rest').addEventListener('click', function () { runRounds(true); });
+  $('btn-again').addEventListener('click', function () { start(seed); });
+  $('btn-today').addEventListener('click', function () { start(today); });
+  $('btn-new').addEventListener('click', function () { start('r' + Math.floor(Math.random() * 1e9).toString(36)); });
+  $('btn-mirror').addEventListener('click', runMirror);
+  $('btn-lang').addEventListener('click', function () { lang = lang === 'en' ? 'fr' : 'en'; applyLang(); });
+  $('btn-contrast').addEventListener('click', function () {
+    hc = !hc;
+    document.documentElement.classList.toggle('hc', hc);
+    this.setAttribute('aria-pressed', hc ? 'true' : 'false');
+  });
+  contest = R.createContest(seed);
+  writeControls(R.startFor(seed));
+  applyLang();
+  setBusy(false);
+})();
+</script>
+</body>
+</html>

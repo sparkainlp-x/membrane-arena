@@ -1,0 +1,54 @@
+/* Membrane Arena: extra styles for Reverse Membranes. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. */
+.playgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 12px; }
+@media (min-width: 900px) { .playgrid { grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr); align-items: start; } }
+.forecast { font-weight: 600; color: var(--gold-bright); margin: 4px 0 6px; }
+.tide { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; height: 46px; }
+.tide li { background: #1b2a5a; border: 1px solid var(--line); border-radius: 4px 4px 0 0; min-height: 6px; }
+.tide li.played { background: #23406e; }
+.tide li.cur { background: var(--gold); border-color: var(--gold); }
+.indent { margin-left: 32px; }
+.stepper { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; flex-wrap: wrap; }
+.stepper .slabel { flex: 0 0 9.5em; font-weight: 600; }
+.stepper output { min-width: 2.2em; text-align: center; font-size: 1.25rem; }
+.btn.step { min-width: 48px; min-height: 48px; padding: 0; font-size: 1.4rem; line-height: 1; }
+.bigscore { font-size: 2.6rem; font-weight: 700; margin: 0; color: var(--gold-bright); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tally { margin: 2px 0 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#res-text p { margin: 6px 0; }
+#res-text .good { color: var(--aqua); font-weight: 600; }
+#res-text .warn { color: var(--danger); font-weight: 600; }
+.episodes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 760px) { .episodes { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.episodes .empty { grid-column: 1 / -1; color: var(--muted); margin: 8px 0; }
+.ep { background: #070e26; border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 4px; min-width: 0; }
+.ep.t { border-color: var(--cyan); } .ep.f { border-color: var(--danger); }
+.ep h3 { margin: 0 0 2px; font-size: 0.8rem; color: var(--text); font-weight: 600; }
+.ep .out { margin: 0; font-size: 0.75rem; color: var(--muted); }
+.ep.t .out { color: var(--cyan); } .ep.f .out { color: var(--danger); }
+.ep svg { display: block; width: 100%; height: auto; }
+.ep .chance { stroke: #6f7fae; stroke-width: 1; }
+.ep .thr { stroke: var(--gold); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.ep .m1 { stroke: #40d0e0; } .ep .m2 { stroke: #f0a050; } .ep .m3 { stroke: #b48cff; }
+.ep .tr { fill: none; stroke-width: 1.6; stroke-linejoin: round; }
+.ep .dot { stroke: #fff; stroke-width: 1; }
+.ep .dot.m1 { fill: #40d0e0; } .ep .dot.m2 { fill: #f0a050; } .ep .dot.m3 { fill: #b48cff; }
+.legend { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.88rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.key.k1 { border-top-color: #40d0e0; } .key.k2 { border-top-color: #f0a050; } .key.k3 { border-top-color: #b48cff; }
+.key.kc { border-top: 1px solid #6f7fae; } .key.kt { border-top: 2px dashed var(--gold); }
+.tablewrap { overflow-x: auto; }
+.rtable { border-collapse: collapse; width: 100%; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.rtable th, .rtable td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable th { color: var(--gold-bright); font-weight: 600; }
+.rtable td.n, .rtable th.n { text-align: right; }
+.rtable tr.cur td { background: #12204a; }
+.mirror td { white-space: normal; }
+.mirror td.hit { color: var(--aqua); font-weight: 600; }
+.mirror td.miss { color: var(--muted); }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; color: var(--text); }
+html.hc .tide li { background: #000; border-color: #fff; } html.hc .tide li.played { background: #444; } html.hc .tide li.cur { background: #ffd400; }
+html.hc .ep { background: #000; border: 2px solid #fff; } html.hc .ep.t { border-color: #00ff96; } html.hc .ep.f { border-color: #ff8a8a; border-style: dashed; }
+html.hc .ep .m1, html.hc .key.k1 { stroke: #fff; border-top-color: #fff; } html.hc .ep .m2, html.hc .key.k2 { stroke: #ff6ad5; border-top-color: #ff6ad5; } html.hc .ep .m3, html.hc .key.k3 { stroke: #00ffff; border-top-color: #00ffff; }
+html.hc .ep .dot.m1 { fill: #fff; } html.hc .ep .dot.m2 { fill: #ff6ad5; } html.hc .ep .dot.m3 { fill: #00ffff; }
+html.hc .ep .chance { stroke: #9a9a9a; stroke-dasharray: 1 3; } html.hc .key.kc { border-top: 1px dotted #9a9a9a; }
+html.hc .ep .thr { stroke: #ffd400; } html.hc .rtable tr.cur td { background: #222; }
+html.hc .ep .dot { stroke: #000; }

@@ -24,7 +24,7 @@ jobs:
         run: node --test tests/*.test.js
       - name: baselines.js matches the CSV copies
         run: node scripts/make-baselines.js --check
-      - name: dist/index.html, dist/brain.html and dist/quorum.html are up to date
+      - name: dist/index.html, dist/brain.html, dist/quorum.html and dist/reverse.html are up to date
         run: |
           node build.js
-          git diff --exit-code dist/index.html dist/brain.html dist/quorum.html
+          git diff --exit-code dist/index.html dist/brain.html dist/quorum.html dist/reverse.html

@@ -1,8 +1,8 @@
 {
   "title": "Membrane Arena: a browser game about three coupled membranes, reward schemes, a shield, an amplifier and a stabilizer (SYNTHETIC classical simulation)",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "upload_type": "software",
-  "description": "<p>SYNTHETIC educational game, zero dependencies, offline, English and French. The player steers three coupled Oja-rule membranes that learn a planted pattern in noise, chooses a reward scheme, a cooperation setting, a 2-of-3 shield, a capped amplifier and a gain-clamped stabilizer, and watches a (1+1) evolution step. Scores are compared with the measured width-32 results of the crystallization-contest repository, with the source file cited next to each number. Includes a daily seeded contest, a plain-text share card and challenge links in the URL hash, and a Lab view with instruments, multi-seed ensembles with confidence intervals against the repository baselines, paired A/B tests and a replay. A brain page sizes layers of membranes with the 2f + 1 rule and joins them with delayed links called microtubules (a metaphor only; nothing models real neurons, microtubules or a brain), and the Quorum Keeper logic game builds and breaks such fault-tolerant brains against an exhaustive adversary; its level targets are tuned to each level's own seed. Classical simulation only: the JavaScript port is statistically comparable to the Python original, not bit-identical. No accounts, no network calls.</p>",
+  "description": "<p>SYNTHETIC educational game, zero dependencies, offline, English and French. The player steers three coupled Oja-rule membranes that learn a planted pattern in noise, chooses a reward scheme, a cooperation setting, a 2-of-3 shield, a capped amplifier and a gain-clamped stabilizer, and watches a (1+1) evolution step. Scores are compared with the measured width-32 results of the crystallization-contest repository, with the source file cited next to each number. Includes a daily seeded contest, a plain-text share card and challenge links in the URL hash, and a Lab view with instruments, multi-seed ensembles with confidence intervals against the repository baselines, paired A/B tests and a replay. A brain page sizes layers of membranes with the 2f + 1 rule and joins them with delayed links called microtubules (a metaphor only; nothing models real neurons, microtubules or a brain), and the Quorum Keeper logic game builds and breaks such fault-tolerant brains against an exhaustive adversary; its level targets are tuned to each level's own seed. Reverse Membranes runs the arena backwards at width 16: membranes with the learning sign flipped (anti-Hebbian) find a dark direction whose energy was removed from every observation; \"opposite energy\" is only the name of a score, and nothing models negative energy, antimatter, physics or biology. Classical simulation only: the JavaScript port is statistically comparable to the Python original, not bit-identical. No accounts, no network calls.</p>",
   "creators": [
     {
       "name": "Brisson, Jean-François",
@@ -22,7 +22,8 @@
     "synthetic",
     "JavaScript",
     "fault tolerance",
-    "logic game"
+    "logic game",
+    "anti-Hebbian learning"
   ],
   "related_identifiers": [
     {
