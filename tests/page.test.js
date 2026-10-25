@@ -180,6 +180,12 @@ test('closing the tour returns the focus to the Run button (a hidden button must
   assert.match(app, /function closeTutorial\(\) \{[^}]*contains\(document\.activeElement\)[^}]*\$\('btn-run'\)\.focus\(\)/s);
 });
 
+test('letter shortcuts work while a button has focus; Space stays with the button', () => {
+  const app = read('app.js');
+  assert.match(app, /tag === 'INPUT' \|\| tag === 'SELECT' \|\| tag === 'TEXTAREA'\) return;/);
+  assert.match(app, /\(tag === 'BUTTON' \|\| tag === 'SUMMARY' \|\| tag === 'A'\) && \(e\.key === ' ' \|\| e\.key === 'Enter'\)/);
+});
+
 test('the method panel names what was measured, what is a design choice and what is not verified', () => {
   const I = require('../i18n.js');
   for (const l of Object.keys(I.LANGS)) {
