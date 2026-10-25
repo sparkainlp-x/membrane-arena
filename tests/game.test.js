@@ -503,7 +503,7 @@ test('golden: full contests reproduce the exact v0.1.0 numbers, so old challenge
   ]);
 });
 
-test('store: the v0.2 fields are validated field by field (flags, missions, per-scheme records), hostile input is dropped', () => {
+test('store: the v0.2 fields are checked field by field (flags, missions, per-scheme records), hostile input is dropped', () => {
   const good = G.sanitizeStore({ hc: true, still: true, introSeen: true, tutorialSeen: true, bestScheme: { team: 77.5, consensus: 90, bogus: 50 },
     missions: { shield: { outcome: 'reproduced', n: 20, metrics: ['F', 'x'] }, amp: { outcome: 'no_effect', n: 40 } } });
   assert.equal(good.hc, true); assert.equal(good.still, true); assert.equal(good.introSeen, true); assert.equal(good.tutorialSeen, true);
