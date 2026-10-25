@@ -13,8 +13,8 @@ license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.23633127"
-    description: "Version 0.2.0"
+    value: "10.5281/zenodo.23639631"
+    description: "Version 0.3.0"
 repository-code: "https://github.com/sparkainlp-x/membrane-arena"
 abstract: >-
   SYNTHETIC educational game, zero dependencies, offline, English and French.

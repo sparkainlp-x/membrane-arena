@@ -1,6 +1,6 @@
 # Changelog
 ## 0.3.0 (2026-10-25)
-The arena's mechanics and seeds are unchanged: a seed, a daily seed or a challenge link from 0.1.0 or 0.2.0 plays exactly as before, and `dist/index.html` changes only in its version string.
+Archived on Zenodo as 10.5281/zenodo.23639631 (all versions: 10.5281/zenodo.23633126). The arena's mechanics and seeds are unchanged: a seed, a daily seed or a challenge link from 0.1.0 or 0.2.0 plays exactly as before, and `dist/index.html` changes only in its version string.
 - Brain architecture: `brain.js` plans the necessary membranes of each kind (sensory columns, gates, integrators, output, optional inhibitory and memory) from the faults each layer must tolerate (2f + 1 voters, strict-majority quorum). It builds the microtubule links with delays and transport noise, checks wiring and timing, runs seeded simulations with colluding, stuck or silent faults, and draws an SVG diagram.
 - `brain.html` page (English and French, high contrast, built to `dist/brain.html`), `brain-i18n.js`, `brainui.js`, `brain.css`.
 - `scripts/brain.js` (command line), `scripts/brain-check.js` (writes `docs/brain-check.txt`), `scripts/brain-e2e-check.js` (headless Chrome, writes `docs/brain-e2e-report.json` and `docs/screenshots/brain-*.png`), `docs/BRAIN.md`.

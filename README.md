@@ -8,7 +8,7 @@ Résumé FR : jeu éducatif SYNTHÉTIQUE (simulation classique) construit sur le
 
 ![The Lab view on desktop: Wilson-banded event rates, weight alignment, the energy-ratio histogram with thresholds, precision and recall against the threshold, shield counts, stabilizer trace, evolution landscape and the amplifier measurement](docs/screenshots/en-desktop-04-lab.png)
 
-Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: version 0.3.0 (adds the brain architecture page and the Quorum Keeper logic game; 0.2.0 brought the Lab, ensembles, A/B tests, missions, replay and high-contrast mode). The brain page is at https://sparkainlp-x.github.io/membrane-arena/brain.html and Quorum Keeper at https://sparkainlp-x.github.io/membrane-arena/quorum.html. Released as [v0.3.0](https://github.com/sparkainlp-x/membrane-arena/releases/tag/v0.3.0); the Zenodo DOI for 0.3.0 is not issued yet and this line is updated when it is. Version 0.2.0 is archived on Zenodo with DOI [10.5281/zenodo.23633127](https://doi.org/10.5281/zenodo.23633127) (concept DOI for all versions: [10.5281/zenodo.23633126](https://doi.org/10.5281/zenodo.23633126)).
+Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: version 0.3.0 (adds the brain architecture page and the Quorum Keeper logic game; 0.2.0 brought the Lab, ensembles, A/B tests, missions, replay and high-contrast mode). The brain page is at https://sparkainlp-x.github.io/membrane-arena/brain.html and Quorum Keeper at https://sparkainlp-x.github.io/membrane-arena/quorum.html. Released as [v0.3.0](https://github.com/sparkainlp-x/membrane-arena/releases/tag/v0.3.0); archived on Zenodo with DOI [10.5281/zenodo.23639631](https://doi.org/10.5281/zenodo.23639631) (concept DOI for all versions: [10.5281/zenodo.23633126](https://doi.org/10.5281/zenodo.23633126); version 0.2.0: [10.5281/zenodo.23633127](https://doi.org/10.5281/zenodo.23633127)).
 
 ## What you do
 
@@ -148,6 +148,7 @@ See [DESIGN.md](DESIGN.md) and [CHANGELOG.md](CHANGELOG.md).
 
 Lineage: `game.js` is a port of crystallization-contest, whose helper functions come from membrane-crystallization, which began as a package received under Mun Seok Lee's name. The game design, interface, scoring and lesson text are this project's own. Mun Seok Lee is acknowledged for that earlier package only: he is not an author of this release and has not reviewed or endorsed it.
 
+- Brisson, J.-F. Membrane Arena v0.3.0. https://doi.org/10.5281/zenodo.23639631
 - Brisson, J.-F. Membrane Arena v0.2.0. https://doi.org/10.5281/zenodo.23633127
 - Oja, E. (1982). Simplified neuron model as a principal component analyzer. *Journal of Mathematical Biology* 15(3), 267-273. https://doi.org/10.1007/BF00275687
 - Brisson, J.-F. crystallization-contest v0.1.0. https://doi.org/10.5281/zenodo.23619515
