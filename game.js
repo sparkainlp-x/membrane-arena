@@ -35,6 +35,9 @@
   var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
   var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
   var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
 
   /* ---------- seeded RNG (xmur3 hash + mulberry32 + Box-Muller) ---------- */
@@ -476,8 +479,25 @@
   /* ---------- defensive store ---------- */
 
   function sanitizeStore(raw) {
-    var out = { daily: {}, bestDaily: null, bestPractice: null }, num = function (v) { return typeof v === 'number' && isFinite(v); };
+    var out = { daily: {}, bestDaily: null, bestPractice: null, bestScheme: {}, missions: {}, hc: false, still: false, introSeen: false, tutorialSeen: false }, num = function (v) { return typeof v === 'number' && isFinite(v); };
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    if (raw.hc === true) out.hc = true;
+    if (raw.still === true) out.still = true;
+    if (raw.introSeen === true) out.introSeen = true;
+    if (raw.tutorialSeen === true) out.tutorialSeen = true;
+    var bs = raw.bestScheme;
+    if (bs && typeof bs === 'object' && !Array.isArray(bs)) SCHEMES.forEach(function (k) { if (Object.prototype.hasOwnProperty.call(bs, k) && num(bs[k]) && bs[k] >= 0 && bs[k] <= 100) out.bestScheme[k] = bs[k]; });
+    var ms = raw.missions;
+    if (ms && typeof ms === 'object' && !Array.isArray(ms)) {
+      MISSION_IDS.forEach(function (id) {
+        if (!Object.prototype.hasOwnProperty.call(ms, id)) return;
+        var m = ms[id];
+        if (!m || typeof m !== 'object' || OUTCOMES.indexOf(m.outcome) < 0) return;
+        var n = num(m.n) && m.n >= 0 && m.n <= 200 && Math.floor(m.n) === m.n ? m.n : 0;
+        var metrics = Array.isArray(m.metrics) ? m.metrics.filter(function (x) { return METRIC_IDS.indexOf(x) >= 0; }).slice(0, 5) : [];
+        out.missions[id] = { outcome: m.outcome, n: n, metrics: metrics };
+      });
+    }
     if (num(raw.bestDaily) && raw.bestDaily >= 0 && raw.bestDaily <= 100) out.bestDaily = raw.bestDaily;
     if (num(raw.bestPractice) && raw.bestPractice >= 0 && raw.bestPractice <= 100) out.bestPractice = raw.bestPractice;
     if (typeof raw.lang === 'string' && /^[a-z]{2}$/.test(raw.lang)) out.lang = raw.lang;
@@ -499,7 +519,7 @@
   return {
     VERSION: VERSION, BUILD: BUILD, EPOCH: EPOCH, N: N, EP: EP, GENS: GENS, STEPS: STEPS, CHECK: CHECK, AGREE: AGREE, TRUTH: TRUTH,
     AMP_CAP: AMP_CAP, TARGET: TARGET, GAIN_MIN: GAIN_MIN, GAIN_MAX: GAIN_MAX, FACTOR_MIN: FACTOR_MIN,
-    SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
+    MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
     hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
     sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
     stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,

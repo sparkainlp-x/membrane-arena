@@ -502,3 +502,27 @@ test('golden: full contests reproduce the exact v0.1.0 numbers, so old challenge
     ['d2026-10-24', 45, 2, '93.131049', '0.271716/0.674343 0.408475/0.924243 0.439168/0.936201']
   ]);
 });
+
+test('store: the v0.2 fields are validated field by field (flags, missions, per-scheme records), hostile input is dropped', () => {
+  const good = G.sanitizeStore({ hc: true, still: true, introSeen: true, tutorialSeen: true, bestScheme: { team: 77.5, consensus: 90, bogus: 50 },
+    missions: { shield: { outcome: 'reproduced', n: 20, metrics: ['F', 'x'] }, amp: { outcome: 'no_effect', n: 40 } } });
+  assert.equal(good.hc, true); assert.equal(good.still, true); assert.equal(good.introSeen, true); assert.equal(good.tutorialSeen, true);
+  assert.deepEqual(good.bestScheme, { team: 77.5, consensus: 90 });
+  assert.deepEqual(good.missions.shield, { outcome: 'reproduced', n: 20, metrics: ['F'] });
+  assert.equal(good.missions.amp.n, 40);
+  const bad = G.sanitizeStore({ hc: 'yes', still: 1, bestScheme: { team: 1e9, individual: 'x', __proto__: { team: 5 } }, missions: { shield: { outcome: '<b>', n: 1 }, __proto__: { amp: { outcome: 'beat' } }, nope: { outcome: 'beat', n: 1 }, play: { outcome: 'beat', n: -3 } } });
+  assert.equal(bad.hc, false); assert.equal(bad.still, false);
+  assert.deepEqual(bad.bestScheme, {});
+  assert.deepEqual(Object.keys(bad.missions), ['play']);
+  assert.equal(bad.missions.play.n, 0);
+  assert.deepEqual(G.sanitizeStore(null).missions, {});
+  assert.ok(!('polluted' in {}));
+  // v0.1 stores still load unchanged
+  const old = G.sanitizeStore({ daily: { '2026-10-24': { score: 80, T: 40, F: 3, precision: 0.9, tag: 'S--' } }, bestDaily: 80, lang: 'fr' });
+  assert.equal(old.daily['2026-10-24'].score, 80); assert.equal(old.bestDaily, 80); assert.equal(old.lang, 'fr');
+});
+
+test('mission ids in the store whitelist match the missions defined in the Lab', () => {
+  const L = require('../lab.js');
+  assert.deepEqual(G.MISSION_IDS, L.MISSIONS.map((m) => m.id));
+});
