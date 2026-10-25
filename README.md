@@ -8,7 +8,7 @@ Résumé FR : jeu éducatif SYNTHÉTIQUE (simulation classique) construit sur le
 
 ![The Lab view on desktop: Wilson-banded event rates, weight alignment, the energy-ratio histogram with thresholds, precision and recall against the threshold, shield counts, stabilizer trace, evolution landscape and the amplifier measurement](docs/screenshots/en-desktop-04-lab.png)
 
-Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: version 0.2.0 (the Lab, ensembles, A/B tests, missions, replay, high-contrast mode). The GitHub release and its Zenodo DOI are not issued yet; this line is updated when they are.
+Play it: https://sparkainlp-x.github.io/membrane-arena/ (GitHub Pages, built from `main` by CI). Status: version 0.2.0 (the Lab, ensembles, A/B tests, missions, replay, high-contrast mode). Released as [v0.2.0](https://github.com/sparkainlp-x/membrane-arena/releases/tag/v0.2.0); archived on Zenodo with DOI [10.5281/zenodo.23633127](https://doi.org/10.5281/zenodo.23633127) (concept DOI for all versions: [10.5281/zenodo.23633126](https://doi.org/10.5281/zenodo.23633126)).
 
 ## What you do
 
@@ -114,7 +114,7 @@ Open `dist/index.html` directly in a browser, or serve it. Node 20 or later is o
 
 ## Tests
 
-`node --test tests/*.test.js` runs 145 tests with Node's built-in runner and no dependencies. It covers: seeded determinism of the whole contest and of lazy stepping, the contest mechanics (shield, amplifier cap, stabilizer clamp and leaky update, evolution acceptance and bounds, reward schemes), scoring, baseline lookup, hash links and hostile input, the store sanitizer, dates and streaks, i18n parity and share-card line length in both languages, the timeline and layout helpers, the arena with a stub canvas, the statistics (Wilson and t interval coverage against known cases by simulation, bootstrap, the paired test's false-positive rate near 5 percent, histograms), the Lab data (probe, sweep, shield counts, ensembles reproducing the repository means, A/B pairing, missions, CSV and JSON), the instrument drawing at four sizes, text equivalents in both languages, a golden test that seeds `golden1` and `d2026-10-24` still give the exact v0.1.0 numbers (so v0.1 challenge links keep working), and the built page (self-contained, no network APIs, ids and keys exist, accessibility basics, brand colours, no banned wording).
+`node --test tests/*.test.js` runs 146 tests with Node's built-in runner and no dependencies. It covers: seeded determinism of the whole contest and of lazy stepping, the contest mechanics (shield, amplifier cap, stabilizer clamp and leaky update, evolution acceptance and bounds, reward schemes), scoring, baseline lookup, hash links and hostile input, the store sanitizer, dates and streaks, i18n parity and share-card line length in both languages, the timeline and layout helpers, the arena with a stub canvas, the statistics (Wilson and t interval coverage against known cases by simulation, bootstrap, the paired test's false-positive rate near 5 percent, histograms), the Lab data (probe, sweep, shield counts, ensembles reproducing the repository means, A/B pairing, missions, CSV and JSON), the instrument drawing at four sizes, text equivalents in both languages, a golden test that seeds `golden1` and `d2026-10-24` still give the exact v0.1.0 numbers (so v0.1 challenge links keep working), and the built page (self-contained, no network APIs, ids and keys exist, accessibility basics, brand colours, no banned wording).
 
 `scripts/e2e-check.js` plays a full round in headless Chrome (English and French, phone and desktop, reduced motion, high contrast), opens every Lab tab, runs a 20-seed ensemble and a 20-pair A/B test, scrubs and plays the replay, exports CSV and JSON, checks that every instrument canvas is drawn and described, and records console errors, external requests, horizontal overflow, frame times, draw time per frame and ensemble run time. A second part runs 36 checks of storage, hash, keyboard, tabs, tour, intro and switches. It needs playwright-core and Chrome, so it is not part of `node --test`. The last run's report is `docs/e2e-report.json` and screenshots are in `docs/screenshots/`.
 
@@ -137,6 +137,7 @@ See [DESIGN.md](DESIGN.md) and [CHANGELOG.md](CHANGELOG.md).
 
 Lineage: `game.js` is a port of crystallization-contest, whose helper functions come from membrane-crystallization, which began as a package received under Mun Seok Lee's name. The game design, interface, scoring and lesson text are this project's own. Mun Seok Lee is acknowledged for that earlier package only: he is not an author of this release and has not reviewed or endorsed it.
 
+- Brisson, J.-F. Membrane Arena v0.2.0. https://doi.org/10.5281/zenodo.23633127
 - Oja, E. (1982). Simplified neuron model as a principal component analyzer. *Journal of Mathematical Biology* 15(3), 267-273. https://doi.org/10.1007/BF00275687
 - Brisson, J.-F. crystallization-contest v0.1.0. https://doi.org/10.5281/zenodo.23619515
 - Brisson, J.-F. membrane-crystallization v0.1.0. https://doi.org/10.5281/zenodo.23583050

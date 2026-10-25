@@ -195,3 +195,11 @@ test('the method panel names what was measured, what is a design choice and what
   const html = read('index.html');
   for (const k of ['method.measured', 'method.design', 'method.unverified']) assert.ok(html.includes(`data-i18n="${k}"`));
 });
+
+test('the DOI named in the README matches the one in CITATION.cff, and the page names no DOI of its own', () => {
+  const readme = read('README.md'), cff = read('CITATION.cff');
+  const v = cff.match(/value: "(10\.5281\/zenodo\.\d+)"/), concept = cff.match(/^doi: "(10\.5281\/zenodo\.\d+)"/m);
+  assert.ok(v && concept, 'CITATION.cff carries a version DOI and a concept DOI');
+  assert.ok(readme.includes(v[1]) && readme.includes(concept[1]));
+  assert.notEqual(v[1], concept[1]);
+});
