@@ -8,11 +8,13 @@ const crypto = require('node:crypto');
 const { buildPulse } = require('../build.js');
 const P = require('../pulse.js');
 const L = require('../pulse-i18n.js').LANGS;
+const REGION_CAL = require('../pulse-region-calib.js');
 const root = path.join(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(path.join(root, f))).digest('hex');
-const FILES = ['pulse.html', 'pulse.css', 'pulse.js', 'pulse-i18n.js', 'pulseui.js', 'pulse-calib.js',
-  'scripts/pulse-check.js', 'scripts/pulse-e2e-check.js', 'docs/PULSE.md', 'docs/PULSE-PROTOCOL.md',
+const FILES = ['pulse.html', 'pulse.css', 'pulse.js', 'pulse-i18n.js', 'pulseui.js', 'pulse-calib.js', 'pulse-region-calib.js',
+  'scripts/pulse-check.js', 'scripts/pulse-region-check.js', 'scripts/pulse-e2e-check.js', 'docs/PULSE.md', 'docs/PULSE-PROTOCOL.md',
+  'docs/PULSE-REGION-PROTOCOL-v035.md', 'docs/pulse-region-check-v035.txt',
   'tests/pulse.test.js', 'tests/pulsepage.test.js'];
 // word lists are assembled from fragments so this file does not contain the words it forbids
 const join = (parts) => new RegExp('\\b(' + parts.map((p) => p.join('')).join('|') + ')', 'i');
@@ -38,7 +40,7 @@ test('dist/pulse.html, when present, matches a fresh build', { skip: !fs.existsS
 
 test('scripts load in dependency order, the calibration before the logic', () => {
   const html = read('pulse.html');
-  const order = ['baselines.js', 'game.js', 'pulse-calib.js', 'pulse.js', 'pulse-i18n.js', 'pulseui.js'];
+  const order = ['baselines.js', 'game.js', 'pulse-calib.js', 'pulse-region-calib.js', 'pulse.js', 'pulse-i18n.js', 'pulseui.js'];
   const at = order.map((f) => html.indexOf(`<script src="${f}"></script>`));
   at.forEach((i, k) => assert.ok(i > 0, order[k] + ' is loaded'));
   for (let k = 1; k < at.length; k++) assert.ok(at[k] > at[k - 1], `${order[k]} after ${order[k - 1]}`);

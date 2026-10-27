@@ -1,4 +1,9 @@
 # Changelog
+## 0.3.5 (2026-10-26)
+- Wave Pulse adds an experimental, setting-specific calibration for the hint region; the locator engine, detector, simulation and v0.3.4 numeric results are unchanged.
+- Calibration used 200 new seeds per setting; evaluation used 400 separate held-out seeds per setting under a protocol frozen before the full run. On the fresh set, 11 of 16 new per-setting Wilson intervals contain 90%, versus 1 of 16 with the old shared allowance. The default setting is 85.8% [82.0%, 88.8%]; `win/4/loud/patchy` had 20/200 calibration fallbacks and no finite region. This does not establish 90% coverage across all settings. See `docs/PULSE-REGION-v035.md` and `docs/pulse-region-check-v035.txt`.
+- The v0.3.4 protocol and numeric results remain unchanged; the current manifest is rechecked against the v0.3.5 software build. Release DOI will be added after Zenodo archiving.
+
 ## 0.3.4 (2026-10-25)
 Archived on Zenodo as 10.5281/zenodo.23647863 (all versions: 10.5281/zenodo.23633126). The six earlier pages, their mechanics, seeds and results (including the frozen Reverse Pair and Pair Watch protocols and outputs) are unchanged; their built pages change only in the version string and in the new links to Wave Pulse.
 - Wave Pulse (`pulse.html`, `pulse.js`, `pulseui.js`, `pulse-i18n.js`, `pulse.css`), page 7: a SYNTHETIC visual game where a big win or a crowd cheer sends a ripple across a 40 × 26 damped wave grid. The player locates the start from the edge sensors' recordings, then sees the ripple replayed in a Great Wave colour style. 12 pulses in 3 stages, a locator hint with its 90% region, free waves, keyboard play, replay codes in the page address, English and French, phone and high contrast. No claim of holography or of modelling a real floor.

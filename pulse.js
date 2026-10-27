@@ -29,7 +29,7 @@
   } else root.ArenaPulse = factory(root.ArenaGame, root.ArenaPulseCalib || null);
 })(typeof self !== 'undefined' ? self : this, function (G, CALIB) {
   'use strict';
-  var VERSION = G.VERSION;
+  var VERSION = '0.3.4';                 // frozen locator engine; v0.3.5 changes only region allowances
   var GEN = 'membrane-arena/pulse/v1/';
 
   /* ---------- the simulation (docs/PULSE-PROTOCOL.md section 2) ---------- */

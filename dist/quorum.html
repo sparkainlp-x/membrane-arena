@@ -615,7 +615,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
 })(typeof self !== 'undefined' ? self : this, function (BASE) {
   'use strict';
 
-  var VERSION = '0.3.4';
+  var VERSION = '0.3.5';
   var BUILD = VERSION;   // shown in the page footer
   var GEN = 'membrane-arena/v1/';        // generator namespace: changing it changes every contest
   var EPOCH = '2026-10-24';              // day number 1
@@ -1293,7 +1293,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
   else root.ArenaBrain = factory(root.ArenaGame, root.ArenaStats);
 })(typeof self !== 'undefined' ? self : this, function (G, ST) {
   'use strict';
-  var VERSION = '0.3.4';
+  var VERSION = '0.3.5';
   var NS = 'membrane-arena/brain/v1/';      // generator namespace for brain runs
   var KINDS = ['sensory', 'gate', 'integrator', 'output', 'inhibitory', 'memory'];
   var MODES = ['collude', 'stuck', 'silent'];
@@ -1881,7 +1881,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
   else root.QuorumGame = factory(root.ArenaGame, root.ArenaBrain);
 })(typeof self !== 'undefined' ? self : this, function (G, B) {
   'use strict';
-  var VERSION = '0.3.4';
+  var VERSION = '0.3.5';
   var MODES = B.MODES;                         // collude, stuck, silent
   var GOALS = ['fool', 'silence'];
   var SIM_EPISODES = 60;                       // half planted

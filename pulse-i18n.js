@@ -44,6 +44,8 @@
     'banner.3': 'Stage 3: a patchy floor with only the 4 corner sensors. A hidden slow patch delays some arrivals.',
     'banner.free': 'Free waves: nothing is scored. Tap anywhere on the grid to send a ripple from there.',
     'banner.nocalib': 'pulse-calib.js is missing: the hint uses default values, not the calibrated ones.',
+    'banner.noregion': 'pulse-region-calib.js is missing: the older shared region size is shown.',
+    'banner.regionfit': 'No finite 90% region was fit for this setting; only the locator point is shown.',
     'btn.listen': 'Listen',
     'btn.listening': 'Listening\u2026',
     'btn.next': 'Next pulse',
@@ -152,6 +154,7 @@
     'eval.p3': 'All six hypotheses written into the frozen protocol held, with paired intervals above zero: the locator gets worse on a patchy floor (+0.65 [+0.53, +0.78] cells), with loud noise (+0.90 [+0.69, +1.13]), with 4 sensors instead of 8 (+0.13 [+0.07, +0.18]) and for crowd cheers (+0.33 [+0.27, +0.39]). The cost of having 4 sensors is real but small.',
     'eval.p4': 'A negative result: the locator\u2019s 90% region is calibrated in only 2 of 16 settings. On a calm, even floor it holds the start 99.5% of the time (too wide); with loud noise on a patchy floor, only 59.0% (too narrow). One fixed region size cannot fit every setting. In clean recordings arrivals advance at 0.488 cells per tick, while the best locator speed was 0.46; the report does not test why they differ.',
     'eval.p5': 'All of this is about a small synthetic simulation and its own game, not a real floor, real pressure waves, holography or any physical system. One command regenerates every number: node scripts/pulse-check.js --write (and --verify to check). Details: docs/PULSE.md and docs/pulse-check.txt.',
+    'eval.v035': 'v0.3.5 experimental release: the hint now tries a separate 90% region for each setting, using 200 calibration pulses and 400 fresh held-out pulses per setting. On the fresh test set, the number of Wilson intervals containing 90% rose from 1/16 with the old shared allowance to 11/16 with the new allowances, but several settings still miss the target. Default-setting coverage is 85.8% [82.0%, 88.8%]. In win/4/loud/patchy, 20/200 calibration pulses fell back, so no finite region could be fitted; 7.0% [4.9%, 9.9%] of held-out pulses also fell back. The descriptive average across settings is 85.3% for the new regions and 90.1% for the old shared allowance. This release does not establish a 90% guarantee across all settings. Details: docs/pulse-region-check-v035.txt.',
 
     'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Offline, no network requests, nothing stored.'
   };
@@ -189,6 +192,8 @@
     'banner.3': '\u00C9tape 3\u00A0: un sol in\u00E9gal avec seulement les 4 capteurs des coins. Une zone lente cach\u00E9e retarde certaines arriv\u00E9es.',
     'banner.free': 'Vagues libres\u00A0: rien n\u2019est compt\u00E9. Touchez la grille n\u2019importe o\u00F9 pour envoyer une onde depuis cet endroit.',
     'banner.nocalib': 'pulse-calib.js manque\u00A0: l\u2019indice utilise des valeurs par d\u00E9faut, pas les valeurs calibr\u00E9es.',
+    'banner.noregion': 'pulse-region-calib.js manque\u00A0: l\u2019ancienne taille de zone partag\u00E9e est affich\u00E9e.',
+    'banner.regionfit': 'Aucune zone finie \u00E0 90\u00A0% n\u2019a \u00E9t\u00E9 ajust\u00E9e pour ce r\u00E9glage\u00A0; seul le point du localisateur est affich\u00E9.',
     'btn.listen': '\u00C9couter',
     'btn.listening': '\u00C0 l\u2019\u00E9coute\u2026',
     'btn.next': 'Impulsion suivante',
@@ -297,6 +302,7 @@
     'eval.p3': 'Les six hypoth\u00E8ses inscrites dans le protocole fig\u00E9 se v\u00E9rifient, avec des intervalles appari\u00E9s au-dessus de z\u00E9ro\u00A0: le localisateur se d\u00E9grade sur sol in\u00E9gal (+0,65 [+0,53, +0,78] case), avec bruit fort (+0,90 [+0,69, +1,13]), avec 4 capteurs au lieu de 8 (+0,13 [+0,07, +0,18]) et pour les clameurs (+0,33 [+0,27, +0,39]). Le co\u00FBt de n\u2019avoir que 4 capteurs est r\u00E9el mais faible.',
     'eval.p4': 'Un r\u00E9sultat n\u00E9gatif\u00A0: la zone \u00E0 90\u00A0% du localisateur n\u2019est calibr\u00E9e que dans 2 r\u00E9glages sur 16. Sur sol calme et uniforme, elle contient le d\u00E9part 99,5\u00A0% du temps (trop large)\u00A0; avec bruit fort sur sol in\u00E9gal, seulement 59,0\u00A0% (trop \u00E9troite). Une seule taille de zone ne convient pas \u00E0 tous les r\u00E9glages. Sans bruit, les arriv\u00E9es avancent de 0,488 case par tic, alors que la meilleure vitesse du localisateur \u00E9tait 0,46\u00A0; le rapport ne teste pas la cause de cet \u00E9cart.',
     'eval.p5': 'Tout ceci concerne une petite simulation synth\u00E9tique et son propre jeu, pas un vrai sol, de vraies ondes de pression, l\u2019holographie ni aucun syst\u00E8me physique. Une seule commande r\u00E9g\u00E9n\u00E8re tous les chiffres\u00A0: node scripts/pulse-check.js --write (et --verify pour v\u00E9rifier). D\u00E9tails\u00A0: docs/PULSE.md et docs/pulse-check.txt.',
+    'eval.v035': 'Version exp\u00E9rimentale v0.3.5\u00A0: l\u2019indice essaie maintenant une zone \u00E0 90\u00A0% distincte pour chaque r\u00E9glage, avec 200 impulsions de calibration et 400 impulsions r\u00E9serv\u00E9es in\u00E9dites par r\u00E9glage. Sur ce nouveau test, le nombre d\u2019intervalles de Wilson contenant 90\u00A0% passe de 1/16 avec l\u2019ancienne taille partag\u00E9e \u00E0 11/16 avec les nouvelles tailles, mais plusieurs r\u00E9glages manquent encore la cible. Dans le r\u00E9glage par d\u00E9faut, la couverture est de 85,8\u00A0% [82,0\u00A0%, 88,8\u00A0%]. Pour win/4/loud/patchy, 20/200 impulsions de calibration ont bascul\u00E9 vers le centre, donc aucune zone finie n\u2019a pu \u00EAtre ajust\u00E9e\u00A0; 7,0\u00A0% [4,9\u00A0%, 9,9\u00A0%] des impulsions de test ont aussi bascul\u00E9 vers le centre. La moyenne descriptive par r\u00E9glage est de 85,3\u00A0% pour les nouvelles zones contre 90,1\u00A0% avec l\u2019ancienne taille partag\u00E9e. Cette version ne garantit pas une couverture de 90\u00A0% dans tous les r\u00E9glages. D\u00E9tails\u00A0: docs/pulse-region-check-v035.txt.',
 
     'foot.license': 'Membrane Arena. Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only. Hors ligne, aucune requ\u00EAte r\u00E9seau, rien n\'est stock\u00E9.'
   };

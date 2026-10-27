@@ -26,6 +26,7 @@
   var REVEAL_TPS = 11;                     // slower while the ripple is replayed, so the rings can be followed
   var REVEAL_END = 92;                     // the reveal stops here: the first pass across the grid, before the walls' echoes pile up
   var CAL = PU.calib();
+  var REGION_CAL = window.ArenaPulseRegionCalib || null;
   var mode = 'play', phase = 'idle', run = null, A = null, entry = null, tick = 0, speed = 2, hintOn = false;
   var marker = null, raf = 0, lastTs = 0, freeSim = null, freeN = 0, freePatchy = false;
   var FREE_PATCH = PU.spec('free-patch').patch;
@@ -269,7 +270,18 @@
     $('end').hidden = true;
     loadPulse(); setHash(); renderAll();
   }
-  function loadPulse() { A = PU.preparePulse(run, run.log.length, CAL); phase = 'idle'; tick = 0; marker = null; entry = null; resize(); }
+  function loadPulse() {
+    A = PU.preparePulse(run, run.log.length, CAL);
+    if (REGION_CAL && REGION_CAL.calibrated && REGION_CAL.rhoBySetting) {
+      var id = PU.settingId(A.setting);
+      if (Object.prototype.hasOwnProperty.call(REGION_CAL.rhoBySetting, id)) {
+        var rho = REGION_CAL.rhoBySetting[id];
+        A.region = Number.isFinite(rho) ? PU.region(A.sensors, A.arrivals, CAL.c, rho, A.loc) : { cells: [], area: 0 };
+        A.covered = Number.isFinite(rho) && PU.covers(A.sensors, A.arrivals, CAL.c, rho, A.loc, A.target);
+      }
+    }
+    phase = 'idle'; tick = 0; marker = null; entry = null; resize();
+  }
   function listen() {
     if (mode !== 'play' || phase !== 'idle') return;
     phase = 'listen'; tick = 0;
@@ -353,6 +365,8 @@
     text($('hud-locator'), String(s.locator));
     var b = mode === 'free' ? t('banner.free') : stage ? t('banner.' + stage.id) : '';
     if (!CAL.calibrated) b += ' ' + t('banner.nocalib');
+    if (!REGION_CAL || !REGION_CAL.calibrated) b += ' ' + t('banner.noregion');
+    else if (A && REGION_CAL.rhoBySetting && Object.prototype.hasOwnProperty.call(REGION_CAL.rhoBySetting, PU.settingId(A.setting)) && REGION_CAL.rhoBySetting[PU.settingId(A.setting)] === null) b += ' ' + t('banner.regionfit');
     text($('banner'), b);
   }
   function renderControls() {
@@ -417,7 +431,7 @@
     text(document.querySelector('[data-i18n="how.p2"]'), t('how.p2', { k: CAL.k }));
     document.title = t('page.title');
     document.querySelector('.hud').setAttribute('aria-label', t('sec.game'));
-    text($('footer-version'), 'pulse ' + PU.VERSION + ' / arena ' + G.BUILD);
+    text($('footer-version'), 'pulse regions 0.3.5 / engine ' + PU.VERSION + ' / arena ' + G.BUILD);
     setHash(); renderAll(); draw();
   }
   /* ---------- input ---------- */
@@ -474,7 +488,7 @@
   if (reduce) { speed = 4; $('speed').value = '4'; }
   // read-only state for the headless-browser check
   window.WavePulseState = function () {
-    return { mode: mode, phase: phase, tick: tick, idx: run.log.length, marker: marker, hint: hintOn, calibrated: !!CAL.calibrated,
+    return { mode: mode, phase: phase, tick: tick, idx: run.log.length, marker: marker, hint: hintOn, calibrated: !!CAL.calibrated, regionCalibrated: !!(REGION_CAL && REGION_CAL.calibrated),
       points: PU.summarize(run.log).points, locatorPoints: PU.summarize(run.log).locator,
       log: run.log.map(function (e) { return { points: e.points, err: e.err, locPoints: e.locator.points, kind: e.setting.kind }; }),
       grid: L ? { x: L.gx, y: L.gy, cs: L.cs } : null, setting: A ? A.setting : null, arrivals: A ? A.arrivals.slice() : null,

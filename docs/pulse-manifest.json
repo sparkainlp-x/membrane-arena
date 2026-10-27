@@ -466,8 +466,8 @@
   "seed": "pulse-permutation"
  },
  "inputs": {
-  "game.js": "3f629da89653febff50fc16355f5b60b4383ec3efeb7da5170911730c645626f",
-  "pulse.js": "48d9c3edece29e52f7048c93baa31c5b0c766639815768c59ab95e766a9d1978",
+  "game.js": "077fa7ca6ce5fb62ed51b87a7bdb32c4b6bc79c5c569d49a4c4d4abfb716dc03",
+  "pulse.js": "c6591e5725ed67b10f10a031dda51ac14ea8fba22247c1759dca94e3ceeed789",
   "scripts/pulse-check.js": "3a1215413828acbeb0bd2530174069d360e88de46b77325fdafd0e987ced2051",
   "docs/PULSE-PROTOCOL.md": "50eec68a3043851ac308b113e3916eedc8c5522f8b08819763d7917ae4ba214e"
  },

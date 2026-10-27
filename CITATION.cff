@@ -7,8 +7,8 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.3.4
-date-released: 2026-10-25
+version: 0.3.5
+date-released: 2026-10-26
 license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
 identifiers:
@@ -44,11 +44,14 @@ abstract: >-
   the player is the second vote of the shield, with a logistic coach fitted
   on calibration runs and frozen, evaluated under its own frozen protocol on
   200 held-out runs, and replay codes checked by replaying the seed.
-  Wave Pulse sends a ripple across a 40 x 26 damped wave grid and asks the
-  player to locate its start from edge-sensor arrival times, against a
-  least-squares locator calibrated on 200 pulses and evaluated under its
-  own frozen protocol on 200 held-out pulses in 16 settings (nothing
-  models a real floor, pressure waves or holography).
+  Wave Pulse keeps the v0.3.4 locator and point estimate, and adds per-setting
+  cost allowances for its nominal 90% region. These were fitted on 200 new
+  calibration pulses and evaluated on 400 fresh held-out pulses per setting
+  under a separate frozen protocol. The experimental result is mixed: 11 of
+  16 per-setting Wilson intervals contain 90%, default coverage is 85.8%
+  [82.0%, 88.8%], and one setting has no finite region after 20 of 200
+  calibration pulses fell back. This does not establish 90% coverage across
+  all settings; no real floor, pressure waves or holography are modeled.
   Classical simulation only.
 keywords:
   - "scientific-reasoning"

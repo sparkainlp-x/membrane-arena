@@ -16,12 +16,13 @@ function playAll(seed, pick) {
   return run;
 }
 
-test('grid and settings: 40 x 26 cells, 16 settings, the version is the project version', () => {
+test('grid and settings: 40 x 26 cells, 16 settings, the locator engine stays pinned to v0.3.4', () => {
   assert.equal(P.W, 40); assert.equal(P.H, 26); assert.equal(P.NC, 1040);
   assert.equal(P.SETTINGS.length, 16);
   assert.equal(new Set(P.SETTINGS.map(P.settingId)).size, 16);
   assert.equal(P.settingId(P.DEFAULT_SETTING), 'win/8/calm/even');
-  assert.equal(P.VERSION, G.VERSION);
+  assert.equal(P.VERSION, '0.3.4');
+  assert.equal(G.VERSION, '0.3.5');
   // the courant number stays below the 2-D stability limit of the explicit scheme
   assert.ok(P.C_NOMINAL * P.C_NOMINAL <= 0.5);
 });

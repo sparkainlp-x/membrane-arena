@@ -1,0 +1,32 @@
+Membrane Arena 0.3.5: Wave Pulse 90% region recalibration (SYNTHETIC simulation)
+Protocol docs/PULSE-REGION-PROTOCOL-v035.md, SHA-256 458f76b5bb93ad16ef35c98ccb50d519bf8919ca6c93db852cb9a19d12384161
+Regenerate: node scripts/pulse-region-check.js --write   Verify: node scripts/pulse-region-check.js --verify
+v0.3.4 engine retained: k = 7, c = 0.46, old shared rho = 181.726 ticks^2.
+Calibration: pcal35-000 to pcal35-199 (200 seeds x 16 settings).
+Fresh held-out evaluation: ptest35-000 to ptest35-399 (400 seeds x 16 settings).
+The selected allowance is order statistic 181 of 200, including fallback pulses as infinite residuals; finite values round upward to 0.001.
+Unconditional coverage intervals and fallback-rate intervals are two-sided 95% Wilson intervals.
+
+Fresh held-out coverage by setting (90% check is descriptive; interval contains 90%):
+setting                 rho35    cal fb  unconditional [95% Wilson]  90%?  conditional  fallback [95% Wilson]  area/locatable  old rho coverage [95% Wilson]
+win/8/calm/even         16.102   0       85.8% [82.0%, 88.8%]           no    85.8%        0.0% [0.0%, 1.0%]         3.09            99.8% [98.6%, 100.0%]
+win/8/calm/patchy       125.975  0       93.8% [90.9%, 95.7%]           no    93.8%        0.0% [0.0%, 1.0%]         25.23           97.0% [94.8%, 98.3%]
+win/8/loud/even         217.524  0       92.8% [89.8%, 94.9%]           yes   92.8%        0.0% [0.0%, 1.0%]         47.52           91.5% [88.4%, 93.9%]
+win/8/loud/patchy       784.286  0       97.5% [95.5%, 98.6%]           no    97.5%        0.0% [0.0%, 1.0%]         158.08          65.3% [60.5%, 69.8%]
+win/4/calm/even         15.714   0       85.8% [82.0%, 88.8%]           no    85.8%        0.0% [0.0%, 1.0%]         5.91            99.5% [98.2%, 99.9%]
+win/4/calm/patchy       82.513   0       91.8% [88.6%, 94.1%]           yes   91.8%        0.0% [0.0%, 1.0%]         31.40           98.8% [97.1%, 99.5%]
+win/4/loud/even         9.551    0       90.3% [86.9%, 92.8%]           yes   90.5%        0.3% [0.0%, 1.4%]         3.75            97.3% [95.1%, 98.5%]
+win/4/loud/patchy       n/a      20      0.0% [0.0%, 1.0%]              no    0.0%         7.0% [4.9%, 9.9%]         0.00            73.8% [69.2%, 77.8%]
+cheer/8/calm/even       50.881   0       91.3% [88.1%, 93.6%]           yes   91.3%        0.0% [0.0%, 1.0%]         9.84            99.3% [97.8%, 99.7%]
+cheer/8/calm/patchy     122.153  0       92.5% [89.5%, 94.7%]           yes   92.5%        0.0% [0.0%, 1.0%]         24.34           96.8% [94.5%, 98.1%]
+cheer/8/loud/even       349.820  0       90.8% [87.5%, 93.2%]           yes   90.8%        0.0% [0.0%, 1.0%]         74.60           84.3% [80.4%, 87.5%]
+cheer/8/loud/patchy     638.949  0       92.3% [89.2%, 94.5%]           yes   92.3%        0.0% [0.0%, 1.0%]         123.00          69.0% [64.3%, 73.3%]
+cheer/4/calm/even       32.784   0       87.3% [83.6%, 90.2%]           yes   87.3%        0.0% [0.0%, 1.0%]         12.35           99.5% [98.2%, 99.9%]
+cheer/4/calm/patchy     90.128   0       92.0% [88.9%, 94.3%]           yes   92.0%        0.0% [0.0%, 1.0%]         34.06           98.3% [96.4%, 99.1%]
+cheer/4/loud/even       57.774   1       88.8% [85.3%, 91.5%]           yes   89.4%        0.8% [0.3%, 2.2%]         22.62           93.5% [90.6%, 95.5%]
+cheer/4/loud/patchy     658.033  12      92.8% [89.8%, 94.9%]           yes   96.4%        3.8% [2.3%, 6.1%]         210.86          78.8% [74.5%, 82.5%]
+
+Settings whose fresh Wilson interval contains 90%: v0.3.5 11/16; shared v0.3.4 allowance on the same fresh pulses 1/16.
+Mean setting coverage (descriptive macro-average; not a pooled confidence interval): v0.3.5 85.3%; v0.3.4 90.1%.
+All findings concern this synthetic game simulation only.
+Copyright (c) 2026 Jean-François Brisson, Spark AI NLP. AGPL-3.0-only.
