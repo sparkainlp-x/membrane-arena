@@ -192,6 +192,10 @@ See [DESIGN.md](DESIGN.md) and [CHANGELOG.md](CHANGELOG.md).
 
 Lineage: `game.js` is a port of crystallization-contest, whose helper functions come from membrane-crystallization, which began as a package received under Mun Seok Lee's name. The game design, interface, scoring and lesson text are this project's own. Mun Seok Lee is acknowledged for that earlier package only: he is not an author of this release and has not reviewed or endorsed it.
 
+- Brisson, J.-F. Membrane Arena v0.3.5. https://doi.org/10.5281/zenodo.23680525
+- Brisson, J.-F. Membrane Arena v0.3.4. https://doi.org/10.5281/zenodo.23647863
+- Brisson, J.-F. Membrane Arena v0.3.3. https://doi.org/10.5281/zenodo.23645840
+- Brisson, J.-F. Membrane Arena v0.3.2. https://doi.org/10.5281/zenodo.23644414
 - Brisson, J.-F. Membrane Arena v0.3.1. https://doi.org/10.5281/zenodo.23642469
 - Brisson, J.-F. Membrane Arena v0.3.0. https://doi.org/10.5281/zenodo.23639631
 - Brisson, J.-F. Membrane Arena v0.2.0. https://doi.org/10.5281/zenodo.23633127
