@@ -1,6 +1,6 @@
 {
  "version": "0.3.3",
- "checkedWith": "0.3.5",
+ "checkedWith": "0.3.6",
  "generator": "membrane-arena/watch/v1/",
  "command": "node scripts/watch-check.js --write",
  "seeds": {
@@ -434,7 +434,7 @@
  },
  "protocolSha256": "fcb3adfce65c9e0d22b881404f7ad7642d94a0949bc4cfc35c2732d434fd684c",
  "inputs": {
-  "game.js": "8e8bbd1e640b57d99a53a89b2de3d09a1901a061afad6a4d97521ccfe8857ff3",
+  "game.js": "67027fe443569c133e1c436e6fde88e21c536b0f212d34f2ca21eb10984750e4",
   "reverse.js": "b8a8d1710b967df8d8b5f0bff4ced003a216e275fd95ee000242642b78ac4b34",
   "pair.js": "5a3f6c94a6754d38c266da0908a3c2ca31893749d206ce37e8d143a90af1cd45",
   "watch.js": "3bc97c93223958fe74b161c36b42d98c65fee29fdf5b4019ab44e4660abc4d99",

@@ -7,14 +7,10 @@ authors:
     given-names: "Jean-François"
     orcid: "https://orcid.org/0009-0000-9778-5374"
     affiliation: "Spark AI NLP, Fredericton, New Brunswick, Canada"
-version: 0.3.5
-date-released: 2026-10-26
+version: 0.3.6
+date-released: 2026-11-07
 license: AGPL-3.0-only
 doi: "10.5281/zenodo.23633126"
-identifiers:
-  - type: doi
-    value: "10.5281/zenodo.23680525"
-    description: "Version 0.3.5"
 repository-code: "https://github.com/sparkainlp-x/membrane-arena"
 abstract: >-
   SYNTHETIC educational game, zero dependencies, offline, English and French.
@@ -52,6 +48,7 @@ abstract: >-
   [82.0%, 88.8%], and one setting has no finite region after 20 of 200
   calibration pulses fell back. This does not establish 90% coverage across
   all settings; no real floor, pressure waves or holography are modeled.
+  The Lab adds a grounds-to-decide mission (commit, request a measurement, or abstain) and two checks: a shield-strictness sweep showing no voting rule separates a shared artifact from a real signal, and a behavioral-fingerprint comparison showing no behavioral feature does either. The committee overcommits on the artifact, and strictness backfires.
   Classical simulation only.
 keywords:
   - "scientific-reasoning"

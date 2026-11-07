@@ -22,7 +22,7 @@ test('grid and settings: 40 x 26 cells, 16 settings, the locator engine stays pi
   assert.equal(new Set(P.SETTINGS.map(P.settingId)).size, 16);
   assert.equal(P.settingId(P.DEFAULT_SETTING), 'win/8/calm/even');
   assert.equal(P.VERSION, '0.3.4');
-  assert.equal(G.VERSION, '0.3.5');
+  assert.equal(G.VERSION, '0.3.6');
   // the courant number stays below the 2-D stability limit of the explicit scheme
   assert.ok(P.C_NOMINAL * P.C_NOMINAL <= 0.5);
 });
