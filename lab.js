@@ -170,6 +170,63 @@
     return { n: K, beta: beta, signal: signal, artifact: artifact, measure: measure,
       settings: { th: s.th, c: s.c, g: s.g } };
   }
+  // Two arms at the repository starting parameters, each K episodes, seeded:
+  // a real signal and a shared artifact as strong as a real pattern (beta = 1).
+  // In every arm the shield's verdict is the game's own 2-of-3 rule. When the
+  // shield passes, it requests a reference measurement: M independent samples
+  // from a second channel that sees the environment but NOT the disturbance.
+  // A real signal is in the environment, so it appears in both channels; an
+  // artifact lives only in the membranes' channel, so the reference channel
+  // sees noise. The probe measures the declared vector's mean energy ratio in
+  // the reference samples and confirms it when that energy reaches the game's
+  // own declaration threshold (scaledThreshold). The shield has grounds only
+  // if the reference confirms the signal and does not confirm the artifact.
+  // Sanity (200 episodes, M = 20): signal mean energy ratio 5.55, confirm
+  // 98.5%; artifact mean energy ratio 1.00, confirm 0.0%. See
+  // docs/REFERENCE-CHANNEL.md.
+  function referenceProbe(settings, K, seedTag, beta, M) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/reference/' + (seedTag || 'repo'));
+    beta = beta === undefined ? 1 : beta;
+    M = M === undefined ? 20 : M;
+    var thr = G.scaledThreshold(s.th, n, sigma);
+    function arm(patFn, refPatFn, P) {
+      var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, confirm = 0, totalDecl = 0, e;
+      for (e = 0; e < K; e++) {
+        var made = patFn(), pat = made.pat, ref = made.ref;
+        var trace = new Float32Array(G.STEPS * 3);
+        var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+        var nDecl = d.filter(Boolean).length;
+        totalDecl += nDecl;
+        if (nDecl >= 1) decl1++;
+        if (nDecl >= 2) decl2++;
+        var passed = G.systemEvent(d, G.AGREE);
+        if (passed !== null) {
+          pass++;
+          if (ref && G.fidelity(d[passed], ref) >= G.TRUTH) passMatch++;
+          var refPat = refPatFn(ref);
+          var sum = 0, m;
+          for (m = 0; m < M; m++) {
+            var x = refPat ? G.noisy(refPat, sigma, rng) : G.rvec(n, rng);
+            var y = G.inner(x, d[passed]);
+            sum += y.re * y.re + y.im * y.im;
+          }
+          if (n * sum / M >= thr) confirm++;
+        }
+      }
+      return { decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, confirm: confirm, meanDecl: totalDecl / K,
+        passRate: pass / K, passMatchRate: passMatch / K, confirmRate: pass ? confirm / pass : 0, decideRate: confirm / K,
+        decideCI: ST.wilson(confirm, K) };
+    }
+    function artifactPat() {
+      var art = G.rvec(n, rng);
+      return { pat: { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) }, ref: art };
+    }
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var signal = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, function (ref) { return ref; }, P);
+    var artifact = arm(artifactPat, function () { return null; }, P);
+    return { n: K, beta: beta, M: M, threshold: thr, signal: signal, artifact: artifact,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -376,7 +433,8 @@
     { id: 'repo', kind: 'ens', minN: 20 },
     { id: 'play', kind: 'play' },
     { id: 'disturbance', kind: 'disturb', minN: 100 },
-    { id: 'grounds', kind: 'grounds', minN: 100 }
+    { id: 'grounds', kind: 'grounds', minN: 100 },
+    { id: 'reference', kind: 'reference', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -430,6 +488,21 @@
       var ps = g.signal.pass / g.n, pa = g.artifact.pass / g.n;
       var out = (ps > 0.5 && pa < 0.5) ? 'grounds' : (pa > 0.5 ? 'overcommits' : 'abstains');
       return { counts: true, outcome: out, detail: { n: g.n, signal: g.signal.pass, signalRate: ps, artifact: g.artifact.pass, artifactRate: pa, measure: g.measure.pass, measureRate: g.measure.pass / g.n } };
+    }
+    if (m.kind === 'reference') {
+      // The described run is 100 episodes per arm with a full-strength shared
+      // artifact (beta = 1) at the repository starting parameters. Anything
+      // else does not count. The shield has grounds only if the reference
+      // channel confirms the signal and does not confirm the artifact; a
+      // confirmed artifact is overcommitting, a confirmed neither is abstaining.
+      var rf = data.result;
+      if (!rf || rf.n < m.minN || rf.beta !== 1 || !rf.settings ||
+          rf.settings.th !== REPO_START.th || rf.settings.c !== REPO_START.c || rf.settings.g !== REPO_START.g ||
+          !rf.signal || !rf.artifact)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var ds = rf.signal.confirm / rf.n, da = rf.artifact.confirm / rf.n;
+      var rout = (ds > 0.5 && da < 0.5) ? 'grounds' : (da > 0.5 ? 'overcommits' : 'abstains');
+      return { counts: true, outcome: rout, detail: { n: rf.n, signal: rf.signal.confirm, signalRate: ds, artifact: rf.artifact.confirm, artifactRate: da } };
     }
     return null;
   }
@@ -563,10 +636,14 @@
     if (!r || !r.n || !r.signal || !r.artifact || !r.measure) return t('alt.empty');
     return t('alt.ground', { n: r.n, s: pct(r.signal.passRate), a: pct(r.artifact.passRate), m: pct(r.measure.passRate) });
   }
+  function describeReference(t, r) {
+    if (!r || !r.n || !r.signal || !r.artifact) return t('alt.empty');
+    return t('alt.reference', { n: r.n, s: pct(r.signal.decideRate), a: pct(r.artifact.decideRate) });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, referenceProbe: referenceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
@@ -574,6 +651,6 @@
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
     describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
-    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds
+    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds, describeReference: describeReference
   };
 });

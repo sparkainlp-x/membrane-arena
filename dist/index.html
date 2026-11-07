@@ -412,6 +412,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
             <p id="ground-alt" class="alt"></p>
           </div>
         </figure>
+        <figure class="inst">
+          <h3 id="h-lab-reference" data-i18n="lab.reference.title"></h3>
+          <p class="hint" data-i18n="lab.reference.help"></p>
+          <div class="row">
+            <button id="btn-reference-run" class="btn primary small" type="button" data-i18n="lab.reference.run"></button>
+          </div>
+          <p class="small-text"><span id="reference-status" role="status"></span></p>
+          <p id="reference-empty" class="hint" data-i18n="lab.reference.empty"></p>
+          <div id="reference-out" hidden>
+            <div class="tablewrap"><table id="reference-table" class="scores"></table></div>
+            <p id="reference-note" class="hint"></p>
+            <p id="reference-alt" class="alt"></p>
+          </div>
+        </figure>
         </div>
         <figure class="inst wide">
           <h3 id="h-sci" data-i18n="sci.title"></h3>
@@ -895,7 +909,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
   var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
   var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
   var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
-  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance', 'grounds'];
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance', 'grounds', 'reference'];
   var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below', 'certifies', 'holds', 'grounds', 'overcommits', 'abstains'];
   var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
@@ -1691,6 +1705,63 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     return { n: K, beta: beta, signal: signal, artifact: artifact, measure: measure,
       settings: { th: s.th, c: s.c, g: s.g } };
   }
+  // Two arms at the repository starting parameters, each K episodes, seeded:
+  // a real signal and a shared artifact as strong as a real pattern (beta = 1).
+  // In every arm the shield's verdict is the game's own 2-of-3 rule. When the
+  // shield passes, it requests a reference measurement: M independent samples
+  // from a second channel that sees the environment but NOT the disturbance.
+  // A real signal is in the environment, so it appears in both channels; an
+  // artifact lives only in the membranes' channel, so the reference channel
+  // sees noise. The probe measures the declared vector's mean energy ratio in
+  // the reference samples and confirms it when that energy reaches the game's
+  // own declaration threshold (scaledThreshold). The shield has grounds only
+  // if the reference confirms the signal and does not confirm the artifact.
+  // Sanity (200 episodes, M = 20): signal mean energy ratio 5.55, confirm
+  // 98.5%; artifact mean energy ratio 1.00, confirm 0.0%. See
+  // docs/REFERENCE-CHANNEL.md.
+  function referenceProbe(settings, K, seedTag, beta, M) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/reference/' + (seedTag || 'repo'));
+    beta = beta === undefined ? 1 : beta;
+    M = M === undefined ? 20 : M;
+    var thr = G.scaledThreshold(s.th, n, sigma);
+    function arm(patFn, refPatFn, P) {
+      var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, confirm = 0, totalDecl = 0, e;
+      for (e = 0; e < K; e++) {
+        var made = patFn(), pat = made.pat, ref = made.ref;
+        var trace = new Float32Array(G.STEPS * 3);
+        var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+        var nDecl = d.filter(Boolean).length;
+        totalDecl += nDecl;
+        if (nDecl >= 1) decl1++;
+        if (nDecl >= 2) decl2++;
+        var passed = G.systemEvent(d, G.AGREE);
+        if (passed !== null) {
+          pass++;
+          if (ref && G.fidelity(d[passed], ref) >= G.TRUTH) passMatch++;
+          var refPat = refPatFn(ref);
+          var sum = 0, m;
+          for (m = 0; m < M; m++) {
+            var x = refPat ? G.noisy(refPat, sigma, rng) : G.rvec(n, rng);
+            var y = G.inner(x, d[passed]);
+            sum += y.re * y.re + y.im * y.im;
+          }
+          if (n * sum / M >= thr) confirm++;
+        }
+      }
+      return { decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, confirm: confirm, meanDecl: totalDecl / K,
+        passRate: pass / K, passMatchRate: passMatch / K, confirmRate: pass ? confirm / pass : 0, decideRate: confirm / K,
+        decideCI: ST.wilson(confirm, K) };
+    }
+    function artifactPat() {
+      var art = G.rvec(n, rng);
+      return { pat: { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) }, ref: art };
+    }
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var signal = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, function (ref) { return ref; }, P);
+    var artifact = arm(artifactPat, function () { return null; }, P);
+    return { n: K, beta: beta, M: M, threshold: thr, signal: signal, artifact: artifact,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -1897,7 +1968,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     { id: 'repo', kind: 'ens', minN: 20 },
     { id: 'play', kind: 'play' },
     { id: 'disturbance', kind: 'disturb', minN: 100 },
-    { id: 'grounds', kind: 'grounds', minN: 100 }
+    { id: 'grounds', kind: 'grounds', minN: 100 },
+    { id: 'reference', kind: 'reference', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -1951,6 +2023,21 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       var ps = g.signal.pass / g.n, pa = g.artifact.pass / g.n;
       var out = (ps > 0.5 && pa < 0.5) ? 'grounds' : (pa > 0.5 ? 'overcommits' : 'abstains');
       return { counts: true, outcome: out, detail: { n: g.n, signal: g.signal.pass, signalRate: ps, artifact: g.artifact.pass, artifactRate: pa, measure: g.measure.pass, measureRate: g.measure.pass / g.n } };
+    }
+    if (m.kind === 'reference') {
+      // The described run is 100 episodes per arm with a full-strength shared
+      // artifact (beta = 1) at the repository starting parameters. Anything
+      // else does not count. The shield has grounds only if the reference
+      // channel confirms the signal and does not confirm the artifact; a
+      // confirmed artifact is overcommitting, a confirmed neither is abstaining.
+      var rf = data.result;
+      if (!rf || rf.n < m.minN || rf.beta !== 1 || !rf.settings ||
+          rf.settings.th !== REPO_START.th || rf.settings.c !== REPO_START.c || rf.settings.g !== REPO_START.g ||
+          !rf.signal || !rf.artifact)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var ds = rf.signal.confirm / rf.n, da = rf.artifact.confirm / rf.n;
+      var rout = (ds > 0.5 && da < 0.5) ? 'grounds' : (da > 0.5 ? 'overcommits' : 'abstains');
+      return { counts: true, outcome: rout, detail: { n: rf.n, signal: rf.signal.confirm, signalRate: ds, artifact: rf.artifact.confirm, artifactRate: da } };
     }
     return null;
   }
@@ -2084,10 +2171,14 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     if (!r || !r.n || !r.signal || !r.artifact || !r.measure) return t('alt.empty');
     return t('alt.ground', { n: r.n, s: pct(r.signal.passRate), a: pct(r.artifact.passRate), m: pct(r.measure.passRate) });
   }
+  function describeReference(t, r) {
+    if (!r || !r.n || !r.signal || !r.artifact) return t('alt.empty');
+    return t('alt.reference', { n: r.n, s: pct(r.signal.decideRate), a: pct(r.artifact.decideRate) });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, referenceProbe: referenceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
@@ -2095,7 +2186,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
     describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
-    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds
+    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds, describeReference: describeReference
   };
 });
 </script>
@@ -2408,6 +2499,19 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'ground.row.artifact': 'Shared artifact',
     'ground.row.measure': 'Artifact, coupling off (requested measurement)',
     'ground.note': 'Commit on the signal, abstain on the artifact: that is knowing when the committee has grounds. Measured on this code the shield commits on both, and switching the coupling off does not separate the causes — see docs/GROUNDS-TO-DECIDE.md.',
+    'lab.reference.title': 'Reference channel',
+    'lab.reference.help': 'Two arms at the repository starting parameters, each 100 episodes, seeded: a real signal and a shared artifact as strong as a real pattern. When the shield passes, it requests a reference measurement: 20 samples from a second channel that sees the environment but not the disturbance. A real signal is in the environment, so it appears in both channels; an artifact lives only in the membranes’ channel. The reference confirms the declared pattern when its mean energy reaches the game’s own declaration threshold.',
+    'lab.reference.run': 'Run 200 episodes',
+    'lab.reference.running': 'Running…',
+    'lab.reference.done': 'Done: {n} episodes per arm in {sec} s.',
+    'lab.reference.empty': 'Not run yet.',
+    'reference.col.arm': 'Arm',
+    'reference.col.pass': 'Shield pass',
+    'reference.col.confirm': 'Reference confirms',
+    'reference.col.decide': 'Decides',
+    'reference.row.signal': 'Real signal',
+    'reference.row.artifact': 'Shared artifact',
+    'reference.note': 'Commit on the signal, abstain on the artifact: that is having grounds. Measured on this code the reference confirms the signal and never the artifact — see docs/REFERENCE-CHANNEL.md.',
     'lab.export.title': 'Export this contest',
     'lab.export.csv': 'Contest CSV',
     'lab.export.json': 'Contest JSON',
@@ -2524,6 +2628,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'mis.disturbance.brief': 'Run 100 episodes where all three membranes see noisy copies of one shared artifact, as strong as a real pattern. Measured on this code, the shield passed it in 96.6 percent of episodes — the same rate as a real signal. See whether it holds here.',
     'mis.grounds.title': 'Know when to decide',
     'mis.grounds.brief': 'Run 300 episodes: a real signal, a shared artifact, and the artifact with coupling off. The committee has grounds only if it commits on the signal and abstains on the artifact. Measured on this code, it commits on both — signal 95.5 percent, artifact 96.6 percent, coupling off 94.0 percent.',
+    'mis.reference.title': 'Ask the reference',
+    'mis.reference.brief': 'Run 200 episodes: a real signal and a shared artifact. When the shield passes, a reference channel that sees the environment but not the disturbance is asked whether the declared pattern is really there. The shield has grounds only if the reference confirms the signal and not the artifact. Measured on this code, it confirms the signal 94 percent of the time and the artifact never.',
     'out.reproduced': 'reproduced: fewer false outputs with the shield (interval excludes 0)',
     'out.not_reproduced': 'not reproduced at this sample size',
     'out.found': 'found: individual reward lags on {metrics}',
@@ -2581,7 +2687,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'alt.ens_nobase': 'The repository has no measurement for this combination.',
     'alt.ab': '{n} paired seeds, A minus B. True outputs {T}; false outputs {F}; precision {P}; game score {S}. A scored higher on {wins} of {n} seeds.',
     'alt.dist': 'Shared disturbance, {n} episodes: the shield passed {p} (95 percent Wilson interval {lo} to {hi}); {m} of the passes matched the artifact.',
-    'alt.ground': 'Grounds to decide, {n} episodes per arm: real signal {s} shield pass, shared artifact {a}, artifact with coupling off {m}.'
+    'alt.ground': 'Grounds to decide, {n} episodes per arm: real signal {s} shield pass, shared artifact {a}, artifact with coupling off {m}.',
+    'alt.reference': 'Reference channel, {n} episodes per arm: real signal decides {s}, shared artifact decides {a}.'
   };
 
   var fr = {
@@ -2880,6 +2987,19 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'ground.row.artifact': 'Artefact partagé',
     'ground.row.measure': 'Artefact, couplage coupé (mesure demandée)',
     'ground.note': 'S\'engager sur le signal, s\'abstenir sur l\'artefact : c\'est savoir quand le comité a des motifs. Mesuré sur ce code, le bouclier s\'engage sur les deux, et couper le couplage ne sépare pas les causes — voir docs/GROUNDS-TO-DECIDE.md.',
+    'lab.reference.title': 'Canal de référence',
+    'lab.reference.help': 'Deux volets avec les paramètres de départ du dépôt, 100 épisodes chacun, avec graine fixe : un vrai signal et un artefact partagé aussi fort qu\'un vrai motif. Quand le bouclier passe, il demande une mesure de référence : 20 échantillons d\'un second canal qui voit l\'environnement mais pas la perturbation. Un vrai signal est dans l\'environnement, donc il apparaît dans les deux canaux ; un artefact ne vit que dans le canal des membranes. La référence confirme le motif déclaré quand son énergie moyenne atteint le seuil de déclaration du jeu.',
+    'lab.reference.run': 'Lancer 200 épisodes',
+    'lab.reference.running': 'En cours…',
+    'lab.reference.done': 'Terminé : {n} épisodes par volet en {sec} s.',
+    'lab.reference.empty': 'Pas encore lancé.',
+    'reference.col.arm': 'Volet',
+    'reference.col.pass': 'Passage du bouclier',
+    'reference.col.confirm': 'Référence confirme',
+    'reference.col.decide': 'Décide',
+    'reference.row.signal': 'Vrai signal',
+    'reference.row.artifact': 'Artefact partagé',
+    'reference.note': 'S\'engager sur le signal, s\'abstenir sur l\'artefact : c\'est avoir des motifs. Mesuré sur ce code, la référence confirme le signal et jamais l\'artefact — voir docs/REFERENCE-CHANNEL.md.',
     'lab.export.title': 'Exporter ce concours',
     'lab.export.csv': 'CSV du concours',
     'lab.export.json': 'JSON du concours',
@@ -2996,6 +3116,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'mis.disturbance.brief': 'Lancez 100 épisodes où les trois membranes voient des copies bruitées d\'un même artefact, aussi fort qu\'un vrai motif. Mesuré sur ce code, le bouclier l\'a laissé passer dans 96,6 pour cent des épisodes — le même taux qu\'un vrai signal. Voyez s\'il tient ici.',
     'mis.grounds.title': 'Savoir quand décider',
     'mis.grounds.brief': 'Lancez 300 épisodes : un vrai signal, un artefact partagé, et l\'artefact avec le couplage coupé. Le comité a des motifs seulement s\'il s\'engage sur le signal et s\'abstient sur l\'artefact. Mesuré sur ce code, il s\'engage sur les deux — signal 95,5 pour cent, artefact 96,6 pour cent, couplage coupé 94,0 pour cent.',
+    'mis.reference.title': 'Demander à la référence',
+    'mis.reference.brief': 'Lancez 200 épisodes : un vrai signal et un artefact partagé. Quand le bouclier passe, un canal de référence qui voit l\'environnement mais pas la perturbation est interrogé pour savoir si le motif déclaré est vraiment là. Le bouclier a des motifs seulement si la référence confirme le signal et pas l\'artefact. Mesuré sur ce code, elle confirme le signal 94 pour cent du temps et jamais l\'artefact.',
     'out.reproduced': 'reproduit : moins de sorties fausses avec le bouclier (l\'intervalle exclut 0)',
     'out.not_reproduced': 'non reproduit à cette taille d\'échantillon',
     'out.found': 'trouvé : la récompense individuelle traîne sur {metrics}',
@@ -3053,7 +3175,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'alt.ens_nobase': 'Le dépôt n\'a pas de mesure pour cette combinaison.',
     'alt.ab': '{n} graines appariées, A moins B. Sorties vraies {T} ; sorties fausses {F} ; précision {P} ; score du jeu {S}. A a marqué plus haut sur {wins} graines sur {n}.',
     'alt.dist': 'Perturbation partagée, {n} épisodes : le bouclier a laissé passer {p} (intervalle de Wilson à 95 pour cent, {lo} à {hi}) ; {m} des passages correspondaient à l\'artefact.',
-    'alt.ground': 'Motifs de décider, {n} épisodes par volet : vrai signal {s} de passage du bouclier, artefact partagé {a}, artefact avec couplage coupé {m}.'
+    'alt.ground': 'Motifs de décider, {n} épisodes par volet : vrai signal {s} de passage du bouclier, artefact partagé {a}, artefact avec couplage coupé {m}.',
+    'alt.reference': 'Canal de référence, {n} épisodes par volet : vrai signal décide {s}, artefact partagé décide {a}.'
   };
 
   var LANGS = { en: en, fr: fr };
@@ -4240,6 +4363,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     var ab = { job: null, summary: null, meta: null, settings: null, running: false, t0: 0, runMs: 0, labels: null };
     var dist = { running: false, result: null, t0: 0, wallMs: 0 };
     var ground = { running: false, result: null, t0: 0, wallMs: 0 };
+    var reference = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -4574,6 +4698,45 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       setAlt('ground-alt', LAB.describeGrounds(env.t(), r));
     }
 
+    /* ---------- reference channel ---------- */
+
+    // 100 episodes per arm with a full-strength shared artifact (beta = 1) at
+    // the repository starting parameters: a real signal and the artifact. When
+    // the shield passes, the reference channel is asked whether the declared
+    // pattern is really in the environment. The run is seeded, so repeating it
+    // gives the same numbers.
+    function runReference() {
+      if (reference.running) return;
+      reference.running = true; reference.t0 = Date.now();
+      $('btn-reference-run').disabled = true;
+      $('reference-status').textContent = t('lab.reference.running');
+      $('reference-empty').hidden = true; $('reference-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        reference.result = LAB.referenceProbe(s, 100, 'mission', 1, 20);
+        reference.wallMs = Date.now() - reference.t0;
+        reference.running = false; $('btn-reference-run').disabled = false;
+        renderReference();
+        var res = LAB.evaluateMission('reference', { result: reference.result });
+        if (res && res.counts) record('reference', res, reference.result.n);
+      }, 0);
+    }
+    function renderReference() {
+      var r = reference.result;
+      $('reference-empty').hidden = !!r; $('reference-out').hidden = !r;
+      if (!r) return;
+      $('reference-status').textContent = t('lab.reference.done', { n: r.n, sec: f(reference.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('reference-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('reference.col.arm'), t('reference.col.pass'), t('reference.col.confirm'), t('reference.col.decide')], true));
+      [['signal', 'reference.row.signal'], ['artifact', 'reference.row.artifact']].forEach(function (pair) {
+        var a = r[pair[0]];
+        tb.appendChild(row([t(pair[1]), a.pass + ' (' + pc(a.pass, r.n) + ')', a.confirm + ' (' + pc(a.confirm, a.pass || 1) + ')', a.confirm + ' (' + pc(a.confirm, r.n) + ', ' + pc(a.decideCI.lo, 1) + ' to ' + pc(a.decideCI.hi, 1) + ')']));
+      });
+      $('reference-note').textContent = t('reference.note');
+      setAlt('reference-alt', LAB.describeReference(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -4611,6 +4774,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       else if (m.kind === 'ens') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); $('ens-repo').checked = true; $('ens-n').value = String(m.minN); showTab('ens', true); }
       else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else if (m.kind === 'grounds') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
+      else if (m.kind === 'reference') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -4650,6 +4814,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       $('btn-ab-cancel').addEventListener('click', function () { if (ab.job) ab.job.cancel(); });
       $('btn-dist-run').addEventListener('click', runDisturbance);
       $('btn-ground-run').addEventListener('click', runGrounds);
+      $('btn-reference-run').addEventListener('click', runReference);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);

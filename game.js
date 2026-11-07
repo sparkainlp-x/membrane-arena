@@ -35,7 +35,7 @@
   var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
   var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
   var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
-  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance', 'grounds'];
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance', 'grounds', 'reference'];
   var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below', 'certifies', 'holds', 'grounds', 'overcommits', 'abstains'];
   var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
