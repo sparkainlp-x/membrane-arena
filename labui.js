@@ -26,6 +26,7 @@
     var ab = { job: null, summary: null, meta: null, settings: null, running: false, t0: 0, runMs: 0, labels: null };
     var dist = { running: false, result: null, t0: 0, wallMs: 0 };
     var ground = { running: false, result: null, t0: 0, wallMs: 0 };
+    var reference = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -360,6 +361,45 @@
       setAlt('ground-alt', LAB.describeGrounds(env.t(), r));
     }
 
+    /* ---------- reference channel ---------- */
+
+    // 100 episodes per arm with a full-strength shared artifact (beta = 1) at
+    // the repository starting parameters: a real signal and the artifact. When
+    // the shield passes, the reference channel is asked whether the declared
+    // pattern is really in the environment. The run is seeded, so repeating it
+    // gives the same numbers.
+    function runReference() {
+      if (reference.running) return;
+      reference.running = true; reference.t0 = Date.now();
+      $('btn-reference-run').disabled = true;
+      $('reference-status').textContent = t('lab.reference.running');
+      $('reference-empty').hidden = true; $('reference-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        reference.result = LAB.referenceProbe(s, 100, 'mission', 1, 20);
+        reference.wallMs = Date.now() - reference.t0;
+        reference.running = false; $('btn-reference-run').disabled = false;
+        renderReference();
+        var res = LAB.evaluateMission('reference', { result: reference.result });
+        if (res && res.counts) record('reference', res, reference.result.n);
+      }, 0);
+    }
+    function renderReference() {
+      var r = reference.result;
+      $('reference-empty').hidden = !!r; $('reference-out').hidden = !r;
+      if (!r) return;
+      $('reference-status').textContent = t('lab.reference.done', { n: r.n, sec: f(reference.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('reference-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('reference.col.arm'), t('reference.col.pass'), t('reference.col.confirm'), t('reference.col.decide')], true));
+      [['signal', 'reference.row.signal'], ['artifact', 'reference.row.artifact']].forEach(function (pair) {
+        var a = r[pair[0]];
+        tb.appendChild(row([t(pair[1]), a.pass + ' (' + pc(a.pass, r.n) + ')', a.confirm + ' (' + pc(a.confirm, a.pass || 1) + ')', a.confirm + ' (' + pc(a.confirm, r.n) + ', ' + pc(a.decideCI.lo, 1) + ' to ' + pc(a.decideCI.hi, 1) + ')']));
+      });
+      $('reference-note').textContent = t('reference.note');
+      setAlt('reference-alt', LAB.describeReference(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -397,6 +437,7 @@
       else if (m.kind === 'ens') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); $('ens-repo').checked = true; $('ens-n').value = String(m.minN); showTab('ens', true); }
       else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else if (m.kind === 'grounds') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
+      else if (m.kind === 'reference') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -436,6 +477,7 @@
       $('btn-ab-cancel').addEventListener('click', function () { if (ab.job) ab.job.cancel(); });
       $('btn-dist-run').addEventListener('click', runDisturbance);
       $('btn-ground-run').addEventListener('click', runGrounds);
+      $('btn-reference-run').addEventListener('click', runReference);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);

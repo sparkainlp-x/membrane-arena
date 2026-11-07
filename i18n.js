@@ -306,6 +306,19 @@
     'ground.row.artifact': 'Shared artifact',
     'ground.row.measure': 'Artifact, coupling off (requested measurement)',
     'ground.note': 'Commit on the signal, abstain on the artifact: that is knowing when the committee has grounds. Measured on this code the shield commits on both, and switching the coupling off does not separate the causes — see docs/GROUNDS-TO-DECIDE.md.',
+    'lab.reference.title': 'Reference channel',
+    'lab.reference.help': 'Two arms at the repository starting parameters, each 100 episodes, seeded: a real signal and a shared artifact as strong as a real pattern. When the shield passes, it requests a reference measurement: 20 samples from a second channel that sees the environment but not the disturbance. A real signal is in the environment, so it appears in both channels; an artifact lives only in the membranes’ channel. The reference confirms the declared pattern when its mean energy reaches the game’s own declaration threshold.',
+    'lab.reference.run': 'Run 200 episodes',
+    'lab.reference.running': 'Running…',
+    'lab.reference.done': 'Done: {n} episodes per arm in {sec} s.',
+    'lab.reference.empty': 'Not run yet.',
+    'reference.col.arm': 'Arm',
+    'reference.col.pass': 'Shield pass',
+    'reference.col.confirm': 'Reference confirms',
+    'reference.col.decide': 'Decides',
+    'reference.row.signal': 'Real signal',
+    'reference.row.artifact': 'Shared artifact',
+    'reference.note': 'Commit on the signal, abstain on the artifact: that is having grounds. Measured on this code the reference confirms the signal and never the artifact — see docs/REFERENCE-CHANNEL.md.',
     'lab.export.title': 'Export this contest',
     'lab.export.csv': 'Contest CSV',
     'lab.export.json': 'Contest JSON',
@@ -422,6 +435,8 @@
     'mis.disturbance.brief': 'Run 100 episodes where all three membranes see noisy copies of one shared artifact, as strong as a real pattern. Measured on this code, the shield passed it in 96.6 percent of episodes — the same rate as a real signal. See whether it holds here.',
     'mis.grounds.title': 'Know when to decide',
     'mis.grounds.brief': 'Run 300 episodes: a real signal, a shared artifact, and the artifact with coupling off. The committee has grounds only if it commits on the signal and abstains on the artifact. Measured on this code, it commits on both — signal 95.5 percent, artifact 96.6 percent, coupling off 94.0 percent.',
+    'mis.reference.title': 'Ask the reference',
+    'mis.reference.brief': 'Run 200 episodes: a real signal and a shared artifact. When the shield passes, a reference channel that sees the environment but not the disturbance is asked whether the declared pattern is really there. The shield has grounds only if the reference confirms the signal and not the artifact. Measured on this code, it confirms the signal 94 percent of the time and the artifact never.',
     'out.reproduced': 'reproduced: fewer false outputs with the shield (interval excludes 0)',
     'out.not_reproduced': 'not reproduced at this sample size',
     'out.found': 'found: individual reward lags on {metrics}',
@@ -479,7 +494,8 @@
     'alt.ens_nobase': 'The repository has no measurement for this combination.',
     'alt.ab': '{n} paired seeds, A minus B. True outputs {T}; false outputs {F}; precision {P}; game score {S}. A scored higher on {wins} of {n} seeds.',
     'alt.dist': 'Shared disturbance, {n} episodes: the shield passed {p} (95 percent Wilson interval {lo} to {hi}); {m} of the passes matched the artifact.',
-    'alt.ground': 'Grounds to decide, {n} episodes per arm: real signal {s} shield pass, shared artifact {a}, artifact with coupling off {m}.'
+    'alt.ground': 'Grounds to decide, {n} episodes per arm: real signal {s} shield pass, shared artifact {a}, artifact with coupling off {m}.',
+    'alt.reference': 'Reference channel, {n} episodes per arm: real signal decides {s}, shared artifact decides {a}.'
   };
 
   var fr = {
@@ -778,6 +794,19 @@
     'ground.row.artifact': 'Artefact partagé',
     'ground.row.measure': 'Artefact, couplage coupé (mesure demandée)',
     'ground.note': 'S\'engager sur le signal, s\'abstenir sur l\'artefact : c\'est savoir quand le comité a des motifs. Mesuré sur ce code, le bouclier s\'engage sur les deux, et couper le couplage ne sépare pas les causes — voir docs/GROUNDS-TO-DECIDE.md.',
+    'lab.reference.title': 'Canal de référence',
+    'lab.reference.help': 'Deux volets avec les paramètres de départ du dépôt, 100 épisodes chacun, avec graine fixe : un vrai signal et un artefact partagé aussi fort qu\'un vrai motif. Quand le bouclier passe, il demande une mesure de référence : 20 échantillons d\'un second canal qui voit l\'environnement mais pas la perturbation. Un vrai signal est dans l\'environnement, donc il apparaît dans les deux canaux ; un artefact ne vit que dans le canal des membranes. La référence confirme le motif déclaré quand son énergie moyenne atteint le seuil de déclaration du jeu.',
+    'lab.reference.run': 'Lancer 200 épisodes',
+    'lab.reference.running': 'En cours…',
+    'lab.reference.done': 'Terminé : {n} épisodes par volet en {sec} s.',
+    'lab.reference.empty': 'Pas encore lancé.',
+    'reference.col.arm': 'Volet',
+    'reference.col.pass': 'Passage du bouclier',
+    'reference.col.confirm': 'Référence confirme',
+    'reference.col.decide': 'Décide',
+    'reference.row.signal': 'Vrai signal',
+    'reference.row.artifact': 'Artefact partagé',
+    'reference.note': 'S\'engager sur le signal, s\'abstenir sur l\'artefact : c\'est avoir des motifs. Mesuré sur ce code, la référence confirme le signal et jamais l\'artefact — voir docs/REFERENCE-CHANNEL.md.',
     'lab.export.title': 'Exporter ce concours',
     'lab.export.csv': 'CSV du concours',
     'lab.export.json': 'JSON du concours',
@@ -894,6 +923,8 @@
     'mis.disturbance.brief': 'Lancez 100 épisodes où les trois membranes voient des copies bruitées d\'un même artefact, aussi fort qu\'un vrai motif. Mesuré sur ce code, le bouclier l\'a laissé passer dans 96,6 pour cent des épisodes — le même taux qu\'un vrai signal. Voyez s\'il tient ici.',
     'mis.grounds.title': 'Savoir quand décider',
     'mis.grounds.brief': 'Lancez 300 épisodes : un vrai signal, un artefact partagé, et l\'artefact avec le couplage coupé. Le comité a des motifs seulement s\'il s\'engage sur le signal et s\'abstient sur l\'artefact. Mesuré sur ce code, il s\'engage sur les deux — signal 95,5 pour cent, artefact 96,6 pour cent, couplage coupé 94,0 pour cent.',
+    'mis.reference.title': 'Demander à la référence',
+    'mis.reference.brief': 'Lancez 200 épisodes : un vrai signal et un artefact partagé. Quand le bouclier passe, un canal de référence qui voit l\'environnement mais pas la perturbation est interrogé pour savoir si le motif déclaré est vraiment là. Le bouclier a des motifs seulement si la référence confirme le signal et pas l\'artefact. Mesuré sur ce code, elle confirme le signal 94 pour cent du temps et jamais l\'artefact.',
     'out.reproduced': 'reproduit : moins de sorties fausses avec le bouclier (l\'intervalle exclut 0)',
     'out.not_reproduced': 'non reproduit à cette taille d\'échantillon',
     'out.found': 'trouvé : la récompense individuelle traîne sur {metrics}',
@@ -951,7 +982,8 @@
     'alt.ens_nobase': 'Le dépôt n\'a pas de mesure pour cette combinaison.',
     'alt.ab': '{n} graines appariées, A moins B. Sorties vraies {T} ; sorties fausses {F} ; précision {P} ; score du jeu {S}. A a marqué plus haut sur {wins} graines sur {n}.',
     'alt.dist': 'Perturbation partagée, {n} épisodes : le bouclier a laissé passer {p} (intervalle de Wilson à 95 pour cent, {lo} à {hi}) ; {m} des passages correspondaient à l\'artefact.',
-    'alt.ground': 'Motifs de décider, {n} épisodes par volet : vrai signal {s} de passage du bouclier, artefact partagé {a}, artefact avec couplage coupé {m}.'
+    'alt.ground': 'Motifs de décider, {n} épisodes par volet : vrai signal {s} de passage du bouclier, artefact partagé {a}, artefact avec couplage coupé {m}.',
+    'alt.reference': 'Canal de référence, {n} épisodes par volet : vrai signal décide {s}, artefact partagé décide {a}.'
   };
 
   var LANGS = { en: en, fr: fr };

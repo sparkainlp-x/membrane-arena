@@ -238,7 +238,7 @@ test('missions: the required experiment must have been run, and the outcome foll
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: 70 }).outcome, 'below');
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: null }).counts, false);
   assert.equal(L.evaluateMission('nope', {}), null);
-  assert.equal(L.MISSIONS.length, 7);
+  assert.equal(L.MISSIONS.length, 8);
 });
 
 test('disturbance probe: deterministic, a full-strength shared artifact passes the shield like a real pattern, noise does not', () => {
@@ -288,6 +288,35 @@ test('grounds probe: deterministic, commits on a real signal and on the shared a
   assert.equal(L.evaluateMission('grounds', { result: Object.assign({}, m, { signal: null }) }).counts, false);
 });
 
+test('reference probe: deterministic, the reference channel confirms the signal and never the artifact, so the shield has grounds', () => {
+  const s = Object.assign({}, G.DEFAULTS, L.REPO_START);
+  const a = L.referenceProbe(s, 100, 'test', 1, 20), b = L.referenceProbe(s, 100, 'test', 1, 20);
+  assert.deepEqual(a, b);
+  assert.equal(a.n, 100); assert.equal(a.beta, 1); assert.equal(a.M, 20);
+  assert.ok(a.threshold > 1, `threshold ${a.threshold}`);
+  assert.ok(a.signal.pass / a.n > 0.8, `signal pass rate ${a.signal.pass / a.n}`);
+  assert.ok(a.artifact.pass / a.n > 0.8, `artifact pass rate ${a.artifact.pass / a.n}`);
+  assert.ok(a.signal.decideRate > 0.8, `signal decide rate ${a.signal.decideRate}`);
+  assert.ok(a.artifact.decideRate < 0.2, `artifact decide rate ${a.artifact.decideRate}`);
+  assert.ok(a.signal.confirmRate > 0.8, `signal confirm rate ${a.signal.confirmRate}`);
+  assert.ok(a.artifact.confirmRate < 0.2, `artifact confirm rate ${a.artifact.confirmRate}`);
+  assert.ok(a.signal.decideCI.lo <= a.signal.decideRate && a.signal.decideRate <= a.signal.decideCI.hi);
+  assert.ok(a.artifact.decideCI.lo <= a.artifact.decideRate && a.artifact.decideRate <= a.artifact.decideCI.hi);
+  const m = L.referenceProbe(s, 100, 'mission', 1, 20);
+  assert.equal(L.evaluateMission('reference', { result: m }).outcome, 'grounds');
+  const over = Object.assign({}, m, { artifact: Object.assign({}, m.artifact, { confirm: 90, confirmRate: 0.9, decideRate: 0.9 }) });
+  assert.equal(L.evaluateMission('reference', { result: over }).outcome, 'overcommits');
+  const abstains = Object.assign({}, m, {
+    signal: Object.assign({}, m.signal, { confirm: 10, confirmRate: 0.1, decideRate: 0.1 }),
+    artifact: Object.assign({}, m.artifact, { confirm: 10, confirmRate: 0.1, decideRate: 0.1 })
+  });
+  assert.equal(L.evaluateMission('reference', { result: abstains }).outcome, 'abstains');
+  assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { n: 50 }) }).counts, false);
+  assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { beta: 0.5 }) }).counts, false);
+  assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { settings: { th: 0.6, c: 0.05, g: 1.0 } }) }).counts, false);
+  assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { signal: null }) }).counts, false);
+});
+
 test('CSV and JSON export: rectangular, quoted correctly, labelled SYNTHETIC, with the baseline file', () => {
   const { c } = run('lab-export', { shield: true });
   const csv = L.runCSV(c.hist).trim().split('\n');
@@ -328,7 +357,8 @@ test('text equivalents: every chart has one, in both languages, with every place
       sweep: L.describeSweep(t, sw, cur), shield: L.describeShield(t, L.shieldCounts(c.hist)), gain: L.describeGain(t, L.gainTrace(c.hist)),
       land: L.describeLandscape(t, L.landscape(c.hist)), amp: L.describeAmp(t, L.ampBaseline()), ens: L.describeEnsemble(t, sum),
       ab: L.describePaired(t, ps, pm.meta, { a: 'on', b: 'off' }), dist: L.describeDisturbance(t, L.disturbanceProbe(s, 20, 'alt', 1)),
-      ground: L.describeGrounds(t, L.groundsProbe(s, 20, 'alt', 1))
+      ground: L.describeGrounds(t, L.groundsProbe(s, 20, 'alt', 1)),
+      reference: L.describeReference(t, L.referenceProbe(s, 20, 'alt', 1, 20))
     };
     Object.entries(texts).forEach(([k, v]) => {
       assert.ok(v.length > 30, `${lang} ${k} too short`);
