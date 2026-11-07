@@ -633,7 +633,7 @@
   "rounding": "finite thresholds rounded upward to 0.001"
  },
  "inputs": {
-  "game.js": "8e8bbd1e640b57d99a53a89b2de3d09a1901a061afad6a4d97521ccfe8857ff3",
+  "game.js": "67027fe443569c133e1c436e6fde88e21c536b0f212d34f2ca21eb10984750e4",
   "pulse.js": "c6591e5725ed67b10f10a031dda51ac14ea8fba22247c1759dca94e3ceeed789",
   "pulse-calib.js": "e9d4b1823a9f458a1450f6ea6ff79182e8111b109a6ef5268382e4972e0f9e38",
   "scripts/pulse-region-check.js": "6f8bd14a66cebfa59f52656df727173a16484ee05dadc7c360f24f6f98fc2509",
