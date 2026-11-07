@@ -124,6 +124,52 @@
       passRate: pass / K, passMatchRate: passMatch / K, passCI: ST.wilson(pass, K), thr: thr,
       settings: { th: s.th, c: s.c, g: s.g } };
   }
+  // Three arms at the repository starting parameters, each K episodes, seeded:
+  // a real signal (a planted pattern), a shared artifact as strong as a real
+  // pattern (beta = 1), and the same artifact with the coupling switched off —
+  // the measurement the committee would request to separate the causes. The
+  // shield's verdict in every arm is the game's own 2-of-3 rule. The committee
+  // has grounds only if it commits on the signal and abstains on the artifact.
+  // Reference rates on this code (game.js v0.3.5, defaults; shared-disturbance
+  // test, 2026-11-06): signal 95.5% pass, artifact 96.6%, artifact with
+  // coupling off 94.0%. The grounds probe reproduces them (500 episodes:
+  // 96.0%, 97.4%, 94.0%) — the committee commits on the artifact as if it
+  // were a signal, and the requested measurement does not separate the causes.
+  // See docs/GROUNDS-TO-DECIDE.md.
+  function groundsProbe(settings, K, seedTag, beta) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/grounds/' + (seedTag || 'repo'));
+    beta = beta === undefined ? 1 : beta;
+    function arm(patFn, P) {
+      var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, totalDecl = 0, e;
+      for (e = 0; e < K; e++) {
+        var made = patFn(), pat = made.pat, ref = made.ref;
+        var trace = new Float32Array(G.STEPS * 3);
+        var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+        var nDecl = d.filter(Boolean).length;
+        totalDecl += nDecl;
+        if (nDecl >= 1) decl1++;
+        if (nDecl >= 2) decl2++;
+        var passed = G.systemEvent(d, G.AGREE);
+        if (passed !== null) {
+          pass++;
+          if (ref && G.fidelity(d[passed], ref) >= G.TRUTH) passMatch++;
+        }
+      }
+      return { decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, meanDecl: totalDecl / K,
+        passRate: pass / K, passMatchRate: passMatch / K, passCI: ST.wilson(pass, K) };
+    }
+    function artifactPat() {
+      var art = G.rvec(n, rng);
+      return { pat: { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) }, ref: art };
+    }
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var P0 = [0, 1, 2].map(function () { return { th: s.th, c: 0, g: s.g, sp: 0.5, geff: 1 }; });
+    var signal = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, P);
+    var artifact = arm(artifactPat, P);
+    var measure = arm(artifactPat, P0);
+    return { n: K, beta: beta, signal: signal, artifact: artifact, measure: measure,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -329,7 +375,8 @@
     { id: 'amp', kind: 'ab', factor: 'amp', a: true, b: false, minN: 20, metric: 'precision' },
     { id: 'repo', kind: 'ens', minN: 20 },
     { id: 'play', kind: 'play' },
-    { id: 'disturbance', kind: 'disturb', minN: 100 }
+    { id: 'disturbance', kind: 'disturb', minN: 100 },
+    { id: 'grounds', kind: 'grounds', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -368,6 +415,21 @@
           r.settings.th !== REPO_START.th || r.settings.c !== REPO_START.c || r.settings.g !== REPO_START.g)
         return { counts: false, outcome: 'wrong_setup', detail: {} };
       return { counts: true, outcome: r.pass / r.n > 0.5 ? 'certifies' : 'holds', detail: { n: r.n, pass: r.pass, passRate: r.pass / r.n } };
+    }
+    if (m.kind === 'grounds') {
+      // The described run is 100 episodes per arm with a full-strength shared
+      // artifact (beta = 1) at the repository starting parameters. Anything
+      // else does not count. The committee has grounds only if it commits on
+      // the signal and abstains on the artifact; committing on the artifact
+      // is overcommitting, committing on neither is abstaining.
+      var g = data.result;
+      if (!g || g.n < m.minN || g.beta !== 1 || !g.settings ||
+          g.settings.th !== REPO_START.th || g.settings.c !== REPO_START.c || g.settings.g !== REPO_START.g ||
+          !g.signal || !g.artifact || !g.measure)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var ps = g.signal.pass / g.n, pa = g.artifact.pass / g.n;
+      var out = (ps > 0.5 && pa < 0.5) ? 'grounds' : (pa > 0.5 ? 'overcommits' : 'abstains');
+      return { counts: true, outcome: out, detail: { n: g.n, signal: g.signal.pass, signalRate: ps, artifact: g.artifact.pass, artifactRate: pa, measure: g.measure.pass, measureRate: g.measure.pass / g.n } };
     }
     return null;
   }
@@ -497,10 +559,14 @@
     if (!r || !r.n) return t('alt.empty');
     return t('alt.dist', { n: r.n, p: pct(r.passRate), lo: pct(r.passCI.lo), hi: pct(r.passCI.hi), m: r.passMatch });
   }
+  function describeGrounds(t, r) {
+    if (!r || !r.n || !r.signal || !r.artifact || !r.measure) return t('alt.empty');
+    return t('alt.ground', { n: r.n, s: pct(r.signal.passRate), a: pct(r.artifact.passRate), m: pct(r.measure.passRate) });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
@@ -508,6 +574,6 @@
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
     describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
-    describeDisturbance: describeDisturbance
+    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds
   };
 });

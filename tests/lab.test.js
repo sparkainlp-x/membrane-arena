@@ -238,7 +238,7 @@ test('missions: the required experiment must have been run, and the outcome foll
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: 70 }).outcome, 'below');
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: null }).counts, false);
   assert.equal(L.evaluateMission('nope', {}), null);
-  assert.equal(L.MISSIONS.length, 6);
+  assert.equal(L.MISSIONS.length, 7);
 });
 
 test('disturbance probe: deterministic, a full-strength shared artifact passes the shield like a real pattern, noise does not', () => {
@@ -258,6 +258,34 @@ test('disturbance probe: deterministic, a full-strength shared artifact passes t
   assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { n: 50 }) }).counts, false);
   assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { beta: 0.5 }) }).counts, false);
   assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { settings: { th: 0.6, c: 0.05, g: 1.0 } }) }).counts, false);
+});
+
+test('grounds probe: deterministic, commits on a real signal and on the shared artifact alike, and the requested measurement does not separate them', () => {
+  const s = Object.assign({}, G.DEFAULTS, L.REPO_START);
+  const a = L.groundsProbe(s, 100, 'test', 1), b = L.groundsProbe(s, 100, 'test', 1);
+  assert.deepEqual(a, b);
+  assert.equal(a.n, 100); assert.equal(a.beta, 1);
+  assert.ok(a.signal.pass / a.n > 0.8, `signal pass rate ${a.signal.pass / a.n}`);
+  assert.ok(a.artifact.pass / a.n > 0.8, `artifact pass rate ${a.artifact.pass / a.n}`);
+  assert.ok(a.measure.pass / a.n > 0.8, `measure pass rate ${a.measure.pass / a.n}`);
+  assert.ok(a.signal.passMatch / a.n > 0.8, `signal match rate ${a.signal.passMatch / a.n}`);
+  assert.ok(a.artifact.passMatch / a.n > 0.8, `artifact match rate ${a.artifact.passMatch / a.n}`);
+  assert.ok(a.signal.passCI.lo <= a.signal.passRate && a.signal.passRate <= a.signal.passCI.hi);
+  assert.ok(a.artifact.passCI.lo <= a.artifact.passRate && a.artifact.passRate <= a.artifact.passCI.hi);
+  assert.ok(a.measure.passCI.lo <= a.measure.passRate && a.measure.passRate <= a.measure.passCI.hi);
+  const m = L.groundsProbe(s, 100, 'mission', 1);
+  assert.equal(L.evaluateMission('grounds', { result: m }).outcome, 'overcommits');
+  const hasGrounds = Object.assign({}, m, { artifact: Object.assign({}, m.artifact, { pass: 10, passRate: 0.1, passMatch: 10 }) });
+  assert.equal(L.evaluateMission('grounds', { result: hasGrounds }).outcome, 'grounds');
+  const abstains = Object.assign({}, m, {
+    signal: Object.assign({}, m.signal, { pass: 10, passRate: 0.1, passMatch: 10 }),
+    artifact: Object.assign({}, m.artifact, { pass: 10, passRate: 0.1, passMatch: 10 })
+  });
+  assert.equal(L.evaluateMission('grounds', { result: abstains }).outcome, 'abstains');
+  assert.equal(L.evaluateMission('grounds', { result: Object.assign({}, m, { n: 50 }) }).counts, false);
+  assert.equal(L.evaluateMission('grounds', { result: Object.assign({}, m, { beta: 0.5 }) }).counts, false);
+  assert.equal(L.evaluateMission('grounds', { result: Object.assign({}, m, { settings: { th: 0.6, c: 0.05, g: 1.0 } }) }).counts, false);
+  assert.equal(L.evaluateMission('grounds', { result: Object.assign({}, m, { signal: null }) }).counts, false);
 });
 
 test('CSV and JSON export: rectangular, quoted correctly, labelled SYNTHETIC, with the baseline file', () => {
@@ -299,7 +327,8 @@ test('text equivalents: every chart has one, in both languages, with every place
       rates: L.describeRates(t, L.rateSeries(c.hist)), align: L.describeAlignment(t, L.alignment(c.hist, 5)), hist: L.describeHist(t, L.ratioHistogram(pr)),
       sweep: L.describeSweep(t, sw, cur), shield: L.describeShield(t, L.shieldCounts(c.hist)), gain: L.describeGain(t, L.gainTrace(c.hist)),
       land: L.describeLandscape(t, L.landscape(c.hist)), amp: L.describeAmp(t, L.ampBaseline()), ens: L.describeEnsemble(t, sum),
-      ab: L.describePaired(t, ps, pm.meta, { a: 'on', b: 'off' }), dist: L.describeDisturbance(t, L.disturbanceProbe(s, 20, 'alt', 1))
+      ab: L.describePaired(t, ps, pm.meta, { a: 'on', b: 'off' }), dist: L.describeDisturbance(t, L.disturbanceProbe(s, 20, 'alt', 1)),
+      ground: L.describeGrounds(t, L.groundsProbe(s, 20, 'alt', 1))
     };
     Object.entries(texts).forEach(([k, v]) => {
       assert.ok(v.length > 30, `${lang} ${k} too short`);

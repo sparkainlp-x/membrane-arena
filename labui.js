@@ -25,6 +25,7 @@
     var ens = { job: null, summary: null, results: null, settings: null, repo: true, running: false, t0: 0, runMs: 0, wallMs: 0 };
     var ab = { job: null, summary: null, meta: null, settings: null, running: false, t0: 0, runMs: 0, labels: null };
     var dist = { running: false, result: null, t0: 0, wallMs: 0 };
+    var ground = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -321,6 +322,44 @@
       setAlt('dist-alt', LAB.describeDisturbance(env.t(), r));
     }
 
+    /* ---------- grounds to decide ---------- */
+
+    // 100 episodes per arm with a full-strength shared artifact (beta = 1) at
+    // the repository starting parameters: a real signal, the artifact, and the
+    // artifact with coupling off. The run is seeded, so repeating it gives the
+    // same numbers.
+    function runGrounds() {
+      if (ground.running) return;
+      ground.running = true; ground.t0 = Date.now();
+      $('btn-ground-run').disabled = true;
+      $('ground-status').textContent = t('lab.ground.running');
+      $('ground-empty').hidden = true; $('ground-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        ground.result = LAB.groundsProbe(s, 100, 'mission', 1);
+        ground.wallMs = Date.now() - ground.t0;
+        ground.running = false; $('btn-ground-run').disabled = false;
+        renderGrounds();
+        var res = LAB.evaluateMission('grounds', { result: ground.result });
+        if (res && res.counts) record('grounds', res, ground.result.n);
+      }, 0);
+    }
+    function renderGrounds() {
+      var r = ground.result;
+      $('ground-empty').hidden = !!r; $('ground-out').hidden = !r;
+      if (!r) return;
+      $('ground-status').textContent = t('lab.ground.done', { n: r.n, sec: f(ground.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('ground-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('ground.col.arm'), t('ground.col.pass'), t('ground.col.match')], true));
+      [['signal', 'ground.row.signal'], ['artifact', 'ground.row.artifact'], ['measure', 'ground.row.measure']].forEach(function (pair) {
+        var a = r[pair[0]];
+        tb.appendChild(row([t(pair[1]), a.pass + ' (' + pc(a.pass, r.n) + ', ' + pc(a.passCI.lo, 1) + ' to ' + pc(a.passCI.hi, 1) + ')', a.passMatch + ' (' + pc(a.passMatch, r.n) + ')']));
+      });
+      $('ground-note').textContent = t('ground.note');
+      setAlt('ground-alt', LAB.describeGrounds(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -357,6 +396,7 @@
       if (m.kind === 'ab') { setupAB(m.factor, m.a, m.b, m.minN); showTab('ab', true); }
       else if (m.kind === 'ens') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); $('ens-repo').checked = true; $('ens-n').value = String(m.minN); showTab('ens', true); }
       else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
+      else if (m.kind === 'grounds') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -395,6 +435,7 @@
       $('btn-ab-run').addEventListener('click', runAB);
       $('btn-ab-cancel').addEventListener('click', function () { if (ab.job) ab.job.cancel(); });
       $('btn-dist-run').addEventListener('click', runDisturbance);
+      $('btn-ground-run').addEventListener('click', runGrounds);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);
