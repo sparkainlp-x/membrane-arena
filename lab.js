@@ -94,6 +94,36 @@
     sample.chk.forEach(function (c) { if (c[0] > m) m = c[0]; });
     return m;
   }
+  // K disturbance episodes: every membrane sees noisy copies of ONE shared artifact
+  // (beta x a unit vector), with no planted pattern. Real declarations, and the shield
+  // pass is the game's own 2-of-3 rule. beta = 1 is an artifact as strong as a real
+  // pattern; beta = 0 is pure noise. Measured 2026-11-06 (game.js v0.3.5, defaults):
+  // clean noise 0.0% shield pass, shared artifact 96.6% (96.4% matching the artifact),
+  // planted pattern 95.5%. See docs/SHARED-DISTURBANCE.md.
+  function disturbanceProbe(settings, K, seedTag, beta) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/disturbance/' + (seedTag || 'repo'));
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var thr = P.map(function (p) { return effThreshold(p, n, sigma); });
+    var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, totalDecl = 0, e;
+    for (e = 0; e < K; e++) {
+      var art = G.rvec(n, rng);
+      var pat = beta > 0 ? { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) } : null;
+      var trace = new Float32Array(G.STEPS * 3);
+      var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+      var nDecl = d.filter(Boolean).length;
+      totalDecl += nDecl;
+      if (nDecl >= 1) decl1++;
+      if (nDecl >= 2) decl2++;
+      var passed = G.systemEvent(d, G.AGREE);
+      if (passed !== null) {
+        pass++;
+        if (G.fidelity(d[passed], art) >= G.TRUTH) passMatch++;
+      }
+    }
+    return { n: K, beta: beta, decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, meanDecl: totalDecl / K,
+      passRate: pass / K, passMatchRate: passMatch / K, passCI: ST.wilson(pass, K), thr: thr,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -298,7 +328,8 @@
     { id: 'individual', kind: 'ab', factor: 'scheme', a: 'consensus', b: 'individual', minN: 20, metric: 'T' },
     { id: 'amp', kind: 'ab', factor: 'amp', a: true, b: false, minN: 20, metric: 'precision' },
     { id: 'repo', kind: 'ens', minN: 20 },
-    { id: 'play', kind: 'play' }
+    { id: 'play', kind: 'play' },
+    { id: 'disturbance', kind: 'disturb', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -328,6 +359,15 @@
     if (m.kind === 'play') {
       if (!data.result || data.ref === null || data.ref === undefined) return { counts: false, outcome: 'no_ref', detail: {} };
       return { counts: true, outcome: data.result.score >= data.ref ? 'beat' : 'below', detail: { score: data.result.score, ref: data.ref } };
+    }
+    if (m.kind === 'disturb') {
+      // The described run is 100 episodes with a full-strength shared artifact (beta = 1)
+      // at the repository starting parameters. Anything else does not count.
+      var r = data.result;
+      if (!r || r.n < m.minN || r.beta !== 1 || !r.settings ||
+          r.settings.th !== REPO_START.th || r.settings.c !== REPO_START.c || r.settings.g !== REPO_START.g)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      return { counts: true, outcome: r.pass / r.n > 0.5 ? 'certifies' : 'holds', detail: { n: r.n, pass: r.pass, passRate: r.pass / r.n } };
     }
     return null;
   }
@@ -453,16 +493,21 @@
     var one = function (k, d) { var x = m[k].diff; return f(x.mean, d) + ' (' + f(x.lo, d) + ' to ' + f(x.hi, d) + ')' + (x.excludesZero ? '' : ' ' + t('ab.ci_zero')); };
     return t('alt.ab', { n: sum.n, a: label.a, b: label.b, T: one('T', 1), F: one('F', 1), P: one('precision', 3), S: one('score', 1), wins: m.score.diff.aWins });
   }
+  function describeDisturbance(t, r) {
+    if (!r || !r.n) return t('alt.empty');
+    return t('alt.dist', { n: r.n, p: pct(r.passRate), lo: pct(r.passCI.lo), hi: pct(r.passCI.hi), m: r.passMatch });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
     missionById: missionById, evaluateMission: evaluateMission,
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
-    describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired
+    describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
+    describeDisturbance: describeDisturbance
   };
 });

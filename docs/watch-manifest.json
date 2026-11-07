@@ -434,7 +434,7 @@
  },
  "protocolSha256": "fcb3adfce65c9e0d22b881404f7ad7642d94a0949bc4cfc35c2732d434fd684c",
  "inputs": {
-  "game.js": "077fa7ca6ce5fb62ed51b87a7bdb32c4b6bc79c5c569d49a4c4d4abfb716dc03",
+  "game.js": "3d7fc5d0b96786763cd98ded63673225adaa3be60f45d0874caa2cbb9c3f9767",
   "reverse.js": "b8a8d1710b967df8d8b5f0bff4ced003a216e275fd95ee000242642b78ac4b34",
   "pair.js": "5a3f6c94a6754d38c266da0908a3c2ca31893749d206ce37e8d143a90af1cd45",
   "watch.js": "3bc97c93223958fe74b161c36b42d98c65fee29fdf5b4019ab44e4660abc4d99",
@@ -448,7 +448,7 @@
   "watch-coach.js": "0f764969621695399c261547f8f9ad7c8031f9643bd2f783c6c55c3835d767fb"
  },
  "generatedWith": {
-  "node": "v24.19.0",
+  "node": "v24.22.1",
   "platform": "linux-x64"
  }
 }

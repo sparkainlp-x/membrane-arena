@@ -238,7 +238,26 @@ test('missions: the required experiment must have been run, and the outcome foll
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: 70 }).outcome, 'below');
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: null }).counts, false);
   assert.equal(L.evaluateMission('nope', {}), null);
-  assert.equal(L.MISSIONS.length, 5);
+  assert.equal(L.MISSIONS.length, 6);
+});
+
+test('disturbance probe: deterministic, a full-strength shared artifact passes the shield like a real pattern, noise does not', () => {
+  const s = Object.assign({}, G.DEFAULTS, L.REPO_START);
+  const a = L.disturbanceProbe(s, 100, 'test', 1), b = L.disturbanceProbe(s, 100, 'test', 1);
+  assert.deepEqual(a, b);
+  assert.equal(a.n, 100); assert.equal(a.beta, 1);
+  assert.ok(a.pass / a.n > 0.8, `pass rate ${a.pass / a.n}`);
+  assert.ok(a.passMatch / a.n > 0.8, `match rate ${a.passMatch / a.n}`);
+  assert.ok(a.decl2 >= a.pass);
+  assert.ok(a.passCI.lo <= a.passRate && a.passRate <= a.passCI.hi);
+  assert.equal(L.disturbanceProbe(s, 100, 'test', 0).pass, 0);
+  assert.equal(L.disturbanceProbe(s, 100, 'test', 0.5).pass, 0);
+  const m = L.disturbanceProbe(s, 100, 'mission', 1);
+  assert.equal(L.evaluateMission('disturbance', { result: m }).outcome, 'certifies');
+  assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { pass: 10, passRate: 0.1, passMatch: 10 }) }).outcome, 'holds');
+  assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { n: 50 }) }).counts, false);
+  assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { beta: 0.5 }) }).counts, false);
+  assert.equal(L.evaluateMission('disturbance', { result: Object.assign({}, m, { settings: { th: 0.6, c: 0.05, g: 1.0 } }) }).counts, false);
 });
 
 test('CSV and JSON export: rectangular, quoted correctly, labelled SYNTHETIC, with the baseline file', () => {
@@ -280,7 +299,7 @@ test('text equivalents: every chart has one, in both languages, with every place
       rates: L.describeRates(t, L.rateSeries(c.hist)), align: L.describeAlignment(t, L.alignment(c.hist, 5)), hist: L.describeHist(t, L.ratioHistogram(pr)),
       sweep: L.describeSweep(t, sw, cur), shield: L.describeShield(t, L.shieldCounts(c.hist)), gain: L.describeGain(t, L.gainTrace(c.hist)),
       land: L.describeLandscape(t, L.landscape(c.hist)), amp: L.describeAmp(t, L.ampBaseline()), ens: L.describeEnsemble(t, sum),
-      ab: L.describePaired(t, ps, pm.meta, { a: 'on', b: 'off' })
+      ab: L.describePaired(t, ps, pm.meta, { a: 'on', b: 'off' }), dist: L.describeDisturbance(t, L.disturbanceProbe(s, 20, 'alt', 1))
     };
     Object.entries(texts).forEach(([k, v]) => {
       assert.ok(v.length > 30, `${lang} ${k} too short`);
