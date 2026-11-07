@@ -384,6 +384,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
           <p id="alt-amp" class="alt"></p>
           <p class="hint" id="lab-amp-help"></p>
         </figure>
+        <figure class="inst">
+          <h3 id="h-lab-dist" data-i18n="lab.dist.title"></h3>
+          <p class="hint" data-i18n="lab.dist.help"></p>
+          <div class="row">
+            <button id="btn-dist-run" class="btn primary small" type="button" data-i18n="lab.dist.run"></button>
+          </div>
+          <p class="small-text"><span id="dist-status" role="status"></span></p>
+          <p id="dist-empty" class="hint" data-i18n="lab.dist.empty"></p>
+          <div id="dist-out" hidden>
+            <div class="tablewrap"><table id="dist-table" class="scores"></table></div>
+            <p id="dist-note" class="hint"></p>
+            <p id="dist-alt" class="alt"></p>
+          </div>
+        </figure>
         </div>
         <figure class="inst wide">
           <h3 id="h-sci" data-i18n="sci.title"></h3>
@@ -867,8 +881,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
   var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
   var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
   var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
-  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play'];
-  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below'];
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance'];
+  var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below', 'certifies', 'holds'];
   var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
 
@@ -1587,6 +1601,36 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     sample.chk.forEach(function (c) { if (c[0] > m) m = c[0]; });
     return m;
   }
+  // K disturbance episodes: every membrane sees noisy copies of ONE shared artifact
+  // (beta x a unit vector), with no planted pattern. Real declarations, and the shield
+  // pass is the game's own 2-of-3 rule. beta = 1 is an artifact as strong as a real
+  // pattern; beta = 0 is pure noise. Measured 2026-11-06 (game.js v0.3.5, defaults):
+  // clean noise 0.0% shield pass, shared artifact 96.6% (96.4% matching the artifact),
+  // planted pattern 95.5%. See docs/SHARED-DISTURBANCE.md.
+  function disturbanceProbe(settings, K, seedTag, beta) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/disturbance/' + (seedTag || 'repo'));
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var thr = P.map(function (p) { return effThreshold(p, n, sigma); });
+    var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, totalDecl = 0, e;
+    for (e = 0; e < K; e++) {
+      var art = G.rvec(n, rng);
+      var pat = beta > 0 ? { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) } : null;
+      var trace = new Float32Array(G.STEPS * 3);
+      var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+      var nDecl = d.filter(Boolean).length;
+      totalDecl += nDecl;
+      if (nDecl >= 1) decl1++;
+      if (nDecl >= 2) decl2++;
+      var passed = G.systemEvent(d, G.AGREE);
+      if (passed !== null) {
+        pass++;
+        if (G.fidelity(d[passed], art) >= G.TRUTH) passMatch++;
+      }
+    }
+    return { n: K, beta: beta, decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, meanDecl: totalDecl / K,
+      passRate: pass / K, passMatchRate: passMatch / K, passCI: ST.wilson(pass, K), thr: thr,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -1791,7 +1835,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     { id: 'individual', kind: 'ab', factor: 'scheme', a: 'consensus', b: 'individual', minN: 20, metric: 'T' },
     { id: 'amp', kind: 'ab', factor: 'amp', a: true, b: false, minN: 20, metric: 'precision' },
     { id: 'repo', kind: 'ens', minN: 20 },
-    { id: 'play', kind: 'play' }
+    { id: 'play', kind: 'play' },
+    { id: 'disturbance', kind: 'disturb', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -1821,6 +1866,15 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     if (m.kind === 'play') {
       if (!data.result || data.ref === null || data.ref === undefined) return { counts: false, outcome: 'no_ref', detail: {} };
       return { counts: true, outcome: data.result.score >= data.ref ? 'beat' : 'below', detail: { score: data.result.score, ref: data.ref } };
+    }
+    if (m.kind === 'disturb') {
+      // The described run is 100 episodes with a full-strength shared artifact (beta = 1)
+      // at the repository starting parameters. Anything else does not count.
+      var r = data.result;
+      if (!r || r.n < m.minN || r.beta !== 1 || !r.settings ||
+          r.settings.th !== REPO_START.th || r.settings.c !== REPO_START.c || r.settings.g !== REPO_START.g)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      return { counts: true, outcome: r.pass / r.n > 0.5 ? 'certifies' : 'holds', detail: { n: r.n, pass: r.pass, passRate: r.pass / r.n } };
     }
     return null;
   }
@@ -1946,17 +2000,22 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     var one = function (k, d) { var x = m[k].diff; return f(x.mean, d) + ' (' + f(x.lo, d) + ' to ' + f(x.hi, d) + ')' + (x.excludesZero ? '' : ' ' + t('ab.ci_zero')); };
     return t('alt.ab', { n: sum.n, a: label.a, b: label.b, T: one('T', 1), F: one('F', 1), P: one('precision', 3), S: one('score', 1), wins: m.score.diff.aWins });
   }
+  function describeDisturbance(t, r) {
+    if (!r || !r.n) return t('alt.empty');
+    return t('alt.dist', { n: r.n, p: pct(r.passRate), lo: pct(r.passCI.lo), hi: pct(r.passCI.hi), m: r.passMatch });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
     missionById: missionById, evaluateMission: evaluateMission,
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
-    describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired
+    describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
+    describeDisturbance: describeDisturbance
   };
 });
 </script>
@@ -2242,6 +2301,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'lab.axes.c_g': 'coupling and gain',
     'lab.amp.title': 'Amplifier: the repository measurement',
     'lab.amp.help': 'Precision without and with the amplifier from {file}, {seeds} seeds per cell, with 95 percent t intervals from the reported standard deviations. The measured difference is about zero (largest {dp}); the amplifier was not found to help. To test it here, run the A/B test on the amplifier.',
+    'lab.dist.title': 'Shared disturbance',
+    'lab.dist.help': 'Every membrane sees noisy copies of one shared artifact, as strong as a real pattern. The shield’s verdict is the game’s own 2-of-3 rule. The run uses the repository starting parameters and is seeded, so repeating it gives the same numbers.',
+    'lab.dist.run': 'Run 100 episodes',
+    'lab.dist.running': 'Running…',
+    'lab.dist.done': 'Done: {n} episodes in {sec} s.',
+    'lab.dist.empty': 'Not run yet.',
+    'dist.col.measure': 'Measure',
+    'dist.col.value': 'Value',
+    'dist.row.episodes': 'Episodes',
+    'dist.row.decl1': 'At least one declaration',
+    'dist.row.decl2': 'At least two declarations',
+    'dist.row.pass': 'Shield pass (Wilson 95 percent)',
+    'dist.row.match': 'Pass matches the artifact',
+    'dist.note': 'Artifact as strong as a real pattern (beta = 1). Dose-response, measured on this code: half strength 0 percent, 75 percent strength 1.4 percent — see docs/SHARED-DISTURBANCE.md.',
     'lab.export.title': 'Export this contest',
     'lab.export.csv': 'Contest CSV',
     'lab.export.json': 'Contest JSON',
@@ -2354,6 +2427,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'mis.repo.brief': 'Match the repository setup with the shield on, run at least 20 seeds, and see whether the repository means fall inside your intervals.',
     'mis.play.title': 'Beat the reference',
     'mis.play.brief': 'Finish a contest whose score reaches the repository reference shown in the result table.',
+    'mis.disturbance.title': 'Test the shield against a shared disturbance',
+    'mis.disturbance.brief': 'Run 100 episodes where all three membranes see noisy copies of one shared artifact, as strong as a real pattern. Measured on this code, the shield passed it in 96.6 percent of episodes — the same rate as a real signal. See whether it holds here.',
     'out.reproduced': 'reproduced: fewer false outputs with the shield (interval excludes 0)',
     'out.not_reproduced': 'not reproduced at this sample size',
     'out.found': 'found: individual reward lags on {metrics}',
@@ -2365,6 +2440,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'out.differs': 'differs from the repository',
     'out.beat': 'reached the reference',
     'out.below': 'below the reference',
+    'out.certifies': 'certifies the common error: the shield passed the shared artifact more often than not',
+    'out.holds': 'holds: the shared artifact rarely passed the shield',
     'method.title': 'Method: what is measured, designed and not verified',
     'method.measured': 'Measured in this page',
     'method.m1': 'Every plotted number is computed by the simulation in this page (a JavaScript port of the repository contest at width 32) or read from the repository CSV copies, with the file named next to it.',
@@ -2404,7 +2481,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'alt.ens': '{n} seeds. True outputs {T} (95 percent interval {Tlo} to {Thi}); false outputs {F} ({Flo} to {Fhi}); precision {P} ({Plo} to {Phi}).',
     'alt.ens_base': 'Repository means from {seeds} seeds in {file}: true {T}, false {F}, precision {P}; {like}.',
     'alt.ens_nobase': 'The repository has no measurement for this combination.',
-    'alt.ab': '{n} paired seeds, A minus B. True outputs {T}; false outputs {F}; precision {P}; game score {S}. A scored higher on {wins} of {n} seeds.'
+    'alt.ab': '{n} paired seeds, A minus B. True outputs {T}; false outputs {F}; precision {P}; game score {S}. A scored higher on {wins} of {n} seeds.',
+    'alt.dist': 'Shared disturbance, {n} episodes: the shield passed {p} (95 percent Wilson interval {lo} to {hi}); {m} of the passes matched the artifact.'
   };
 
   var fr = {
@@ -2676,6 +2754,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'lab.axes.c_g': 'couplage et gain',
     'lab.amp.title': 'Amplificateur : la mesure du dépôt',
     'lab.amp.help': 'Précision sans et avec l\'amplificateur, d\'après {file}, {seeds} graines par cellule, avec des intervalles t à 95 pour cent calculés depuis les écarts types publiés. La différence mesurée est proche de zéro (au plus {dp}) ; on n\'a pas trouvé que l\'amplificateur aide. Pour le tester ici, lancez le test A/B sur l\'amplificateur.',
+    'lab.dist.title': 'Perturbation partagée',
+    'lab.dist.help': 'Chaque membrane voit des copies bruitées d\'un même artefact, aussi fort qu\'un vrai motif. Le verdict du bouclier est la règle 2 sur 3 du jeu. Le test utilise les paramètres de départ du dépôt et une graine fixe : le relancer donne les mêmes nombres.',
+    'lab.dist.run': 'Lancer 100 épisodes',
+    'lab.dist.running': 'En cours…',
+    'lab.dist.done': 'Terminé : {n} épisodes en {sec} s.',
+    'lab.dist.empty': 'Pas encore lancé.',
+    'dist.col.measure': 'Mesure',
+    'dist.col.value': 'Valeur',
+    'dist.row.episodes': 'Épisodes',
+    'dist.row.decl1': 'Au moins une déclaration',
+    'dist.row.decl2': 'Au moins deux déclarations',
+    'dist.row.pass': 'Passage du bouclier (Wilson à 95 pour cent)',
+    'dist.row.match': 'Passage correspondant à l\'artefact',
+    'dist.note': 'Artefact aussi fort qu\'un vrai motif (bêta = 1). Réponse à la dose, mesurée sur ce code : demi-force 0 pour cent, force à 75 pour cent 1,4 pour cent — voir docs/SHARED-DISTURBANCE.md.',
     'lab.export.title': 'Exporter ce concours',
     'lab.export.csv': 'CSV du concours',
     'lab.export.json': 'JSON du concours',
@@ -2788,6 +2880,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'mis.repo.brief': 'Reprenez le réglage du dépôt avec le bouclier actif, lancez au moins 20 graines et voyez si les moyennes du dépôt tombent dans vos intervalles.',
     'mis.play.title': 'Battre la référence',
     'mis.play.brief': 'Terminez un concours dont le score atteint la référence du dépôt indiquée dans le tableau du résultat.',
+    'mis.disturbance.title': 'Tester le bouclier contre une perturbation partagée',
+    'mis.disturbance.brief': 'Lancez 100 épisodes où les trois membranes voient des copies bruitées d\'un même artefact, aussi fort qu\'un vrai motif. Mesuré sur ce code, le bouclier l\'a laissé passer dans 96,6 pour cent des épisodes — le même taux qu\'un vrai signal. Voyez s\'il tient ici.',
     'out.reproduced': 'reproduit : moins de sorties fausses avec le bouclier (l\'intervalle exclut 0)',
     'out.not_reproduced': 'non reproduit à cette taille d\'échantillon',
     'out.found': 'trouvé : la récompense individuelle traîne sur {metrics}',
@@ -2799,6 +2893,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'out.differs': 'diffère du dépôt',
     'out.beat': 'référence atteinte',
     'out.below': 'sous la référence',
+    'out.certifies': 'certifie l\'erreur commune : le bouclier a laissé passer l\'artefact partagé plus d\'une fois sur deux',
+    'out.holds': 'tient : l\'artefact partagé a rarement passé le bouclier',
     'method.title': 'Méthode : ce qui est mesuré, conçu et non vérifié',
     'method.measured': 'Mesuré dans cette page',
     'method.m1': 'Chaque nombre tracé est calculé par la simulation de cette page (un portage JavaScript du concours du dépôt à largeur 32) ou lu dans les copies CSV du dépôt, avec le fichier nommé à côté.',
@@ -2838,7 +2934,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'alt.ens': '{n} graines. Sorties vraies {T} (intervalle à 95 pour cent {Tlo} à {Thi}) ; sorties fausses {F} ({Flo} à {Fhi}) ; précision {P} ({Plo} à {Phi}).',
     'alt.ens_base': 'Moyennes du dépôt sur {seeds} graines dans {file} : vraies {T}, fausses {F}, précision {P} ; {like}.',
     'alt.ens_nobase': 'Le dépôt n\'a pas de mesure pour cette combinaison.',
-    'alt.ab': '{n} graines appariées, A moins B. Sorties vraies {T} ; sorties fausses {F} ; précision {P} ; score du jeu {S}. A a marqué plus haut sur {wins} graines sur {n}.'
+    'alt.ab': '{n} graines appariées, A moins B. Sorties vraies {T} ; sorties fausses {F} ; précision {P} ; score du jeu {S}. A a marqué plus haut sur {wins} graines sur {n}.',
+    'alt.dist': 'Perturbation partagée, {n} épisodes : le bouclier a laissé passer {p} (intervalle de Wilson à 95 pour cent, {lo} à {hi}) ; {m} des passages correspondaient à l\'artefact.'
   };
 
   var LANGS = { en: en, fr: fr };
@@ -4023,6 +4120,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     var lab = { probe: null, probeKey: '', token: 0 };
     var ens = { job: null, summary: null, results: null, settings: null, repo: true, running: false, t0: 0, runMs: 0, wallMs: 0 };
     var ab = { job: null, summary: null, meta: null, settings: null, running: false, t0: 0, runMs: 0, labels: null };
+    var dist = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -4282,6 +4380,43 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       });
     }
 
+    /* ---------- shared disturbance ---------- */
+
+    // 100 episodes with a full-strength shared artifact (beta = 1) at the repository
+    // starting parameters. The run is seeded, so repeating it gives the same numbers.
+    function runDisturbance() {
+      if (dist.running) return;
+      dist.running = true; dist.t0 = Date.now();
+      $('btn-dist-run').disabled = true;
+      $('dist-status').textContent = t('lab.dist.running');
+      $('dist-empty').hidden = true; $('dist-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        dist.result = LAB.disturbanceProbe(s, 100, 'mission', 1);
+        dist.wallMs = Date.now() - dist.t0;
+        dist.running = false; $('btn-dist-run').disabled = false;
+        renderDisturbance();
+        var res = LAB.evaluateMission('disturbance', { result: dist.result });
+        if (res && res.counts) record('disturbance', res, dist.result.n);
+      }, 0);
+    }
+    function renderDisturbance() {
+      var r = dist.result;
+      $('dist-empty').hidden = !!r; $('dist-out').hidden = !r;
+      if (!r) return;
+      $('dist-status').textContent = t('lab.dist.done', { n: r.n, sec: f(dist.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('dist-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('dist.col.measure'), t('dist.col.value')], true));
+      tb.appendChild(row([t('dist.row.episodes'), String(r.n)]));
+      tb.appendChild(row([t('dist.row.decl1'), r.decl1 + ' (' + pc(r.decl1, r.n) + ')']));
+      tb.appendChild(row([t('dist.row.decl2'), r.decl2 + ' (' + pc(r.decl2, r.n) + ')']));
+      tb.appendChild(row([t('dist.row.pass'), r.pass + ' (' + pc(r.pass, r.n) + ', ' + pc(r.passCI.lo, 1) + ' to ' + pc(r.passCI.hi, 1) + ')']));
+      tb.appendChild(row([t('dist.row.match'), r.passMatch + ' (' + pc(r.passMatch, r.n) + ')']));
+      $('dist-note').textContent = t('dist.note');
+      setAlt('dist-alt', LAB.describeDisturbance(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -4317,6 +4452,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       var m = LAB.missionById(id);
       if (m.kind === 'ab') { setupAB(m.factor, m.a, m.b, m.minN); showTab('ab', true); }
       else if (m.kind === 'ens') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); $('ens-repo').checked = true; $('ens-n').value = String(m.minN); showTab('ens', true); }
+      else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -4354,6 +4490,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       $('btn-ens-match').addEventListener('click', matchRepository);
       $('btn-ab-run').addEventListener('click', runAB);
       $('btn-ab-cancel').addEventListener('click', function () { if (ab.job) ab.job.cancel(); });
+      $('btn-dist-run').addEventListener('click', runDisturbance);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);

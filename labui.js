@@ -24,6 +24,7 @@
     var lab = { probe: null, probeKey: '', token: 0 };
     var ens = { job: null, summary: null, results: null, settings: null, repo: true, running: false, t0: 0, runMs: 0, wallMs: 0 };
     var ab = { job: null, summary: null, meta: null, settings: null, running: false, t0: 0, runMs: 0, labels: null };
+    var dist = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -283,6 +284,43 @@
       });
     }
 
+    /* ---------- shared disturbance ---------- */
+
+    // 100 episodes with a full-strength shared artifact (beta = 1) at the repository
+    // starting parameters. The run is seeded, so repeating it gives the same numbers.
+    function runDisturbance() {
+      if (dist.running) return;
+      dist.running = true; dist.t0 = Date.now();
+      $('btn-dist-run').disabled = true;
+      $('dist-status').textContent = t('lab.dist.running');
+      $('dist-empty').hidden = true; $('dist-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        dist.result = LAB.disturbanceProbe(s, 100, 'mission', 1);
+        dist.wallMs = Date.now() - dist.t0;
+        dist.running = false; $('btn-dist-run').disabled = false;
+        renderDisturbance();
+        var res = LAB.evaluateMission('disturbance', { result: dist.result });
+        if (res && res.counts) record('disturbance', res, dist.result.n);
+      }, 0);
+    }
+    function renderDisturbance() {
+      var r = dist.result;
+      $('dist-empty').hidden = !!r; $('dist-out').hidden = !r;
+      if (!r) return;
+      $('dist-status').textContent = t('lab.dist.done', { n: r.n, sec: f(dist.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('dist-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('dist.col.measure'), t('dist.col.value')], true));
+      tb.appendChild(row([t('dist.row.episodes'), String(r.n)]));
+      tb.appendChild(row([t('dist.row.decl1'), r.decl1 + ' (' + pc(r.decl1, r.n) + ')']));
+      tb.appendChild(row([t('dist.row.decl2'), r.decl2 + ' (' + pc(r.decl2, r.n) + ')']));
+      tb.appendChild(row([t('dist.row.pass'), r.pass + ' (' + pc(r.pass, r.n) + ', ' + pc(r.passCI.lo, 1) + ' to ' + pc(r.passCI.hi, 1) + ')']));
+      tb.appendChild(row([t('dist.row.match'), r.passMatch + ' (' + pc(r.passMatch, r.n) + ')']));
+      $('dist-note').textContent = t('dist.note');
+      setAlt('dist-alt', LAB.describeDisturbance(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -318,6 +356,7 @@
       var m = LAB.missionById(id);
       if (m.kind === 'ab') { setupAB(m.factor, m.a, m.b, m.minN); showTab('ab', true); }
       else if (m.kind === 'ens') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); $('ens-repo').checked = true; $('ens-n').value = String(m.minN); showTab('ens', true); }
+      else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -355,6 +394,7 @@
       $('btn-ens-match').addEventListener('click', matchRepository);
       $('btn-ab-run').addEventListener('click', runAB);
       $('btn-ab-cancel').addEventListener('click', function () { if (ab.job) ab.job.cancel(); });
+      $('btn-dist-run').addEventListener('click', runDisturbance);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);

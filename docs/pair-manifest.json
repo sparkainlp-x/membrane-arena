@@ -197,7 +197,7 @@
   "seed": "pair-bootstrap"
  },
  "inputs": {
-  "game.js": "077fa7ca6ce5fb62ed51b87a7bdb32c4b6bc79c5c569d49a4c4d4abfb716dc03",
+  "game.js": "3d7fc5d0b96786763cd98ded63673225adaa3be60f45d0874caa2cbb9c3f9767",
   "reverse.js": "b8a8d1710b967df8d8b5f0bff4ced003a216e275fd95ee000242642b78ac4b34",
   "pair.js": "5a3f6c94a6754d38c266da0908a3c2ca31893749d206ce37e8d143a90af1cd45",
   "scripts/pair-check.js": "d2217a2060d7557f9463baa8dd28295568daee5bd55c9d7f79f53b2baf7818b4",
@@ -209,7 +209,7 @@
   "docs/pair-results.csv": "54e6cf9c2fc17dd255790d1536d05c51e39085091bc1581e67b8ca19b2d42682"
  },
  "generatedWith": {
-  "node": "v24.19.0",
+  "node": "v24.22.1",
   "platform": "linux-x64"
  }
 }

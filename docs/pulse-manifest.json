@@ -466,7 +466,7 @@
   "seed": "pulse-permutation"
  },
  "inputs": {
-  "game.js": "077fa7ca6ce5fb62ed51b87a7bdb32c4b6bc79c5c569d49a4c4d4abfb716dc03",
+  "game.js": "3d7fc5d0b96786763cd98ded63673225adaa3be60f45d0874caa2cbb9c3f9767",
   "pulse.js": "c6591e5725ed67b10f10a031dda51ac14ea8fba22247c1759dca94e3ceeed789",
   "scripts/pulse-check.js": "3a1215413828acbeb0bd2530174069d360e88de46b77325fdafd0e987ced2051",
   "docs/PULSE-PROTOCOL.md": "50eec68a3043851ac308b113e3916eedc8c5522f8b08819763d7917ae4ba214e"
@@ -478,7 +478,7 @@
   "docs/pulse-results.csv": "02d2af6aab4791e1bafacfeb79444a09644bd6b4167065b8402a5316e399f22f"
  },
  "generatedWith": {
-  "node": "v24.19.0",
+  "node": "v24.22.1",
   "platform": "linux-x64"
  }
 }
