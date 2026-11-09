@@ -319,6 +319,20 @@
     'reference.row.signal': 'Real signal',
     'reference.row.artifact': 'Shared artifact',
     'reference.note': 'Commit on the signal, abstain on the artifact: that is having grounds. Measured on this code the reference confirms the signal and never the artifact — see docs/REFERENCE-CHANNEL.md.',
+    'lab.collision.title': 'Collision guard',
+    'lab.collision.help': 'Three arms at the repository starting parameters, each 100 episodes, seeded: a real signal, a shared artifact as strong as a real pattern, and a planted pairwise collision — membranes 0 and 1 strongly coupled on the shared pattern while membrane 2 is uncoupled, so the pair declares near-identical vectors. When the shield passes, the collision guard checks whether the agreement is localised (one pair far above the mean fidelity) or global consensus: it abstains on a localised collision and commits on consensus. The guard does not separate signal from artifact — both are global consensus. See docs/COLLISION-GUARD.md.',
+    'lab.collision.run': 'Run 300 episodes',
+    'lab.collision.running': 'Running…',
+    'lab.collision.done': 'Done: {n} episodes per arm in {sec} s.',
+    'lab.collision.empty': 'Not run yet.',
+    'collision.col.arm': 'Arm',
+    'collision.col.pass': 'Shield pass',
+    'collision.col.fire': 'Guard fires',
+    'collision.col.commit': 'Commits',
+    'collision.row.signal': 'Real signal',
+    'collision.row.artifact': 'Shared artifact',
+    'collision.row.collision': 'Planted collision',
+    'collision.note': 'The guard fires far more often on the planted collision than on a real signal, while the signal still commits: that is having grounds. Measured on this code the guard fires on 26 percent of planted-collision passes and 1 percent of signal passes — see docs/COLLISION-GUARD.md.',
     'lab.export.title': 'Export this contest',
     'lab.export.csv': 'Contest CSV',
     'lab.export.json': 'Contest JSON',
@@ -437,6 +451,8 @@
     'mis.grounds.brief': 'Run 300 episodes: a real signal, a shared artifact, and the artifact with coupling off. The committee has grounds only if it commits on the signal and abstains on the artifact. Measured on this code, it commits on both — signal 95.5 percent, artifact 96.6 percent, coupling off 94.0 percent.',
     'mis.reference.title': 'Ask the reference',
     'mis.reference.brief': 'Run 200 episodes: a real signal and a shared artifact. When the shield passes, a reference channel that sees the environment but not the disturbance is asked whether the declared pattern is really there. The shield has grounds only if the reference confirms the signal and not the artifact. Measured on this code, it confirms the signal 94 percent of the time and the artifact never.',
+    'mis.collision.title': 'Catch a pairwise collision',
+    'mis.collision.brief': 'Run 300 episodes: a real signal, a shared artifact, and a planted pairwise collision — two membranes strongly coupled on one pattern while the third is uncoupled. When the shield passes, the collision guard abstains if the agreement is localised (one pair far above the mean) and commits on global consensus. The shield has grounds only if the guard fires far more often on the planted collision than on the signal while the signal still commits. Measured on this code, it fires on 26 percent of planted-collision passes and 1 percent of signal passes.',
     'out.reproduced': 'reproduced: fewer false outputs with the shield (interval excludes 0)',
     'out.not_reproduced': 'not reproduced at this sample size',
     'out.found': 'found: individual reward lags on {metrics}',
@@ -495,7 +511,8 @@
     'alt.ab': '{n} paired seeds, A minus B. True outputs {T}; false outputs {F}; precision {P}; game score {S}. A scored higher on {wins} of {n} seeds.',
     'alt.dist': 'Shared disturbance, {n} episodes: the shield passed {p} (95 percent Wilson interval {lo} to {hi}); {m} of the passes matched the artifact.',
     'alt.ground': 'Grounds to decide, {n} episodes per arm: real signal {s} shield pass, shared artifact {a}, artifact with coupling off {m}.',
-    'alt.reference': 'Reference channel, {n} episodes per arm: real signal decides {s}, shared artifact decides {a}.'
+    'alt.reference': 'Reference channel, {n} episodes per arm: real signal decides {s}, shared artifact decides {a}.',
+    'alt.collision': 'Collision guard, {n} episodes per arm: real signal commits {s}, shared artifact commits {a}, planted collision commits {c}; guard fires on {fs} of signal passes and {fc} of planted-collision passes.'
   };
 
   var fr = {
@@ -807,6 +824,20 @@
     'reference.row.signal': 'Vrai signal',
     'reference.row.artifact': 'Artefact partagé',
     'reference.note': 'S\'engager sur le signal, s\'abstenir sur l\'artefact : c\'est avoir des motifs. Mesuré sur ce code, la référence confirme le signal et jamais l\'artefact — voir docs/REFERENCE-CHANNEL.md.',
+    'lab.collision.title': 'Garde de collision',
+    'lab.collision.help': 'Trois volets avec les paramètres de départ du dépôt, 100 épisodes chacun, avec graine fixe : un vrai signal, un artefact partagé aussi fort qu\'un vrai motif, et une collision par paire plantée — les membranes 0 et 1 fortement couplées sur le motif partagé tandis que la membrane 2 est découplée, donc la paire déclare des vecteurs presque identiques. Quand le bouclier passe, la garde de collision vérifie si l\'accord est localisé (une paire très au-dessus de la fidélité moyenne) ou un consensus global : elle s\'abstient sur une collision localisée et s\'engage sur un consensus. La garde ne sépare pas le signal de l\'artefact — les deux sont des consensus globaux. Voir docs/COLLISION-GUARD.md.',
+    'lab.collision.run': 'Lancer 300 épisodes',
+    'lab.collision.running': 'En cours…',
+    'lab.collision.done': 'Terminé : {n} épisodes par volet en {sec} s.',
+    'lab.collision.empty': 'Pas encore lancé.',
+    'collision.col.arm': 'Volet',
+    'collision.col.pass': 'Passage du bouclier',
+    'collision.col.fire': 'Garde déclenchée',
+    'collision.col.commit': 'S\'engage',
+    'collision.row.signal': 'Vrai signal',
+    'collision.row.artifact': 'Artefact partagé',
+    'collision.row.collision': 'Collision plantée',
+    'collision.note': 'La garde se déclenche bien plus souvent sur la collision plantée que sur un vrai signal, tandis que le signal s\'engage toujours : c\'est avoir des motifs. Mesuré sur ce code, la garde se déclenche sur 26 pour cent des passages de collision plantée et 1 pour cent des passages de signal — voir docs/COLLISION-GUARD.md.',
     'lab.export.title': 'Exporter ce concours',
     'lab.export.csv': 'CSV du concours',
     'lab.export.json': 'JSON du concours',
@@ -925,6 +956,8 @@
     'mis.grounds.brief': 'Lancez 300 épisodes : un vrai signal, un artefact partagé, et l\'artefact avec le couplage coupé. Le comité a des motifs seulement s\'il s\'engage sur le signal et s\'abstient sur l\'artefact. Mesuré sur ce code, il s\'engage sur les deux — signal 95,5 pour cent, artefact 96,6 pour cent, couplage coupé 94,0 pour cent.',
     'mis.reference.title': 'Demander à la référence',
     'mis.reference.brief': 'Lancez 200 épisodes : un vrai signal et un artefact partagé. Quand le bouclier passe, un canal de référence qui voit l\'environnement mais pas la perturbation est interrogé pour savoir si le motif déclaré est vraiment là. Le bouclier a des motifs seulement si la référence confirme le signal et pas l\'artefact. Mesuré sur ce code, elle confirme le signal 94 pour cent du temps et jamais l\'artefact.',
+    'mis.collision.title': 'Attraper une collision par paire',
+    'mis.collision.brief': 'Lancez 300 épisodes : un vrai signal, un artefact partagé, et une collision par paire plantée — deux membranes fortement couplées sur un motif tandis que la troisième est découplée. Quand le bouclier passe, la garde de collision s\'abstient si l\'accord est localisé (une paire très au-dessus de la moyenne) et s\'engage sur un consensus global. Le bouclier a des motifs seulement si la garde se déclenche bien plus souvent sur la collision plantée que sur le signal tandis que le signal s\'engage toujours. Mesuré sur ce code, elle se déclenche sur 26 pour cent des passages de collision plantée et 1 pour cent des passages de signal.',
     'out.reproduced': 'reproduit : moins de sorties fausses avec le bouclier (l\'intervalle exclut 0)',
     'out.not_reproduced': 'non reproduit à cette taille d\'échantillon',
     'out.found': 'trouvé : la récompense individuelle traîne sur {metrics}',
@@ -983,7 +1016,8 @@
     'alt.ab': '{n} graines appariées, A moins B. Sorties vraies {T} ; sorties fausses {F} ; précision {P} ; score du jeu {S}. A a marqué plus haut sur {wins} graines sur {n}.',
     'alt.dist': 'Perturbation partagée, {n} épisodes : le bouclier a laissé passer {p} (intervalle de Wilson à 95 pour cent, {lo} à {hi}) ; {m} des passages correspondaient à l\'artefact.',
     'alt.ground': 'Motifs de décider, {n} épisodes par volet : vrai signal {s} de passage du bouclier, artefact partagé {a}, artefact avec couplage coupé {m}.',
-    'alt.reference': 'Canal de référence, {n} épisodes par volet : vrai signal décide {s}, artefact partagé décide {a}.'
+    'alt.reference': 'Canal de référence, {n} épisodes par volet : vrai signal décide {s}, artefact partagé décide {a}.',
+    'alt.collision': 'Garde de collision, {n} épisodes par volet : vrai signal s\'engage {s}, artefact partagé s\'engage {a}, collision plantée s\'engage {c} ; la garde se déclenche sur {fs} des passages de signal et {fc} des passages de collision plantée.'
   };
 
   var LANGS = { en: en, fr: fr };

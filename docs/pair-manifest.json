@@ -197,7 +197,7 @@
   "seed": "pair-bootstrap"
  },
  "inputs": {
-  "game.js": "431d4471fa3bf6eab8260933d79d63ecfc65906168634407f3b54194f2bbbc06",
+  "game.js": "72f9010b75f58ddccd7368458a90d5a83c39d242590ddb1594cbe68c840a706b",
   "reverse.js": "b8a8d1710b967df8d8b5f0bff4ced003a216e275fd95ee000242642b78ac4b34",
   "pair.js": "5a3f6c94a6754d38c266da0908a3c2ca31893749d206ce37e8d143a90af1cd45",
   "scripts/pair-check.js": "d2217a2060d7557f9463baa8dd28295568daee5bd55c9d7f79f53b2baf7818b4",

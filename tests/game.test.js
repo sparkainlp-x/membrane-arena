@@ -89,6 +89,48 @@ test('system event needs two agreeing declarations; reward schemes behave as in 
   assert.equal(G.reward('team', 0, [a, c, null]), 0);
 });
 
+test('pairwise collision guard: a localised collision fires, global consensus and a silent third do not', () => {
+  const a = unit(32, 0), b = unit(32, 0), c = unit(32, 5);
+  // Two identical declarations and a third far away: maxFid 1, meanFid 1/3, margin 2/3.
+  const hit = G.pairwiseCollision([a, b, c]);
+  assert.equal(hit.collided, true);
+  assert.deepEqual(hit.pair, [0, 1]);
+  assert.ok(Math.abs(hit.maxFid - 1) < 1e-12);
+  assert.ok(Math.abs(hit.margin - 2 / 3) < 1e-12);
+  // All three identical: global consensus, margin 0, no collision.
+  const all = G.pairwiseCollision([a, b, unit(32, 0)]);
+  assert.equal(all.collided, false);
+  assert.ok(Math.abs(all.margin) < 1e-12);
+  // Third close to the pair (fidelity 0.95): margin 1 - (1 + 0.95 + 0.95) / 3 = 0.033 < 0.05, no collision.
+  const near = { r: new Float64Array(32), i: new Float64Array(32) };
+  near.r[0] = Math.sqrt(0.95); near.r[1] = Math.sqrt(0.05);
+  const close = G.pairwiseCollision([a, b, near]);
+  assert.equal(close.collided, false);
+  assert.ok(close.margin > 0 && close.margin < G.COLL_MARGIN);
+  // Closest pair below the collide threshold (fidelity 0.8) with the third far: no collision.
+  const weak = { r: new Float64Array(32), i: new Float64Array(32) };
+  weak.r[0] = Math.sqrt(0.8); weak.r[1] = Math.sqrt(0.2);
+  assert.equal(G.pairwiseCollision([weak, a, c]).collided, false);
+  // Only two declarations: margin is 0 by definition, a silent third is not dissent.
+  assert.equal(G.pairwiseCollision([a, b, null]).collided, false);
+  assert.equal(G.pairwiseCollision([a, b, null]).margin, 0);
+  // Fewer than two declarations: nothing to check.
+  assert.equal(G.pairwiseCollision([a, null, null]).collided, false);
+  assert.equal(G.pairwiseCollision([null, null, null]).collided, false);
+  assert.equal(G.COLLIDE, 0.9);
+  assert.equal(G.COLL_MARGIN, 0.05);
+});
+
+test('shield integration: a collided episode is recorded as dropped, never committed', () => {
+  const c = play('coll-int', settings({ shield: true }), 4);
+  c.hist.forEach((h) => h.episodes.forEach((ep) => {
+    assert.equal(typeof ep.collision, 'boolean');
+    assert.ok(typeof ep.collMaxFid === 'number' && ep.collMaxFid >= 0 && ep.collMaxFid <= 1);
+    assert.ok(typeof ep.collMargin === 'number' && ep.collMargin >= 0 && ep.collMargin <= 1);
+    if (ep.collision) { assert.equal(ep.passed, null); assert.equal(ep.dropped, true); assert.deepEqual(ep.outs, []); }
+  }));
+});
+
 test('stabilizer factor shrinks above target, floors at 0.2; leaky update is a convex blend; gain clamp is [0.33, 3]', () => {
   assert.equal(G.stabilizerFactor(0.5), 1);
   assert.ok(G.stabilizerFactor(0.9) < 1);
@@ -498,8 +540,12 @@ test('golden: full contests reproduce the exact v0.1.0 numbers, so old challenge
     out.push([seed, r.T, r.F, r.score.toFixed(6), c.par.map((p) => p.th.toFixed(6) + '/' + p.g.toFixed(6)).join(' ')]);
   }
   assert.deepEqual(out, [
-    ['golden1', 41, 7, '81.770833', '0.479345/1.007160 0.339303/0.752064 0.445237/1.116356'],
-    ['d2026-10-24', 45, 2, '93.131049', '0.271716/0.674343 0.408475/0.924243 0.439168/0.936201']
+    // Collision guard (2026-11-09): the guard abstains on a localised
+    // collision, so a few episodes that used to be true outputs are now
+    // held; false outputs are unchanged. Old challenge links no longer
+    // play the same contest. See docs/COLLISION-GUARD.md.
+    ['golden1', 37, 7, '74.234533', '0.444927/0.812558 0.203064/0.491483 0.381379/0.793997'],
+    ['d2026-10-24', 41, 2, '83.657088', '0.444596/0.867208 0.498952/1.194003 0.527778/0.988014']
   ]);
 });
 
