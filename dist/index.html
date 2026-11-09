@@ -426,6 +426,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
             <p id="reference-alt" class="alt"></p>
           </div>
         </figure>
+        <figure class="inst">
+          <h3 id="h-lab-collision" data-i18n="lab.collision.title"></h3>
+          <p class="hint" data-i18n="lab.collision.help"></p>
+          <div class="row">
+            <button id="btn-collision-run" class="btn primary small" type="button" data-i18n="lab.collision.run"></button>
+          </div>
+          <p class="small-text"><span id="collision-status" role="status"></span></p>
+          <p id="collision-empty" class="hint" data-i18n="lab.collision.empty"></p>
+          <div id="collision-out" hidden>
+            <div class="tablewrap"><table id="collision-table" class="scores"></table></div>
+            <p id="collision-note" class="hint"></p>
+            <p id="collision-alt" class="alt"></p>
+          </div>
+        </figure>
         </div>
         <figure class="inst wide">
           <h3 id="h-sci" data-i18n="sci.title"></h3>
@@ -902,6 +916,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
   var EP = 8, GENS = 12, STEPS = 60;     // as in the repository contest
   var CHECK = 10, WINDOW = 5, ETA = 0.5;
   var AGREE = 0.4, TRUTH = 0.5, SIGMA_SCALE = 1.5;
+  var COLLIDE = 0.9, COLL_MARGIN = 0.05;   // pairwise-collision guard: a pair is "the same vector" at fidelity >= COLLIDE, and the collision is localised (not global consensus) when maxFid - meanFid > COLL_MARGIN; see docs/COLLISION-GUARD.md
   var AMP_CAP = 0.5, TARGET = 0.5, LEAK = 0.3, KSTAB = 1.5;
   var GAIN_MIN = 0.33, GAIN_MAX = 3.0, FACTOR_MIN = 0.2;
   var TH_MIN = 0.02, TH_MAX = 1.5, C_MAX = 0.5;
@@ -909,7 +924,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
   var W_STEPS = [0, 0.25, 0.5, 0.75, 1];
   var SCHEME_SCALE = 0.25;               // arena choice: weight of the scheme reward in selection
   var STEADY_REF = 0.05;                 // rate variance at which steadiness reaches 0
-  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance', 'grounds', 'reference'];
+  var MISSION_IDS = ['shield', 'individual', 'amp', 'repo', 'play', 'disturbance', 'grounds', 'reference', 'collision'];
   var OUTCOMES = ['reproduced', 'not_reproduced', 'found', 'not_found', 'no_effect', 'detected', 'agrees', 'partly', 'differs', 'beat', 'below', 'certifies', 'holds', 'grounds', 'overcommits', 'abstains'];
   var METRIC_IDS = ['T', 'F', 'precision', 'rateVar', 'score'];
   var DEFAULTS = { scheme: 'consensus', w: 0.5, shield: true, amp: false, stab: false, evolve: true, fcost: 0, th: 0.5, c: 0.05, g: 1.0 };
@@ -995,6 +1010,28 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     for (var k = 0; k < decls.length; k++) if (decls[k] && agreeing(decls[k], decls, thresh) >= 2) return k;
     return null;
   }
+  // Pairwise-collision analysis of the declarations (docs/COLLISION-GUARD.md).
+  // A collision is two membranes declaring near-identical vectors (one
+  // effective witness, counted twice) while the third declares something
+  // far away. maxFid - meanFid is the fidelity-space margin: it is large
+  // for a localised collision and small for global consensus, where all
+  // three declarations are close. With fewer than 2 declarations there is
+  // nothing to check; with exactly 2 the margin is 0 by definition (one
+  // pair, no background), so a silent third membrane is not dissent and
+  // the standard 2-of-3 pass stands.
+  function pairwiseCollision(decls) {
+    var idx = [];
+    for (var k = 0; k < decls.length; k++) if (decls[k]) idx.push(k);
+    if (idx.length < 2) return { pair: null, maxFid: 0, meanFid: 0, margin: 0, collided: false };
+    var fs = [], a, b;
+    for (a = 0; a < idx.length; a++) for (b = a + 1; b < idx.length; b++) fs.push([fidelity(decls[idx[a]], decls[idx[b]]), idx[a], idx[b]]);
+    var maxF = fs[0], meanF = 0;
+    for (var q = 0; q < fs.length; q++) { meanF += fs[q][0]; if (fs[q][0] > maxF[0]) maxF = fs[q]; }
+    meanF /= fs.length;
+    var margin = maxF[0] - meanF;
+    return { pair: [maxF[1], maxF[2]], maxFid: maxF[0], meanFid: meanF, margin: margin,
+      collided: idx.length === 3 && maxF[0] >= COLLIDE && margin > COLL_MARGIN };
+  }
   function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
 
   function reward(scheme, i, decls) {              // rewards.py, for 3 agents
@@ -1026,7 +1063,10 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
   //   ix.fid   Float32Array STEPS*3, |<v|pattern>| of each membrane after each step (-1 in a noise episode)
   //   ix.noDecl  when true nobody declares or freezes (used by the Lab probe)
   //   ix.chk   when set to [[],[],[]], each check step pushes [geff * energy ratio, fidelity to the pattern] per membrane
-  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix) {
+  // `pats` is an optional per-membrane pattern override (array of 3 patterns or nulls): membrane i sees
+  // pats[i] (or noise when null) instead of the shared `pat`. It exists so a probe can plant a localised
+  // collision — two membranes on one pattern, the third on another — and is null in normal play.
+  function episode(n, pat, sigma, P, warm, amp, rng, trace, ix, pats) {
     ix = ix || {};
     var vs = [], win = [[], [], []], decl = [null, null, null], declStep = [null, null, null], i, j, k, t;
     var lastFid = [-1, -1, -1];
@@ -1038,7 +1078,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     for (t = 1; t <= STEPS; t++) {
       for (i = 0; i < 3; i++) {
         if (decl[i]) { trace[(t - 1) * 3 + i] = last[i]; if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i]; continue; }
-        var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+        var pp = pats ? pats[i] : pat;
+        var x = pp ? noisy(pp, sigma, rng) : rvec(n, rng);
         var y = inner(x, vs[i]);
         win[i].push(y.re * y.re + y.im * y.im);
         if (win[i].length > WINDOW) win[i].shift();
@@ -1061,12 +1102,13 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
         vs[i] = normalize(v);
         last[i] = P[i].geff * energyRatio(win[i], n);
         trace[(t - 1) * 3 + i] = last[i];
-        if (pat) lastFid[i] = Math.sqrt(fidelity(vs[i], pat));
+        if (pp) lastFid[i] = Math.sqrt(fidelity(vs[i], pp));
         if (ix.fid) ix.fid[(t - 1) * 3 + i] = lastFid[i];
       }
       if (t % CHECK === 0) {
         for (i = 0; i < 3; i++) {
-          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pat ? fidelity(vs[i], pat) : 0]);
+          var pci = pats ? pats[i] : pat;
+          if (ix.chk) ix.chk[i].push([P[i].geff * energyRatio(win[i], n), pci ? fidelity(vs[i], pci) : 0]);
           if (!ix.noDecl && !decl[i] && P[i].geff * energyRatio(win[i], n) >= thr[i]) { decl[i] = copyVec(vs[i]); declStep[i] = t; }
         }
       }
@@ -1141,10 +1183,19 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
         }
       }
       if (truth[0] && truth[1] && truth[2]) joint++;
-      var outs, passed = null;
+      var outs, passed = null, coll = { pair: null, maxFid: 0, meanFid: 0, margin: 0, collided: false };
       if (o.shield) {
         passed = null;
         for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        // Collision guard: a localised collision (two membranes declaring
+        // near-identical vectors while the third declares something far
+        // away) is one witness counted twice, not two independent votes.
+        // The shield abstains rather than committing on it; global
+        // consensus (all three close) is unaffected. See docs/COLLISION-GUARD.md.
+        if (passed !== null) {
+          coll = pairwiseCollision(d);
+          if (coll.collided) passed = null;
+        }
         outs = passed === null ? [] : [passed];
       } else {
         outs = [];
@@ -1158,6 +1209,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       episodes.push({
         planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
         dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
+        collision: coll.collided, collMaxFid: coll.maxFid, collMargin: coll.margin,
         agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
       });
     }
@@ -1396,6 +1448,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
     hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
     sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    pairwiseCollision: pairwiseCollision, COLLIDE: COLLIDE, COLL_MARGIN: COLL_MARGIN,
     stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
     sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
     summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
@@ -1762,6 +1815,63 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     return { n: K, beta: beta, M: M, threshold: thr, signal: signal, artifact: artifact,
       settings: { th: s.th, c: s.c, g: s.g } };
   }
+  // Three arms at the repository starting parameters, each K episodes, seeded:
+  // a real signal, a shared artifact as strong as a real pattern (beta = 1),
+  // and a planted pairwise collision: membranes 0 and 1 strongly coupled
+  // (c = 0.5) on the shared pattern while membrane 2 is uncoupled (c = 0),
+  // so the pair declares near-identical vectors and the third declares on
+  // its own learning. In every arm the shield's verdict is the game's own
+  // 2-of-3 rule, and the collision guard (game.js pairwiseCollision,
+  // COLLIDE = 0.9, COLL_MARGIN = 0.05) is consulted before committing: when
+  // it fires the shield abstains. The guard fires on a *localised* collision
+  // (one pair far above the mean fidelity) and stays silent on global
+  // consensus, whether signal or artifact — so it does not separate signal
+  // from artifact (that is the reference channel's job), it separates a
+  // localised collision from a genuine consensus. Measured (K = 500/arm,
+  // game.js v0.3.6): guard fires on 28.6% of planted-collision passes vs
+  // 1.3% of signal passes and 0.0% of artifact passes; signal commits
+  // ~93%. The shield has grounds only if the guard fires far more often on
+  // the planted collision than on the signal while the signal still
+  // commits. See docs/COLLISION-GUARD.md.
+  function collisionProbe(settings, K, seedTag, beta) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/collision/' + (seedTag || 'repo'));
+    beta = beta === undefined ? 1 : beta;
+    function arm(patFn, P) {
+      var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, fire = 0, commit = 0, totalDecl = 0, sumMaxFid = 0, sumMargin = 0, e;
+      for (e = 0; e < K; e++) {
+        var made = patFn(), pat = made.pat, ref = made.ref;
+        var trace = new Float32Array(G.STEPS * 3);
+        var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+        var nDecl = d.filter(Boolean).length;
+        totalDecl += nDecl;
+        if (nDecl >= 1) decl1++;
+        if (nDecl >= 2) decl2++;
+        var passed = G.systemEvent(d, G.AGREE);
+        if (passed !== null) {
+          pass++;
+          if (ref && G.fidelity(d[passed], ref) >= G.TRUTH) passMatch++;
+          var coll = G.pairwiseCollision(d);
+          sumMaxFid += coll.maxFid; sumMargin += coll.margin;
+          if (coll.collided) fire++; else commit++;
+        }
+      }
+      return { decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, fire: fire, commit: commit, meanDecl: totalDecl / K,
+        passRate: pass / K, passMatchRate: passMatch / K, fireRate: fire / K, fireGivenPass: pass ? fire / pass : 0,
+        commitRate: commit / K, commitCI: ST.wilson(commit, K),
+        meanMaxFid: pass ? sumMaxFid / pass : 0, meanMargin: pass ? sumMargin / pass : 0 };
+    }
+    function artifactPat() {
+      var art = G.rvec(n, rng);
+      return { pat: { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) }, ref: art };
+    }
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var PC = [{ th: s.th, c: 0.5, g: s.g, sp: 0.5, geff: 1 }, { th: s.th, c: 0.5, g: s.g, sp: 0.5, geff: 1 }, { th: s.th, c: 0, g: s.g, sp: 0.5, geff: 1 }];
+    var signal = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, P);
+    var artifact = arm(artifactPat, P);
+    var collision = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, PC);
+    return { n: K, beta: beta, plant: { c: [0.5, 0.5, 0] }, signal: signal, artifact: artifact, collision: collision,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -1969,7 +2079,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     { id: 'play', kind: 'play' },
     { id: 'disturbance', kind: 'disturb', minN: 100 },
     { id: 'grounds', kind: 'grounds', minN: 100 },
-    { id: 'reference', kind: 'reference', minN: 100 }
+    { id: 'reference', kind: 'reference', minN: 100 },
+    { id: 'collision', kind: 'collision', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -2038,6 +2149,30 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       var ds = rf.signal.confirm / rf.n, da = rf.artifact.confirm / rf.n;
       var rout = (ds > 0.5 && da < 0.5) ? 'grounds' : (da > 0.5 ? 'overcommits' : 'abstains');
       return { counts: true, outcome: rout, detail: { n: rf.n, signal: rf.signal.confirm, signalRate: ds, artifact: rf.artifact.confirm, artifactRate: da } };
+    }
+    if (m.kind === 'collision') {
+      // The described run is 100 episodes per arm with a full-strength shared
+      // artifact (beta = 1) at the repository starting parameters, the
+      // collision arm planted with a strongly coupled pair (c = 0.5, 0.5, 0).
+      // Anything else does not count. The guard's job is not to make the
+      // shield abstain on every planted episode — most planted episodes are
+      // global consensus, where the guard correctly stays silent — but to
+      // fire far more often on the planted collision than on a genuine
+      // signal, while the signal still commits. So the shield has grounds
+      // only if the signal commits and the guard fires on the planted
+      // collision at least 5x its fire rate on the signal, on a meaningful
+      // fraction of the planted arm; firing no more often than on signal is
+      // overcommitting, and breaking the signal is abstaining.
+      var cl = data.result;
+      if (!cl || cl.n < m.minN || cl.beta !== 1 || !cl.settings ||
+          cl.settings.th !== REPO_START.th || cl.settings.c !== REPO_START.c || cl.settings.g !== REPO_START.g ||
+          !cl.signal || !cl.artifact || !cl.collision || !cl.plant || !cl.plant.c ||
+          cl.plant.c[0] !== 0.5 || cl.plant.c[1] !== 0.5 || cl.plant.c[2] !== 0)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var cs = cl.signal.commit / cl.n, cc = cl.collision.commit / cl.n;
+      var fs = cl.signal.fire / cl.n, fc = cl.collision.fire / cl.n;
+      var cout = (cs > 0.5 && fc > 0.10 && fc > 5 * fs) ? 'grounds' : (cs > 0.5 ? 'overcommits' : 'abstains');
+      return { counts: true, outcome: cout, detail: { n: cl.n, signalCommit: cl.signal.commit, signalCommitRate: cs, collisionCommit: cl.collision.commit, collisionCommitRate: cc, signalFire: cl.signal.fire, signalFireRate: fs, collisionFire: cl.collision.fire, collisionFireRate: fc, fireRatio: fs ? fc / fs : null } };
     }
     return null;
   }
@@ -2175,10 +2310,14 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     if (!r || !r.n || !r.signal || !r.artifact) return t('alt.empty');
     return t('alt.reference', { n: r.n, s: pct(r.signal.decideRate), a: pct(r.artifact.decideRate) });
   }
+  function describeCollision(t, r) {
+    if (!r || !r.n || !r.signal || !r.artifact || !r.collision) return t('alt.empty');
+    return t('alt.collision', { n: r.n, s: pct(r.signal.commitRate), a: pct(r.artifact.commitRate), c: pct(r.collision.commitRate), fs: pct(r.signal.fireGivenPass), fc: pct(r.collision.fireGivenPass) });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, referenceProbe: referenceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, referenceProbe: referenceProbe, collisionProbe: collisionProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
@@ -2186,7 +2325,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
     describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
-    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds, describeReference: describeReference
+    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds, describeReference: describeReference, describeCollision: describeCollision
   };
 });
 </script>
@@ -2512,6 +2651,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'reference.row.signal': 'Real signal',
     'reference.row.artifact': 'Shared artifact',
     'reference.note': 'Commit on the signal, abstain on the artifact: that is having grounds. Measured on this code the reference confirms the signal and never the artifact — see docs/REFERENCE-CHANNEL.md.',
+    'lab.collision.title': 'Collision guard',
+    'lab.collision.help': 'Three arms at the repository starting parameters, each 100 episodes, seeded: a real signal, a shared artifact as strong as a real pattern, and a planted pairwise collision — membranes 0 and 1 strongly coupled on the shared pattern while membrane 2 is uncoupled, so the pair declares near-identical vectors. When the shield passes, the collision guard checks whether the agreement is localised (one pair far above the mean fidelity) or global consensus: it abstains on a localised collision and commits on consensus. The guard does not separate signal from artifact — both are global consensus. See docs/COLLISION-GUARD.md.',
+    'lab.collision.run': 'Run 300 episodes',
+    'lab.collision.running': 'Running…',
+    'lab.collision.done': 'Done: {n} episodes per arm in {sec} s.',
+    'lab.collision.empty': 'Not run yet.',
+    'collision.col.arm': 'Arm',
+    'collision.col.pass': 'Shield pass',
+    'collision.col.fire': 'Guard fires',
+    'collision.col.commit': 'Commits',
+    'collision.row.signal': 'Real signal',
+    'collision.row.artifact': 'Shared artifact',
+    'collision.row.collision': 'Planted collision',
+    'collision.note': 'The guard fires far more often on the planted collision than on a real signal, while the signal still commits: that is having grounds. Measured on this code the guard fires on 29 percent of planted-collision passes and 1 percent of signal passes — see docs/COLLISION-GUARD.md.',
     'lab.export.title': 'Export this contest',
     'lab.export.csv': 'Contest CSV',
     'lab.export.json': 'Contest JSON',
@@ -2630,6 +2783,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'mis.grounds.brief': 'Run 300 episodes: a real signal, a shared artifact, and the artifact with coupling off. The committee has grounds only if it commits on the signal and abstains on the artifact. Measured on this code, it commits on both — signal 95.5 percent, artifact 96.6 percent, coupling off 94.0 percent.',
     'mis.reference.title': 'Ask the reference',
     'mis.reference.brief': 'Run 200 episodes: a real signal and a shared artifact. When the shield passes, a reference channel that sees the environment but not the disturbance is asked whether the declared pattern is really there. The shield has grounds only if the reference confirms the signal and not the artifact. Measured on this code, it confirms the signal 94 percent of the time and the artifact never.',
+    'mis.collision.title': 'Catch a pairwise collision',
+    'mis.collision.brief': 'Run 300 episodes: a real signal, a shared artifact, and a planted pairwise collision — two membranes strongly coupled on one pattern while the third is uncoupled. When the shield passes, the collision guard abstains if the agreement is localised (one pair far above the mean) and commits on global consensus. The shield has grounds only if the guard fires far more often on the planted collision than on the signal while the signal still commits. Measured on this code, it fires on 29 percent of planted-collision passes and 1 percent of signal passes.',
     'out.reproduced': 'reproduced: fewer false outputs with the shield (interval excludes 0)',
     'out.not_reproduced': 'not reproduced at this sample size',
     'out.found': 'found: individual reward lags on {metrics}',
@@ -2688,7 +2843,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'alt.ab': '{n} paired seeds, A minus B. True outputs {T}; false outputs {F}; precision {P}; game score {S}. A scored higher on {wins} of {n} seeds.',
     'alt.dist': 'Shared disturbance, {n} episodes: the shield passed {p} (95 percent Wilson interval {lo} to {hi}); {m} of the passes matched the artifact.',
     'alt.ground': 'Grounds to decide, {n} episodes per arm: real signal {s} shield pass, shared artifact {a}, artifact with coupling off {m}.',
-    'alt.reference': 'Reference channel, {n} episodes per arm: real signal decides {s}, shared artifact decides {a}.'
+    'alt.reference': 'Reference channel, {n} episodes per arm: real signal decides {s}, shared artifact decides {a}.',
+    'alt.collision': 'Collision guard, {n} episodes per arm: real signal commits {s}, shared artifact commits {a}, planted collision commits {c}; guard fires on {fs} of signal passes and {fc} of planted-collision passes.'
   };
 
   var fr = {
@@ -3000,6 +3156,20 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'reference.row.signal': 'Vrai signal',
     'reference.row.artifact': 'Artefact partagé',
     'reference.note': 'S\'engager sur le signal, s\'abstenir sur l\'artefact : c\'est avoir des motifs. Mesuré sur ce code, la référence confirme le signal et jamais l\'artefact — voir docs/REFERENCE-CHANNEL.md.',
+    'lab.collision.title': 'Garde de collision',
+    'lab.collision.help': 'Trois volets avec les paramètres de départ du dépôt, 100 épisodes chacun, avec graine fixe : un vrai signal, un artefact partagé aussi fort qu\'un vrai motif, et une collision par paire plantée — les membranes 0 et 1 fortement couplées sur le motif partagé tandis que la membrane 2 est découplée, donc la paire déclare des vecteurs presque identiques. Quand le bouclier passe, la garde de collision vérifie si l\'accord est localisé (une paire très au-dessus de la fidélité moyenne) ou un consensus global : elle s\'abstient sur une collision localisée et s\'engage sur un consensus. La garde ne sépare pas le signal de l\'artefact — les deux sont des consensus globaux. Voir docs/COLLISION-GUARD.md.',
+    'lab.collision.run': 'Lancer 300 épisodes',
+    'lab.collision.running': 'En cours…',
+    'lab.collision.done': 'Terminé : {n} épisodes par volet en {sec} s.',
+    'lab.collision.empty': 'Pas encore lancé.',
+    'collision.col.arm': 'Volet',
+    'collision.col.pass': 'Passage du bouclier',
+    'collision.col.fire': 'Garde déclenchée',
+    'collision.col.commit': 'S\'engage',
+    'collision.row.signal': 'Vrai signal',
+    'collision.row.artifact': 'Artefact partagé',
+    'collision.row.collision': 'Collision plantée',
+    'collision.note': 'La garde se déclenche bien plus souvent sur la collision plantée que sur un vrai signal, tandis que le signal s\'engage toujours : c\'est avoir des motifs. Mesuré sur ce code, la garde se déclenche sur 29 pour cent des passages de collision plantée et 1 pour cent des passages de signal — voir docs/COLLISION-GUARD.md.',
     'lab.export.title': 'Exporter ce concours',
     'lab.export.csv': 'CSV du concours',
     'lab.export.json': 'JSON du concours',
@@ -3118,6 +3288,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'mis.grounds.brief': 'Lancez 300 épisodes : un vrai signal, un artefact partagé, et l\'artefact avec le couplage coupé. Le comité a des motifs seulement s\'il s\'engage sur le signal et s\'abstient sur l\'artefact. Mesuré sur ce code, il s\'engage sur les deux — signal 95,5 pour cent, artefact 96,6 pour cent, couplage coupé 94,0 pour cent.',
     'mis.reference.title': 'Demander à la référence',
     'mis.reference.brief': 'Lancez 200 épisodes : un vrai signal et un artefact partagé. Quand le bouclier passe, un canal de référence qui voit l\'environnement mais pas la perturbation est interrogé pour savoir si le motif déclaré est vraiment là. Le bouclier a des motifs seulement si la référence confirme le signal et pas l\'artefact. Mesuré sur ce code, elle confirme le signal 94 pour cent du temps et jamais l\'artefact.',
+    'mis.collision.title': 'Attraper une collision par paire',
+    'mis.collision.brief': 'Lancez 300 épisodes : un vrai signal, un artefact partagé, et une collision par paire plantée — deux membranes fortement couplées sur un motif tandis que la troisième est découplée. Quand le bouclier passe, la garde de collision s\'abstient si l\'accord est localisé (une paire très au-dessus de la moyenne) et s\'engage sur un consensus global. Le bouclier a des motifs seulement si la garde se déclenche bien plus souvent sur la collision plantée que sur le signal tandis que le signal s\'engage toujours. Mesuré sur ce code, elle se déclenche sur 29 pour cent des passages de collision plantée et 1 pour cent des passages de signal.',
     'out.reproduced': 'reproduit : moins de sorties fausses avec le bouclier (l\'intervalle exclut 0)',
     'out.not_reproduced': 'non reproduit à cette taille d\'échantillon',
     'out.found': 'trouvé : la récompense individuelle traîne sur {metrics}',
@@ -3176,7 +3348,8 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     'alt.ab': '{n} graines appariées, A moins B. Sorties vraies {T} ; sorties fausses {F} ; précision {P} ; score du jeu {S}. A a marqué plus haut sur {wins} graines sur {n}.',
     'alt.dist': 'Perturbation partagée, {n} épisodes : le bouclier a laissé passer {p} (intervalle de Wilson à 95 pour cent, {lo} à {hi}) ; {m} des passages correspondaient à l\'artefact.',
     'alt.ground': 'Motifs de décider, {n} épisodes par volet : vrai signal {s} de passage du bouclier, artefact partagé {a}, artefact avec couplage coupé {m}.',
-    'alt.reference': 'Canal de référence, {n} épisodes par volet : vrai signal décide {s}, artefact partagé décide {a}.'
+    'alt.reference': 'Canal de référence, {n} épisodes par volet : vrai signal décide {s}, artefact partagé décide {a}.',
+    'alt.collision': 'Garde de collision, {n} épisodes par volet : vrai signal s\'engage {s}, artefact partagé s\'engage {a}, collision plantée s\'engage {c} ; la garde se déclenche sur {fs} des passages de signal et {fc} des passages de collision plantée.'
   };
 
   var LANGS = { en: en, fr: fr };
@@ -4364,6 +4537,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
     var dist = { running: false, result: null, t0: 0, wallMs: 0 };
     var ground = { running: false, result: null, t0: 0, wallMs: 0 };
     var reference = { running: false, result: null, t0: 0, wallMs: 0 };
+    var collision = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -4737,6 +4911,47 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       setAlt('reference-alt', LAB.describeReference(env.t(), r));
     }
 
+    /* ---------- collision guard ---------- */
+
+    // 100 episodes per arm at the repository starting parameters, seeded: a
+    // real signal, a shared artifact as strong as a real pattern (beta = 1),
+    // and a planted pairwise collision (membranes 0 and 1 strongly coupled
+    // on the shared pattern, membrane 2 uncoupled). When the shield passes,
+    // the collision guard is consulted: it abstains on a localised collision
+    // (one pair far above the mean fidelity) and commits on global consensus.
+    // The run is seeded, so repeating it gives the same numbers.
+    function runCollision() {
+      if (collision.running) return;
+      collision.running = true; collision.t0 = Date.now();
+      $('btn-collision-run').disabled = true;
+      $('collision-status').textContent = t('lab.collision.running');
+      $('collision-empty').hidden = true; $('collision-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        collision.result = LAB.collisionProbe(s, 100, 'mission', 1);
+        collision.wallMs = Date.now() - collision.t0;
+        collision.running = false; $('btn-collision-run').disabled = false;
+        renderCollision();
+        var res = LAB.evaluateMission('collision', { result: collision.result });
+        if (res && res.counts) record('collision', res, collision.result.n);
+      }, 0);
+    }
+    function renderCollision() {
+      var r = collision.result;
+      $('collision-empty').hidden = !!r; $('collision-out').hidden = !r;
+      if (!r) return;
+      $('collision-status').textContent = t('lab.collision.done', { n: r.n, sec: f(collision.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('collision-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('collision.col.arm'), t('collision.col.pass'), t('collision.col.fire'), t('collision.col.commit')], true));
+      [['signal', 'collision.row.signal'], ['artifact', 'collision.row.artifact'], ['collision', 'collision.row.collision']].forEach(function (pair) {
+        var a = r[pair[0]];
+        tb.appendChild(row([t(pair[1]), a.pass + ' (' + pc(a.pass, r.n) + ')', a.fire + ' (' + pc(a.fire, a.pass || 1) + ')', a.commit + ' (' + pc(a.commit, r.n) + ')']));
+      });
+      $('collision-note').textContent = t('collision.note');
+      setAlt('collision-alt', LAB.describeCollision(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -4775,6 +4990,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else if (m.kind === 'grounds') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else if (m.kind === 'reference') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
+      else if (m.kind === 'collision') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -4815,6 +5031,7 @@ html.hc .hint, html.hc .muted { color: #f0f0f0; }
       $('btn-dist-run').addEventListener('click', runDisturbance);
       $('btn-ground-run').addEventListener('click', runGrounds);
       $('btn-reference-run').addEventListener('click', runReference);
+      $('btn-collision-run').addEventListener('click', runCollision);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);

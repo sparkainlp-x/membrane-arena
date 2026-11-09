@@ -238,7 +238,7 @@ test('missions: the required experiment must have been run, and the outcome foll
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: 70 }).outcome, 'below');
   assert.equal(L.evaluateMission('play', { result: { score: 60 }, ref: null }).counts, false);
   assert.equal(L.evaluateMission('nope', {}), null);
-  assert.equal(L.MISSIONS.length, 8);
+  assert.equal(L.MISSIONS.length, 9);
 });
 
 test('disturbance probe: deterministic, a full-strength shared artifact passes the shield like a real pattern, noise does not', () => {
@@ -315,6 +315,39 @@ test('reference probe: deterministic, the reference channel confirms the signal 
   assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { beta: 0.5 }) }).counts, false);
   assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { settings: { th: 0.6, c: 0.05, g: 1.0 } }) }).counts, false);
   assert.equal(L.evaluateMission('reference', { result: Object.assign({}, m, { signal: null }) }).counts, false);
+});
+
+test('collision probe: deterministic, the guard fires far more often on the planted collision than on a real signal, so the shield has grounds', () => {
+  const s = Object.assign({}, G.DEFAULTS, L.REPO_START);
+  const a = L.collisionProbe(s, 100, 'test', 1), b = L.collisionProbe(s, 100, 'test', 1);
+  assert.deepEqual(a, b);
+  assert.equal(a.n, 100); assert.equal(a.beta, 1);
+  assert.deepEqual(a.plant.c, [0.5, 0.5, 0]);
+  assert.ok(a.signal.pass / a.n > 0.8, `signal pass rate ${a.signal.pass / a.n}`);
+  assert.ok(a.artifact.pass / a.n > 0.8, `artifact pass rate ${a.artifact.pass / a.n}`);
+  assert.ok(a.collision.pass / a.n > 0.8, `collision pass rate ${a.collision.pass / a.n}`);
+  assert.ok(a.signal.passMatch / a.n > 0.8, `signal match rate ${a.signal.passMatch / a.n}`);
+  assert.ok(a.artifact.passMatch / a.n > 0.8, `artifact match rate ${a.artifact.passMatch / a.n}`);
+  assert.ok(a.signal.commit / a.n > 0.8, `signal commit rate ${a.signal.commit / a.n}`);
+  assert.ok(a.collision.fire / a.n > 0.1, `collision fire rate ${a.collision.fire / a.n}`);
+  assert.ok(a.collision.fireGivenPass > 5 * a.signal.fireGivenPass, `fire ratio ${a.collision.fireGivenPass / (a.signal.fireGivenPass || 1)}`);
+  assert.ok(a.signal.commitCI.lo <= a.signal.commitRate && a.signal.commitRate <= a.signal.commitCI.hi);
+  assert.ok(a.collision.commitCI.lo <= a.collision.commitRate && a.collision.commitRate <= a.collision.commitCI.hi);
+  assert.ok(a.collision.meanMaxFid > a.signal.meanMaxFid, `collision maxFid ${a.collision.meanMaxFid} vs signal ${a.signal.meanMaxFid}`);
+  const m = L.collisionProbe(s, 100, 'mission', 1);
+  assert.equal(L.evaluateMission('collision', { result: m }).outcome, 'grounds');
+  const over = Object.assign({}, m, { collision: Object.assign({}, m.collision, { fire: 0, fireRate: 0, fireGivenPass: 0, commit: 90, commitRate: 0.9 }) });
+  assert.equal(L.evaluateMission('collision', { result: over }).outcome, 'overcommits');
+  const abstains = Object.assign({}, m, {
+    signal: Object.assign({}, m.signal, { commit: 10, commitRate: 0.1 }),
+    collision: Object.assign({}, m.collision, { commit: 10, commitRate: 0.1 })
+  });
+  assert.equal(L.evaluateMission('collision', { result: abstains }).outcome, 'abstains');
+  assert.equal(L.evaluateMission('collision', { result: Object.assign({}, m, { n: 50 }) }).counts, false);
+  assert.equal(L.evaluateMission('collision', { result: Object.assign({}, m, { beta: 0.5 }) }).counts, false);
+  assert.equal(L.evaluateMission('collision', { result: Object.assign({}, m, { settings: { th: 0.6, c: 0.05, g: 1.0 } }) }).counts, false);
+  assert.equal(L.evaluateMission('collision', { result: Object.assign({}, m, { signal: null }) }).counts, false);
+  assert.equal(L.evaluateMission('collision', { result: Object.assign({}, m, { plant: { c: [0.05, 0.05, 0.05] } }) }).counts, false);
 });
 
 test('CSV and JSON export: rectangular, quoted correctly, labelled SYNTHETIC, with the baseline file', () => {
