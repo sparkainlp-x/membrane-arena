@@ -240,8 +240,8 @@
   // consensus, whether signal or artifact — so it does not separate signal
   // from artifact (that is the reference channel's job), it separates a
   // localised collision from a genuine consensus. Measured (K = 500/arm,
-  // game.js v0.3.6): guard fires on 28.6% of planted-collision passes vs
-  // 1.3% of signal passes and 0.0% of artifact passes; signal commits
+  // game.js v0.3.6): guard fires on 26.1% of planted-collision passes vs
+  // 1.0% of signal passes and 0.6% of artifact passes; signal commits
   // ~93%. The shield has grounds only if the guard fires far more often on
   // the planted collision than on the signal while the signal still
   // commits. See docs/COLLISION-GUARD.md.

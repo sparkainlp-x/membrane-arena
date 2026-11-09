@@ -45,9 +45,9 @@ from two independent membranes that happen to agree.
   Collided iff maxFid >= COLLIDE **and** margin > COLL_MARGIN.
 
 Threshold justification (measured on the real episode(), repo-start
-params, K=200/arm): on a genuine signal the closest pair averages
-0.874 fidelity and the guard fires on only 0.5% of shield passes; on a
-shared artifact it fires on 0.0%. A strongly coupled pair reaches 0.954.
+params, K=500/arm): on a genuine signal the closest pair averages
+0.874 fidelity and the guard fires on only 1.0% of shield passes; on a
+shared artifact it fires on 0.6%. A strongly coupled pair reaches 0.953.
 COLLIDE = 0.9 sits between the natural level and the planted level.
 COLL_MARGIN = 0.05 is the 3x3's margin, carried over exactly (same
 arithmetic in fidelity units).
@@ -82,17 +82,27 @@ each, seeded stream `membrane-arena/v1/collision/<seedTag>`:
   pass ~95% and the guard to fire on ~0.5% of passes.
 - **artifact**: all three see a shared artifact, beta = 1. Expect the
   shield to pass ~94% and the guard to fire ~0% (global consensus).
-- **collision** (planted): membranes 0 and 1 see artifact A with strong
-  coupling (c = 0.5), membrane 2 sees a different pattern B with no
-  coupling (c = 0). Expect the pair to declare near-identical vectors
-  (maxFid ~0.95) while the third declares far away, so the guard fires
-  and the shield abstains. This arm needs per-membrane patterns in
-  `episode()` (new optional `pats` parameter; existing callers
-  unaffected) and per-membrane coupling (already supported via P).
+- **collision** (planted): a shared pattern, membranes 0 and 1 strongly
+  coupled (c = 0.5) while membrane 2 is uncoupled (c = 0), so the pair
+  declares near-identical vectors (mean maxFid ~0.95) and the third
+  declares on its own learning, which lands far enough below the pair
+  for the guard to fire. The per-membrane-pattern plant ([A, A, B]) does
+  not work — the all-to-all coupling drags the pair off the pattern —
+  so the plant is a strongly coupled pair on a *shared* pattern; see
+  "Measured rates" for why. This arm uses per-membrane coupling
+  (already supported via P). `episode()` also gained an optional `pats`
+  parameter (per-membrane patterns) for future probes; it is not used
+  by this probe and existing callers are unaffected.
 
 Mission criterion (reuses the `grounds` / `overcommits` / `abstains`
 outcomes): the shield has grounds iff it commits on the signal
-(> 50%) and abstains on the planted collision (< 50% commit).
+(> 50%) and the guard fires on the planted collision at least 5x its
+fire rate on the signal, on more than 10% of the planted arm. A
+commit-rate criterion would measure the plant's composition, not the
+guard: most planted episodes are global consensus (the third agrees),
+where the guard correctly stays silent, so the planted commit rate
+stays above 50% even though the guard fires on every localised
+collision that actually occurs.
 
 ## Measured rates
 
