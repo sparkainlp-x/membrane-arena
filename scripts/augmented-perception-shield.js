@@ -42,8 +42,7 @@
  * The collision arm is reported, not gated: the guard is known to be
  * partial — it fires only on localised collisions, and in ~74% of
  * planted passes the third channel agrees, making it global consensus.
- * Full numbers and the honest limits: docs/AUGMENTED-PERCEPTION-SHIELD.md
- * (to be written when this prototype is reviewed).
+ * Full numbers and the honest limits: docs/AUGMENTED-PERCEPTION-SHIELD.md.
  *
  *   node scripts/augmented-perception-shield.js
  *

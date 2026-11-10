@@ -60,8 +60,8 @@ lives in this file.
 
 ## Status
 
-Prototype only, in the working tree (`scripts/augmented-perception-shield.js`).
-Not pushed, no PR. The perception side is simulated — the three channels are
+Prototype only, on branch `augmented-perception-shield`. PR pending —
+merging is Jean's call. The perception side is simulated — the three channels are
 the game's membranes, not a real brain-computer interface. The shield
 side is real: it calls the game's exported `episode()`, `systemEvent()`,
 `pairwiseCollision()`, and the reference-confirm computation from
