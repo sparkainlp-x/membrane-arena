@@ -27,6 +27,7 @@
     var dist = { running: false, result: null, t0: 0, wallMs: 0 };
     var ground = { running: false, result: null, t0: 0, wallMs: 0 };
     var reference = { running: false, result: null, t0: 0, wallMs: 0 };
+    var collision = { running: false, result: null, t0: 0, wallMs: 0 };
 
     function t(k, v) { return env.t()(k, v); }
     // keys assembled from a prefix, a name and a suffix (the page test checks the literal keys only)
@@ -400,6 +401,47 @@
       setAlt('reference-alt', LAB.describeReference(env.t(), r));
     }
 
+    /* ---------- collision guard ---------- */
+
+    // 100 episodes per arm at the repository starting parameters, seeded: a
+    // real signal, a shared artifact as strong as a real pattern (beta = 1),
+    // and a planted pairwise collision (membranes 0 and 1 strongly coupled
+    // on the shared pattern, membrane 2 uncoupled). When the shield passes,
+    // the collision guard is consulted: it abstains on a localised collision
+    // (one pair far above the mean fidelity) and commits on global consensus.
+    // The run is seeded, so repeating it gives the same numbers.
+    function runCollision() {
+      if (collision.running) return;
+      collision.running = true; collision.t0 = Date.now();
+      $('btn-collision-run').disabled = true;
+      $('collision-status').textContent = t('lab.collision.running');
+      $('collision-empty').hidden = true; $('collision-out').hidden = true;
+      setTimeout(function () {
+        var s = Object.assign({}, G.DEFAULTS, LAB.REPO_START, { shield: true, amp: false, stab: false });
+        collision.result = LAB.collisionProbe(s, 100, 'mission', 1);
+        collision.wallMs = Date.now() - collision.t0;
+        collision.running = false; $('btn-collision-run').disabled = false;
+        renderCollision();
+        var res = LAB.evaluateMission('collision', { result: collision.result });
+        if (res && res.counts) record('collision', res, collision.result.n);
+      }, 0);
+    }
+    function renderCollision() {
+      var r = collision.result;
+      $('collision-empty').hidden = !!r; $('collision-out').hidden = !r;
+      if (!r) return;
+      $('collision-status').textContent = t('lab.collision.done', { n: r.n, sec: f(collision.wallMs / 1000, 1) });
+      var pc = function (x, n) { return Math.round(100 * x / n) + '%'; };
+      var tb = $('collision-table'); tb.innerHTML = '';
+      tb.appendChild(row([t('collision.col.arm'), t('collision.col.pass'), t('collision.col.fire'), t('collision.col.commit')], true));
+      [['signal', 'collision.row.signal'], ['artifact', 'collision.row.artifact'], ['collision', 'collision.row.collision']].forEach(function (pair) {
+        var a = r[pair[0]];
+        tb.appendChild(row([t(pair[1]), a.pass + ' (' + pc(a.pass, r.n) + ')', a.fire + ' (' + pc(a.fire, a.pass || 1) + ')', a.commit + ' (' + pc(a.commit, r.n) + ')']));
+      });
+      $('collision-note').textContent = t('collision.note');
+      setAlt('collision-alt', LAB.describeCollision(env.t(), r));
+    }
+
     /* ---------- missions ---------- */
 
     function outcomeText(m) {
@@ -438,6 +480,7 @@
       else if (m.kind === 'disturb') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else if (m.kind === 'grounds') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else if (m.kind === 'reference') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
+      else if (m.kind === 'collision') { env.applySettings(LAB.matchRepository(Object.assign({}, env.readSettings(), { shield: true, amp: false, stab: false }))); showTab('lab', true); }
       else { var el = $('main'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' }); $('btn-run').focus(); }
       $('mis-note').textContent = t('mis.wrong');
     }
@@ -478,6 +521,7 @@
       $('btn-dist-run').addEventListener('click', runDisturbance);
       $('btn-ground-run').addEventListener('click', runGrounds);
       $('btn-reference-run').addEventListener('click', runReference);
+      $('btn-collision-run').addEventListener('click', runCollision);
       $('ab-factor').addEventListener('change', fillLevels);
       $('lab-gen').addEventListener('change', refreshLab);
       $('lab-axes').addEventListener('change', refreshLab);
