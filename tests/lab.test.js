@@ -191,11 +191,21 @@ test('ensemble summary: intervals come from the stats toolkit, baseline carries 
   assert.equal(m.scheme, 'random'); assert.equal(m.fcost, 0); assert.equal(m.evolve, true);
 });
 
-test('ensemble at the repository setup reproduces the repository means within sampling error (width 32, shield on)', () => {
+test('ensemble at the repository setup: the integrated shield keeps true outputs high, false outputs near zero, precision near one (width 32, shield on)', () => {
+  // The repository baseline was measured with the old (ungated) shield, so
+  // the ensemble no longer agrees with it on F and precision — that is the
+  // point of the integration. The reference gate eliminates false commits
+  // (it never confirms noise) and raises precision to near one, while true
+  // outputs stay close to the baseline (the reference confirms a real
+  // pattern ~98% of the time it is asked). Measured at n = 40: T mean
+  // 39.98 (baseline 42.15, intervals overlap), F mean 0.50 (baseline
+  // 3.95), precision mean 0.987 (baseline 0.915).
   const s = L.matchRepository(Object.assign({}, G.DEFAULTS, { shield: true }));
   const e = L.createEnsemble({ settings: s, n: 40, repoStart: true }); drain(e, 1000);
-  const sum = L.summarizeEnsemble(e.results(), s, true), ag = L.agreementWithBaseline(sum);
-  assert.ok(ag.count >= 2, `agreement ${JSON.stringify(ag.per)}`);
+  const sum = L.summarizeEnsemble(e.results(), s, true);
+  assert.ok(sum.metrics.T.t.lo > 35, `T mean ${sum.metrics.T.t.mean}`);
+  assert.ok(sum.metrics.F.t.hi < 1, `F mean ${sum.metrics.F.t.mean}`);
+  assert.ok(sum.metrics.precision.t.lo > 0.97, `precision mean ${sum.metrics.precision.t.mean}`);
 });
 
 test('paired runs: both arms use the same seeds; identical arms give zero difference; the shield cuts false outputs', () => {
