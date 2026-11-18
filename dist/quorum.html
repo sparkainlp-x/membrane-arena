@@ -718,6 +718,39 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
   }
   function isTrueEvent(vec, pat) { return !!vec && !!pat && fidelity(vec, pat) >= TRUTH; }
 
+  // The reference channel: an independent witness that sees the environment
+  // but not the disturbance. It takes M independent samples from the
+  // environment — the true pattern, if one is planted, plus noise, never
+  // the disturbance — and confirms the declared vector when its mean energy
+  // ratio reaches the game's own declaration threshold at the default
+  // threshold parameter (scaledThreshold(0.5, n, sigma) = 3.91 at n = 32).
+  // Same threshold and M as the Lab reference probe (lab.js referenceProbe).
+  var REF_M = 20;
+  function referenceConfirm(decl, pat, sigma, rng, M) {
+    M = M === undefined ? REF_M : M;
+    var n = decl.r.length, thr = scaledThreshold(0.5, n, sigma), sum = 0, m;
+    for (m = 0; m < M; m++) {
+      var x = pat ? noisy(pat, sigma, rng) : rvec(n, rng);
+      var y = inner(x, decl);
+      sum += y.re * y.re + y.im * y.im;
+    }
+    return n * sum / M >= thr;
+  }
+  // The shield's commit decision: 2-of-3 agreement is the trigger, the
+  // reference channel is the gate. Returns { passed, refChecked,
+  // refConfirmed }. When the membranes agree but the reference does not
+  // confirm, the shield abstains (passed null) and play continues. The
+  // reference draws from its own RNG stream (refRng), independent of the
+  // membranes' stream, so consulting it never perturbs the game's own
+  // randomness — only the commit decision changes.
+  function shieldCommit(decls, pat, sigma, refRng) {
+    var passed = systemEvent(decls, AGREE);
+    if (passed === null) return { passed: null, refChecked: false, refConfirmed: false };
+    var confirmed = referenceConfirm(decls[passed], pat, sigma, refRng, REF_M);
+    if (!confirmed) return { passed: null, refChecked: true, refConfirmed: false };
+    return { passed: passed, refChecked: true, refConfirmed: true };
+  }
+
   function reward(scheme, i, decls) {              // rewards.py, for 3 agents
     var without, team;
     if (scheme === 'individual') return decls[i] ? 1 : 0;
@@ -815,7 +848,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
     for (var i = 0; i < 3; i++) par.push({ th: o.th, c: o.c, g: o.g, sp: 0.5, geff: 1 });
     return {
       seed: String(seed), n: N, sigma: sigma, par: par, best: [-1, -1, -1], rateEma: TARGET, warm: null, hist: [], gen: 0,
-      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut')
+      rng: makeRng(GEN + seed + '/main'), mrng: makeRng(GEN + seed + '/mut'), refRng: makeRng(GEN + seed + '/reference')
     };
   }
   function done(c) { return c.gen >= GENS; }
@@ -862,10 +895,14 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
         }
       }
       if (truth[0] && truth[1] && truth[2]) joint++;
-      var outs, passed = null;
+      var outs, passed = null, refChecked = false, refConfirmed = false;
       if (o.shield) {
-        passed = null;
-        for (i = 0; i < 3; i++) if (d[i] && agreeing(d[i], d, AGREE) >= 2) { passed = i; break; }
+        // The shield would commit on 2-of-3 agreement; it first consults
+        // the reference channel, which sees the true environment pattern
+        // (never the disturbance). If the reference does not confirm, the
+        // shield abstains and play continues.
+        var sc = shieldCommit(d, pat, c.sigma, c.refRng);
+        passed = sc.passed; refChecked = sc.refChecked; refConfirmed = sc.refConfirmed;
         outs = passed === null ? [] : [passed];
       } else {
         outs = [];
@@ -878,6 +915,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
       c.rateEma = leakyUpdate(c.rateEma, outs.length / (o.shield ? 1 : 3));
       episodes.push({
         planted: planted, declStep: ep.declStep, truth: truth, thr: ep.thr, geff: geffs, outs: outs, passed: passed,
+        refChecked: refChecked, refConfirmed: refConfirmed,
         dropped: o.shield && passed === null && (d[0] || d[1] || d[2]) ? true : false,
         agree: agree, evT: evT, evF: evF, trace: trace, fid: fidTrace, rateEma: c.rateEma
       });
@@ -1117,6 +1155,7 @@ html.hc #res-text .win, html.hc .cost .ok { color: #00ff96; }
     MISSION_IDS: MISSION_IDS, OUTCOMES: OUTCOMES, SCHEMES: SCHEMES, W_STEPS: W_STEPS, DEFAULTS: DEFAULTS, LESSON_IDS: LESSON_IDS, SCHEME_SCALE: SCHEME_SCALE,
     hashStr: hashStr, makeRng: makeRng, gauss: gauss, rvec: rvec, noisy: noisy, inner: inner, fidelity: fidelity, normalize: normalize,
     sigmaFor: sigmaFor, scaledThreshold: scaledThreshold, energyRatio: energyRatio, systemEvent: systemEvent, reward: reward,
+    referenceConfirm: referenceConfirm, shieldCommit: shieldCommit, REF_M: REF_M,
     stabilizerFactor: stabilizerFactor, leakyUpdate: leakyUpdate, clampGain: clampGain, warmStart: warmStart,
     sanitizeSettings: sanitizeSettings, createContest: createContest, startFor: startFor, stepGeneration: stepGeneration, done: done,
     summarize: summarize, cfgTag: cfgTag, baselineFor: baselineFor, baselineScore: baselineScore, nearestW: nearestW,
