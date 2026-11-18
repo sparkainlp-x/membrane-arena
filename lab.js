@@ -227,6 +227,63 @@
     return { n: K, beta: beta, M: M, threshold: thr, signal: signal, artifact: artifact,
       settings: { th: s.th, c: s.c, g: s.g } };
   }
+  // Three arms at the repository starting parameters, each K episodes, seeded:
+  // a real signal, a shared artifact as strong as a real pattern (beta = 1),
+  // and a planted pairwise collision: membranes 0 and 1 strongly coupled
+  // (c = 0.5) on the shared pattern while membrane 2 is uncoupled (c = 0),
+  // so the pair declares near-identical vectors and the third declares on
+  // its own learning. In every arm the shield's verdict is the game's own
+  // 2-of-3 rule, and the collision guard (game.js pairwiseCollision,
+  // COLLIDE = 0.9, COLL_MARGIN = 0.05) is consulted before committing: when
+  // it fires the shield abstains. The guard fires on a *localised* collision
+  // (one pair far above the mean fidelity) and stays silent on global
+  // consensus, whether signal or artifact — so it does not separate signal
+  // from artifact (that is the reference channel's job), it separates a
+  // localised collision from a genuine consensus. Measured (K = 500/arm,
+  // game.js v0.3.6): guard fires on 26.1% of planted-collision passes vs
+  // 1.0% of signal passes and 0.6% of artifact passes; signal commits
+  // ~93%. The shield has grounds only if the guard fires far more often on
+  // the planted collision than on the signal while the signal still
+  // commits. See docs/COLLISION-GUARD.md.
+  function collisionProbe(settings, K, seedTag, beta) {
+    var s = G.sanitizeSettings(settings), n = G.N, sigma = G.sigmaFor(n), rng = G.makeRng('membrane-arena/v1/collision/' + (seedTag || 'repo'));
+    beta = beta === undefined ? 1 : beta;
+    function arm(patFn, P) {
+      var decl1 = 0, decl2 = 0, pass = 0, passMatch = 0, fire = 0, commit = 0, totalDecl = 0, sumMaxFid = 0, sumMargin = 0, e;
+      for (e = 0; e < K; e++) {
+        var made = patFn(), pat = made.pat, ref = made.ref;
+        var trace = new Float32Array(G.STEPS * 3);
+        var d = G.episode(n, pat, sigma, P, null, 0, rng, trace, {}).decl;
+        var nDecl = d.filter(Boolean).length;
+        totalDecl += nDecl;
+        if (nDecl >= 1) decl1++;
+        if (nDecl >= 2) decl2++;
+        var passed = G.systemEvent(d, G.AGREE);
+        if (passed !== null) {
+          pass++;
+          if (ref && G.fidelity(d[passed], ref) >= G.TRUTH) passMatch++;
+          var coll = G.pairwiseCollision(d);
+          sumMaxFid += coll.maxFid; sumMargin += coll.margin;
+          if (coll.collided) fire++; else commit++;
+        }
+      }
+      return { decl1: decl1, decl2: decl2, pass: pass, passMatch: passMatch, fire: fire, commit: commit, meanDecl: totalDecl / K,
+        passRate: pass / K, passMatchRate: passMatch / K, fireRate: fire / K, fireGivenPass: pass ? fire / pass : 0,
+        commitRate: commit / K, commitCI: ST.wilson(commit, K),
+        meanMaxFid: pass ? sumMaxFid / pass : 0, meanMargin: pass ? sumMargin / pass : 0 };
+    }
+    function artifactPat() {
+      var art = G.rvec(n, rng);
+      return { pat: { r: Float64Array.from(art.r, function (v) { return v * beta; }), i: Float64Array.from(art.i, function (v) { return v * beta; }) }, ref: art };
+    }
+    var P = [0, 1, 2].map(function () { return { th: s.th, c: s.c, g: s.g, sp: 0.5, geff: 1 }; });
+    var PC = [{ th: s.th, c: 0.5, g: s.g, sp: 0.5, geff: 1 }, { th: s.th, c: 0.5, g: s.g, sp: 0.5, geff: 1 }, { th: s.th, c: 0, g: s.g, sp: 0.5, geff: 1 }];
+    var signal = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, P);
+    var artifact = arm(artifactPat, P);
+    var collision = arm(function () { var v = G.rvec(n, rng); return { pat: v, ref: v }; }, PC);
+    return { n: K, beta: beta, plant: { c: [0.5, 0.5, 0] }, signal: signal, artifact: artifact, collision: collision,
+      settings: { th: s.th, c: s.c, g: s.g } };
+  }
   function ratioHistogram(pr, bins) {
     bins = bins || 24;
     var pl = [], no = [], hi = 4;
@@ -434,7 +491,8 @@
     { id: 'play', kind: 'play' },
     { id: 'disturbance', kind: 'disturb', minN: 100 },
     { id: 'grounds', kind: 'grounds', minN: 100 },
-    { id: 'reference', kind: 'reference', minN: 100 }
+    { id: 'reference', kind: 'reference', minN: 100 },
+    { id: 'collision', kind: 'collision', minN: 100 }
   ];
   function missionById(id) { for (var k = 0; k < MISSIONS.length; k++) if (MISSIONS[k].id === id) return MISSIONS[k]; return null; }
   // returns { counts: bool (the required experiment was run), outcome: string id, detail: object }
@@ -503,6 +561,30 @@
       var ds = rf.signal.confirm / rf.n, da = rf.artifact.confirm / rf.n;
       var rout = (ds > 0.5 && da < 0.5) ? 'grounds' : (da > 0.5 ? 'overcommits' : 'abstains');
       return { counts: true, outcome: rout, detail: { n: rf.n, signal: rf.signal.confirm, signalRate: ds, artifact: rf.artifact.confirm, artifactRate: da } };
+    }
+    if (m.kind === 'collision') {
+      // The described run is 100 episodes per arm with a full-strength shared
+      // artifact (beta = 1) at the repository starting parameters, the
+      // collision arm planted with a strongly coupled pair (c = 0.5, 0.5, 0).
+      // Anything else does not count. The guard's job is not to make the
+      // shield abstain on every planted episode — most planted episodes are
+      // global consensus, where the guard correctly stays silent — but to
+      // fire far more often on the planted collision than on a genuine
+      // signal, while the signal still commits. So the shield has grounds
+      // only if the signal commits and the guard fires on the planted
+      // collision at least 5x its fire rate on the signal, on a meaningful
+      // fraction of the planted arm; firing no more often than on signal is
+      // overcommitting, and breaking the signal is abstaining.
+      var cl = data.result;
+      if (!cl || cl.n < m.minN || cl.beta !== 1 || !cl.settings ||
+          cl.settings.th !== REPO_START.th || cl.settings.c !== REPO_START.c || cl.settings.g !== REPO_START.g ||
+          !cl.signal || !cl.artifact || !cl.collision || !cl.plant || !cl.plant.c ||
+          cl.plant.c[0] !== 0.5 || cl.plant.c[1] !== 0.5 || cl.plant.c[2] !== 0)
+        return { counts: false, outcome: 'wrong_setup', detail: {} };
+      var cs = cl.signal.commit / cl.n, cc = cl.collision.commit / cl.n;
+      var fs = cl.signal.fire / cl.n, fc = cl.collision.fire / cl.n;
+      var cout = (cs > 0.5 && fc > 0.10 && fc > 5 * fs) ? 'grounds' : (cs > 0.5 ? 'overcommits' : 'abstains');
+      return { counts: true, outcome: cout, detail: { n: cl.n, signalCommit: cl.signal.commit, signalCommitRate: cs, collisionCommit: cl.collision.commit, collisionCommitRate: cc, signalFire: cl.signal.fire, signalFireRate: fs, collisionFire: cl.collision.fire, collisionFireRate: fc, fireRatio: fs ? fc / fs : null } };
     }
     return null;
   }
@@ -640,10 +722,14 @@
     if (!r || !r.n || !r.signal || !r.artifact) return t('alt.empty');
     return t('alt.reference', { n: r.n, s: pct(r.signal.decideRate), a: pct(r.artifact.decideRate) });
   }
+  function describeCollision(t, r) {
+    if (!r || !r.n || !r.signal || !r.artifact || !r.collision) return t('alt.empty');
+    return t('alt.collision', { n: r.n, s: pct(r.signal.commitRate), a: pct(r.artifact.commitRate), c: pct(r.collision.commitRate), fs: pct(r.signal.fireGivenPass), fc: pct(r.collision.fireGivenPass) });
+  }
 
   return {
     METRICS: METRICS, FACTORS: FACTORS, MISSIONS: MISSIONS, REPO_START: REPO_START,
-    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, referenceProbe: referenceProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
+    rateSeries: rateSeries, alignment: alignment, probe: probe, disturbanceProbe: disturbanceProbe, groundsProbe: groundsProbe, referenceProbe: referenceProbe, collisionProbe: collisionProbe, decisionStat: decisionStat, ratioHistogram: ratioHistogram, declareAt: declareAt,
     sweep: sweep, atThreshold: atThreshold, effThreshold: effThreshold, shieldCounts: shieldCounts, gainTrace: gainTrace, landscape: landscape, ampBaseline: ampBaseline,
     runOne: runOne, createEnsemble: createEnsemble, likeForLike: likeForLike, matchRepository: matchRepository, summarizeEnsemble: summarizeEnsemble,
     agreementWithBaseline: agreementWithBaseline, applyFactor: applyFactor, createPaired: createPaired, summarizePaired: summarizePaired,
@@ -651,6 +737,6 @@
     toCSV: toCSV, runCSV: runCSV, ensembleCSV: ensembleCSV, pairedCSV: pairedCSV, ensembleJSON: ensembleJSON, pairedJSON: pairedJSON, runJSON: runJSON,
     describeRates: describeRates, describeAlignment: describeAlignment, describeHist: describeHist, describeSweep: describeSweep, describeShield: describeShield,
     describeGain: describeGain, describeLandscape: describeLandscape, describeAmp: describeAmp, describeEnsemble: describeEnsemble, describePaired: describePaired,
-    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds, describeReference: describeReference
+    describeDisturbance: describeDisturbance, describeGrounds: describeGrounds, describeReference: describeReference, describeCollision: describeCollision
   };
 });
