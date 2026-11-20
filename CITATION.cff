@@ -10,7 +10,7 @@ authors:
 version: 0.3.6
 date-released: 2026-11-07
 license: AGPL-3.0-only
-doi: "10.5281/zenodo.23633126"
+doi: "10.5281/zenodo.24391771"
 repository-code: "https://github.com/sparkainlp-x/membrane-arena"
 abstract: >-
   SYNTHETIC educational game, zero dependencies, offline, English and French.
